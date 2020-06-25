@@ -13,5 +13,5 @@ jobs:
           event-type: vvctre
           client-payload: |
             {
-              "commit_message": "vvctre: update ${{join(github.event.gollum.pages.*.page_name, ', ')}}"
+              "commit_message": "vvctre: update ${{join(github.event.pages.*.page_name, ', ')}}"
             }
