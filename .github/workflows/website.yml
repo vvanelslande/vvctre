@@ -1,0 +1,13 @@
+name: Website
+on: gollum
+
+jobs:
+  website:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{secrets.TOKEN}}
+          repository: vvanelslande/vvanelslande.github.io
+          event-type: vvctre
