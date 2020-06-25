@@ -592,7 +592,9 @@ void vvctre_gui_text(const char* text) {
 }
 
 void vvctre_gui_text_colored(float red, float green, float blue, float alpha, const char* text) {
-    ImGui::TextColored(ImVec4(red, green, blue, alpha), "%s", text);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(red, green, blue, alpha));
+    ImGui::TextUnformatted(text);
+    ImGui::PopStyleColor();
 }
 
 bool vvctre_gui_button(const char* label) {
