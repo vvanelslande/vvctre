@@ -11,3 +11,7 @@ jobs:
           token: ${{secrets.WEBSITE_TOKEN}}
           repository: vvanelslande/vvanelslande.github.io
           event-type: vvctre
+          client-payload: |
+            {
+              "commit_message": "vvctre: update ${{join(github.event.gollum.pages.*.page_name, ', ')}}"
+            }
