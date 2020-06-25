@@ -33,7 +33,7 @@ jobs:
         working-directory: ./build
         shell: bash
         run: cmake --build . --config Release
-      - name: Prepare to upload to GitHub releases
+      - name: Prepare to upload to GitHub Releases
         if: github.event_name == 'push'
         shell: bash
         run: |
@@ -54,7 +54,7 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ]; then
             rm ./build/bin/Release/*.pdb
           fi
-      - name: Upload to GitHub releases
+      - name: Upload to GitHub Releases
         if: github.event_name == 'push'
         uses: svenstaro/upload-release-action@v1-release
         with:
@@ -69,3 +69,33 @@ jobs:
         with:
           name: vvctre-${{runner.os}}
           path: build/bin/Release
+  success:
+    if: github.event_name == 'push' && success()
+    needs: build
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Set version
+        run: |
+          export VERSION=${GITHUB_REF:10}
+          echo ::set-env name=VERSION::$VERSION
+      - name: Discord notification
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{secrets.SUCCESS_WEBHOOK}}
+        with:
+          args: "<https://github.com/vvanelslande/vvctre/releases/tag/${{env.VERSION}}>"
+  error:
+    if: github.event_name == 'push' && failure()
+    needs: build
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Set version
+        run: |
+          export VERSION=${GITHUB_REF:10}
+          echo ::set-env name=VERSION::$VERSION
+      - name: Discord notification
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{secrets.ERROR_WEBHOOK}}
+        with:
+          args: "Error when building: <https://github.com/vvanelslande/vvctre/releases/tag/${{env.VERSION}}>"
