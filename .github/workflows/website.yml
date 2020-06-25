@@ -8,6 +8,6 @@ jobs:
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v1
         with:
-          token: ${{secrets.TOKEN}}
+          token: ${{secrets.WEBSITE_TOKEN}}
           repository: vvanelslande/vvanelslande.github.io
           event-type: vvctre
