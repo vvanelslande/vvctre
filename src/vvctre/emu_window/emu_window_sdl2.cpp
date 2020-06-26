@@ -540,8 +540,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::Unindent();
                     }
 
-                    ImGui::Unindent();
-
                     ImGui::Checkbox("Use Shader JIT", &Settings::values.use_shader_jit);
                     ImGui::Checkbox("Enable VSync", &Settings::values.enable_vsync);
 
