@@ -8,7 +8,6 @@
 #include "video_core/renderer_opengl/gl_resource_manager.h"
 #include "video_core/renderer_opengl/gl_shader_util.h"
 #include "video_core/renderer_opengl/gl_state.h"
-#include "video_core/renderer_opengl/gl_vars.h"
 
 namespace OpenGL {
 
@@ -30,9 +29,8 @@ void OGLTexture::Release() {
     handle = 0;
 }
 
-void OGLTexture::Allocate(GLenum target, GLsizei levels, GLenum internalformat,
-                                 GLenum format, GLenum type, GLsizei width, GLsizei height,
-                                 GLsizei depth) {
+void OGLTexture::Allocate(GLenum target, GLsizei levels, GLenum internalformat, GLenum format,
+                          GLenum type, GLsizei width, GLsizei height, GLsizei depth) {
     const bool tex_storage = GLAD_GL_ARB_texture_storage || GLES;
 
     switch (target) {
