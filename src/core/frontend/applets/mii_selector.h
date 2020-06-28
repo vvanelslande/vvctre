@@ -10,7 +10,7 @@
 
 namespace Frontend {
 
-/// Default English button text mappings. Frontends may need to copy this to internationalize it.
+/// Default English button text mappings.
 constexpr char MII_BUTTON_OKAY[] = "Ok";
 constexpr char MII_BUTTON_CANCEL[] = "Cancel";
 
