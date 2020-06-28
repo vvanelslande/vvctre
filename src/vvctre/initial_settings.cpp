@@ -576,7 +576,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     std::string username = Common::UTF16ToUTF8(cfg.GetUsername());
                     if (ImGui::InputText("##username", &username)) {
                         cfg.SetUsername(Common::UTF8ToUTF16(username));
-                        cfg.UpdateConfigNANDSavegame();
+                        update_config_savegame = true;
                     }
 
                     ImGui::TextUnformatted("Birthday:");

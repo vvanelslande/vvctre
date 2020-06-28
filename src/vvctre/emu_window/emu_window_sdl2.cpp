@@ -907,74 +907,62 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }())) {
                             if (ImGui::Selectable("January")) {
                                 cfg->SetBirthday(1, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("February")) {
                                 cfg->SetBirthday(2, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("March")) {
                                 cfg->SetBirthday(3, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("April")) {
                                 cfg->SetBirthday(4, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("May")) {
                                 cfg->SetBirthday(5, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("June")) {
                                 cfg->SetBirthday(6, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("July")) {
                                 cfg->SetBirthday(7, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("August")) {
                                 cfg->SetBirthday(8, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("September")) {
                                 cfg->SetBirthday(9, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("October")) {
                                 cfg->SetBirthday(10, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("November")) {
                                 cfg->SetBirthday(11, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("December")) {
                                 cfg->SetBirthday(12, day);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             ImGui::EndCombo();
@@ -1025,74 +1013,62 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }())) {
                             if (ImGui::Selectable("Japanese")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_JP);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("English")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_EN);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("French")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_FR);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("German")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_DE);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("Italian")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_IT);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("Spanish")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_ES);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("Simplified Chinese")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_ZH);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("Korean")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_KO);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("Dutch")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_NL);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("Portugese")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_PT);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("Russian")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_RU);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             if (ImGui::Selectable("Traditional Chinese")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_TW);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
 
                             ImGui::EndCombo();
@@ -1116,20 +1092,17 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }())) {
                             if (ImGui::Selectable("Mono")) {
                                 cfg->SetSoundOutputMode(Service::CFG::SoundOutputMode::SOUND_MONO);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Stereo")) {
                                 cfg->SetSoundOutputMode(
                                     Service::CFG::SoundOutputMode::SOUND_STEREO);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Surround")) {
                                 cfg->SetSoundOutputMode(
                                     Service::CFG::SoundOutputMode::SOUND_SURROUND);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             ImGui::EndCombo();
                         }
@@ -1412,668 +1385,535 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }())) {
                             if (ImGui::Selectable("Japan")) {
                                 cfg->SetCountryCode(1);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Anguilla")) {
                                 cfg->SetCountryCode(8);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Antigua and Barbuda")) {
                                 cfg->SetCountryCode(9);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Argentina")) {
                                 cfg->SetCountryCode(10);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Aruba")) {
                                 cfg->SetCountryCode(11);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Bahamas")) {
                                 cfg->SetCountryCode(12);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Barbados")) {
                                 cfg->SetCountryCode(13);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Belize")) {
                                 cfg->SetCountryCode(14);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Bolivia")) {
                                 cfg->SetCountryCode(15);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Brazil")) {
                                 cfg->SetCountryCode(16);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("British Virgin Islands")) {
                                 cfg->SetCountryCode(17);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Canada")) {
                                 cfg->SetCountryCode(18);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Cayman Islands")) {
                                 cfg->SetCountryCode(19);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Chile")) {
                                 cfg->SetCountryCode(20);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Colombia")) {
                                 cfg->SetCountryCode(21);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Costa Rica")) {
                                 cfg->SetCountryCode(22);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Dominica")) {
                                 cfg->SetCountryCode(23);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Dominican Republic")) {
                                 cfg->SetCountryCode(24);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Ecuador")) {
                                 cfg->SetCountryCode(25);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("El Salvador")) {
                                 cfg->SetCountryCode(26);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("French Guiana")) {
                                 cfg->SetCountryCode(27);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Grenada")) {
                                 cfg->SetCountryCode(28);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Guadeloupe")) {
                                 cfg->SetCountryCode(29);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Guatemala")) {
                                 cfg->SetCountryCode(30);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Guyana")) {
                                 cfg->SetCountryCode(31);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Haiti")) {
                                 cfg->SetCountryCode(32);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Honduras")) {
                                 cfg->SetCountryCode(33);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Jamaica")) {
                                 cfg->SetCountryCode(34);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Martinique")) {
                                 cfg->SetCountryCode(35);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Mexico")) {
                                 cfg->SetCountryCode(36);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Montserrat")) {
                                 cfg->SetCountryCode(37);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Netherlands Antilles")) {
                                 cfg->SetCountryCode(38);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Nicaragua")) {
                                 cfg->SetCountryCode(39);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Panama")) {
                                 cfg->SetCountryCode(40);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Paraguay")) {
                                 cfg->SetCountryCode(41);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Peru")) {
                                 cfg->SetCountryCode(42);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Saint Kitts and Nevis")) {
                                 cfg->SetCountryCode(43);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Saint Lucia")) {
                                 cfg->SetCountryCode(44);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Saint Vincent and the Grenadines")) {
                                 cfg->SetCountryCode(45);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Suriname")) {
                                 cfg->SetCountryCode(46);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Trinidad and Tobago")) {
                                 cfg->SetCountryCode(47);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Turks and Caicos Islands")) {
                                 cfg->SetCountryCode(48);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("United States")) {
                                 cfg->SetCountryCode(49);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Uruguay")) {
                                 cfg->SetCountryCode(50);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("US Virgin Islands")) {
                                 cfg->SetCountryCode(51);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Venezuela")) {
                                 cfg->SetCountryCode(52);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Albania")) {
                                 cfg->SetCountryCode(64);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Australia")) {
                                 cfg->SetCountryCode(65);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Austria")) {
                                 cfg->SetCountryCode(66);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Belgium")) {
                                 cfg->SetCountryCode(67);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Bosnia and Herzegovina")) {
                                 cfg->SetCountryCode(68);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Botswana")) {
                                 cfg->SetCountryCode(69);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Bulgaria")) {
                                 cfg->SetCountryCode(70);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Croatia")) {
                                 cfg->SetCountryCode(71);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Cyprus")) {
                                 cfg->SetCountryCode(72);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Czech Republic")) {
                                 cfg->SetCountryCode(73);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Denmark")) {
                                 cfg->SetCountryCode(74);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Estonia")) {
                                 cfg->SetCountryCode(75);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Finland")) {
                                 cfg->SetCountryCode(76);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("France")) {
                                 cfg->SetCountryCode(77);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Germany")) {
                                 cfg->SetCountryCode(78);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Greece")) {
                                 cfg->SetCountryCode(79);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Hungary")) {
                                 cfg->SetCountryCode(80);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Iceland")) {
                                 cfg->SetCountryCode(81);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Ireland")) {
                                 cfg->SetCountryCode(82);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Italy")) {
                                 cfg->SetCountryCode(83);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Latvia")) {
                                 cfg->SetCountryCode(84);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Lesotho")) {
                                 cfg->SetCountryCode(85);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Liechtenstein")) {
                                 cfg->SetCountryCode(86);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Lithuania")) {
                                 cfg->SetCountryCode(87);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Luxembourg")) {
                                 cfg->SetCountryCode(88);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Macedonia")) {
                                 cfg->SetCountryCode(89);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Malta")) {
                                 cfg->SetCountryCode(90);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Montenegro")) {
                                 cfg->SetCountryCode(91);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Mozambique")) {
                                 cfg->SetCountryCode(92);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Namibia")) {
                                 cfg->SetCountryCode(93);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Netherlands")) {
                                 cfg->SetCountryCode(94);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("New Zealand")) {
                                 cfg->SetCountryCode(95);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Norway")) {
                                 cfg->SetCountryCode(96);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Poland")) {
                                 cfg->SetCountryCode(97);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Portugal")) {
                                 cfg->SetCountryCode(98);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Romania")) {
                                 cfg->SetCountryCode(99);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Russia")) {
                                 cfg->SetCountryCode(100);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Serbia")) {
                                 cfg->SetCountryCode(101);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Slovakia")) {
                                 cfg->SetCountryCode(102);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Slovenia")) {
                                 cfg->SetCountryCode(103);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("South Africa")) {
                                 cfg->SetCountryCode(104);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Spain")) {
                                 cfg->SetCountryCode(105);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Swaziland")) {
                                 cfg->SetCountryCode(106);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Sweden")) {
                                 cfg->SetCountryCode(107);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Switzerland")) {
                                 cfg->SetCountryCode(108);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Turkey")) {
                                 cfg->SetCountryCode(109);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("United Kingdom")) {
                                 cfg->SetCountryCode(110);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Zambia")) {
                                 cfg->SetCountryCode(111);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Zimbabwe")) {
                                 cfg->SetCountryCode(112);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Azerbaijan")) {
                                 cfg->SetCountryCode(113);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Mauritania")) {
                                 cfg->SetCountryCode(114);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Mali")) {
                                 cfg->SetCountryCode(115);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Niger")) {
                                 cfg->SetCountryCode(116);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Chad")) {
                                 cfg->SetCountryCode(117);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Sudan")) {
                                 cfg->SetCountryCode(118);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Eritrea")) {
                                 cfg->SetCountryCode(119);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Djibouti")) {
                                 cfg->SetCountryCode(120);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Somalia")) {
                                 cfg->SetCountryCode(121);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Andorra")) {
                                 cfg->SetCountryCode(122);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Gibraltar")) {
                                 cfg->SetCountryCode(123);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Guernsey")) {
                                 cfg->SetCountryCode(124);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Isle of Man")) {
                                 cfg->SetCountryCode(125);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Jersey")) {
                                 cfg->SetCountryCode(126);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Monaco")) {
                                 cfg->SetCountryCode(127);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Taiwan")) {
                                 cfg->SetCountryCode(128);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("South Korea")) {
                                 cfg->SetCountryCode(136);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Hong Kong")) {
                                 cfg->SetCountryCode(144);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Macau")) {
                                 cfg->SetCountryCode(145);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Indonesia")) {
                                 cfg->SetCountryCode(152);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Singapore")) {
                                 cfg->SetCountryCode(153);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Thailand")) {
                                 cfg->SetCountryCode(154);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Philippines")) {
                                 cfg->SetCountryCode(155);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Malaysia")) {
                                 cfg->SetCountryCode(156);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("China")) {
                                 cfg->SetCountryCode(160);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("United Arab Emirates")) {
                                 cfg->SetCountryCode(168);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("India")) {
                                 cfg->SetCountryCode(169);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Egypt")) {
                                 cfg->SetCountryCode(170);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Oman")) {
                                 cfg->SetCountryCode(171);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Qatar")) {
                                 cfg->SetCountryCode(172);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Kuwait")) {
                                 cfg->SetCountryCode(173);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Saudi Arabia")) {
                                 cfg->SetCountryCode(174);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Syria")) {
                                 cfg->SetCountryCode(175);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Bahrain")) {
                                 cfg->SetCountryCode(176);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Jordan")) {
                                 cfg->SetCountryCode(177);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("San Marino")) {
                                 cfg->SetCountryCode(184);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Vatican City")) {
                                 cfg->SetCountryCode(185);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             if (ImGui::Selectable("Bermuda")) {
                                 cfg->SetCountryCode(186);
-                                cfg->UpdateConfigNANDSavegame();
-                                system.RequestReset();
+                                update_config_savegame = true;
                             }
                             ImGui::EndCombo();
                         }
@@ -2426,6 +2266,11 @@ void EmuWindow_SDL2::SwapBuffers() {
             if (play_coins_changed) {
                 Service::PTM::Module::SetPlayCoins(play_coins);
                 play_coins_changed = false;
+            }
+            if (update_config_savegame) {
+                Service::CFG::GetModule(system)->UpdateConfigNANDSavegame();
+                system.RequestReset();
+                update_config_savegame = false;
             }
             paused = false;
         }
