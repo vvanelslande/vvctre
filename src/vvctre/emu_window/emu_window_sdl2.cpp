@@ -855,7 +855,10 @@ void EmuWindow_SDL2::SwapBuffers() {
                     auto cfg = Service::CFG::GetModule(system);
 
                     if (cfg != nullptr) {
-                        ImGui::TextUnformatted("Username (changing will restart emulation):");
+                        ImGui::TextUnformatted("Will Restart");
+                        ImGui::Indent();
+
+                        ImGui::TextUnformatted("Username:");
                         ImGui::SameLine();
 
                         std::string username = Common::UTF16ToUTF8(cfg->GetUsername());
@@ -865,7 +868,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             system.RequestReset();
                         }
 
-                        ImGui::TextUnformatted("Birthday (changing will restart emulation):");
+                        ImGui::TextUnformatted("Birthday:");
                         ImGui::SameLine();
 
                         auto [month, day] = cfg->GetBirthday();
@@ -985,7 +988,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             system.RequestReset();
                         }
 
-                        ImGui::TextUnformatted("Language (changing will restart emulation):");
+                        ImGui::TextUnformatted("Language:");
                         ImGui::SameLine();
 
                         if (ImGui::BeginCombo("##language", [&] {
@@ -1095,8 +1098,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::EndCombo();
                         }
 
-                        ImGui::TextUnformatted(
-                            "Sound output mode (changing will restart emulation):");
+                        ImGui::TextUnformatted("Sound output mode:");
                         ImGui::SameLine();
                         if (ImGui::BeginCombo("##soundoutputmode", [&] {
                                 switch (cfg->GetSoundOutputMode()) {
@@ -1132,7 +1134,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::EndCombo();
                         }
 
-                        ImGui::TextUnformatted("Country (changing will restart emulation):");
+                        ImGui::TextUnformatted("Country:");
                         ImGui::SameLine();
                         if (ImGui::BeginCombo("##country", [&] {
                                 switch (cfg->GetCountryCode()) {
@@ -2075,9 +2077,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }
                             ImGui::EndCombo();
                         }
+
+                        ImGui::Unindent();
+                        ImGui::NewLine();
                     }
 
-                    ImGui::TextUnformatted("Play Coins (may need to restart emulation):");
+                    ImGui::TextUnformatted("Restart Recommended");
+                    ImGui::Indent();
+                    ImGui::TextUnformatted("Play Coins:");
                     ImGui::SameLine();
                     const u16 min = 0;
                     const u16 max = 300;
@@ -2088,6 +2095,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                             &max)) {
                         play_coins_changed = true;
                     }
+                    ImGui::Unindent();
 
                     ImGui::EndMenu();
                 }
