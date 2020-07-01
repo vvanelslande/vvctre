@@ -31,7 +31,6 @@
 #include "core/movie.h"
 #include "core/settings.h"
 #include "input_common/main.h"
-#include "video_core/renderer_opengl/post_processing_opengl.h"
 #include "video_core/renderer_opengl/texture_filters/texture_filterer.h"
 #include "vvctre/common.h"
 #include "vvctre/initial_settings.h"
