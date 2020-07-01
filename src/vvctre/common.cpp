@@ -19,7 +19,7 @@
 
 const u8 vvctre_version_major = 34;
 const u8 vvctre_version_minor = 7;
-const u8 vvctre_version_patch = 3;
+const u8 vvctre_version_patch = 4;
 
 std::vector<std::tuple<std::string, std::string>> GetInstalledList() {
     std::vector<std::tuple<std::string, std::string>> all;
