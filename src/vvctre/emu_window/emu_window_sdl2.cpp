@@ -642,6 +642,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         if (ImGui::Selectable("Off", Settings::values.render_3d ==
                                                          Settings::StereoRenderOption::Off)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Off;
+                            Settings::values.post_processing_shader = "none (builtin)";
                             Settings::Apply();
                         }
 
@@ -649,6 +650,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                               Settings::values.render_3d ==
                                                   Settings::StereoRenderOption::SideBySide)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::SideBySide;
+                            Settings::values.post_processing_shader = "none (builtin)";
                             Settings::Apply();
                         }
 
@@ -656,6 +658,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                               Settings::values.render_3d ==
                                                   Settings::StereoRenderOption::Anaglyph)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Anaglyph;
+                            Settings::values.post_processing_shader = "dubois (builtin)";
                             Settings::Apply();
                         }
 
@@ -663,6 +666,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                               Settings::values.render_3d ==
                                                   Settings::StereoRenderOption::Interlaced)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Interlaced;
+                            Settings::values.post_processing_shader = "horizontal (builtin)";
                             Settings::Apply();
                         }
 
