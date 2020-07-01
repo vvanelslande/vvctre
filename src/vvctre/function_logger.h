@@ -10,16 +10,13 @@ namespace Log {
 
 class FunctionLogger : public Log::Backend {
 public:
-    using Function = void (*)(const char* log);
+    void (*function)(const char* log);
+    std::string name;
 
-    explicit FunctionLogger(Function function, std::string name);
+    explicit FunctionLogger(decltype(FunctionLogger::function) function, std::string name);
 
     const char* GetName() const override;
     void Write(const Entry& entry) override;
-
-private:
-    Function function;
-    std::string name;
 };
 
 } // namespace Log

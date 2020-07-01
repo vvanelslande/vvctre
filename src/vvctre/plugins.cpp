@@ -6,6 +6,7 @@
 #include <utility>
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
+#include <asl/Directory.h>
 #include <asl/JSON.h>
 #include <asl/Process.h>
 #include <fmt/format.h>
@@ -37,91 +38,68 @@
 #include "video_core/renderer_base.h"
 #include "video_core/video_core.h"
 #include "vvctre/common.h"
+#include "vvctre/function_logger.h"
 #include "vvctre/plugins.h"
 
-#ifndef _WIN32
-#include <dlfcn.h>
-#define GetProcAddress dlsym
-#endif
-
-bool has_suffix(const std::string& str, const std::string& suffix) {
-    return str.size() >= suffix.size() &&
-           str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-
 PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(window) {
-    FileUtil::FSTEntry parent;
-    FileUtil::ScanDirectoryTree(*asl::Process::myDir(), parent);
-    for (const auto& entry : parent.children) {
-        if (!entry.isDirectory &&
+    asl::Array<asl::File> files = asl::Directory(asl::Process::myDir())
+                                      .files(
 #ifdef _WIN32
-            entry.virtualName != "SDL2.dll" && has_suffix(entry.virtualName, ".dll")
+                                          "*.dll"
 #else
-            has_suffix(entry.virtualName, ".so")
+                                          "*.so"
 #endif
-        ) {
-#ifdef _WIN32
-            HMODULE handle = LoadLibraryA(entry.virtualName.c_str());
-#else
-            void* handle = dlopen(
-                fmt::format("{}/{}", *asl::Process::myDir(), entry.virtualName).c_str(), RTLD_LAZY);
-#endif
+                                      );
+    foreach (asl::File& file, files) {
+        if (file.name() != "SDL2.dll") {
+            void* handle = SDL_LoadObject(*file.path());
             if (handle == NULL) {
-                fmt::print("Plugin {} failed to load: {}\n", entry.virtualName,
-#ifdef _WIN32
-                           GetLastErrorMsg()
-#else
-                           dlerror()
-#endif
-                );
+                fmt::print("Plugin {} failed to load: {}\n", *file.name(), SDL_GetError());
             } else {
-                PluginImportedFunctions::GetRequiredFunctionCount GetRequiredFunctionCount =
-                    (PluginImportedFunctions::GetRequiredFunctionCount)GetProcAddress(
-                        handle, "GetRequiredFunctionCount");
-                PluginImportedFunctions::GetRequiredFunctionNames GetRequiredFunctionNames =
-                    (PluginImportedFunctions::GetRequiredFunctionNames)GetProcAddress(
-                        handle, "GetRequiredFunctionNames");
-                PluginImportedFunctions::PluginLoaded PluginLoaded =
-                    (PluginImportedFunctions::PluginLoaded)GetProcAddress(handle, "PluginLoaded");
-                if (GetRequiredFunctionCount == nullptr || GetRequiredFunctionNames == nullptr ||
-                    PluginLoaded == nullptr) {
-                    fmt::print("Plugin {} failed to load: a required function is nullptr\n",
-                               entry.virtualName);
+                void* get_required_function_count =
+                    SDL_LoadFunction(handle, "GetRequiredFunctionCount");
+                void* get_required_function_names =
+                    SDL_LoadFunction(handle, "GetRequiredFunctionNames");
+                void* plugin_loaded = SDL_LoadFunction(handle, "PluginLoaded");
+                if (get_required_function_count == nullptr ||
+                    get_required_function_names == nullptr || plugin_loaded == nullptr) {
+                    fmt::print("Plugin {} failed to load: {}\n", *file.name(), SDL_GetError());
+                    SDL_UnloadObject(handle);
                 } else {
                     Plugin plugin;
                     plugin.handle = handle;
                     plugin.before_drawing_fps =
-                        (PluginImportedFunctions::BeforeDrawingFPS)GetProcAddress(
-                            handle, "BeforeDrawingFPS");
+                        (decltype(Plugin::before_drawing_fps))SDL_LoadFunction(handle,
+                                                                               "BeforeDrawingFPS");
                     plugin.add_menu =
-                        (PluginImportedFunctions::AddMenu)GetProcAddress(handle, "AddMenu");
-                    plugin.add_tab =
-                        (PluginImportedFunctions::AddTab)GetProcAddress(handle, "AddTab");
+                        (decltype(Plugin::add_menu))SDL_LoadFunction(handle, "AddMenu");
+                    plugin.add_tab = (decltype(Plugin::add_tab))SDL_LoadFunction(handle, "AddTab");
                     plugin.after_swap_window =
-                        (PluginImportedFunctions::AfterSwapWindow)GetProcAddress(handle,
-                                                                                 "AfterSwapWindow");
-                    plugin.screenshot_callback =
-                        (PluginImportedFunctions::ScreenshotCallback)GetProcAddress(
-                            handle, "ScreenshotCallback");
-                    PluginImportedFunctions::Log log =
-                        (PluginImportedFunctions::Log)GetProcAddress(handle, "Log");
+                        (decltype(Plugin::after_swap_window))SDL_LoadFunction(handle,
+                                                                              "AfterSwapWindow");
+                    plugin.screenshot_callback = (decltype(
+                        Plugin::screenshot_callback))SDL_LoadFunction(handle, "ScreenshotCallback");
+                    void* log = SDL_LoadFunction(handle, "Log");
                     if (log != nullptr) {
                         Log::AddBackend(std::make_unique<Log::FunctionLogger>(
-                            log, fmt::format("Plugin {}", entry.virtualName)));
+                            (decltype(Log::FunctionLogger::function))log,
+                            fmt::format("Plugin {}", *file.name())));
                     }
 
-                    int count = GetRequiredFunctionCount();
-                    const char** required_function_names = GetRequiredFunctionNames();
+                    int count = ((int (*)())get_required_function_count)();
+                    const char** required_function_names =
+                        ((const char** (*)())get_required_function_names)();
                     std::vector<void*> required_functions(count);
                     for (int i = 0; i < count; ++i) {
                         required_functions[i] =
                             function_map[std::string(required_function_names[i])];
                     }
-                    PluginLoaded(static_cast<void*>(&core), static_cast<void*>(this),
-                                 required_functions.data());
+                    ((void (*)(void* core, void* plugin_manager, void* functions[]))plugin_loaded)(
+                        static_cast<void*>(&core), static_cast<void*>(this),
+                        required_functions.data());
 
                     plugins.push_back(std::move(plugin));
-                    fmt::print("Plugin {} loaded\n", entry.virtualName);
+                    fmt::print("Plugin {} loaded\n", *file.name());
                 }
             }
         }
@@ -130,80 +108,61 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
 
 PluginManager::~PluginManager() {
     for (const auto& plugin : plugins) {
-        PluginImportedFunctions::EmulatorClosing f =
-            (PluginImportedFunctions::EmulatorClosing)GetProcAddress(plugin.handle,
-                                                                     "EmulatorClosing");
-        if (f != nullptr) {
-            f();
-        }
-#ifdef _WIN32
-        FreeLibrary(plugin.handle);
-#else
-        dlclose(plugin.handle);
-#endif
+        SDL_UnloadObject(plugin.handle);
     }
 }
 
 void PluginManager::InitialSettingsOpening() {
     for (const auto& plugin : plugins) {
-        PluginImportedFunctions::InitialSettingsOpening f =
-            (PluginImportedFunctions::InitialSettingsOpening)GetProcAddress(
-                plugin.handle, "InitialSettingsOpening");
-        if (f != nullptr) {
-            f();
+        void* initial_settings_opening = SDL_LoadFunction(plugin.handle, "InitialSettingsOpening");
+        if (initial_settings_opening != nullptr) {
+            ((void (*)())initial_settings_opening)();
         }
     }
 }
 
 void PluginManager::InitialSettingsOkPressed() {
     for (const auto& plugin : plugins) {
-        PluginImportedFunctions::InitialSettingsOkPressed f =
-            (PluginImportedFunctions::InitialSettingsOkPressed)GetProcAddress(
-                plugin.handle, "InitialSettingsOkPressed");
-        if (f != nullptr) {
-            f();
+        void* initial_settings_ok_pressed =
+            SDL_LoadFunction(plugin.handle, "InitialSettingsOkPressed");
+        if (initial_settings_ok_pressed != nullptr) {
+            ((void (*)())initial_settings_ok_pressed)();
         }
     }
 }
 
 void PluginManager::BeforeLoading() {
     for (const auto& plugin : plugins) {
-        PluginImportedFunctions::BeforeLoading f =
-            (PluginImportedFunctions::BeforeLoading)GetProcAddress(plugin.handle, "BeforeLoading");
-        if (f != nullptr) {
-            f();
+        void* before_loading = SDL_LoadFunction(plugin.handle, "BeforeLoading");
+        if (before_loading != nullptr) {
+            ((void (*)())before_loading)();
         }
     }
 }
 
 void PluginManager::EmulationStarting() {
     for (const auto& plugin : plugins) {
-        PluginImportedFunctions::EmulationStarting f =
-            (PluginImportedFunctions::EmulationStarting)GetProcAddress(plugin.handle,
-                                                                       "EmulationStarting");
-        if (f != nullptr) {
-            f();
+        void* emulation_starting = SDL_LoadFunction(plugin.handle, "EmulationStarting");
+        if (emulation_starting != nullptr) {
+            ((void (*)())emulation_starting)();
         }
     }
 }
 
 void PluginManager::EmulatorClosing() {
     for (const auto& plugin : plugins) {
-        PluginImportedFunctions::EmulatorClosing f =
-            (PluginImportedFunctions::EmulatorClosing)GetProcAddress(plugin.handle,
-                                                                     "EmulatorClosing");
-        if (f != nullptr) {
-            f();
+        void* emulator_closing = SDL_LoadFunction(plugin.handle, "EmulatorClosing");
+        if (emulator_closing != nullptr) {
+            ((void (*)())emulator_closing)();
         }
     }
 }
 
 void PluginManager::FatalError() {
     for (const auto& plugin : plugins) {
-        PluginImportedFunctions::FatalError f =
-            (PluginImportedFunctions::FatalError)GetProcAddress(plugin.handle, "FatalError");
-        if (f != nullptr) {
-            f();
+        void* fatal_error = SDL_LoadFunction(plugin.handle, "FatalError");
+        if (fatal_error != nullptr) {
+            ((void (*)())fatal_error)();
         }
     }
 }
@@ -1892,9 +1851,9 @@ u8 vvctre_multiplayer_get_room_member_slots(void* /* core, currently unused */) 
     return 0;
 }
 
-void vvctre_multiplayer_on_chat_message(
-    void* /* core, currently unused */,
-    PluginImportedFunctions::MultiplayerChatMessageCallback callback) {
+void vvctre_multiplayer_on_chat_message(void* /* core, currently unused */,
+                                        void (*callback)(const char* nickname,
+                                                         const char* message)) {
     if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
         room_member->BindOnChatMessageReceived([=](const Network::ChatEntry& entry) {
             callback(entry.nickname.c_str(), entry.message.c_str());
@@ -1902,9 +1861,8 @@ void vvctre_multiplayer_on_chat_message(
     }
 }
 
-void vvctre_multiplayer_on_status_message(
-    void* /* core, currently unused */,
-    PluginImportedFunctions::MultiplayerStatusMessageCallback callback) {
+void vvctre_multiplayer_on_status_message(void* /* core, currently unused */,
+                                          void (*callback)(u8 type, const char* nickname)) {
     if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
         room_member->BindOnStatusMessageReceived([=](const Network::StatusMessageEntry& entry) {
             callback(static_cast<u8>(entry.type), entry.nickname.c_str());
@@ -1912,26 +1870,22 @@ void vvctre_multiplayer_on_status_message(
     }
 }
 
-void vvctre_multiplayer_on_error(void* /* core, currently unused */,
-                                 PluginImportedFunctions::MultiplayerErrorCallback callback) {
+void vvctre_multiplayer_on_error(void* /* core, currently unused */, void (*callback)(u8 error)) {
     if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
         room_member->BindOnError(
             [=](const Network::RoomMember::Error& error) { callback(static_cast<u8>(error)); });
     }
 }
 
-void vvctre_multiplayer_on_information_change(
-    void* /* core, currently unused */,
-    PluginImportedFunctions::MultiplayerInformationChangeCallback callback) {
+void vvctre_multiplayer_on_information_change(void* /* core, currently unused */,
+                                              void (*callback)()) {
     if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
         room_member->BindOnRoomInformationChanged(
             [=](const Network::RoomInformation&) { callback(); });
     }
 }
 
-void vvctre_multiplayer_on_state_change(
-    void* /* core, currently unused */,
-    PluginImportedFunctions::MultiplayerStateChangeCallback callback) {
+void vvctre_multiplayer_on_state_change(void* /* core, currently unused */, void (*callback)()) {
     if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
         room_member->BindOnRoomInformationChanged(
             [=](const Network::RoomInformation&) { callback(); });

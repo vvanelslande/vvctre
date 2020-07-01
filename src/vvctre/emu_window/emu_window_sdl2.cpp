@@ -674,10 +674,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                     u8 factor_3d = Settings::values.factor_3d;
                     const u8 factor_3d_min = 0;
                     const u8 factor_3d_max = 100;
+                    ImGui::PushItemWidth(135);
                     if (ImGui::SliderScalar("##factor_3d", ImGuiDataType_U8, &factor_3d,
                                             &factor_3d_min, &factor_3d_max, "%d%%")) {
                         Settings::values.factor_3d = factor_3d;
                     }
+                    ImGui::PopItemWidth();
 
                     ImGui::EndMenu();
                 }
@@ -2255,11 +2257,15 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }
                             show_connect_to_citra_room = true;
                         }
+                        ImGui::EndMenu();
                     }
                 }
             }
 
             plugin_manager.AddMenus();
+
+            ImGui::Separator();
+            ImGui::MenuItem("Close Menu");
 
             ImGui::EndPopup();
         } else {

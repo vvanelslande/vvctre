@@ -8,7 +8,7 @@
 
 namespace Log {
 
-FunctionLogger::FunctionLogger(Function function, std::string name)
+FunctionLogger::FunctionLogger(decltype(FunctionLogger::function) function, std::string name)
     : function(function), name(std::move(name)) {}
 
 const char* FunctionLogger::GetName() const {
