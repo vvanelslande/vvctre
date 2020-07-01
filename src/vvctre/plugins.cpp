@@ -542,6 +542,10 @@ bool vvctre_gui_is_item_hovered(int flags) {
     return ImGui::IsItemHovered(flags);
 }
 
+bool vvctre_gui_is_item_deactivated_after_edit() {
+    return ImGui::IsItemDeactivatedAfterEdit();
+}
+
 void vvctre_gui_end_tooltip() {
     ImGui::EndTooltip();
 }
@@ -2000,6 +2004,8 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_tooltip", (void*)&vvctre_gui_tooltip},
     {"vvctre_gui_begin_tooltip", (void*)&vvctre_gui_begin_tooltip},
     {"vvctre_gui_is_item_hovered", (void*)&vvctre_gui_is_item_hovered},
+    {"vvctre_gui_is_item_deactivated_after_edit",
+     (void*)&vvctre_gui_is_item_deactivated_after_edit},
     {"vvctre_gui_end_tooltip", (void*)&vvctre_gui_end_tooltip},
     {"vvctre_gui_text", (void*)&vvctre_gui_text},
     {"vvctre_gui_text_colored", (void*)&vvctre_gui_text_colored},
