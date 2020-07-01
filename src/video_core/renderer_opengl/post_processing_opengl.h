@@ -6,13 +6,8 @@
 
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace OpenGL {
-
-// Returns a vector of the names of the shaders available in the
-// "shaders" directory in vvctre's data directory
-std::vector<std::string> GetPostProcessingShaderList(const bool anaglyph);
 
 // Returns the shader code for the shader named "shader_name"
 // with the appropriate header prepended to it

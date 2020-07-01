@@ -1696,34 +1696,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     ImGui::TextUnformatted("Post Processing Shader");
                     ImGui::SameLine();
-                    if (ImGui::BeginCombo("##postprocessingshader",
-                                          Settings::values.post_processing_shader.c_str())) {
-                        const auto shaders = OpenGL::GetPostProcessingShaderList(
-                            Settings::values.render_3d == Settings::StereoRenderOption::Anaglyph);
-
-                        if (Settings::values.render_3d == Settings::StereoRenderOption::Anaglyph &&
-                            ImGui::Selectable("dubois (builtin)")) {
-                            Settings::values.post_processing_shader = "dubois (builtin)";
-                        } else if (Settings::values.render_3d ==
-                                       Settings::StereoRenderOption::Interlaced &&
-                                   ImGui::Selectable("horizontal (builtin)")) {
-                            Settings::values.post_processing_shader = "horizontal (builtin)";
-                        } else if ((Settings::values.render_3d ==
-                                        Settings::StereoRenderOption::Off ||
-                                    Settings::values.render_3d ==
-                                        Settings::StereoRenderOption::SideBySide) &&
-                                   ImGui::Selectable("none (builtin)")) {
-                            Settings::values.post_processing_shader = "none (builtin)";
-                        }
-
-                        for (const auto& shader : shaders) {
-                            if (ImGui::Selectable(shader.c_str())) {
-                                Settings::values.post_processing_shader = shader;
-                            }
-                        }
-
-                        ImGui::EndCombo();
-                    }
+                    ImGui::InputText("##postprocessingshader",
+                                     &Settings::values.post_processing_shader);
 
                     ImGui::TextUnformatted("Texture Filter");
                     ImGui::SameLine();

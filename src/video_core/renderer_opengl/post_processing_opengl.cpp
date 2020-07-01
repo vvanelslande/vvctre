@@ -111,43 +111,6 @@ void SetOutput(float4 color_in)
 
 )";
 
-std::vector<std::string> GetPostProcessingShaderList(bool anaglyph) {
-    std::string shader_dir = FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir);
-    std::vector<std::string> shader_names;
-
-    if (!FileUtil::IsDirectory(shader_dir)) {
-        FileUtil::CreateDir(shader_dir);
-    }
-
-    if (anaglyph) {
-        shader_dir = shader_dir + "anaglyph";
-        if (!FileUtil::IsDirectory(shader_dir)) {
-            FileUtil::CreateDir(shader_dir);
-        }
-    }
-
-    // Would it make more sense to just add a directory list function to FileUtil?
-    const auto callback = [&shader_names](u64* num_entries_out, const std::string& directory,
-                                          const std::string& virtual_name) -> bool {
-        const std::string physical_name = directory + "/" + virtual_name;
-        if (!FileUtil::IsDirectory(physical_name)) {
-            std::size_t dot_pos = virtual_name.rfind(".");
-            if (dot_pos != std::string::npos) {
-                if (Common::ToLower(virtual_name.substr(dot_pos + 1)) == "glsl") {
-                    shader_names.push_back(virtual_name.substr(0, dot_pos));
-                }
-            }
-        }
-        return true;
-    };
-
-    FileUtil::ForeachDirectoryEntry(nullptr, shader_dir, callback);
-
-    std::sort(shader_names.begin(), shader_names.end());
-
-    return shader_names;
-}
-
 std::string GetPostProcessingShaderCode(const bool anaglyph, std::string_view shader) {
     std::string shader_dir = FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir);
     std::string shader_path;
