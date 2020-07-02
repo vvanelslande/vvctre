@@ -21,7 +21,6 @@ if (MSVC)
     # Ensure that projects build with Unicode support.
     add_definitions(-DUNICODE -D_UNICODE)
 
-    # /W3                 - Level 3 warnings
     # /MP                 - Multi-threaded compilation
     # /Zi                 - Output debugging information
     # /Zo                 - Enhanced debug info for optimized builds
@@ -32,7 +31,6 @@ if (MSVC)
     # /Zc:inline          - Let codegen omit inline functions in object files
     # /Zc:throwingNew     - Let codegen assume `operator new` (without std::nothrow) will never return null
     add_compile_options(
-        /W3
         /MP
         /Zi
         /Zo
@@ -50,14 +48,8 @@ if (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG   "/DEBUG /MANIFEST:NO" CACHE STRING "" FORCE)
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/DEBUG /MANIFEST:NO /INCREMENTAL:NO /OPT:REF,ICF" CACHE STRING "" FORCE)
 else()
-    add_compile_options(
-        -Wall
-        -Wno-attributes
-    )
-
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         # Set file offset size to 64 bits.
-        #
         # On modern Unixes, this is typically already the case. The lone exception is
         # glibc, which may default to 32 bits. glibc allows this to be configured
         # by setting _FILE_OFFSET_BITS.
