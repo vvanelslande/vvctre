@@ -18,7 +18,7 @@
 #include "vvctre/common.h"
 
 const u8 vvctre_version_major = 34;
-const u8 vvctre_version_minor = 9;
+const u8 vvctre_version_minor = 10;
 const u8 vvctre_version_patch = 0;
 
 std::vector<std::tuple<std::string, std::string>> GetInstalledList() {
@@ -119,6 +119,7 @@ CitraRoomList GetPublicCitraRooms() {
         room.owner = *json_room("owner");
         room.max_players = json_room("maxPlayers");
         room.has_password = json_room("hasPassword");
+        room.game = *json_room("preferredGameName");
         room.members.resize(json_room("players").length());
         rooms.push_back(std::move(room));
     }

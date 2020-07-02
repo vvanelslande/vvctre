@@ -248,7 +248,9 @@ void EmuWindow_SDL2::SwapBuffers() {
         ImGui::SetWindowPos(ImVec2(), ImGuiCond_Once);
         ImGui::TextColored(fps_color, "%d FPS", static_cast<int>(io.Framerate));
         if (ImGui::BeginPopupContextItem("##menu", ImGuiMouseButton_Right)) {
-            paused = true;
+            if (ImGui::IsWindowAppearing() && !ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
+                paused = true;
+            }
 
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Load File")) {
@@ -2592,14 +2594,16 @@ void EmuWindow_SDL2::SwapBuffers() {
                 if (ImGui::ListBoxHeader("##members", ImVec2(ImGui::GetWindowWidth() / 2.0f,
                                                              ImGui::GetWindowHeight() / 1.23f))) {
                     for (const auto& member : members) {
+                        ImGui::PushTextWrapPos();
                         if (member.game_info.name.empty()) {
                             ImGui::TextUnformatted(member.nickname.c_str());
                         } else {
                             ImGui::Text("%s is playing %s", member.nickname.c_str(),
                                         member.game_info.name.c_str());
                         }
+                        ImGui::PopTextWrapPos();
                         if (member.nickname != room_member->GetNickname()) {
-                            if (ImGui::BeginPopupContextItem("##membermenu",
+                            if (ImGui::BeginPopupContextItem(member.nickname.c_str(),
                                                              ImGuiMouseButton_Right)) {
                                 if (multiplayer_blocked_nicknames.count(member.nickname)) {
                                     if (ImGui::MenuItem("Unblock")) {
@@ -2627,6 +2631,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                ImGui::GetContentRegionAvail().x);
                         ImGui::TextUnformatted(message.c_str());
                         ImGui::PopTextWrapPos();
+                    }
+                    if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
                         ImGui::SetScrollHereY(1.0f);
                     }
                     ImGui::ListBoxFooter();
@@ -2732,12 +2738,21 @@ void EmuWindow_SDL2::SwapBuffers() {
                 public_rooms = GetPublicCitraRooms();
             }
 
-            if (ImGui::ListBoxHeader("##publicrooms",
-                                     ImVec2(-1.0f, ImGui::GetContentRegionAvail().y - 40.0f))) {
+            if (ImGui::BeginChildFrame(ImGui::GetID("publicrooms"),
+                                       ImVec2(-1.0f, ImGui::GetContentRegionAvail().y - 40.0f),
+                                       ImGuiWindowFlags_HorizontalScrollbar)) {
                 for (const auto& room : public_rooms) {
                     const std::string room_string = fmt::format(
-                        room.has_password ? "{} ({}/{}) by {} (has password)" : "{} ({}/{}) by {}",
-                        room.name, room.members.size(), room.max_players, room.owner);
+                        room.has_password ? "{}\n\nHas Password: Yes\nMembers: "
+                                            "{}/{}\nPreferred Game: {}\nOwner: "
+                                            "{}{}"
+                                          : "{}\n\nHas Password: No\nMembers: "
+                                            "{}/{}\nPreferred Game: {}\nOwner: "
+                                            "{}{}",
+                        room.name, room.members.size(), room.max_players, room.game, room.owner,
+                        room.description.empty()
+                            ? ""
+                            : fmt::format("\n\nDescription:\n{}", room.description));
 
                     if (asl::String(room_string.c_str())
                             .toLowerCase()
@@ -2746,20 +2761,11 @@ void EmuWindow_SDL2::SwapBuffers() {
                             Settings::values.multiplayer_ip = room.ip;
                             Settings::values.multiplayer_port = room.port;
                         }
-
-                        if (ImGui::IsItemHovered() && !room.description.empty()) {
-                            const float x = ImGui::GetContentRegionAvail().x;
-
-                            ImGui::BeginTooltip();
-                            ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + x);
-                            ImGui::TextUnformatted(room.description.c_str());
-                            ImGui::PopTextWrapPos();
-                            ImGui::EndTooltip();
-                        }
+                        ImGui::Separator();
                     }
                 }
-                ImGui::ListBoxFooter();
             }
+            ImGui::EndChildFrame();
 
             ImGui::NewLine();
 
@@ -2809,39 +2815,45 @@ void EmuWindow_SDL2::PollEvents() {
             break;
         case SDL_KEYDOWN:
         case SDL_KEYUP:
-            if (!ImGui::GetIO().WantCaptureKeyboard) {
+            if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
+                !ImGui::GetIO().WantCaptureKeyboard) {
                 OnKeyEvent(static_cast<int>(event.key.keysym.scancode), event.key.state);
             }
 
             break;
         case SDL_MOUSEMOTION:
-            if (!ImGui::GetIO().WantCaptureMouse && event.button.which != SDL_TOUCH_MOUSEID) {
+            if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
+                !ImGui::GetIO().WantCaptureMouse && event.button.which != SDL_TOUCH_MOUSEID) {
                 OnMouseMotion(event.motion.x, event.motion.y);
             }
 
             break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
-            if (!ImGui::GetIO().WantCaptureMouse && event.button.which != SDL_TOUCH_MOUSEID) {
+            if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
+                !ImGui::GetIO().WantCaptureMouse && event.button.which != SDL_TOUCH_MOUSEID) {
                 OnMouseButton(event.button.button, event.button.state, event.button.x,
                               event.button.y);
             }
 
             break;
         case SDL_FINGERDOWN:
-            if (!ImGui::GetIO().WantCaptureMouse) {
+            if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
+                !ImGui::GetIO().WantCaptureMouse) {
                 OnFingerDown(event.tfinger.x, event.tfinger.y);
             }
 
             break;
         case SDL_FINGERMOTION:
-            if (!ImGui::GetIO().WantCaptureMouse) {
+            if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
+                !ImGui::GetIO().WantCaptureMouse) {
                 OnFingerMotion(event.tfinger.x, event.tfinger.y);
             }
 
             break;
         case SDL_FINGERUP:
-            if (!ImGui::GetIO().WantCaptureMouse) {
+            if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
+                !ImGui::GetIO().WantCaptureMouse) {
                 OnFingerUp();
             }
 

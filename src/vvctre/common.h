@@ -22,6 +22,7 @@ struct CitraRoom {
     u16 port;
     u32 max_players;
     bool has_password;
+    std::string game;
 
     struct Member {};
     std::vector<Member> members;

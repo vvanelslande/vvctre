@@ -2723,14 +2723,23 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     if (ImGui::Button("Refresh")) {
                         public_rooms = GetPublicCitraRooms();
                     }
-                    if (ImGui::ListBoxHeader(
-                            "##publicrooms",
-                            ImVec2(-1.0f, ImGui::GetContentRegionAvail().y - 40.0f))) {
+                    if (ImGui::BeginChildFrame(
+                            ImGui::GetID("publicrooms"),
+                            ImVec2(-1.0f, ImGui::GetContentRegionAvail().y - 40.0f),
+                            ImGuiWindowFlags_HorizontalScrollbar)) {
                         for (const auto& room : public_rooms) {
                             const std::string room_string = fmt::format(
-                                room.has_password ? "{} ({}/{}) by {} (has password)"
-                                                  : "{} ({}/{}) by {}",
-                                room.name, room.members.size(), room.max_players, room.owner);
+                                room.has_password ? "{}\n\nHas Password: Yes\nMembers: "
+                                                    "{}/{}\nPreferred Game: {}\nOwner: "
+                                                    "{}{}"
+                                                  : "{}\n\nHas Password: No\nMembers: "
+                                                    "{}/{}\nPreferred Game: {}\nOwner: "
+                                                    "{}{}",
+                                room.name, room.members.size(), room.max_players, room.game,
+                                room.owner,
+                                room.description.empty()
+                                    ? ""
+                                    : fmt::format("\n\nDescription:\n{}", room.description));
 
                             if (asl::String(room_string.c_str())
                                     .toLowerCase()
@@ -2740,20 +2749,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                     Settings::values.multiplayer_ip = room.ip;
                                     Settings::values.multiplayer_port = room.port;
                                 }
-
-                                if (ImGui::IsItemHovered() && !room.description.empty()) {
-                                    const float x = ImGui::GetContentRegionAvail().x;
-
-                                    ImGui::BeginTooltip();
-                                    ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + x);
-                                    ImGui::TextUnformatted(room.description.c_str());
-                                    ImGui::PopTextWrapPos();
-                                    ImGui::EndTooltip();
-                                }
+                                ImGui::Separator();
                             }
                         }
-                        ImGui::ListBoxFooter();
                     }
+                    ImGui::EndChildFrame();
 
                     ImGui::EndTabItem();
                 }
