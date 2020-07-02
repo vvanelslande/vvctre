@@ -1675,7 +1675,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::Checkbox("Enable Linear Filtering",
                                     &Settings::values.enable_linear_filtering);
                     if (ImGui::IsItemHovered()) {
-                        ImGui::SetTooltip("This is required for some shaders to work correctly");
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted(
+                            "This is required for some shaders to work correctly");
+                        ImGui::EndTooltip();
                     }
                     ImGui::Checkbox("Sharper Distant Objects",
                                     &Settings::values.sharper_distant_objects);
@@ -1697,6 +1700,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::SameLine();
                     ImGui::InputText("##postprocessingshader",
                                      &Settings::values.post_processing_shader);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted("File name without extension and folder");
+                        ImGui::EndTooltip();
+                    }
 
                     ImGui::TextUnformatted("Texture Filter");
                     ImGui::SameLine();
@@ -1989,8 +1997,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             GetInput(InputCommon::Polling::DeviceType::Button);
                     }
                     if (ImGui::IsItemHovered()) {
-                        ImGui::SetTooltip(
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted(
                             "If you're using a XInput controller, make sure it says Axis 2+.");
+                        ImGui::EndTooltip();
                     }
 
                     ImGui::TextUnformatted("ZR:");
@@ -2003,8 +2013,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             GetInput(InputCommon::Polling::DeviceType::Button);
                     }
                     if (ImGui::IsItemHovered()) {
-                        ImGui::SetTooltip(
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted(
                             "If you're using a XInput controller, make sure it says Axis 5+.");
+                        ImGui::EndTooltip();
                     }
 
                     ImGui::TextUnformatted("Start:");
@@ -2208,9 +2220,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             GetInput(InputCommon::Polling::DeviceType::Analog);
                     }
                     if (ImGui::IsItemHovered()) {
-                        ImGui::SetTooltip("Keyboard: Press the keys to use for Up, Down, "
-                                          "Left, Right, and Modifier.\nReal stick: first move "
-                                          "the stick to the right, and then to the bottom.");
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted("Keyboard: Press the keys to use for Up, Down, "
+                                               "Left, Right, and Modifier.\nReal stick: first move "
+                                               "the stick to the right, and then to the bottom.");
+                        ImGui::EndTooltip();
                     }
                     ImGui::EndGroup();
 
@@ -2361,9 +2375,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             GetInput(InputCommon::Polling::DeviceType::Analog);
                     }
                     if (ImGui::IsItemHovered()) {
-                        ImGui::SetTooltip("Keyboard: Press the keys to use for Up, Down, "
-                                          "Left, Right, and Modifier.\nReal stick: first move "
-                                          "the stick to the right, and then to the bottom.");
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted("Keyboard: Press the keys to use for Up, Down, "
+                                               "Left, Right, and Modifier.\nReal stick: first move "
+                                               "the stick to the right, and then to the bottom.");
+                        ImGui::EndTooltip();
                     }
                     ImGui::EndGroup();
 
@@ -2729,14 +2745,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             ImGuiWindowFlags_HorizontalScrollbar)) {
                         for (const auto& room : public_rooms) {
                             const std::string room_string = fmt::format(
-                                room.has_password ? "{}\n\nHas Password: Yes\nMembers: "
-                                                    "{}/{}\nPreferred Game: {}\nOwner: "
-                                                    "{}{}"
-                                                  : "{}\n\nHas Password: No\nMembers: "
-                                                    "{}/{}\nPreferred Game: {}\nOwner: "
-                                                    "{}{}",
-                                room.name, room.members.size(), room.max_players, room.game,
-                                room.owner,
+                                "{}\n\nHas Password: {}\nMembers: "
+                                "{}/{}\nPreferred Game: {}\nOwner: "
+                                "{}{}",
+                                room.name, room.has_password ? "Yes" : "No", room.members.size(),
+                                room.max_players, room.game, room.owner,
                                 room.description.empty()
                                     ? ""
                                     : fmt::format("\n\nDescription:\n{}", room.description));

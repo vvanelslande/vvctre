@@ -18,7 +18,7 @@
 #include "vvctre/common.h"
 
 const u8 vvctre_version_major = 34;
-const u8 vvctre_version_minor = 10;
+const u8 vvctre_version_minor = 11;
 const u8 vvctre_version_patch = 0;
 
 std::vector<std::tuple<std::string, std::string>> GetInstalledList() {

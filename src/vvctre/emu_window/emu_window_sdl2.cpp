@@ -572,6 +572,11 @@ void EmuWindow_SDL2::SwapBuffers() {
                     if (ImGui::IsItemDeactivatedAfterEdit()) {
                         Settings::Apply();
                     }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted("File name without extension and folder");
+                        ImGui::EndTooltip();
+                    }
 
                     ImGui::TextUnformatted("Texture Filter:");
                     ImGui::SameLine();
@@ -2438,76 +2443,65 @@ void EmuWindow_SDL2::SwapBuffers() {
                     if (label.find(filter) != std::string::npos) {
                         ImGui::Selectable(label.c_str());
                         if (ImGui::IsItemHovered()) {
-                            ImGui::SetTooltip(
-                                "id: %d\n"
-                                "status: %d\n"
-                                "client_process.type: %s\n"
-                                "client_process.name: %s\n"
-                                "client_process.id: %d\n"
-                                "client_thread.type: %s\n"
-                                "client_thread.name: %s\n"
-                                "client_thread.id: %d\n"
-                                "client_session.type: %s\n"
-                                "client_session.name: %s\n"
-                                "client_session.id: %d\n"
-                                "client_port.type: %s\n"
-                                "client_port.name: %s\n"
-                                "client_port.id: %d\n"
-                                "server_process.type: %s\n"
-                                "server_process.name: %s\n"
-                                "server_process.id: %d\n"
-                                "server_thread.type: %s\n"
-                                "server_thread.name: %s\n"
-                                "server_thread.id: %d\n"
-                                "server_session.type: %s\n"
-                                "server_session.name: %s\n"
-                                "server_session.id: %d\n"
-                                "function_name: %s\n"
-                                "is_hle: %s\n"
-                                "untranslated_request_cmdbuf: %s\n"
-                                "translated_request_cmdbuf: %s\n"
-                                "untranslated_reply_cmdbuf: %s\n"
-                                "translated_reply_cmdbuf: %s",
-                                record.first, static_cast<int>(record.second.status),
-                                record.second.client_process.type.c_str(),
-                                record.second.client_process.name.c_str(),
-                                record.second.client_process.id,
-                                record.second.client_thread.type.c_str(),
-                                record.second.client_thread.name.c_str(),
-                                record.second.client_thread.id,
-                                record.second.client_session.type.c_str(),
-                                record.second.client_session.name.c_str(),
-                                record.second.client_session.id,
-                                record.second.client_port.type.c_str(),
-                                record.second.client_port.name.c_str(),
-                                record.second.client_port.id,
-                                record.second.server_process.type.c_str(),
-                                record.second.server_process.name.c_str(),
-                                record.second.server_process.id,
-                                record.second.server_thread.type.c_str(),
-                                record.second.server_thread.name.c_str(),
-                                record.second.server_thread.id,
-                                record.second.server_session.type.c_str(),
-                                record.second.server_session.name.c_str(),
-                                record.second.server_session.id,
-                                record.second.function_name.c_str(),
-                                record.second.is_hle ? "true" : "false",
+                            ImGui::BeginTooltip();
+                            ImGui::TextUnformatted(
                                 fmt::format(
-                                    "0x{:08X}",
-                                    fmt::join(record.second.untranslated_request_cmdbuf, ", 0x"))
-                                    .c_str(),
-                                fmt::format(
-                                    "0x{:08X}",
-                                    fmt::join(record.second.translated_request_cmdbuf, ", 0x"))
-                                    .c_str(),
-                                fmt::format(
-                                    "0x{:08X}",
-                                    fmt::join(record.second.untranslated_reply_cmdbuf, ", 0x"))
-                                    .c_str(),
-                                fmt::format(
-                                    "0x{:08X}",
+                                    "id: {}\n"
+                                    "status: {}\n"
+                                    "client_process.type: {}\n"
+                                    "client_process.name: {}\n"
+                                    "client_process.id: {}\n"
+                                    "client_thread.type: {}\n"
+                                    "client_thread.name: {}\n"
+                                    "client_thread.id: {}\n"
+                                    "client_session.type: {}\n"
+                                    "client_session.name: {}\n"
+                                    "client_session.id: {}\n"
+                                    "client_port.type: {}\n"
+                                    "client_port.name: {}\n"
+                                    "client_port.id: {}\n"
+                                    "server_process.type: {}\n"
+                                    "server_process.name: {}\n"
+                                    "server_process.id: {}\n"
+                                    "server_thread.type: {}\n"
+                                    "server_thread.name: {}\n"
+                                    "server_thread.id: {}\n"
+                                    "server_session.type: {}\n"
+                                    "server_session.name: {}\n"
+                                    "server_session.id: {}\n"
+                                    "function_name: {}\n"
+                                    "is_hle: {}\n"
+                                    "untranslated_request_cmdbuf: 0x{:08X}\n"
+                                    "translated_request_cmdbuf: 0x{:08X}\n"
+                                    "untranslated_reply_cmdbuf: 0x{:08X}\n"
+                                    "translated_reply_cmdbuf: 0x{:08X}",
+                                    record.first, static_cast<int>(record.second.status),
+                                    record.second.client_process.type,
+                                    record.second.client_process.name,
+                                    record.second.client_process.id,
+                                    record.second.client_thread.type,
+                                    record.second.client_thread.name,
+                                    record.second.client_thread.id,
+                                    record.second.client_session.type,
+                                    record.second.client_session.name,
+                                    record.second.client_session.id, record.second.client_port.type,
+                                    record.second.client_port.name, record.second.client_port.id,
+                                    record.second.server_process.type,
+                                    record.second.server_process.name,
+                                    record.second.server_process.id,
+                                    record.second.server_thread.type,
+                                    record.second.server_thread.name,
+                                    record.second.server_thread.id,
+                                    record.second.server_session.type,
+                                    record.second.server_session.name,
+                                    record.second.server_session.id, record.second.function_name,
+                                    record.second.is_hle,
+                                    fmt::join(record.second.untranslated_request_cmdbuf, ", 0x"),
+                                    fmt::join(record.second.translated_request_cmdbuf, ", 0x"),
+                                    fmt::join(record.second.untranslated_reply_cmdbuf, ", 0x"),
                                     fmt::join(record.second.translated_reply_cmdbuf, ", 0x"))
                                     .c_str());
+                            ImGui::EndTooltip();
                         }
                     }
                 }
@@ -2742,17 +2736,15 @@ void EmuWindow_SDL2::SwapBuffers() {
                                        ImVec2(-1.0f, ImGui::GetContentRegionAvail().y - 40.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
                 for (const auto& room : public_rooms) {
-                    const std::string room_string = fmt::format(
-                        room.has_password ? "{}\n\nHas Password: Yes\nMembers: "
-                                            "{}/{}\nPreferred Game: {}\nOwner: "
-                                            "{}{}"
-                                          : "{}\n\nHas Password: No\nMembers: "
-                                            "{}/{}\nPreferred Game: {}\nOwner: "
-                                            "{}{}",
-                        room.name, room.members.size(), room.max_players, room.game, room.owner,
-                        room.description.empty()
-                            ? ""
-                            : fmt::format("\n\nDescription:\n{}", room.description));
+                    const std::string room_string =
+                        fmt::format("{}\n\nHas Password: {}\nMembers: "
+                                    "{}/{}\nPreferred Game: {}\nOwner: "
+                                    "{}{}",
+                                    room.name, room.has_password ? "Yes" : "No",
+                                    room.members.size(), room.max_players, room.game, room.owner,
+                                    room.description.empty()
+                                        ? ""
+                                        : fmt::format("\n\nDescription:\n{}", room.description));
 
                     if (asl::String(room_string.c_str())
                             .toLowerCase()

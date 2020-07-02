@@ -530,7 +530,9 @@ void vvctre_gui_dummy(float width, float height) {
 
 void vvctre_gui_tooltip(const char* text) {
     if (ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("%s", text);
+        ImGui::BeginTooltip();
+        ImGui::TextUnformatted(text);
+        ImGui::EndTooltip();
     }
 }
 
