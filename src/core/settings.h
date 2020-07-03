@@ -44,6 +44,7 @@ enum class StereoRenderOption {
 };
 
 namespace NativeButton {
+
 enum Values {
     A,
     B,
@@ -80,25 +81,6 @@ constexpr int NUM_BUTTONS_HID = BUTTON_HID_END - BUTTON_HID_BEGIN;
 constexpr int NUM_BUTTONS_IR = BUTTON_IR_END - BUTTON_IR_BEGIN;
 constexpr int NUM_BUTTONS_NS = BUTTON_NS_END - BUTTON_NS_BEGIN;
 
-static const std::array<const char*, NumButtons> mapping = {{
-    "button_a",
-    "button_b",
-    "button_x",
-    "button_y",
-    "button_up",
-    "button_down",
-    "button_left",
-    "button_right",
-    "button_l",
-    "button_r",
-    "button_start",
-    "button_select",
-    "button_debug",
-    "button_gpio14",
-    "button_zl",
-    "button_zr",
-    "button_home",
-}};
 } // namespace NativeButton
 
 namespace NativeAnalog {
@@ -109,11 +91,6 @@ enum Values {
 
     NumAnalogs,
 };
-
-static const std::array<const char*, NumAnalogs> mapping = {{
-    "circle_pad",
-    "circle_pad_pro",
-}};
 
 } // namespace NativeAnalog
 
