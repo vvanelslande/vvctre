@@ -43,3 +43,7 @@
 [submodule "asl"]
     path = externals/asl
     url = https://github.com/aslze/asl.git
+[submodule "mbedtls"]
+    path = externals/mbedtls
+    url = https://github.com/ARMmbed/mbedtls.git
+    branch = mbedtls-2.16
