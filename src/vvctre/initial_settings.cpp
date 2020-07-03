@@ -1998,8 +1998,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     }
                     if (ImGui::IsItemHovered()) {
                         ImGui::BeginTooltip();
-                        ImGui::TextUnformatted(
-                            "If you're using a XInput controller, make sure it says Axis 2+.");
+                        ImGui::TextUnformatted("If it says -, make sure it says +");
                         ImGui::EndTooltip();
                     }
 
@@ -2014,8 +2013,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     }
                     if (ImGui::IsItemHovered()) {
                         ImGui::BeginTooltip();
-                        ImGui::TextUnformatted(
-                            "If you're using a XInput controller, make sure it says Axis 5+.");
+                        ImGui::TextUnformatted("If it says -, make sure it says +");
                         ImGui::EndTooltip();
                     }
 
