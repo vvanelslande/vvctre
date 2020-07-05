@@ -63,7 +63,7 @@ Outer Right Camera Engine: blank
 - [ ] Use Custom Textures
 - [ ] Preload Custom Textures
 - [x] Enable Linear Filtering
-- [ ] Shaper Distant Objects
+- [ ] Sharper Distant Objects
 
 Resolution: 1
 Background Color: #000000
