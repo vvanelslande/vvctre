@@ -537,7 +537,7 @@ if (match.groups.graphicsBackgroundColor !== "000000") {
   somethingChanged = true;
 }
 
-if (match.groups.graphicsPostProcessingShader !== "1") {
+if (match.groups.graphicsPostProcessingShader !== "none (builtin)") {
   names.push("vvctre_settings_set_post_processing_shader");
   types.push(["void", "const char* value"]);
   calls.push(
