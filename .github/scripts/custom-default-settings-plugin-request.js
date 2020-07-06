@@ -201,7 +201,7 @@ if (match.groups.startRegion !== "Auto-select") {
   somethingChanged = true;
 }
 
-if (match.groups.startLogFilter !== "Empty") {
+if (match.groups.startLogFilter !== "*:Info") {
   names.push("vvctre_settings_set_log_filter");
   types.push(["void", "const char* value"]);
   calls.push(
