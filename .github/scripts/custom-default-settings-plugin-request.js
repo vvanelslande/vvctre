@@ -379,15 +379,19 @@ if (typeof match.groups.audioMicrophoneDevice === "string") {
 }
 
 if (match.groups.cameraInnerCameraEngine === "image") {
-  names.push("vvctre_settings_set_camera_engine");
-  types.push(["void", "int index, const char* value"]);
+  if (!names.includes("vvctre_settings_set_camera_engine")) {
+    names.push("vvctre_settings_set_camera_engine");
+    types.push(["void", "int index, const char* value"]);
+  }
   calls.push('vvctre_settings_set_camera_engine(1, "image");');
   somethingChanged = true;
 }
 
 if (typeof match.groups.cameraInnerCameraParameter === "string") {
-  names.push("vvctre_settings_set_camera_parameter");
-  types.push(["void", "int index, const char* value"]);
+  if (!names.includes("vvctre_settings_set_camera_parameter")) {
+    names.push("vvctre_settings_set_camera_parameter");
+    types.push(["void", "int index, const char* value"]);
+  }
   calls.push(
     `vvctre_settings_set_camera_parameter(1, "${match.groups.cameraInnerCameraParameter}");`
   );
@@ -395,15 +399,19 @@ if (typeof match.groups.cameraInnerCameraParameter === "string") {
 }
 
 if (match.groups.cameraOuterLeftCameraEngine === "image") {
-  names.push("vvctre_settings_set_camera_engine");
-  types.push(["void", "int index, const char* value"]);
+  if (!names.includes("vvctre_settings_set_camera_engine")) {
+    names.push("vvctre_settings_set_camera_engine");
+    types.push(["void", "int index, const char* value"]);
+  }
   calls.push('vvctre_settings_set_camera_engine(2, "image");');
   somethingChanged = true;
 }
 
 if (typeof match.groups.cameraOuterLeftCameraParameter === "string") {
-  names.push("vvctre_settings_set_camera_parameter");
-  types.push(["void", "int index, const char* value"]);
+  if (!names.includes("vvctre_settings_set_camera_parameter")) {
+    names.push("vvctre_settings_set_camera_parameter");
+    types.push(["void", "int index, const char* value"]);
+  }
   calls.push(
     `vvctre_settings_set_camera_parameter(2, "${match.groups.cameraOuterLeftCameraParameter}");`
   );
@@ -411,15 +419,19 @@ if (typeof match.groups.cameraOuterLeftCameraParameter === "string") {
 }
 
 if (match.groups.cameraOuterRightCameraEngine === "image") {
-  names.push("vvctre_settings_set_camera_engine");
-  types.push(["void", "int index, const char* value"]);
+  if (!names.includes("vvctre_settings_set_camera_engine")) {
+    names.push("vvctre_settings_set_camera_engine");
+    types.push(["void", "int index, const char* value"]);
+  }
   calls.push('vvctre_settings_set_camera_engine(0, "image");');
   somethingChanged = true;
 }
 
 if (typeof match.groups.cameraOuterRightCameraParameter === "string") {
-  names.push("vvctre_settings_set_camera_parameter");
-  types.push(["void", "int index, const char* value"]);
+  if (!names.includes("vvctre_settings_set_camera_parameter")) {
+    names.push("vvctre_settings_set_camera_parameter");
+    types.push(["void", "int index, const char* value"]);
+  }
   calls.push(
     `vvctre_settings_set_camera_parameter(0, "${match.groups.cameraOuterRightCameraParameter}");`
   );
@@ -687,267 +699,343 @@ if (match.groups.layoutBottomBottom !== "480") {
 }
 
 if (match.groups.lleSpi === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("SPI", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleGpio === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("GPIO", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleMp === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("MP", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleCdc === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("CDC", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleHttp === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("HTTP", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleCsnd === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("CSND", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleNs === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("NS", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleNfc === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("NFC", true);');
   somethingChanged = true;
 }
 
 if (match.groups.llePtm === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("PTM", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleNews === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("NEWS", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleNdm === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("NDM", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleMic === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("MIC", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleI2c === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("I2C", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleIr === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("IR", true);');
   somethingChanged = true;
 }
 
 if (match.groups.llePdn === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("PDN", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleNim === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("NIM", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleHid === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("HID", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleGsp === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("GSP", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleFrd === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("FRD", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleCfg === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("CFG", true);');
   somethingChanged = true;
 }
 
 if (match.groups.llePs === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("PS", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleCecd === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("CECD", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleDsp === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("DSP", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleCam === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("CAM", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleMcu === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("MCU", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleSsl === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("SSL", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleBoss === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("BOSS", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleAct === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("ACT", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleAc === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("AC", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleAm === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("AM", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleErr === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("ERR", true);');
   somethingChanged = true;
 }
 
 if (match.groups.llePxi === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("PXI", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleNwm === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("NWM", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleDlp === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("DLP", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleLdr === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("LDR", true);');
   somethingChanged = true;
 }
 
 if (match.groups.llePm === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("PM", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleSoc === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("SOC", true);');
   somethingChanged = true;
 }
 
 if (match.groups.lleFs === "x") {
-  names.push("vvctre_settings_set_use_lle_module");
-  types.push(["void", "const char* name, bool value"]);
+  if (!names.includes("vvctre_settings_set_use_lle_module")) {
+    names.push("vvctre_settings_set_use_lle_module");
+    types.push(["void", "const char* name, bool value"]);
+  }
   calls.push('vvctre_settings_set_use_lle_module("FS", true);');
   somethingChanged = true;
 }
