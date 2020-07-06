@@ -1086,6 +1086,7 @@ ${names
 
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 ${calls.map((call) => `    ${call}`).join("\n")}
-}`;
+}
+`;
 
 fs.writeFileSync("plugin.c", code);
