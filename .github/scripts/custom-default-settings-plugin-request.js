@@ -64,7 +64,7 @@ const match = process.env.ISSUE_BODY.match(
 
       "- \\[(?<graphicsUseHardwareRenderer>[x ])] Use Hardware Renderer\r\n",
       "  - \\[(?<graphicsUseHardwareShader>[x ])] Use Hardware Shader\r\n",
-      "    - \\[(?<graphicsHardwareShaderAccurateMultiplication>[x ])] Accurate Multiplication\r\n",
+      "    - \\[(?<graphicsAccurateMultiplication>[x ])] Accurate Multiplication\r\n",
       "- \\[(?<graphicsUseShaderJit>[x ])] Use Shader JIT\r\n",
       "- \\[(?<graphicsEnableVsync>[x ])] Enable VSync\r\n",
       "- \\[(?<graphicsDumpTextures>[x ])] Dump Textures\r\n",
@@ -441,7 +441,7 @@ if (match.groups.graphicsUseHardwareShader === " ") {
   somethingChanged = true;
 }
 
-if (match.groups.graphicsHardwareShaderAccurateMultiplication === "x") {
+if (match.groups.graphicsAccurateMultiplication === "x") {
   names.push("vvctre_settings_set_hardware_shader_accurate_multiplication");
   types.push(["void", "bool value"]);
   calls.push(
