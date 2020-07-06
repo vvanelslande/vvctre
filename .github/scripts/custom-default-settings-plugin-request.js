@@ -355,13 +355,12 @@ if (match.groups.audioDevice !== "auto") {
   somethingChanged = true;
 }
 
-if (match.groups.audioMicrophoneInputType !== "Auto-select") {
+if (match.groups.audioMicrophoneInputType !== "Disabled") {
   names.push("vvctre_settings_set_microphone_input_type");
   types.push(["void", "int value"]);
   calls.push(
     `vvctre_settings_set_microphone_input_type(${
       {
-        Disabled: 0,
         "Real Device": 1,
         "Static Noise": 2,
       }[match.groups.audioMicrophoneInputType]
@@ -633,7 +632,7 @@ if (match.groups.layoutTopTop !== "0") {
   somethingChanged = true;
 }
 
-if (match.groups.layoutTopRight !== "0") {
+if (match.groups.layoutTopRight !== "400") {
   names.push("vvctre_settings_set_custom_layout_top_right");
   types.push(["void", "u16 value"]);
   calls.push(
@@ -642,7 +641,7 @@ if (match.groups.layoutTopRight !== "0") {
   somethingChanged = true;
 }
 
-if (match.groups.layoutTopBottom !== "0") {
+if (match.groups.layoutTopBottom !== "240") {
   names.push("vvctre_settings_set_custom_layout_top_bottom");
   types.push(["void", "u16 value"]);
   calls.push(
@@ -651,7 +650,7 @@ if (match.groups.layoutTopBottom !== "0") {
   somethingChanged = true;
 }
 
-if (match.groups.layoutBottomLeft !== "0") {
+if (match.groups.layoutBottomLeft !== "40") {
   names.push("vvctre_settings_set_custom_layout_bottom_left");
   types.push(["void", "u16 value"]);
   calls.push(
@@ -660,7 +659,7 @@ if (match.groups.layoutBottomLeft !== "0") {
   somethingChanged = true;
 }
 
-if (match.groups.layoutBottomTop !== "0") {
+if (match.groups.layoutBottomTop !== "240") {
   names.push("vvctre_settings_set_custom_layout_bottom_top");
   types.push(["void", "u16 value"]);
   calls.push(
@@ -669,7 +668,7 @@ if (match.groups.layoutBottomTop !== "0") {
   somethingChanged = true;
 }
 
-if (match.groups.layoutBottomRight !== "0") {
+if (match.groups.layoutBottomRight !== "360") {
   names.push("vvctre_settings_set_custom_layout_bottom_right");
   types.push(["void", "u16 value"]);
   calls.push(
@@ -678,7 +677,7 @@ if (match.groups.layoutBottomRight !== "0") {
   somethingChanged = true;
 }
 
-if (match.groups.layoutBottomBottom !== "0") {
+if (match.groups.layoutBottomBottom !== "480") {
   names.push("vvctre_settings_set_custom_layout_bottom_bottom");
   types.push(["void", "u16 value"]);
   calls.push(
@@ -1057,9 +1056,10 @@ typedef u32 PAddr; ///< Represents a pointer in the ARM11 physical address space
 #define VVCTRE_PLUGIN_EXPORT
 #endif
 
-static const char *required_function_names[] = {${names
-  .map((name) => `"${name}"`)
-  .join(", ")}, NULL};
+static const char *required_function_names[] = {
+${names.map((name) => `    "${name},\n"`).join("")},
+    NULL,
+};
 
 ${names
   .map(
@@ -1077,15 +1077,15 @@ VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
 }
     
 VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager, void* required_functions[]) {
-    ${names
-      .map(
-        (name, index) => `${name} = (${name}_t)required_functions[${index}];`
-      )
-      .join("\n")}
+${names
+  .map(
+    (name, index) => `    ${name} = (${name}_t)required_functions[${index}];`
+  )
+  .join("\n")}
 }
 
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
-    ${calls.join("\n")}
+${calls.map((call) => `    ${call}`).join("\n")}
 }`;
 
 fs.writeFileSync("plugin.c", code);
