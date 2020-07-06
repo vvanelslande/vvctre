@@ -20,6 +20,11 @@ Region: Auto-select
 Log Filter: \*:Info
 Initial Time: System <!-- If this is Unix Timestamp, add the number after this -->
 
+- [x] Use Virtual SD Card
+- [ ] Start in Fullscreen Mode
+- [ ] Record Frame Times
+- [ ] Enable GDB Stub <!-- If this is enabled, add `Port: <port>` after this --->
+
 ## General
 
 - [x] Use CPU JIT
