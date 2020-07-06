@@ -1057,7 +1057,7 @@ typedef u32 PAddr; ///< Represents a pointer in the ARM11 physical address space
 #endif
 
 static const char *required_function_names[] = {
-${names.map((name) => `    "${name},\n"`).join("")},
+${names.map((name) => `    "${name}",\n`).join("")},
     NULL,
 };
 
