@@ -23,7 +23,7 @@ Initial Time: System <!-- If this is Unix Timestamp, add the number after this -
 - [x] Use Virtual SD Card
 - [ ] Start in Fullscreen Mode
 - [ ] Record Frame Times
-- [ ] Enable GDB Stub <!-- If this is enabled, add `Port: <port>` after this --->
+- [ ] Enable GDB Stub <!-- If this is enabled, add `Port: <port>` after this -->
 
 ## General
 
@@ -36,6 +36,7 @@ CPU Clock Percentage: 100%
 ## Audio
 
 - [ ] Enable DSP LLE
+  - [ ] Use multiple threads
 
 Volume: 1.000
 Sink: auto
@@ -64,6 +65,7 @@ Outer Right Camera Engine: blank
   - [x] Use Hardware Shader
     - [ ] Accurate Multiplication
 - [x] Use Shader JIT
+- [ ] Enable VSync
 - [ ] Dump Textures
 - [ ] Use Custom Textures
 - [ ] Preload Custom Textures
@@ -84,24 +86,20 @@ Layout: Default
 - [ ] Swap Screens
 - [ ] Upright Screens
 
-<!--
-If Use Custom Layout is enabled, add:
-
-Top Left
-Top Top
-Top Right
-Top Bottom
-Bottom Left
-Bottom Top
-Bottom Right
-Bottom Bottom
--->
+Top Left (Custom Layout): 0
+Top Top (Custom Layout): 0
+Top Right (Custom Layout): 400
+Top Bottom (Custom Layout): 240
+Bottom Left (Custom Layout): 40
+Bottom Top (Custom Layout): 240
+Bottom Right (Custom Layout): 360
+Bottom Bottom (Custom Layout): 480
 
 ## LLE
 
 - [ ] SPI
-- [ ] MP
 - [ ] GPIO
+- [ ] MP
 - [ ] CDC
 - [ ] HTTP
 - [ ] CSND
