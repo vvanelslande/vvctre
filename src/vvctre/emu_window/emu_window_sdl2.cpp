@@ -496,6 +496,10 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                         if (ImGui::BeginCombo("##microphonedevice",
                                               Settings::values.microphone_device.c_str())) {
+                            if (ImGui::Selectable("auto")) {
+                                Settings::values.microphone_device = "auto";
+                                Settings::Apply();
+                            }
 #ifdef HAVE_CUBEB
                             for (const auto& device : AudioCore::ListCubebInputDevices()) {
                                 if (ImGui::Selectable(device.c_str())) {

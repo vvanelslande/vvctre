@@ -11,8 +11,6 @@
 
 namespace Frontend::Mic {
 
-constexpr char default_device_name[] = "Default";
-
 enum class Signedness : u8 {
     Signed,
     Unsigned,

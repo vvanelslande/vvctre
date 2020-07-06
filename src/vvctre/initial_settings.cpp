@@ -450,6 +450,9 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                         if (ImGui::BeginCombo("##microphonedevice",
                                               Settings::values.microphone_device.c_str())) {
+                            if (ImGui::Selectable("auto")) {
+                                Settings::values.microphone_device = "auto";
+                            }
 #ifdef HAVE_CUBEB
                             for (const auto& device : AudioCore::ListCubebInputDevices()) {
                                 if (ImGui::Selectable(device.c_str())) {

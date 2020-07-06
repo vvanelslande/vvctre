@@ -62,7 +62,7 @@ void CubebInput::StartSampling(const Frontend::Mic::Parameters& params) {
     is_sampling = true;
 
     cubeb_devid input_device = nullptr;
-    if (device_id != Frontend::Mic::default_device_name && !device_id.empty()) {
+    if (device_id != "auto" && !device_id.empty()) {
         cubeb_device_collection collection;
         if (cubeb_enumerate_devices(impl->ctx, CUBEB_DEVICE_TYPE_INPUT, &collection) != CUBEB_OK) {
             LOG_WARNING(Audio, "Audio input device enumeration not supported");
