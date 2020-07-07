@@ -1084,6 +1084,7 @@ if (match.groups.multiplayerPassword !== "Empty") {
 }
 
 if (!somethingChanged) {
+  console.log("no changes");
   process.exit(1);
 }
 

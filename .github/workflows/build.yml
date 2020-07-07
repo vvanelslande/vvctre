@@ -99,4 +99,4 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{secrets.ERROR_WEBHOOK}}
         with:
-          args: "Error when building: <https://github.com/vvanelslande/vvctre/releases/tag/${{env.VERSION}}>"
+          args: "<https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}>"
