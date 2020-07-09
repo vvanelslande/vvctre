@@ -1036,6 +1036,45 @@ bool vvctre_screenshot(void* plugin_manager, void* data) {
         layout);
 }
 
+bool vvctre_screenshot_bottom_screen(void* plugin_manager, void* data, u32 width, u32 height) {
+    const Layout::FramebufferLayout layout =
+        Layout::SingleFrameLayout(Core::kScreenBottomWidth, Core::kScreenBottomHeight, true, false);
+
+    return VideoCore::RequestScreenshot(
+        data,
+        [=] {
+            const auto convert_bgra_to_rgba = [](const std::vector<u8>& input,
+                                                 const Layout::FramebufferLayout& layout) {
+                int offset = 0;
+                std::vector<u8> output(input.size());
+
+                for (u32 y = 0; y < layout.height; ++y) {
+                    for (u32 x = 0; x < layout.width; ++x) {
+                        output[offset] = input[offset + 2];
+                        output[offset + 1] = input[offset + 1];
+                        output[offset + 2] = input[offset];
+                        output[offset + 3] = input[offset + 3];
+
+                        offset += 4;
+                    }
+                }
+
+                return output;
+            };
+
+            std::vector<u8> v(layout.width * layout.height * 4);
+            std::memcpy(v.data(), data, v.size());
+            v = convert_bgra_to_rgba(v, layout);
+            Common::FlipRGBA8Texture(v, static_cast<u64>(layout.width),
+                                     static_cast<u64>(layout.height));
+            std::memcpy(data, v.data(), v.size());
+
+            PluginManager* pm = static_cast<PluginManager*>(plugin_manager);
+            pm->CallScreenshotCallbacks(data);
+        },
+        layout);
+}
+
 bool vvctre_screenshot_default_layout(void* plugin_manager, void* data) {
     const Layout::FramebufferLayout layout = Layout::DefaultFrameLayout(
         Core::kScreenTopWidth, Core::kScreenTopHeight + Core::kScreenBottomHeight, false, false);
@@ -2102,6 +2141,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_use_real_motion_state", (void*)&vvctre_use_real_motion_state},
     {"vvctre_get_motion_state", (void*)&vvctre_get_motion_state},
     {"vvctre_screenshot", (void*)&vvctre_screenshot},
+    {"vvctre_screenshot_bottom_screen", (void*)&vvctre_screenshot_bottom_screen},
     {"vvctre_screenshot_default_layout", (void*)&vvctre_screenshot_default_layout},
     // Settings
     {"vvctre_settings_apply", (void*)&vvctre_settings_apply},
