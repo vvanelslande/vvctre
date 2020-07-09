@@ -2637,8 +2637,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 ImGui::PushItemWidth(ImGui::GetWindowWidth());
-                if (ImGui::InputText("##message", &multiplayer_message,
-                                     ImGuiInputTextFlags_EnterReturnsTrue)) {
+                if (ImGui::InputTextWithHint("##message", "Send Chat Message", &multiplayer_message,
+                                             ImGuiInputTextFlags_EnterReturnsTrue)) {
                     room_member->SendChatMessage(multiplayer_message);
                     if (multiplayer_messages.size() == 100) {
                         multiplayer_messages.pop_front();
