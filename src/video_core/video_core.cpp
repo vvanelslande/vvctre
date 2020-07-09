@@ -38,6 +38,7 @@ void Init(Frontend::EmuWindow& emu_window, Memory::MemorySystem& memory) {
     g_memory = &memory;
     Pica::Init();
     g_renderer = std::make_unique<OpenGL::RendererOpenGL>(emu_window);
+    g_renderer->RefreshRasterizerSetting();
 }
 
 /// Shutdown the video core

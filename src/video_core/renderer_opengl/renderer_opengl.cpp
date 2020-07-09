@@ -206,7 +206,6 @@ RendererOpenGL::RendererOpenGL(Frontend::EmuWindow& window) : RendererBase{windo
     }
 
     InitOpenGLObjects();
-    RefreshRasterizerSetting();
 }
 
 RendererOpenGL::~RendererOpenGL() = default;
