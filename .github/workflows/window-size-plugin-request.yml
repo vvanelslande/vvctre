@@ -32,12 +32,12 @@ jobs:
           fi
 
           if [ "$RUNNER_OS" == "Windows" ]; then
-            7z a vvctre-plugin-window-size-${{github.event.issue.number}}-${{runner.os}}.7z window-size.dll plugin.c license.txt
+            7z a vvctre-plugin-window-size-${{github.event.issue.user.login}}-${{runner.os}}.7z window-size.dll plugin.c license.txt
           else
-            7z a vvctre-plugin-window-size-${{github.event.issue.number}}-${{runner.os}}.7z window-size.so plugin.c license.txt
+            7z a vvctre-plugin-window-size-${{github.event.issue.user.login}}-${{runner.os}}.7z window-size.so plugin.c license.txt
           fi
 
-          export FILE_URL=$(curl ${{secrets.ISSUE_BOT_FILES}} -s -F "file=@vvctre-plugin-window-size-${{github.event.issue.number}}-${{runner.os}}.7z" | jq -r .attachments[0].url)
+          export FILE_URL=$(curl ${{secrets.ISSUE_BOT_FILES}} -s -F "file=@vvctre-plugin-window-size-${{github.event.issue.user.login}}-${{runner.os}}.7z" | jq -r .attachments[0].url)
           echo ::set-env name=FILE_URL::$FILE_URL
       - uses: peter-evans/create-or-update-comment@v1
         with:
