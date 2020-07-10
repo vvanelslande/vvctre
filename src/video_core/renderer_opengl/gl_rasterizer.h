@@ -259,7 +259,7 @@ private:
     /// Setup geometry shader for AccelerateDrawBatch
     bool SetupGeometryShader();
 
-    bool enable_vendor_hacks;
+    bool enable_hacks;
 
     OpenGLState state;
     GLuint default_texture;

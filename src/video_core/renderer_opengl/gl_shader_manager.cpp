@@ -215,10 +215,10 @@ using FragmentShaders = ShaderCache<PicaFSConfig, &GenerateFragmentShader, GL_FR
 
 class ShaderProgramManager::Impl {
 public:
-    explicit Impl(bool separable, bool enable_vendor_hacks)
-        : enable_vendor_hacks(enable_vendor_hacks), separable(separable),
-          programmable_vertex_shaders(separable), trivial_vertex_shader(separable),
-          fixed_geometry_shaders(separable), fragment_shaders(separable) {
+    explicit Impl(bool separable, bool enable_hacks)
+        : enable_hacks(enable_hacks), separable(separable), programmable_vertex_shaders(separable),
+          trivial_vertex_shader(separable), fixed_geometry_shaders(separable),
+          fragment_shaders(separable) {
         if (separable) {
             pipeline.Create();
         }
@@ -248,7 +248,7 @@ public:
         };
     };
 
-    bool enable_vendor_hacks;
+    bool enable_hacks;
     bool separable;
 
     ShaderTuple current;
@@ -263,8 +263,8 @@ public:
     OGLPipeline pipeline;
 };
 
-ShaderProgramManager::ShaderProgramManager(bool separable, bool enable_vendor_hacks)
-    : impl(std::make_unique<Impl>(separable, enable_vendor_hacks)) {}
+ShaderProgramManager::ShaderProgramManager(bool separable, bool enable_hacks)
+    : impl(std::make_unique<Impl>(separable, enable_hacks)) {}
 
 ShaderProgramManager::~ShaderProgramManager() = default;
 
@@ -301,7 +301,7 @@ void ShaderProgramManager::UseFragmentShader(const Pica::Regs& regs) {
 
 void ShaderProgramManager::ApplyTo(OpenGLState& state) {
     if (impl->separable) {
-        if (impl->enable_vendor_hacks) {
+        if (impl->enable_hacks) {
             // Without this reseting, AMD sometimes freezes when one stage is changed but not
             // for the others. On the other hand, including this reset seems to introduce memory
             // leak in Intel Graphics.

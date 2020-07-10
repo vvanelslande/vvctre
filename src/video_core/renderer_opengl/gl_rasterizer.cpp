@@ -30,17 +30,18 @@ namespace OpenGL {
 using PixelFormat = SurfaceParams::PixelFormat;
 using SurfaceType = SurfaceParams::SurfaceType;
 
-static bool NeedToEnableVendorHacks() {
+static bool NeedToEnableHacks() {
     const std::string_view gpu_vendor{reinterpret_cast<char const*>(glGetString(GL_VENDOR))};
     const std::string_view gpu_renderer{reinterpret_cast<char const*>(glGetString(GL_RENDERER))};
     return gpu_vendor == "ATI Technologies Inc." || gpu_vendor == "Advanced Micro Devices, Inc." ||
            gpu_renderer == "Intel(R) HD Graphics 4600" ||
-           gpu_renderer == "Intel(R) HD Graphics 4400";
+           gpu_renderer == "Intel(R) HD Graphics 4400" ||
+           gpu_renderer == "Intel(R) HD Graphics 5500";
 }
 
 RasterizerOpenGL::RasterizerOpenGL()
-    : enable_vendor_hacks(NeedToEnableVendorHacks()),
-      vertex_buffer(GL_ARRAY_BUFFER, VERTEX_BUFFER_SIZE, enable_vendor_hacks),
+    : enable_hacks(NeedToEnableHacks()),
+      vertex_buffer(GL_ARRAY_BUFFER, VERTEX_BUFFER_SIZE, enable_hacks),
       uniform_buffer(GL_UNIFORM_BUFFER, UNIFORM_BUFFER_SIZE, false),
       index_buffer(GL_ELEMENT_ARRAY_BUFFER, INDEX_BUFFER_SIZE, false),
       texture_buffer(GL_TEXTURE_BUFFER, TEXTURE_BUFFER_SIZE, false) {
@@ -150,8 +151,8 @@ RasterizerOpenGL::RasterizerOpenGL()
     state.Apply();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer.GetHandle());
 
-    shader_program_manager = std::make_unique<ShaderProgramManager>(
-        GLAD_GL_ARB_separate_shader_objects, enable_vendor_hacks);
+    shader_program_manager =
+        std::make_unique<ShaderProgramManager>(GLAD_GL_ARB_separate_shader_objects, enable_hacks);
 
     glEnable(GL_BLEND);
 
@@ -752,8 +753,9 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
         temp_tex.Create();
         glBindTexture(GL_TEXTURE_2D, temp_tex.handle);
         auto [internal_format, format, type] = GetFormatTuple(color_surface->pixel_format);
-        OGLTexture::Allocate(GL_TEXTURE_2D, color_surface->max_level + 1, internal_format, format, type,
-                             color_surface->GetScaledWidth(), color_surface->GetScaledHeight());
+        OGLTexture::Allocate(GL_TEXTURE_2D, color_surface->max_level + 1, internal_format, format,
+                             type, color_surface->GetScaledWidth(),
+                             color_surface->GetScaledHeight());
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
