@@ -1037,8 +1037,20 @@ bool vvctre_screenshot(void* plugin_manager, void* data) {
 }
 
 bool vvctre_screenshot_bottom_screen(void* plugin_manager, void* data, u32 width, u32 height) {
-    const Layout::FramebufferLayout layout =
-        Layout::SingleFrameLayout(Core::kScreenBottomWidth, Core::kScreenBottomHeight, true, false);
+    Layout::FramebufferLayout layout;
+    layout.width = width;
+    layout.height = height;
+    layout.top_screen.left = 0;
+    layout.top_screen.top = 0;
+    layout.top_screen.right = 0;
+    layout.top_screen.bottom = 0;
+    layout.top_screen_enabled = false;
+    layout.bottom_screen.left = 0;
+    layout.bottom_screen.top = 0;
+    layout.bottom_screen.right = width;
+    layout.bottom_screen.bottom = height;
+    layout.bottom_screen_enabled = true;
+    layout.is_rotated = true;
 
     return VideoCore::RequestScreenshot(
         data,
