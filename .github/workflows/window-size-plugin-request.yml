@@ -42,7 +42,7 @@ jobs:
       - uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{github.event.issue.number}}
-          body: "[vvctre-plugin-window-size-${{github.event.issue.number}}-${{runner.os}}.7z](${{env.FILE_URL}})"
+          body: "[vvctre-plugin-window-size-${{github.event.issue.user.login}}-${{runner.os}}.7z](${{env.FILE_URL}})"
       - if: failure()
         uses: peter-evans/create-or-update-comment@v1
         with:
