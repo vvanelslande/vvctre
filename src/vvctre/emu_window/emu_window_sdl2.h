@@ -86,7 +86,6 @@ private:
     void ConnectToCitraRoom();
 
     // Window
-    bool is_open = true;
     SDL_Window* window = nullptr;
 
     // System

@@ -179,6 +179,16 @@ int main(int argc, char** argv) {
         }
 
         InitialSettings(plugin_manager, window, *cfg);
+        if (Settings::values.file_path.empty()) {
+            plugin_manager.EmulatorClosing();
+            SDL_GL_MakeCurrent(window, nullptr);
+            ImGui_ImplOpenGL3_Shutdown();
+            ImGui_ImplSDL2_Shutdown();
+            SDL_GL_DeleteContext(context);
+            SDL_DestroyWindow(window);
+
+            return 0;
+        }
     } else {
         Settings::values.file_path = std::string(argv[1]);
         Settings::values.start_in_fullscreen_mode = true;
@@ -278,9 +288,9 @@ int main(int argc, char** argv) {
 
     Core::Movie::GetInstance().Shutdown();
     system.Shutdown();
+    InputCommon::Shutdown();
     plugin_manager.EmulatorClosing();
     SDL_GL_MakeCurrent(window, nullptr);
-    InputCommon::Shutdown();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     SDL_GL_DeleteContext(context);

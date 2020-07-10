@@ -3,6 +3,7 @@
 // Refer to the license.txt file included.
 
 #include <algorithm>
+#include <csignal>
 #include <cstdlib>
 #include <string>
 #define SDL_MAIN_HANDLED
@@ -48,6 +49,8 @@
 #include "vvctre/common.h"
 #include "vvctre/emu_window/emu_window_sdl2.h"
 #include "vvctre/plugins.h"
+
+static bool is_open = true;
 
 static std::string IPC_Recorder_GetStatusString(IPCDebugger::RequestStatus status) {
     switch (status) {
@@ -149,6 +152,9 @@ void EmuWindow_SDL2::ToggleFullscreen() {
 EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manager,
                                SDL_Window* window)
     : window(window), system(system), plugin_manager(plugin_manager) {
+    signal(SIGINT, [](int) { is_open = false; });
+    signal(SIGTERM, [](int) { is_open = false; });
+
     Network::Init();
 
     if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
@@ -292,10 +298,13 @@ void EmuWindow_SDL2::SwapBuffers() {
                                     while (SDL_PollEvent(&event)) {
                                         ImGui_ImplSDL2_ProcessEvent(&event);
 
-                                        if (event.type == SDL_QUIT ||
-                                            (event.type == SDL_WINDOWEVENT &&
-                                             event.window.event == SDL_WINDOWEVENT_CLOSE)) {
-                                            std::exit(1);
+                                        if (event.type == SDL_QUIT) {
+                                            if (pfd::message(
+                                                    "vvctre", "Would you like to exit now?",
+                                                    pfd::choice::yes_no, pfd::icon::question)
+                                                    .result() == pfd::button::yes) {
+                                                std::exit(1);
+                                            }
                                         }
                                     }
 
@@ -2804,8 +2813,7 @@ void EmuWindow_SDL2::PollEvents() {
             case SDL_WINDOWEVENT_MINIMIZED:
                 OnResize();
                 break;
-            case SDL_WINDOWEVENT_CLOSE:
-                is_open = false;
+            default:
                 break;
             }
             break;
@@ -2855,7 +2863,12 @@ void EmuWindow_SDL2::PollEvents() {
 
             break;
         case SDL_QUIT:
-            is_open = false;
+            if (pfd::message("vvctre", "Would you like to exit now?", pfd::choice::yes_no,
+                             pfd::icon::question)
+                    .result() == pfd::button::yes) {
+                is_open = false;
+            }
+
             break;
         default:
             break;

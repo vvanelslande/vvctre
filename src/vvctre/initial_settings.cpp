@@ -3,6 +3,7 @@
 // Refer to the license.txt file included.
 
 #include <algorithm>
+#include <csignal>
 #include <cstdlib>
 #include <string>
 #define SDL_MAIN_HANDLED
@@ -36,8 +37,13 @@
 #include "vvctre/initial_settings.h"
 #include "vvctre/plugins.h"
 
+static bool is_open = true;
+
 InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* window,
                                  Service::CFG::Module& cfg) {
+    signal(SIGINT, [](int) { is_open = false; });
+    signal(SIGTERM, [](int) { is_open = false; });
+
     SDL_Event event;
     CitraRoomList public_rooms;
     bool first_time_in_multiplayer = true;
@@ -45,14 +51,17 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
     u16 play_coins = 0xDEAD;
     bool play_coins_changed = false;
 
-    for (;;) {
+    while (is_open) {
         // Poll events
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
 
-            if (event.type == SDL_QUIT ||
-                (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE)) {
-                std::exit(1);
+            if (event.type == SDL_QUIT) {
+                if (pfd::message("vvctre", "Would you like to exit now?", pfd::choice::yes_no,
+                                 pfd::icon::question)
+                        .result() == pfd::button::yes) {
+                    std::exit(1);
+                }
             }
         }
 
@@ -105,10 +114,13 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                     while (SDL_PollEvent(&event)) {
                                         ImGui_ImplSDL2_ProcessEvent(&event);
 
-                                        if (event.type == SDL_QUIT ||
-                                            (event.type == SDL_WINDOWEVENT &&
-                                             event.window.event == SDL_WINDOWEVENT_CLOSE)) {
-                                            std::exit(1);
+                                        if (event.type == SDL_QUIT) {
+                                            if (pfd::message(
+                                                    "vvctre", "Would you like to exit now?",
+                                                    pfd::choice::yes_no, pfd::icon::question)
+                                                    .result() == pfd::button::yes) {
+                                                std::exit(1);
+                                            }
                                         }
                                     }
 
