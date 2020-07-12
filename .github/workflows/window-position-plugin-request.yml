@@ -1,0 +1,50 @@
+name: Window Position Plugin Request
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  build:
+    if: github.event.label.name == 'Window Position Plugin Request'
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [windows-2019, ubuntu-18.04]
+    steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: "14.5.0"
+      - name: Script
+        shell: bash
+        working-directory: ${{github.workspace}}
+        env:
+          ISSUE_BODY: ${{github.event.issue.body}}
+        run: |
+          node .github/scripts/window-position-plugin-request.js
+
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            cl.exe //LD //Fe:window-position.dll plugin.c
+          else
+            gcc plugin.c -shared -o window-position.so
+          fi
+
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            7z a vvctre-plugin-window-position-for-${{github.event.issue.user.login}}-${{runner.os}}.7z window-position.dll plugin.c license.txt
+          else
+            7z a vvctre-plugin-window-position-for-${{github.event.issue.user.login}}-${{runner.os}}.7z window-position.so plugin.c license.txt
+          fi
+
+          export FILE_URL=$(curl ${{secrets.ISSUE_BOT_FILES}} -s -F "file=@vvctre-plugin-window-position-for-${{github.event.issue.user.login}}-${{runner.os}}.7z" | jq -r .attachments[0].url)
+          echo ::set-env name=FILE_URL::$FILE_URL
+      - uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{github.event.issue.number}}
+          body: "[vvctre-plugin-window-position-for-${{github.event.issue.user.login}}-${{runner.os}}.7z](${{env.FILE_URL}})"
+      - if: failure()
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{github.event.issue.number}}
+          body: "Error: https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}"
