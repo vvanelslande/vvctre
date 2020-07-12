@@ -22,7 +22,6 @@ let code = `// Copyright 2020 Valentin Vanelslande
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <stdbool.h>
 #include <stddef.h>
 
 static const char* required_function_names[] = { "vvctre_set_os_window_size", NULL };
