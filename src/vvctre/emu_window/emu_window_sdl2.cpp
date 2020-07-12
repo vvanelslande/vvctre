@@ -2749,15 +2749,25 @@ void EmuWindow_SDL2::SwapBuffers() {
                                        ImVec2(-1.0f, ImGui::GetContentRegionAvail().y - 40.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
                 for (const auto& room : public_rooms) {
-                    const std::string room_string =
-                        fmt::format("{}\n\nHas Password: {}\nMembers: "
-                                    "{}/{}\nPreferred Game: {}\nOwner: "
-                                    "{}{}",
-                                    room.name, room.has_password ? "Yes" : "No",
-                                    room.members.size(), room.max_players, room.game, room.owner,
-                                    room.description.empty()
-                                        ? ""
-                                        : fmt::format("\n\nDescription:\n{}", room.description));
+                    std::string room_string =
+                        fmt::format("{}\n\nHas Password: {}\nMaximum Members: "
+                                    "{}\nPreferred Game: {}\nOwner: {}",
+                                    room.name, room.has_password ? "Yes" : "No", room.max_players,
+                                    room.game, room.owner);
+                    if (!room.description.empty()) {
+                        room_string += fmt::format("\n\nDescription:\n{}", room.description);
+                    }
+                    if (!room.members.empty()) {
+                        room_string += fmt::format("\n\nMembers ({}):", room.members.size());
+                        for (const CitraRoom::Member& member : room.members) {
+                            if (member.game.empty()) {
+                                room_string += fmt::format("\n\t{}", member.nickname);
+                            } else {
+                                room_string += fmt::format("\n\t{} is playing {}", member.nickname,
+                                                           member.game);
+                            }
+                        }
+                    }
 
                     if (asl::String(room_string.c_str())
                             .toLowerCase()

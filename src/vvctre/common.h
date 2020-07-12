@@ -24,7 +24,11 @@ struct CitraRoom {
     bool has_password;
     std::string game;
 
-    struct Member {};
+    struct Member {
+        std::string nickname;
+        std::string game;
+    };
+
     std::vector<Member> members;
 };
 
