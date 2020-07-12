@@ -145,4 +145,3 @@ Bottom Bottom (Custom Layout): 480
 IP: Empty
 Port: 24872
 Nickname: Empty
-Password: Empty
