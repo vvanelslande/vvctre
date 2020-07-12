@@ -145,8 +145,7 @@ const match = process.env.ISSUE_BODY.match(
 
       "IP: (?<multiplayerIp>.+)\r\n",
       "Port: (?<multiplayerPort>\\d+)\r\n",
-      "Nickname: (?<multiplayerNickname>.+)\r\n",
-      "Password: (?<multiplayerPassword>.+)(?:\r\n)?$",
+      "Nickname: (?<multiplayerNickname>.+)(?:\r\n)?$",
     ].join("")
   )
 );
@@ -1070,15 +1069,6 @@ if (match.groups.multiplayerNickname !== "Empty") {
   types.push(["void", "const char* value"]);
   calls.push(
     `vvctre_settings_set_nickname("${match.groups.multiplayerNickname}");`
-  );
-  somethingChanged = true;
-}
-
-if (match.groups.multiplayerPassword !== "Empty") {
-  names.push("vvctre_settings_set_multiplayer_password");
-  types.push(["void", "const char* value"]);
-  calls.push(
-    `vvctre_settings_set_multiplayer_password("${match.groups.multiplayerPassword}");`
   );
   somethingChanged = true;
 }
