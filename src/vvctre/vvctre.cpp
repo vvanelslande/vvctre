@@ -257,8 +257,8 @@ int main(int argc, char** argv) {
     }
 
     while (emu_window->IsOpen()) {
-        if (emu_window->paused) {
-            while (emu_window->IsOpen() && emu_window->paused) {
+        if (emu_window->paused || plugin_manager.paused) {
+            while (emu_window->IsOpen() && (emu_window->paused || plugin_manager.paused)) {
                 VideoCore::g_renderer->SwapBuffers();
                 SDL_GL_SetSwapInterval(1);
             }
