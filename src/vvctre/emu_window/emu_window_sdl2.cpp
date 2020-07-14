@@ -2548,12 +2548,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                     FileUtil::CreateEmptyFile(filepath);
                 }
 
-#ifdef _WIN32
-                const int code = std::system(fmt::format("start {}", filepath).c_str());
-#else
-                const int code = std::system(fmt::format("xdg-open {}", filepath).c_str());
-#endif
-                LOG_INFO(Frontend, "Opened cheats file in text editor, exit code: {}", code);
+                FileUtil::ReadFileToString(true, filepath, cheats_file_content);
+                show_cheats_text_editor = true;
             }
 
             ImGui::SameLine();
@@ -2566,6 +2562,13 @@ void EmuWindow_SDL2::SwapBuffers() {
 
             if (ImGui::Button("Save File")) {
                 system.CheatEngine().SaveCheatFile();
+                if (show_cheats_text_editor) {
+                    const std::string filepath = fmt::format(
+                        "{}{:016X}.txt", FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
+                        system.Kernel().GetCurrentProcess()->codeset->program_id);
+
+                    FileUtil::ReadFileToString(true, filepath, cheats_file_content);
+                }
             }
 
             if (ImGui::ListBoxHeader("##cheats", ImVec2(-1.0f, -1.0f))) {
@@ -2580,6 +2583,37 @@ void EmuWindow_SDL2::SwapBuffers() {
         }
 
         ImGui::End();
+
+        if (show_cheats_text_editor) {
+            ImGui::SetNextWindowSize(ImVec2(640.0f, 480.0f), ImGuiCond_Appearing);
+
+            if (ImGui::Begin("Cheats Text Editor", &show_cheats_text_editor,
+                             ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar)) {
+                if (ImGui::BeginMenuBar()) {
+                    if (ImGui::BeginMenu("File")) {
+                        if (ImGui::MenuItem("Save")) {
+                            const std::string filepath = fmt::format(
+                                "{}{:016X}.txt",
+                                FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
+                                system.Kernel().GetCurrentProcess()->codeset->program_id);
+
+                            FileUtil::WriteStringToFile(true, filepath, cheats_file_content);
+                        }
+
+                        ImGui::EndMenu();
+                    }
+
+                    ImGui::EndMenuBar();
+                }
+
+                ImGui::InputTextMultiline("##cheats_file_content", &cheats_file_content,
+                                          ImVec2(-1.0f, -1.0f));
+            }
+
+            if (!show_cheats_text_editor) {
+                cheats_file_content.clear();
+            }
+        }
     }
 
     if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
