@@ -2598,54 +2598,65 @@ void EmuWindow_SDL2::SwapBuffers() {
                 ImGui::TextUnformatted(room_information.description.c_str());
                 ImGui::PopTextWrapPos();
 
-                if (ImGui::ListBoxHeader("##members", ImVec2(ImGui::GetWindowWidth() / 2.0f,
-                                                             ImGui::GetWindowHeight() / 1.23f))) {
-                    for (const auto& member : members) {
-                        ImGui::PushTextWrapPos();
-                        if (member.game_info.name.empty()) {
-                            ImGui::TextUnformatted(member.nickname.c_str());
-                        } else {
-                            ImGui::Text("%s is playing %s", member.nickname.c_str(),
-                                        member.game_info.name.c_str());
-                        }
-                        ImGui::PopTextWrapPos();
-                        if (member.nickname != room_member->GetNickname()) {
-                            if (ImGui::BeginPopupContextItem(member.nickname.c_str(),
-                                                             ImGuiMouseButton_Right)) {
-                                if (multiplayer_blocked_nicknames.count(member.nickname)) {
-                                    if (ImGui::MenuItem("Unblock")) {
-                                        multiplayer_blocked_nicknames.erase(member.nickname);
-                                    }
-                                } else {
-                                    if (ImGui::MenuItem("Block")) {
-                                        multiplayer_blocked_nicknames.insert(member.nickname);
-                                    }
-                                }
+                float child_width = 0.0f;
 
-                                ImGui::EndPopup();
+                if (ImGui::BeginChild("roomchild", ImVec2(0.0f, ImGui::GetWindowHeight() - 90.0f),
+                                      true)) {
+                    ImGui::Columns(2);
+
+                    if (ImGui::ListBoxHeader("##members", ImVec2(-1.0f, -1.0f))) {
+                        for (const auto& member : members) {
+                            ImGui::PushTextWrapPos();
+                            if (member.game_info.name.empty()) {
+                                ImGui::TextUnformatted(member.nickname.c_str());
+                            } else {
+                                ImGui::Text("%s is playing %s", member.nickname.c_str(),
+                                            member.game_info.name.c_str());
+                            }
+                            ImGui::PopTextWrapPos();
+                            if (member.nickname != room_member->GetNickname()) {
+                                if (ImGui::BeginPopupContextItem(member.nickname.c_str(),
+                                                                 ImGuiMouseButton_Right)) {
+                                    if (multiplayer_blocked_nicknames.count(member.nickname)) {
+                                        if (ImGui::MenuItem("Unblock")) {
+                                            multiplayer_blocked_nicknames.erase(member.nickname);
+                                        }
+                                    } else {
+                                        if (ImGui::MenuItem("Block")) {
+                                            multiplayer_blocked_nicknames.insert(member.nickname);
+                                        }
+                                    }
+
+                                    ImGui::EndPopup();
+                                }
                             }
                         }
+                        ImGui::ListBoxFooter();
                     }
-                    ImGui::ListBoxFooter();
+
+                    ImGui::NextColumn();
+
+                    if (ImGui::ListBoxHeader("##messages", ImVec2(-1.0f, -1.0f))) {
+                        for (const std::string& message : multiplayer_messages) {
+                            ImGui::PushTextWrapPos(ImGui::GetCursorPosX() +
+                                                   ImGui::GetContentRegionAvail().x);
+                            ImGui::TextUnformatted(message.c_str());
+                            ImGui::PopTextWrapPos();
+                        }
+                        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+                            ImGui::SetScrollHereY(1.0f);
+                        }
+                        ImGui::ListBoxFooter();
+                    }
+
+                    ImGui::Columns();
+
+                    child_width = ImGui::GetWindowWidth();
                 }
 
-                ImGui::SameLine();
+                ImGui::EndChild();
 
-                if (ImGui::ListBoxHeader("##messages", ImVec2(ImGui::GetWindowWidth() / 2.0f,
-                                                              ImGui::GetWindowHeight() / 1.23f))) {
-                    for (const std::string& message : multiplayer_messages) {
-                        ImGui::PushTextWrapPos(ImGui::GetCursorPosX() +
-                                               ImGui::GetContentRegionAvail().x);
-                        ImGui::TextUnformatted(message.c_str());
-                        ImGui::PopTextWrapPos();
-                    }
-                    if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
-                        ImGui::SetScrollHereY(1.0f);
-                    }
-                    ImGui::ListBoxFooter();
-                }
-
-                ImGui::PushItemWidth(ImGui::GetWindowWidth());
+                ImGui::PushItemWidth(child_width);
                 if (ImGui::InputTextWithHint("##message", "Send Chat Message", &multiplayer_message,
                                              ImGuiInputTextFlags_EnterReturnsTrue)) {
                     room_member->SendChatMessage(multiplayer_message);
