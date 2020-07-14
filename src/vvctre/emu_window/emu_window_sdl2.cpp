@@ -2279,87 +2279,81 @@ void EmuWindow_SDL2::SwapBuffers() {
     }
     ImGui::End();
 
-    if (swkbd_config != nullptr && swkbd_code != nullptr && swkbd_text != nullptr) {
+    if (swkbd_data != nullptr) {
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
                                 ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         if (ImGui::Begin("Keyboard", nullptr,
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::InputTextWithHint("", swkbd_config->hint_text.c_str(), swkbd_text,
-                                     swkbd_config->multiline_mode ? ImGuiInputTextFlags_Multiline
-                                                                  : 0);
+            if (!swkbd_data->config.hint_text.empty()) {
+                ImGui::TextUnformatted(swkbd_data->config.hint_text.c_str());
+            }
 
-            switch (swkbd_config->button_config) {
+            if (swkbd_data->config.multiline_mode) {
+                ImGui::InputTextMultiline("##text_multiline", &swkbd_data->text);
+            } else {
+                ImGui::InputText("##text_one_line", &swkbd_data->text);
+            }
+
+            switch (swkbd_data->config.button_config) {
             case Frontend::ButtonConfig::None:
             case Frontend::ButtonConfig::Single: {
-                if (ImGui::Button((swkbd_config->button_text[2].empty()
+                if (ImGui::Button((swkbd_data->config.button_text[2].empty()
                                        ? Frontend::SWKBD_BUTTON_OKAY
-                                       : swkbd_config->button_text[2])
+                                       : swkbd_data->config.button_text[2])
                                       .c_str())) {
-                    swkbd_config = nullptr;
-                    swkbd_code = nullptr;
-                    swkbd_text = nullptr;
+                    swkbd_data = nullptr;
                 }
                 break;
             }
 
             case Frontend::ButtonConfig::Dual: {
-                const std::string cancel = swkbd_config->button_text[0].empty()
+                const std::string cancel = swkbd_data->config.button_text[0].empty()
                                                ? Frontend::SWKBD_BUTTON_CANCEL
-                                               : swkbd_config->button_text[0];
-                const std::string ok = swkbd_config->button_text[2].empty()
+                                               : swkbd_data->config.button_text[0];
+                const std::string ok = swkbd_data->config.button_text[2].empty()
                                            ? Frontend::SWKBD_BUTTON_OKAY
-                                           : swkbd_config->button_text[2];
+                                           : swkbd_data->config.button_text[2];
                 if (ImGui::Button(cancel.c_str())) {
-                    swkbd_config = nullptr;
-                    swkbd_code = nullptr;
-                    swkbd_text = nullptr;
+                    swkbd_data = nullptr;
                     break;
                 }
-                if (Frontend::SoftwareKeyboard::ValidateInput(*swkbd_text, *swkbd_config) ==
-                    Frontend::ValidationError::None) {
+                if (Frontend::SoftwareKeyboard::ValidateInput(
+                        swkbd_data->text, swkbd_data->config) == Frontend::ValidationError::None) {
                     ImGui::SameLine();
                     if (ImGui::Button(ok.c_str())) {
-                        *swkbd_code = 1;
-                        swkbd_config = nullptr;
-                        swkbd_code = nullptr;
-                        swkbd_text = nullptr;
+                        swkbd_data->code = 1;
+                        swkbd_data = nullptr;
                     }
                 }
                 break;
             }
 
             case Frontend::ButtonConfig::Triple: {
-                const std::string cancel = swkbd_config->button_text[0].empty()
+                const std::string cancel = swkbd_data->config.button_text[0].empty()
                                                ? Frontend::SWKBD_BUTTON_CANCEL
-                                               : swkbd_config->button_text[0];
-                const std::string forgot = swkbd_config->button_text[1].empty()
+                                               : swkbd_data->config.button_text[0];
+                const std::string forgot = swkbd_data->config.button_text[1].empty()
                                                ? Frontend::SWKBD_BUTTON_FORGOT
-                                               : swkbd_config->button_text[1];
-                const std::string ok = swkbd_config->button_text[2].empty()
+                                               : swkbd_data->config.button_text[1];
+                const std::string ok = swkbd_data->config.button_text[2].empty()
                                            ? Frontend::SWKBD_BUTTON_OKAY
-                                           : swkbd_config->button_text[2];
+                                           : swkbd_data->config.button_text[2];
                 if (ImGui::Button(cancel.c_str())) {
-                    swkbd_config = nullptr;
-                    swkbd_code = nullptr;
-                    swkbd_text = nullptr;
+                    swkbd_data = nullptr;
                     break;
                 }
                 ImGui::SameLine();
                 if (ImGui::Button(forgot.c_str())) {
-                    *swkbd_code = 1;
-                    swkbd_config = nullptr;
-                    swkbd_code = nullptr;
-                    swkbd_text = nullptr;
+                    swkbd_data->code = 1;
+                    swkbd_data = nullptr;
                     break;
                 }
-                if (Frontend::SoftwareKeyboard::ValidateInput(*swkbd_text, *swkbd_config) ==
-                    Frontend::ValidationError::None) {
+                if (Frontend::SoftwareKeyboard::ValidateInput(
+                        swkbd_data->text, swkbd_data->config) == Frontend::ValidationError::None) {
                     ImGui::SameLine();
                     if (ImGui::Button(ok.c_str())) {
-                        *swkbd_code = 2;
-                        swkbd_config = nullptr;
-                        swkbd_code = nullptr;
-                        swkbd_text = nullptr;
+                        swkbd_data->code = 2;
+                        swkbd_data = nullptr;
                     }
                 }
                 break;
@@ -2369,36 +2363,30 @@ void EmuWindow_SDL2::SwapBuffers() {
         ImGui::End();
     }
 
-    if (mii_selector_config != nullptr && mii_selector_miis != nullptr &&
-        mii_selector_code != nullptr && mii_selector_selected_mii != nullptr) {
+    if (mii_selector_data != nullptr) {
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
                                 ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        if (ImGui::Begin(
-                (mii_selector_config->title.empty() ? "Mii Selector" : mii_selector_config->title)
-                    .c_str(),
-                nullptr, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (ImGui::Begin((mii_selector_data->config.title.empty() ? "Mii Selector"
+                                                                  : mii_selector_data->config.title)
+                             .c_str(),
+                         nullptr,
+                         ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize)) {
             if (ImGui::ListBoxHeader("##miis")) {
-                for (std::size_t index = 0; index < mii_selector_miis->size(); ++index) {
+                for (std::size_t index = 0; index < mii_selector_data->miis.size(); ++index) {
                     if (ImGui::Selectable(
-                            Common::UTF16BufferToUTF8(mii_selector_miis->at(index).mii_name)
+                            Common::UTF16BufferToUTF8(mii_selector_data->miis.at(index).mii_name)
                                 .c_str())) {
-                        *mii_selector_code = 0;
-                        *mii_selector_selected_mii = mii_selector_miis->at(index);
-                        mii_selector_config = nullptr;
-                        mii_selector_miis = nullptr;
-                        mii_selector_code = nullptr;
-                        mii_selector_selected_mii = nullptr;
+                        mii_selector_data->code = 0;
+                        mii_selector_data->selected_mii = mii_selector_data->miis.at(index);
+                        mii_selector_data = nullptr;
                         break;
                     }
                 }
                 ImGui::ListBoxFooter();
             }
-            if (mii_selector_config && mii_selector_config->enable_cancel_button &&
+            if (mii_selector_data != nullptr && mii_selector_data->config.enable_cancel_button &&
                 ImGui::Button("Cancel")) {
-                mii_selector_config = nullptr;
-                mii_selector_miis = nullptr;
-                mii_selector_code = nullptr;
-                mii_selector_selected_mii = nullptr;
+                mii_selector_data = nullptr;
             }
         }
         ImGui::End();

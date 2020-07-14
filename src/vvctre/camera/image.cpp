@@ -18,9 +18,7 @@ ImageCamera::ImageCamera(const std::string& file) {
             asl::HttpResponse r = asl::Http::get(file.c_str());
 
             if (r.ok()) {
-                std::vector<unsigned char> buffer(r.body().length());
-                std::memcpy(buffer.data(), r.body().ptr(), buffer.size());
-                image = stbi_load_from_memory(buffer.data(), buffer.size(), &file_width,
+                image = stbi_load_from_memory(r.body().ptr(), r.body().length(), &file_width,
                                               &file_height, nullptr, 3);
             }
         } else {

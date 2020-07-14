@@ -78,18 +78,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Set up output paths for executable binaries
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
 
-# System imported libraries
-# ======================
+# Boost
 
-find_package(Boost 1.66.0 QUIET)
-if (NOT Boost_FOUND)
-    message(STATUS "Boost 1.66.0 or newer not found, falling back to externals")
-
-    set(BOOST_ROOT "${PROJECT_SOURCE_DIR}/externals/boost")
-    set(Boost_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/externals/boost")
-    set(Boost_NO_SYSTEM_PATHS OFF)
-    find_package(Boost QUIET REQUIRED)
-endif()
+set(BOOST_ROOT "${PROJECT_SOURCE_DIR}/externals/boost")
+set(Boost_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/externals/boost")
+set(Boost_NO_SYSTEM_PATHS OFF)
+find_package(Boost QUIET REQUIRED)
 
 # Prefer the -pthread flag on Linux.
 set(THREADS_PREFER_PTHREAD_FLAG ON)

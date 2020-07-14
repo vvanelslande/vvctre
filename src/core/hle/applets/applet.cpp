@@ -19,11 +19,13 @@
 
 namespace HLE::Applets {
 
-static std::unordered_map<Service::APT::AppletId, std::shared_ptr<Applet>> applets;
-/// The CoreTiming event identifier for the Applet update callback.
-static Core::TimingEventType* applet_update_event = nullptr;
 /// The interval at which the Applet update callback will be called, 16.6ms
 static const u64 applet_update_interval_us = 16666;
+
+static std::unordered_map<Service::APT::AppletId, std::shared_ptr<Applet>> applets;
+
+/// The CoreTiming event identifier for the Applet update callback.
+static Core::TimingEventType* applet_update_event = nullptr;
 
 ResultCode Applet::Create(Service::APT::AppletId id,
                           std::weak_ptr<Service::APT::AppletManager> manager) {
@@ -117,5 +119,8 @@ void Init() {
 
 void Shutdown() {
     Core::System::GetInstance().CoreTiming().RemoveEvent(applet_update_event);
+    applets.clear();
+    applet_update_event = nullptr;
 }
+
 } // namespace HLE::Applets

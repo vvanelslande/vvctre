@@ -8,8 +8,7 @@
 
 namespace Log {
 
-class FunctionLogger : public Log::Backend {
-public:
+struct FunctionLogger : Log::Backend {
     void (*function)(const char* log);
     std::string name;
 

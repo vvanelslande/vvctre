@@ -41,14 +41,26 @@ public:
 
     void Close();
 
-    const Frontend::KeyboardConfig* swkbd_config = nullptr;
-    u8* swkbd_code = nullptr;
-    std::string* swkbd_text = nullptr;
+#pragma pack(push, 1)
+    struct swkbd_data_t {
+        const Frontend::KeyboardConfig& config;
+        u8 code;
+        std::string text;
+    };
+#pragma pack(pop)
 
-    const Frontend::MiiSelectorConfig* mii_selector_config = nullptr;
-    const std::vector<HLE::Applets::MiiData>* mii_selector_miis;
-    u32* mii_selector_code = nullptr;
-    HLE::Applets::MiiData* mii_selector_selected_mii = nullptr;
+    swkbd_data_t* swkbd_data = nullptr;
+
+#pragma pack(push, 1)
+    struct mii_selector_data_t {
+        const Frontend::MiiSelectorConfig& config;
+        const std::vector<HLE::Applets::MiiData>& miis;
+        u32 code;
+        HLE::Applets::MiiData selected_mii;
+    };
+#pragma pack(pop)
+
+    mii_selector_data_t* mii_selector_data = nullptr;
 
     bool paused = false;
 

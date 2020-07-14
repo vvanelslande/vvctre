@@ -49,24 +49,17 @@ void SDL2_MiiSelector::Setup(const MiiSelectorConfig& config) {
         }
     }
 
-    u32 code = 1;
-    HLE::Applets::MiiData selected_mii;
-
-    emu_window.mii_selector_config = &config;
-    emu_window.mii_selector_miis = &miis;
-    emu_window.mii_selector_code = &code;
-    emu_window.mii_selector_selected_mii = &selected_mii;
+    EmuWindow_SDL2::mii_selector_data_t data{config, miis, 1, {}};
+    emu_window.mii_selector_data = &data;
 
     SDL_GL_SetSwapInterval(1);
 
-    while (emu_window.IsOpen() && emu_window.mii_selector_config != nullptr &&
-           emu_window.mii_selector_miis != nullptr && emu_window.mii_selector_code != nullptr &&
-           emu_window.mii_selector_selected_mii != nullptr) {
+    while (emu_window.IsOpen() && emu_window.mii_selector_data != nullptr) {
         VideoCore::g_renderer->SwapBuffers();
     }
 
     SDL_GL_SetSwapInterval(Settings::values.enable_vsync ? 1 : 0);
-    Finalize(code, selected_mii);
+    Finalize(data.code, data.selected_mii);
 }
 
 } // namespace Frontend

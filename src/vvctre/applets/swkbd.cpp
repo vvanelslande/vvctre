@@ -16,22 +16,17 @@ SDL2_SoftwareKeyboard::SDL2_SoftwareKeyboard(EmuWindow_SDL2& emu_window) : emu_w
 void SDL2_SoftwareKeyboard::Execute(const KeyboardConfig& config) {
     SoftwareKeyboard::Execute(config);
 
-    u8 code = 0;
-    std::string text;
-
-    emu_window.swkbd_config = &config;
-    emu_window.swkbd_code = &code;
-    emu_window.swkbd_text = &text;
+    EmuWindow_SDL2::swkbd_data_t data{config, 0, ""};
+    emu_window.swkbd_data = &data;
 
     SDL_GL_SetSwapInterval(1);
 
-    while (emu_window.IsOpen() && emu_window.swkbd_config != nullptr &&
-           emu_window.swkbd_code != nullptr && emu_window.swkbd_text != nullptr) {
+    while (emu_window.IsOpen() && emu_window.swkbd_data != nullptr) {
         VideoCore::g_renderer->SwapBuffers();
     }
 
     SDL_GL_SetSwapInterval(Settings::values.enable_vsync ? 1 : 0);
-    Finalize(text, code);
+    Finalize(data.text, data.code);
 }
 
 void SDL2_SoftwareKeyboard::ShowError(const std::string& error) {
