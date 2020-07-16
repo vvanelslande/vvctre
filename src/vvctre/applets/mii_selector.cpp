@@ -49,7 +49,7 @@ void SDL2_MiiSelector::Setup(const MiiSelectorConfig& config) {
         }
     }
 
-    EmuWindow_SDL2::mii_selector_data_t data{config, miis, 1, {}};
+    EmuWindow_SDL2::MiiSelectorData data{config, miis, 1, {}};
     emu_window.mii_selector_data = &data;
 
     SDL_GL_SetSwapInterval(1);

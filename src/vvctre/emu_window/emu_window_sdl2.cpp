@@ -2279,81 +2279,83 @@ void EmuWindow_SDL2::SwapBuffers() {
     }
     ImGui::End();
 
-    if (swkbd_data != nullptr) {
+    if (keyboard_data != nullptr) {
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
                                 ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         if (ImGui::Begin("Keyboard", nullptr,
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize)) {
-            if (!swkbd_data->config.hint_text.empty()) {
-                ImGui::TextUnformatted(swkbd_data->config.hint_text.c_str());
+            if (!keyboard_data->config.hint_text.empty()) {
+                ImGui::TextUnformatted(keyboard_data->config.hint_text.c_str());
             }
 
-            if (swkbd_data->config.multiline_mode) {
-                ImGui::InputTextMultiline("##text_multiline", &swkbd_data->text);
+            if (keyboard_data->config.multiline_mode) {
+                ImGui::InputTextMultiline("##text_multiline", &keyboard_data->text);
             } else {
-                ImGui::InputText("##text_one_line", &swkbd_data->text);
+                ImGui::InputText("##text_one_line", &keyboard_data->text);
             }
 
-            switch (swkbd_data->config.button_config) {
+            switch (keyboard_data->config.button_config) {
             case Frontend::ButtonConfig::None:
             case Frontend::ButtonConfig::Single: {
-                if (ImGui::Button((swkbd_data->config.button_text[2].empty()
+                if (ImGui::Button((keyboard_data->config.button_text[2].empty()
                                        ? Frontend::SWKBD_BUTTON_OKAY
-                                       : swkbd_data->config.button_text[2])
+                                       : keyboard_data->config.button_text[2])
                                       .c_str())) {
-                    swkbd_data = nullptr;
+                    keyboard_data = nullptr;
                 }
                 break;
             }
 
             case Frontend::ButtonConfig::Dual: {
-                const std::string cancel = swkbd_data->config.button_text[0].empty()
+                const std::string cancel = keyboard_data->config.button_text[0].empty()
                                                ? Frontend::SWKBD_BUTTON_CANCEL
-                                               : swkbd_data->config.button_text[0];
-                const std::string ok = swkbd_data->config.button_text[2].empty()
+                                               : keyboard_data->config.button_text[0];
+                const std::string ok = keyboard_data->config.button_text[2].empty()
                                            ? Frontend::SWKBD_BUTTON_OKAY
-                                           : swkbd_data->config.button_text[2];
+                                           : keyboard_data->config.button_text[2];
                 if (ImGui::Button(cancel.c_str())) {
-                    swkbd_data = nullptr;
+                    keyboard_data = nullptr;
                     break;
                 }
-                if (Frontend::SoftwareKeyboard::ValidateInput(
-                        swkbd_data->text, swkbd_data->config) == Frontend::ValidationError::None) {
+                if (Frontend::SoftwareKeyboard::ValidateInput(keyboard_data->text,
+                                                              keyboard_data->config) ==
+                    Frontend::ValidationError::None) {
                     ImGui::SameLine();
                     if (ImGui::Button(ok.c_str())) {
-                        swkbd_data->code = 1;
-                        swkbd_data = nullptr;
+                        keyboard_data->code = 1;
+                        keyboard_data = nullptr;
                     }
                 }
                 break;
             }
 
             case Frontend::ButtonConfig::Triple: {
-                const std::string cancel = swkbd_data->config.button_text[0].empty()
+                const std::string cancel = keyboard_data->config.button_text[0].empty()
                                                ? Frontend::SWKBD_BUTTON_CANCEL
-                                               : swkbd_data->config.button_text[0];
-                const std::string forgot = swkbd_data->config.button_text[1].empty()
+                                               : keyboard_data->config.button_text[0];
+                const std::string forgot = keyboard_data->config.button_text[1].empty()
                                                ? Frontend::SWKBD_BUTTON_FORGOT
-                                               : swkbd_data->config.button_text[1];
-                const std::string ok = swkbd_data->config.button_text[2].empty()
+                                               : keyboard_data->config.button_text[1];
+                const std::string ok = keyboard_data->config.button_text[2].empty()
                                            ? Frontend::SWKBD_BUTTON_OKAY
-                                           : swkbd_data->config.button_text[2];
+                                           : keyboard_data->config.button_text[2];
                 if (ImGui::Button(cancel.c_str())) {
-                    swkbd_data = nullptr;
+                    keyboard_data = nullptr;
                     break;
                 }
                 ImGui::SameLine();
                 if (ImGui::Button(forgot.c_str())) {
-                    swkbd_data->code = 1;
-                    swkbd_data = nullptr;
+                    keyboard_data->code = 1;
+                    keyboard_data = nullptr;
                     break;
                 }
-                if (Frontend::SoftwareKeyboard::ValidateInput(
-                        swkbd_data->text, swkbd_data->config) == Frontend::ValidationError::None) {
+                if (Frontend::SoftwareKeyboard::ValidateInput(keyboard_data->text,
+                                                              keyboard_data->config) ==
+                    Frontend::ValidationError::None) {
                     ImGui::SameLine();
                     if (ImGui::Button(ok.c_str())) {
-                        swkbd_data->code = 2;
-                        swkbd_data = nullptr;
+                        keyboard_data->code = 2;
+                        keyboard_data = nullptr;
                     }
                 }
                 break;

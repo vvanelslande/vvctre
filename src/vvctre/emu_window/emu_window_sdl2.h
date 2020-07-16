@@ -41,26 +41,20 @@ public:
 
     void Close();
 
-#pragma pack(push, 1)
-    struct swkbd_data_t {
+    struct KeyboardData {
         const Frontend::KeyboardConfig& config;
         u8 code;
         std::string text;
     };
-#pragma pack(pop)
+    KeyboardData* keyboard_data = nullptr;
 
-    swkbd_data_t* swkbd_data = nullptr;
-
-#pragma pack(push, 1)
-    struct mii_selector_data_t {
+    struct MiiSelectorData {
         const Frontend::MiiSelectorConfig& config;
         const std::vector<HLE::Applets::MiiData>& miis;
         u32 code;
         HLE::Applets::MiiData selected_mii;
     };
-#pragma pack(pop)
-
-    mii_selector_data_t* mii_selector_data = nullptr;
+    MiiSelectorData* mii_selector_data = nullptr;
 
     bool paused = false;
 

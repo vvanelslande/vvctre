@@ -16,12 +16,12 @@ SDL2_SoftwareKeyboard::SDL2_SoftwareKeyboard(EmuWindow_SDL2& emu_window) : emu_w
 void SDL2_SoftwareKeyboard::Execute(const KeyboardConfig& config) {
     SoftwareKeyboard::Execute(config);
 
-    EmuWindow_SDL2::swkbd_data_t data{config, 0, ""};
-    emu_window.swkbd_data = &data;
+    EmuWindow_SDL2::KeyboardData data{config, 0, ""};
+    emu_window.keyboard_data = &data;
 
     SDL_GL_SetSwapInterval(1);
 
-    while (emu_window.IsOpen() && emu_window.swkbd_data != nullptr) {
+    while (emu_window.IsOpen() && emu_window.keyboard_data != nullptr) {
         VideoCore::g_renderer->SwapBuffers();
     }
 
