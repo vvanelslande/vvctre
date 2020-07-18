@@ -17,6 +17,7 @@
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
+#include <asl/File.h>
 #include <asl/Http.h>
 #include <asl/JSON.h>
 #include <fmt/format.h>
@@ -57,6 +58,8 @@ extern "C" {
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 }
 #endif
+
+static std::function<void()> play_movie_loop_callback;
 
 static void InitializeLogging() {
     Log::Filter log_filter(Log::Level::Debug);
@@ -247,9 +250,18 @@ int main(int argc, char** argv) {
     }
 
     if (!Settings::values.play_movie.empty()) {
-        Core::Movie::GetInstance().StartPlayback(Settings::values.play_movie, [&] {
-            pfd::message("vvctre", "Playback finished", pfd::choice::ok);
-        });
+        Core::Movie& movie = Core::Movie::GetInstance();
+
+        if (asl::File(Settings::values.play_movie.c_str()).name().contains("loop")) {
+            play_movie_loop_callback = [&movie] {
+                movie.StartPlayback(Settings::values.play_movie, play_movie_loop_callback);
+            };
+            play_movie_loop_callback();
+        } else {
+            movie.StartPlayback(Settings::values.play_movie, [&] {
+                pfd::message("vvctre", "Playback finished", pfd::choice::ok);
+            });
+        }
     }
 
     if (!Settings::values.record_movie.empty()) {

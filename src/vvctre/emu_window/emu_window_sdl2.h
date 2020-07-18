@@ -5,6 +5,7 @@
 #pragma once
 
 #include <deque>
+#include <functional>
 #include <map>
 #include <memory>
 #include <unordered_set>
@@ -90,6 +91,8 @@ private:
     void CopyScreenshot();
 
     void ConnectToCitraRoom();
+
+    std::function<void()> play_movie_loop_callback;
 
     // Window
     SDL_Window* window = nullptr;

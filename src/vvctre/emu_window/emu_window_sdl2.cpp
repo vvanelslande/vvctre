@@ -9,6 +9,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <asl/Date.h>
+#include <asl/File.h>
 #include <asl/Process.h>
 #include <asl/String.h>
 #include <clip.h>
@@ -2199,19 +2200,36 @@ void EmuWindow_SDL2::SwapBuffers() {
                             const auto movie_result = movie.ValidateMovie(filename[0]);
                             switch (movie_result) {
                             case Core::Movie::ValidationResult::OK:
-                                movie.StartPlayback(filename[0], [&] {
-                                    pfd::message("vvctre", "Playback finished", pfd::choice::ok);
-                                });
+                                if (asl::File(filename[0].c_str()).name().contains("loop")) {
+                                    play_movie_loop_callback = [this, &movie,
+                                                                filename = filename[0]] {
+                                        movie.StartPlayback(filename, play_movie_loop_callback);
+                                    };
+
+                                    play_movie_loop_callback();
+                                } else {
+                                    movie.StartPlayback(filename[0], [&] {
+                                        pfd::message("vvctre", "Playback finished",
+                                                     pfd::choice::ok);
+                                    });
+                                }
                                 break;
                             case Core::Movie::ValidationResult::GameDismatch:
                                 pfd::message(
                                     "vvctre",
                                     "Movie was recorded using a ROM with a different program ID",
                                     pfd::choice::ok, pfd::icon::warning);
-                                movie.StartPlayback(filename[0], [&] {
-                                    pfd::message("vvctre", "Playback finished", pfd::choice::ok,
-                                                 pfd::icon::info);
-                                });
+                                if (asl::File(filename[0].c_str()).name().contains("loop")) {
+                                    std::function<void()> f = [&movie, f, filename = filename[0]] {
+                                        movie.StartPlayback(filename, f);
+                                    };
+                                    f();
+                                } else {
+                                    movie.StartPlayback(filename[0], [&] {
+                                        pfd::message("vvctre", "Playback finished",
+                                                     pfd::choice::ok);
+                                    });
+                                }
                                 break;
                             case Core::Movie::ValidationResult::Invalid:
                                 pfd::message("vvctre", "Movie file doesn't have a valid header",
@@ -2224,7 +2242,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                     if (ImGui::MenuItem("Record", nullptr, nullptr,
                                         !movie.IsPlayingInput() && !movie.IsRecordingInput())) {
                         const std::string filename =
-                            pfd::save_file("Play Movie", "movie.vcm", {"VvCtre Movie", "*.vcm"})
+                            pfd::save_file("Record Movie", "movie.vcm", {"VvCtre Movie", "*.vcm"})
                                 .result();
                         if (!filename.empty()) {
                             movie.StartRecording(filename);
