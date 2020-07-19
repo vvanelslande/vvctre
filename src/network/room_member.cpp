@@ -75,15 +75,14 @@ public:
 
     /**
      * Sends a request to the server, asking for permission to join a room with the specified
-     * nickname and preferred mac.
+     * nickname and preferred MAC address.
      * @params nickname The desired nickname.
-     * @params console_id_hash A hash of the Console ID.
-     * @params preferred_mac The preferred MAC address to use in the room, the NoPreferredMac tells
+     * @params console_id_hash A hash of the console ID.
+     * @params preferred_mac Preferred MAC address (or `NO_PREFERRED_MAC_ADDRESS`)
      * @params password The password for the room
-     * the server to assign one for us.
      */
     void SendJoinRequest(const std::string& nickname, const std::string& console_id_hash,
-                         const MacAddress& preferred_mac = NoPreferredMac,
+                         const MacAddress& preferred_mac = NO_PREFERRED_MAC_ADDRESS,
                          const std::string& password = "", const std::string& token = "");
 
     /**
@@ -262,7 +261,7 @@ void RoomMember::RoomMemberImpl::SendJoinRequest(const std::string& nickname,
     packet << nickname;
     packet << console_id_hash;
     packet << preferred_mac;
-    packet << network_version;
+    packet << NETWORK_VERSION;
     packet << password;
     packet << token;
     Send(std::move(packet));
@@ -493,7 +492,7 @@ void RoomMember::Join(const std::string& nick, const std::string& console_id_has
     }
 
     if (!room_member_impl->client) {
-        room_member_impl->client = enet_host_create(nullptr, 1, NumChannels, 0, 0);
+        room_member_impl->client = enet_host_create(nullptr, 1, 1, 0, 0);
         ASSERT_MSG(room_member_impl->client != nullptr, "Could not create client");
     }
 
@@ -502,8 +501,7 @@ void RoomMember::Join(const std::string& nick, const std::string& console_id_has
     ENetAddress address{};
     enet_address_set_host(&address, server_addr);
     address.port = server_port;
-    room_member_impl->server =
-        enet_host_connect(room_member_impl->client, &address, NumChannels, 0);
+    room_member_impl->server = enet_host_connect(room_member_impl->client, &address, 1, 0);
 
     if (!room_member_impl->server) {
         room_member_impl->SetState(State::Idle);

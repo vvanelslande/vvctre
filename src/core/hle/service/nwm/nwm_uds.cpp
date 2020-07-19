@@ -63,7 +63,7 @@ std::list<Network::WifiPacket> NWM_UDS::GetReceivedBeacons(const MacAddress& sen
                 return false;
             }
 
-            if (sender == Network::BroadcastMac) {
+            if (sender == Network::BROADCAST_MAC_ADDRESS) {
                 return true;
             }
 
@@ -103,7 +103,7 @@ void NWM_UDS::BroadcastNodeMap() {
     Network::WifiPacket packet;
     packet.channel = network_channel;
     packet.type = Network::WifiPacket::PacketType::NodeMap;
-    packet.destination_address = Network::BroadcastMac;
+    packet.destination_address = Network::BROADCAST_MAC_ADDRESS;
     std::size_t num_entries = std::count_if(node_map.begin(), node_map.end(),
                                             [](const auto& node) { return node.second.connected; });
     using node_t = decltype(node_map)::value_type;
@@ -250,7 +250,7 @@ void NWM_UDS::HandleEAPoLPacket(const Network::WifiPacket& packet) {
         // On a 3ds the eapol packet is only sent to packet.transmitter_address
         // while a packet containing the node information is broadcasted
         // For now we will broadcast the eapol packet instead
-        eapol_logoff.destination_address = Network::BroadcastMac;
+        eapol_logoff.destination_address = Network::BROADCAST_MAC_ADDRESS;
         eapol_logoff.type = WifiPacket::PacketType::Data;
 
         SendPacket(eapol_logoff);
@@ -347,7 +347,7 @@ void NWM_UDS::HandleSecureDataPacket(const Network::WifiPacket& packet) {
         // The packet wasn't addressed to us, we can only act as a router if we're the host.
         // However, we might have received this packet due to a broadcast from the host, in that
         // case just ignore it.
-        if (packet.destination_address != Network::BroadcastMac &&
+        if (packet.destination_address != Network::BROADCAST_MAC_ADDRESS &&
             connection_status.status != NetworkStatus::ConnectedAsHost) {
             LOG_ERROR(Service_NWM, "Received packet addressed to others but we're not a host");
             return;
@@ -359,7 +359,7 @@ void NWM_UDS::HandleSecureDataPacket(const Network::WifiPacket& packet) {
             // TODO(B3N30): Is there a flag that makes this kind of routing be unicast instead of
             // multicast? Perhaps this is a way to allow spectators to see some of the packets.
             Network::WifiPacket out_packet = packet;
-            out_packet.destination_address = Network::BroadcastMac;
+            out_packet.destination_address = Network::BROADCAST_MAC_ADDRESS;
             SendPacket(out_packet);
         }
         return;
@@ -547,7 +547,7 @@ boost::optional<Network::MacAddress> NWM_UDS::GetNodeMacAddress(u16 dest_node_id
     constexpr u8 BroadcastFlag = 0x2;
     if ((flags & BroadcastFlag) || dest_node_id == BroadcastNetworkNodeId) {
         // Broadcast
-        return Network::BroadcastMac;
+        return Network::BROADCAST_MAC_ADDRESS;
     } else if (dest_node_id == HostDestNodeId) {
         // Destination is host
         return network_info.host_mac_address;
@@ -980,7 +980,7 @@ void NWM_UDS::EjectClient(Kernel::HLERequestContext& ctx) {
     rb.Push(RESULT_SUCCESS);
 
     using Network::WifiPacket;
-    Network::MacAddress dest_address = Network::BroadcastMac;
+    Network::MacAddress dest_address = Network::BROADCAST_MAC_ADDRESS;
 
     if (network_node_id != BroadcastNetworkNodeId) {
         auto address = GetNodeMacAddress(network_node_id, 0);
@@ -1417,7 +1417,7 @@ void NWM_UDS::BeaconBroadcastCallback(u64 userdata, s64 cycles_late) {
     WifiPacket packet;
     packet.type = WifiPacket::PacketType::Beacon;
     packet.data = std::move(frame);
-    packet.destination_address = Network::BroadcastMac;
+    packet.destination_address = Network::BROADCAST_MAC_ADDRESS;
     packet.channel = network_channel;
 
     SendPacket(packet);

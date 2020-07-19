@@ -34,6 +34,7 @@
 #include "core/movie.h"
 #include "core/settings.h"
 #include "network/network.h"
+#include "network/room.h"
 #include "network/room_member.h"
 #include "video_core/renderer_base.h"
 #include "video_core/video_core.h"
@@ -1819,7 +1820,7 @@ void vvctre_multiplayer_join(void* core) {
         room_member->Join(Settings::values.multiplayer_nickname,
                           Service::CFG::GetConsoleIdHash(*static_cast<Core::System*>(core)),
                           Settings::values.multiplayer_ip.c_str(),
-                          Settings::values.multiplayer_port, Network::NoPreferredMac,
+                          Settings::values.multiplayer_port, Network::NO_PREFERRED_MAC_ADDRESS,
                           Settings::values.multiplayer_password);
     }
 }
@@ -1947,6 +1948,10 @@ void vvctre_multiplayer_on_state_change(void* /* core, currently unused */, void
         room_member->BindOnRoomInformationChanged(
             [=](const Network::RoomInformation&) { callback(); });
     }
+}
+
+void vvctre_multiplayer_create_room(const char* ip, u16 port, u32 member_slots) {
+    new Network::Room(ip, port, member_slots);
 }
 
 // Other
@@ -2389,6 +2394,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_multiplayer_on_error", (void*)&vvctre_multiplayer_on_error},
     {"vvctre_multiplayer_on_information_change", (void*)&vvctre_multiplayer_on_information_change},
     {"vvctre_multiplayer_on_state_change", (void*)&vvctre_multiplayer_on_state_change},
+    {"vvctre_multiplayer_create_room", (void*)&vvctre_multiplayer_create_room},
     // Other
     {"vvctre_get_version", (void*)&vvctre_get_version},
     {"vvctre_get_version_major", (void*)&vvctre_get_version_major},

@@ -3000,7 +3000,7 @@ void EmuWindow_SDL2::ConnectToCitraRoom() {
             room_member->Join(
                 Settings::values.multiplayer_nickname, Service::CFG::GetConsoleIdHash(system),
                 Settings::values.multiplayer_ip.c_str(), Settings::values.multiplayer_port,
-                Network::NoPreferredMac, Settings::values.multiplayer_password);
+                Network::NO_PREFERRED_MAC_ADDRESS, Settings::values.multiplayer_password);
         }
     }
 }

@@ -4,48 +4,12 @@
 
 #pragma once
 
-#include <array>
 #include <functional>
 #include <memory>
-#include <string>
 #include <vector>
-#include "common/common_types.h"
+#include "network/common.h"
 
 namespace Network {
-
-constexpr u32 network_version = 4; ///< The version of this Room and RoomMember
-
-constexpr u16 DefaultRoomPort = 24872;
-
-constexpr u32 MaxMessageSize = 500;
-
-/// Maximum number of concurrent connections allowed to this room.
-static constexpr u32 MaxConcurrentConnections = 254;
-
-constexpr std::size_t NumChannels = 1; // Number of channels used for the connection
-
-struct RoomInformation {
-    std::string name;           ///< Name of the server
-    std::string description;    ///< Server description
-    u32 member_slots;           ///< Maximum number of members in this room
-    u16 port;                   ///< The port of this room
-    std::string preferred_game; ///< Game to advertise that you want to play
-    u64 preferred_game_id;      ///< Title ID for the advertised game
-};
-
-struct GameInfo {
-    std::string name;
-    u64 id = 0;
-};
-
-using MacAddress = std::array<u8, 6>;
-
-/// A special MAC address that tells the room we're joining to assign us a MAC address
-/// automatically.
-constexpr MacAddress NoPreferredMac = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-
-// 802.11 broadcast MAC address
-constexpr MacAddress BroadcastMac = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 /// Information about the received WiFi packets.
 /// Acts as our own 802.11 header.
@@ -70,35 +34,6 @@ struct WifiPacket {
 struct ChatEntry {
     std::string nickname;
     std::string message;
-};
-
-// The different types of messages that can be sent. The first byte of each packet defines the type
-enum RoomMessageTypes : u8 {
-    IdJoinRequest = 1,
-    IdJoinSuccess,
-    IdRoomInformation,
-    IdSetGameInfo,
-    IdWifiPacket,
-    IdChatMessage,
-    IdNameCollision,
-    IdMacCollision,
-    IdVersionMismatch,
-    IdWrongPassword,
-    IdCloseRoom,
-    IdRoomIsFull,
-    IdConsoleIdCollision,
-    IdStatusMessage,
-    IdHostKicked,
-    IdHostBanned,
-};
-
-/// Types of system status messages
-enum StatusMessageTypes : u8 {
-    IdMemberJoin = 1,  ///< Member joining
-    IdMemberLeave,     ///< Member leaving
-    IdMemberKicked,    ///< A member is kicked from the room
-    IdMemberBanned,    ///< A member is banned from the room
-    IdAddressUnbanned, ///< Someone is unbanned from the room
 };
 
 /// Represents a system status message.
@@ -202,8 +137,9 @@ public:
      * This may fail if the username or console ID is already taken.
      */
     void Join(const std::string& nickname, const std::string& console_id_hash,
-              const char* server_addr = "127.0.0.1", u16 server_port = DefaultRoomPort,
-              const MacAddress& preferred_mac = NoPreferredMac, const std::string& password = "");
+              const char* server_addr = "127.0.0.1", u16 server_port = DEFAULT_PORT,
+              const MacAddress& preferred_mac = NO_PREFERRED_MAC_ADDRESS,
+              const std::string& password = "");
 
     /**
      * Sends a WiFi packet to the room.

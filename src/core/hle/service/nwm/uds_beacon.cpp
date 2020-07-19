@@ -12,11 +12,9 @@
 #include "common/assert.h"
 #include "core/hle/service/nwm/nwm_uds.h"
 #include "core/hle/service/nwm/uds_beacon.h"
+#include "network/common.h"
 
 namespace Service::NWM {
-
-// 802.11 broadcast MAC address
-constexpr MacAddress BroadcastMac = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 constexpr u64 DefaultNetworkUptime = 900000000; // 15 minutes in microseconds.
 

@@ -8,6 +8,7 @@
 #include <tuple>
 #include <vector>
 #include "common/common_types.h"
+#include "network/common.h"
 #include "vvctre/common.h"
 
 class PluginManager;
@@ -29,4 +30,10 @@ private:
     // Installed
     std::vector<std::tuple<std::string, std::string>> installed;
     std::string installed_query;
+
+    // Host Multiplayer Room
+    std::string host_multiplayer_room_ip = "0.0.0.0";
+    u16 host_multiplayer_room_port = Network::DEFAULT_PORT;
+    u32 host_multiplayer_room_member_slots = Network::DEFAULT_MEMBER_SLOTS;
+    bool host_multiplayer_room_room_created = false;
 };

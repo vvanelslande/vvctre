@@ -142,6 +142,6 @@ Bottom Bottom (Custom Layout): 480
 
 ## Multiplayer
 
-IP: Empty
+IP: 127.0.0.1
 Port: 24872
-Nickname: Empty
+Nickname: vvctre

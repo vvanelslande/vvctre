@@ -14,6 +14,7 @@
 #include "core/hle/service/cam/cam.h"
 #include "input_common/main.h"
 #include "input_common/udp/client.h"
+#include "network/common.h"
 
 namespace Settings {
 
@@ -256,9 +257,9 @@ struct Values {
     bool enable_priority_boost = true;
 
     // Multiplayer
-    std::string multiplayer_ip;
-    u16 multiplayer_port = 24872;
-    std::string multiplayer_nickname;
+    std::string multiplayer_ip = "127.0.0.1";
+    u16 multiplayer_port = Network::DEFAULT_PORT;
+    std::string multiplayer_nickname = "vvctre";
     std::string multiplayer_password;
 } extern values;
 

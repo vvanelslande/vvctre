@@ -1046,7 +1046,7 @@ if (match.groups.hacksPriorityBoost === " ") {
   somethingChanged = true;
 }
 
-if (match.groups.multiplayerIp !== "Empty") {
+if (match.groups.multiplayerIp !== "127.0.0.1") {
   names.push("vvctre_settings_set_multiplayer_ip");
   types.push(["void", "const char* value"]);
   calls.push(
@@ -1064,7 +1064,7 @@ if (match.groups.multiplayerPort !== "24872") {
   somethingChanged = true;
 }
 
-if (match.groups.multiplayerNickname !== "Empty") {
+if (match.groups.multiplayerNickname !== "vvctre") {
   names.push("vvctre_settings_set_nickname");
   types.push(["void", "const char* value"]);
   calls.push(

@@ -32,6 +32,7 @@
 #include "core/movie.h"
 #include "core/settings.h"
 #include "input_common/main.h"
+#include "network/room.h"
 #include "video_core/renderer_opengl/texture_filters/texture_filterer.h"
 #include "vvctre/common.h"
 #include "vvctre/initial_settings.h"
@@ -2796,6 +2797,47 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::EndTabItem();
                 }
 
+                if (!host_multiplayer_room_room_created &&
+                    ImGui::BeginTabItem("Host Multiplayer Room")) {
+                    ImGui::TextUnformatted("IP:");
+                    ImGui::SameLine();
+                    ImGui::InputText("##ip", &host_multiplayer_room_ip);
+
+                    ImGui::TextUnformatted("Port:");
+                    ImGui::SameLine();
+                    ImGui::InputScalar("##port", ImGuiDataType_U16, &host_multiplayer_room_port);
+
+                    ImGui::TextUnformatted("Member Slots:");
+                    ImGui::SameLine();
+                    ImGui::InputScalar("##memberslots", ImGuiDataType_U32,
+                                       &host_multiplayer_room_member_slots);
+
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Read:");
+                    ImGui::Bullet();
+                    ImGui::TextUnformatted("Name is vvctre and can't be changed");
+                    ImGui::Bullet();
+                    ImGui::TextUnformatted("No description");
+                    ImGui::Bullet();
+                    ImGui::TextUnformatted("No preferred game");
+                    ImGui::Bullet();
+                    ImGui::TextUnformatted("No password");
+                    ImGui::Bullet();
+                    ImGui::TextUnformatted("No collision checks");
+                    ImGui::Bullet();
+                    ImGui::TextUnformatted("No message length limit");
+                    ImGui::NewLine();
+
+                    if (ImGui::Button("Create Room & Close This Tab")) {
+                        new Network::Room(host_multiplayer_room_ip, host_multiplayer_room_port,
+                                          host_multiplayer_room_member_slots);
+                        host_multiplayer_room_room_created = true;
+                    }
+
+                    ImGui::EndTabItem();
+                }
+
                 plugin_manager.AddTabs();
 
                 ImGui::EndTabBar();
@@ -2804,6 +2846,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
             // OK
             if (!Settings::values.file_path.empty()) {
                 ImGui::NewLine();
+
+                ImGui::Dummy(
+                    ImVec2(0.0f, ImGui::GetContentRegionAvail().y - ImGui::GetFontSize() - 10.0f));
+
                 if (ImGui::Button("OK")) {
                     Settings::Apply();
                     if (update_config_savegame) {
