@@ -11,14 +11,13 @@ namespace Network {
 
 static std::shared_ptr<RoomMember> g_room_member;
 
-bool Init() {
+void Init() {
     if (enet_initialize() != 0) {
-        LOG_ERROR(Network, "Error initalizing ENet");
-        return false;
+        LOG_ERROR(Network, "Error initializing ENet");
+        return;
     }
     g_room_member = std::make_shared<RoomMember>();
     LOG_DEBUG(Network, "initialized OK");
-    return true;
 }
 
 std::weak_ptr<RoomMember> GetRoomMember() {
@@ -27,8 +26,9 @@ std::weak_ptr<RoomMember> GetRoomMember() {
 
 void Shutdown() {
     if (g_room_member) {
-        if (g_room_member->IsConnected())
+        if (g_room_member->IsConnected()) {
             g_room_member->Leave();
+        }
         g_room_member.reset();
     }
     enet_deinitialize();

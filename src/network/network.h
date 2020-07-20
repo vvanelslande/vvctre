@@ -10,7 +10,7 @@
 namespace Network {
 
 /// Initializes and registers the network device, and the room member.
-bool Init();
+void Init();
 
 /// Returns a pointer to the room member handle
 std::weak_ptr<RoomMember> GetRoomMember();
