@@ -75,10 +75,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
         if (ImGui::Begin("Initial Settings", nullptr,
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar |
                              ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
-                             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar)) {
+                             ImGuiWindowFlags_NoMove)) {
             ImGui::SetWindowPos(ImVec2(), ImGuiCond_Once);
             ImGui::SetWindowSize(io.DisplaySize);
-            if (ImGui::BeginTabBar("##tabBar")) {
+            if (ImGui::BeginTabBar("##tabBar", ImGuiTabBarFlags_TabListPopupButton |
+                                                   ImGuiTabBarFlags_FittingPolicyScroll)) {
                 if (ImGui::BeginTabItem("Start")) {
                     ImGui::TextUnformatted("File:");
                     ImGui::SameLine();
