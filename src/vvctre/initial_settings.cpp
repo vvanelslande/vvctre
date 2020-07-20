@@ -1861,6 +1861,227 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             asl::Json::write(path.c_str(), json, false);
                         }
                     }
+                    ImGui::SameLine();
+                    ImGui::Button("Copy Params");
+                    if (ImGui::BeginPopupContextItem("##copyparamspopup",
+                                                     ImGuiPopupFlags_MouseButtonLeft)) {
+                        ImGuiStyle& style = ImGui::GetStyle();
+
+                        ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted("Buttons");
+                        ImGui::PopStyleColor();
+
+                        if (ImGui::Selectable("A##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::A].c_str());
+                        }
+
+                        if (ImGui::Selectable("B##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::B].c_str());
+                        }
+
+                        if (ImGui::Selectable("X##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::X].c_str());
+                        }
+
+                        if (ImGui::Selectable("Y##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::Y].c_str());
+                        }
+
+                        if (ImGui::Selectable("L##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::L].c_str());
+                        }
+
+                        if (ImGui::Selectable("R##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::R].c_str());
+                        }
+
+                        if (ImGui::Selectable("ZL##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::ZL].c_str());
+                        }
+
+                        if (ImGui::Selectable("ZR##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::ZR].c_str());
+                        }
+
+                        if (ImGui::Selectable("Start##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::Start].c_str());
+                        }
+
+                        if (ImGui::Selectable("Select##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::Select].c_str());
+                        }
+
+                        if (ImGui::Selectable("Debug##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::Debug].c_str());
+                        }
+
+                        if (ImGui::Selectable("GPIO14##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::Gpio14].c_str());
+                        }
+
+                        if (ImGui::Selectable("HOME##Buttons")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::Home].c_str());
+                        }
+
+                        ImGui::NewLine();
+
+                        ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted("Circle Pad");
+                        ImGui::PopStyleColor();
+
+                        if (ImGui::Selectable("Up##Circle Pad")) {
+                            ImGui::SetClipboardText(
+                                Common::ParamPackage(
+                                    Settings::values.analogs[Settings::NativeAnalog::CirclePad])
+                                    .Get("up", "")
+                                    .c_str());
+                        }
+
+                        if (ImGui::Selectable("Down##Circle Pad")) {
+                            ImGui::SetClipboardText(
+                                Common::ParamPackage(
+                                    Settings::values.analogs[Settings::NativeAnalog::CirclePad])
+                                    .Get("down", "")
+                                    .c_str());
+                        }
+
+                        if (ImGui::Selectable("Left##Circle Pad")) {
+                            ImGui::SetClipboardText(
+                                Common::ParamPackage(
+                                    Settings::values.analogs[Settings::NativeAnalog::CirclePad])
+                                    .Get("left", "")
+                                    .c_str());
+                        }
+
+                        if (ImGui::Selectable("Right##Circle Pad")) {
+                            ImGui::SetClipboardText(
+                                Common::ParamPackage(
+                                    Settings::values.analogs[Settings::NativeAnalog::CirclePad])
+                                    .Get("right", "")
+                                    .c_str());
+                        }
+
+                        if (ImGui::Selectable("Modifier##Circle Pad")) {
+                            ImGui::SetClipboardText(
+                                Common::ParamPackage(
+                                    Settings::values.analogs[Settings::NativeAnalog::CirclePad])
+                                    .Get("modifier", "")
+                                    .c_str());
+                        }
+
+                        if (ImGui::Selectable("All##Circle Pad")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.analogs[Settings::NativeAnalog::CirclePad]
+                                    .c_str());
+                        }
+
+                        ImGui::NewLine();
+
+                        ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted("Circle Pad Pro");
+                        ImGui::PopStyleColor();
+
+                        if (ImGui::Selectable("Up##Circle Pad Pro")) {
+                            ImGui::SetClipboardText(
+                                Common::ParamPackage(
+                                    Settings::values.analogs[Settings::NativeAnalog::CirclePadPro])
+                                    .Get("up", "")
+                                    .c_str());
+                        }
+
+                        if (ImGui::Selectable("Down##Circle Pad Pro")) {
+                            ImGui::SetClipboardText(
+                                Common::ParamPackage(
+                                    Settings::values.analogs[Settings::NativeAnalog::CirclePadPro])
+                                    .Get("down", "")
+                                    .c_str());
+                        }
+
+                        if (ImGui::Selectable("Left##Circle Pad Pro")) {
+                            ImGui::SetClipboardText(
+                                Common::ParamPackage(
+                                    Settings::values.analogs[Settings::NativeAnalog::CirclePadPro])
+                                    .Get("left", "")
+                                    .c_str());
+                        }
+
+                        if (ImGui::Selectable("Right##Circle Pad Pro")) {
+                            ImGui::SetClipboardText(
+                                Common::ParamPackage(
+                                    Settings::values.analogs[Settings::NativeAnalog::CirclePadPro])
+                                    .Get("right", "")
+                                    .c_str());
+                        }
+
+                        if (ImGui::Selectable("Modifier##Circle Pad Pro")) {
+                            ImGui::SetClipboardText(
+                                Common::ParamPackage(
+                                    Settings::values.analogs[Settings::NativeAnalog::CirclePadPro])
+                                    .Get("modifier", "")
+                                    .c_str());
+                        }
+
+                        if (ImGui::Selectable("All##Circle Pad Pro")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.analogs[Settings::NativeAnalog::CirclePadPro]
+                                    .c_str());
+                        }
+
+                        ImGui::NewLine();
+
+                        ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted("D-Pad");
+                        ImGui::PopStyleColor();
+
+                        if (ImGui::Selectable("Up##D-Pad")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::Up].c_str());
+                        }
+
+                        if (ImGui::Selectable("Down##D-Pad")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::Down].c_str());
+                        }
+
+                        if (ImGui::Selectable("Left##D-Pad")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::Left].c_str());
+                        }
+
+                        if (ImGui::Selectable("Right##D-Pad")) {
+                            ImGui::SetClipboardText(
+                                Settings::values.buttons[Settings::NativeButton::Right].c_str());
+                        }
+
+                        ImGui::NewLine();
+
+                        ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
+                        ImGui::TextUnformatted("Motion & Touch");
+                        ImGui::PopStyleColor();
+
+                        if (ImGui::Selectable("Motion")) {
+                            ImGui::SetClipboardText(Settings::values.motion_device.c_str());
+                        }
+
+                        if (ImGui::Selectable("Touch")) {
+                            ImGui::SetClipboardText(Settings::values.touch_device.c_str());
+                        }
+
+                        ImGui::EndPopup();
+                    }
                     ImGui::NewLine();
 
                     const auto GetInput =

@@ -8,7 +8,6 @@ assignees: ""
 
 <!--
 Default Key: C
-Key List: https://www.libsdl.org/tmp/SDL/include/SDL_scancode.h
 
 X Range: 0-319
 Y Range: 0-239
