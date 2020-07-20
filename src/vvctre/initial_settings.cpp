@@ -61,6 +61,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                 if (pfd::message("vvctre", "Would you like to exit now?", pfd::choice::yes_no,
                                  pfd::icon::question)
                         .result() == pfd::button::yes) {
+                    vvctreShutdown(&plugin_manager);
                     std::exit(1);
                 }
             }
@@ -120,6 +121,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                                     "vvctre", "Would you like to exit now?",
                                                     pfd::choice::yes_no, pfd::icon::question)
                                                     .result() == pfd::button::yes) {
+                                                vvctreShutdown(&plugin_manager);
                                                 std::exit(1);
                                             }
                                         }

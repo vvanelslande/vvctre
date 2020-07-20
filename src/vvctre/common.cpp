@@ -7,19 +7,40 @@
 #include <asl/Process.h>
 #include <fmt/format.h>
 #include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl.h>
 #include <portable-file-dialogs.h>
 #include "common/file_util.h"
 #include "common/logging/log.h"
+#include "core/core.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/fs/archive.h"
 #include "core/loader/loader.h"
 #include "core/loader/smdh.h"
+#include "core/movie.h"
 #include "core/settings.h"
+#include "input_common/main.h"
+#include "network/network.h"
 #include "vvctre/common.h"
+#include "vvctre/plugins.h"
 
 const u8 vvctre_version_major = 34;
 const u8 vvctre_version_minor = 20;
 const u8 vvctre_version_patch = 2;
+
+void vvctreShutdown(PluginManager* plugin_manager) {
+    if (plugin_manager != nullptr) {
+        plugin_manager->EmulatorClosing();
+    }
+    Core::Movie::GetInstance().Shutdown();
+    Core::System::GetInstance().Shutdown();
+    InputCommon::Shutdown();
+    Network::Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+    SDL_Quit();
+}
 
 std::vector<std::tuple<std::string, std::string>> GetInstalledList() {
     std::vector<std::tuple<std::string, std::string>> all;

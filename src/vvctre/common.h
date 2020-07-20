@@ -10,6 +10,8 @@
 #include "common/common_types.h"
 #include "network/room_member.h"
 
+class PluginManager;
+
 extern const u8 vvctre_version_major;
 extern const u8 vvctre_version_minor;
 extern const u8 vvctre_version_patch;
@@ -33,6 +35,8 @@ struct CitraRoom {
 };
 
 using CitraRoomList = std::vector<CitraRoom>;
+
+void vvctreShutdown(PluginManager* plugin_manager);
 
 std::vector<std::tuple<std::string, std::string>> GetInstalledList();
 CitraRoomList GetPublicCitraRooms();

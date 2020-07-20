@@ -235,10 +235,7 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
     LOG_INFO(Frontend, "Movie version: {}", Core::MovieVersion);
 }
 
-EmuWindow_SDL2::~EmuWindow_SDL2() {
-    SDL_Quit();
-    Network::Shutdown();
-}
+EmuWindow_SDL2::~EmuWindow_SDL2() = default;
 
 void EmuWindow_SDL2::SwapBuffers() {
     ImGui_ImplOpenGL3_NewFrame();

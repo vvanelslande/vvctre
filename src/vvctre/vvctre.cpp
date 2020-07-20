@@ -100,19 +100,22 @@ int main(int argc, char** argv) {
     if (window == nullptr) {
         pfd::message("vvctre", fmt::format("Failed to create window: {}", SDL_GetError()),
                      pfd::choice::ok, pfd::icon::error);
-        std::exit(-1);
+        vvctreShutdown(nullptr);
+        std::exit(1);
     }
     SDL_SetWindowMinimumSize(window, 640, 480);
     SDL_GLContext context = SDL_GL_CreateContext(window);
     if (context == nullptr) {
         pfd::message("vvctre", fmt::format("Failed to create OpenGL context: {}", SDL_GetError()),
                      pfd::choice::ok, pfd::icon::error);
-        std::exit(-1);
+        vvctreShutdown(nullptr);
+        std::exit(1);
     }
     if (!gladLoadGLLoader(static_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
         pfd::message("vvctre", fmt::format("Failed to initialize OpenGL: {}", SDL_GetError()),
                      pfd::choice::ok, pfd::icon::error);
-        std::exit(-1);
+        vvctreShutdown(nullptr);
+        std::exit(1);
     }
     SDL_GL_SetSwapInterval(1);
     SDL_PumpEvents();
@@ -144,7 +147,7 @@ int main(int argc, char** argv) {
         }
 
         if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
-            std::thread([] {
+            std::thread([&] {
                 const std::string user_agent =
                     fmt::format("vvctre/{}.{}.{}", vvctre_version_major, vvctre_version_minor,
                                 vvctre_version_patch);
@@ -176,6 +179,7 @@ int main(int argc, char** argv) {
                                     "https://github.com/vvanelslande/vvctre/releases/latest");
 #endif
 
+                                vvctreShutdown(&plugin_manager);
                                 std::exit(0);
                             }
                         }
@@ -186,13 +190,7 @@ int main(int argc, char** argv) {
 
         InitialSettings(plugin_manager, window, *cfg, ok_multiplayer);
         if (Settings::values.file_path.empty()) {
-            plugin_manager.EmulatorClosing();
-            SDL_GL_MakeCurrent(window, nullptr);
-            ImGui_ImplOpenGL3_Shutdown();
-            ImGui_ImplSDL2_Shutdown();
-            SDL_GL_DeleteContext(context);
-            SDL_DestroyWindow(window);
-
+            vvctreShutdown(&plugin_manager);
             return 0;
         }
     } else {
@@ -301,15 +299,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    Core::Movie::GetInstance().Shutdown();
-    system.Shutdown();
-    InputCommon::Shutdown();
-    plugin_manager.EmulatorClosing();
-    SDL_GL_MakeCurrent(window, nullptr);
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    SDL_GL_DeleteContext(context);
-    SDL_DestroyWindow(window);
+    vvctreShutdown(&plugin_manager);
 
     return 0;
 }
