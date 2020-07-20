@@ -41,7 +41,7 @@
 static bool is_open = true;
 
 InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* window,
-                                 Service::CFG::Module& cfg) {
+                                 Service::CFG::Module& cfg, bool& ok_multiplayer) {
     signal(SIGINT, [](int) { is_open = false; });
     signal(SIGTERM, [](int) { is_open = false; });
 
@@ -2858,6 +2858,20 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     if (play_coins_changed) {
                         Service::PTM::Module::SetPlayCoins(play_coins);
                     }
+                    return;
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("OK (Multiplayer)")) {
+                    Settings::Apply();
+                    if (update_config_savegame) {
+                        cfg.UpdateConfigNANDSavegame();
+                    }
+                    if (play_coins_changed) {
+                        Service::PTM::Module::SetPlayCoins(play_coins);
+                    }
+                    ok_multiplayer = true;
                     return;
                 }
             }

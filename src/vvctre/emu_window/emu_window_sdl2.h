@@ -27,8 +27,8 @@ class System;
 
 class EmuWindow_SDL2 : public Frontend::EmuWindow {
 public:
-    explicit EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manager,
-                            SDL_Window* window);
+    explicit EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manager, SDL_Window* window,
+                            bool& ok_multiplayer);
     ~EmuWindow_SDL2();
 
     /// Swap buffers to display the next frame

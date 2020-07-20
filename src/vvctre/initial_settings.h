@@ -21,7 +21,7 @@ class Module;
 class InitialSettings {
 public:
     explicit InitialSettings(PluginManager& plugin_manager, SDL_Window* window,
-                             Service::CFG::Module& cfg);
+                             Service::CFG::Module& cfg, bool& ok_multiplayer);
 
 private:
     // System

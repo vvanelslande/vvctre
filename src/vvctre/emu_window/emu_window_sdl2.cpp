@@ -151,7 +151,7 @@ void EmuWindow_SDL2::ToggleFullscreen() {
 }
 
 EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manager,
-                               SDL_Window* window)
+                               SDL_Window* window, bool& ok_multiplayer)
     : window(window), system(system), plugin_manager(plugin_manager) {
     signal(SIGINT, [](int) { is_open = false; });
     signal(SIGTERM, [](int) { is_open = false; });
@@ -209,7 +209,9 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
                 }
             });
 
-        ConnectToCitraRoom();
+        if (ok_multiplayer) {
+            ConnectToCitraRoom();
+        }
     }
 
     SDL_SetWindowTitle(window, fmt::format("vvctre {}.{}.{}", vvctre_version_major,

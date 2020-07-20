@@ -134,6 +134,7 @@ int main(int argc, char** argv) {
     std::shared_ptr<Service::CFG::Module> cfg = std::make_shared<Service::CFG::Module>();
     plugin_manager.cfg = cfg.get();
     plugin_manager.InitialSettingsOpening();
+    bool ok_multiplayer = false;
     if (argc < 2) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -181,7 +182,7 @@ int main(int argc, char** argv) {
             }).detach();
         }
 
-        InitialSettings(plugin_manager, window, *cfg);
+        InitialSettings(plugin_manager, window, *cfg, ok_multiplayer);
         if (Settings::values.file_path.empty()) {
             plugin_manager.EmulatorClosing();
             SDL_GL_MakeCurrent(window, nullptr);
@@ -210,7 +211,7 @@ int main(int argc, char** argv) {
     }
 
     std::unique_ptr<EmuWindow_SDL2> emu_window =
-        std::make_unique<EmuWindow_SDL2>(system, plugin_manager, window);
+        std::make_unique<EmuWindow_SDL2>(system, plugin_manager, window, ok_multiplayer);
 
     // Register frontend applets
     system.RegisterSoftwareKeyboard(std::make_shared<Frontend::SDL2_SoftwareKeyboard>(*emu_window));
