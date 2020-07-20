@@ -8,8 +8,7 @@ const match = process.env.ISSUE_BODY.match(
   new RegExp(
     [
       "^<!--\r\n",
-      "Default Key: C\r\n",
-      "Key List: https://www.libsdl.org/tmp/SDL/include/SDL_scancode.h\r\n\r\n",
+      "Default Key: C\r\n\r\n",
 
       "X Range: 0-319\r\n",
       "Y Range: 0-239\r\n\r\n",
