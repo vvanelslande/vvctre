@@ -156,8 +156,6 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
     signal(SIGINT, [](int) { is_open = false; });
     signal(SIGTERM, [](int) { is_open = false; });
 
-    Network::Init();
-
     if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
         multiplayer_on_error =
             room_member->BindOnError([&](const Network::RoomMember::Error& error) {
