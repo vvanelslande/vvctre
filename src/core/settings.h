@@ -109,7 +109,6 @@ struct Values {
     InitialClock initial_clock = InitialClock::SystemTime;
     u64 unix_timestamp = 0;
     bool use_virtual_sd = true;
-    bool start_in_fullscreen_mode = false;
     bool record_frame_times = false;
     bool use_gdbstub = false;
     u16 gdbstub_port = 24689;

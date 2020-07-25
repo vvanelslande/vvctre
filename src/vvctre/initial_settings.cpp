@@ -326,9 +326,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     ImGui::Checkbox("Use Virtual SD Card", &Settings::values.use_virtual_sd);
 
-                    ImGui::Checkbox("Start in Fullscreen Mode",
-                                    &Settings::values.start_in_fullscreen_mode);
-
                     ImGui::Checkbox("Record Frame Times", &Settings::values.record_frame_times);
 
                     ImGui::Checkbox("Enable GDB Stub", &Settings::values.use_gdbstub);

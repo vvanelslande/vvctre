@@ -144,14 +144,6 @@ void EmuWindow_SDL2::OnResize() {
     UpdateCurrentFramebufferLayout(width, height);
 }
 
-void EmuWindow_SDL2::ToggleFullscreen() {
-    if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) {
-        SDL_SetWindowFullscreen(window, 0);
-    } else {
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-    }
-}
-
 EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manager,
                                SDL_Window* window, bool& ok_multiplayer)
     : window(window), system(system), plugin_manager(plugin_manager) {
@@ -218,15 +210,11 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
                                            vvctre_version_minor, vvctre_version_patch)
                                    .c_str());
 
-    if (Settings::values.start_in_fullscreen_mode) {
-        ToggleFullscreen();
-    } else {
-        SDL_SetWindowMinimumSize(window, Core::kScreenTopWidth,
-                                 Core::kScreenTopHeight + Core::kScreenBottomHeight);
-        SDL_RestoreWindow(window);
-        SDL_SetWindowSize(window, Core::kScreenTopWidth,
-                          Core::kScreenTopHeight + Core::kScreenBottomHeight);
-    }
+    SDL_SetWindowMinimumSize(window, Core::kScreenTopWidth,
+                             Core::kScreenTopHeight + Core::kScreenBottomHeight);
+    SDL_RestoreWindow(window);
+    SDL_SetWindowSize(window, Core::kScreenTopWidth,
+                      Core::kScreenTopHeight + Core::kScreenBottomHeight);
 
     SDL_GL_SetSwapInterval(Settings::values.enable_vsync ? 1 : 0);
 
@@ -2101,11 +2089,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 ImGui::Checkbox("Cheats", &show_cheats_window);
-
-                bool fullscreen = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
-                if (ImGui::Checkbox("Fullscreen", &fullscreen)) {
-                    ToggleFullscreen();
-                }
 
                 ImGui::EndMenu();
             }

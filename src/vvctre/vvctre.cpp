@@ -195,7 +195,6 @@ int main(int argc, char** argv) {
         }
     } else {
         Settings::values.file_path = std::string(argv[1]);
-        Settings::values.start_in_fullscreen_mode = true;
         Settings::Apply();
     }
     plugin_manager.InitialSettingsOkPressed();

@@ -84,9 +84,6 @@ private:
     /// Called by PollEvents when any event that may cause the window to be resized occurs
     void OnResize();
 
-    /// Called when user passes the fullscreen parameter flag
-    void ToggleFullscreen();
-
     /// Called when Tools -> Copy Screenshot is clicked
     void CopyScreenshot();
 

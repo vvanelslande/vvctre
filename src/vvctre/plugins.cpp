@@ -1197,14 +1197,6 @@ bool vvctre_settings_get_use_virtual_sd() {
     return Settings::values.use_virtual_sd;
 }
 
-void vvctre_settings_set_start_in_fullscreen_mode(bool value) {
-    Settings::values.start_in_fullscreen_mode = value;
-}
-
-bool vvctre_settings_get_start_in_fullscreen_mode() {
-    return Settings::values.start_in_fullscreen_mode;
-}
-
 void vvctre_settings_set_record_frame_times(bool value) {
     Settings::values.record_frame_times = value;
 }
@@ -2179,10 +2171,6 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_settings_get_unix_timestamp", (void*)&vvctre_settings_get_unix_timestamp},
     {"vvctre_settings_set_use_virtual_sd", (void*)&vvctre_settings_set_use_virtual_sd},
     {"vvctre_settings_get_use_virtual_sd", (void*)&vvctre_settings_get_use_virtual_sd},
-    {"vvctre_settings_set_start_in_fullscreen_mode",
-     (void*)&vvctre_settings_set_start_in_fullscreen_mode},
-    {"vvctre_settings_get_start_in_fullscreen_mode",
-     (void*)&vvctre_settings_get_start_in_fullscreen_mode},
     {"vvctre_settings_set_record_frame_times", (void*)&vvctre_settings_set_record_frame_times},
     {"vvctre_settings_get_record_frame_times", (void*)&vvctre_settings_get_record_frame_times},
     {"vvctre_settings_enable_gdbstub", (void*)&vvctre_settings_enable_gdbstub},

@@ -22,7 +22,6 @@ const match = process.env.ISSUE_BODY.match(
       "Initial Time: (?<startInitialTime_Type>System|Unix Timestamp) <!-- If this is Unix Timestamp, add the number after this -->(?: )?(?<startInitialTime_Timestamp>.*)?\r\n\r\n",
 
       "- \\[(?<startUseVirtualSdCard>[x ])] Use Virtual SD Card\r\n",
-      "- \\[(?<startStartInFullscreenMode>[x ])] Start in Fullscreen Mode\r\n",
       "- \\[(?<startRecordFrameTimes>[x ])] Record Frame Times\r\n",
       "- \\[(?<startEnableGdbStub>[x ])] Enable GDB Stub <!-- If this is enabled, add `Port: <port>` after this -->(?: Port: )?(?<startGdbStubPort>\\d+)?\r\n\r\n",
 
@@ -228,13 +227,6 @@ if (match.groups.startUseVirtualSdCard === " ") {
   names.push("vvctre_settings_set_use_virtual_sd");
   types.push(["void", "bool value"]);
   calls.push("vvctre_settings_set_use_virtual_sd(false);");
-  somethingChanged = true;
-}
-
-if (match.groups.startStartInFullscreenMode === "x") {
-  names.push("vvctre_settings_set_start_in_fullscreen_mode");
-  types.push(["void", "bool value"]);
-  calls.push("vvctre_settings_set_start_in_fullscreen_mode(true);");
   somethingChanged = true;
 }
 
