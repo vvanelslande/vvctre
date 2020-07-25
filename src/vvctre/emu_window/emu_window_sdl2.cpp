@@ -33,6 +33,8 @@
 #include "core/cheats/cheat_base.h"
 #include "core/cheats/cheats.h"
 #include "core/core.h"
+#include "core/file_sys/archive_extsavedata.h"
+#include "core/file_sys/archive_source_sd_savedata.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/cfg/cfg.h"
 #include "core/hle/service/nfc/nfc.h"
@@ -2183,6 +2185,24 @@ void EmuWindow_SDL2::SwapBuffers() {
                                          pfd::icon::error);
                         }
                     }
+                }
+
+                if (ImGui::MenuItem("Copy Save Data Folder Path")) {
+                    u64 program_id = 0;
+                    system.GetAppLoader().ReadProgramId(program_id);
+                    ImGui::SetClipboardText(
+                        FileSys::ArchiveSource_SDSaveData::GetSaveDataPathFor(
+                            FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir), program_id)
+                            .c_str());
+                }
+
+                if (ImGui::MenuItem("Copy Extra Data Folder Path")) {
+                    u64 extdata_id = 0;
+                    system.GetAppLoader().ReadExtdataId(extdata_id);
+                    ImGui::SetClipboardText(
+                        FileSys::GetExtDataPathFromId(
+                            FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir), extdata_id)
+                            .c_str());
                 }
 
                 if (ImGui::BeginMenu("Movie")) {
