@@ -231,21 +231,26 @@ int main(int argc, char** argv) {
 
     switch (load_result) {
     case Core::System::ResultStatus::ErrorNotInitialized:
+        vvctreShutdown(&plugin_manager);
         pfd::message("vvctre", "Not initialized", pfd::choice::ok, pfd::icon::error);
-        return -1;
+        return 1;
     case Core::System::ResultStatus::ErrorSystemMode:
+        vvctreShutdown(&plugin_manager);
         pfd::message("vvctre", "Failed to determine system mode", pfd::choice::ok,
                      pfd::icon::error);
-        return -1;
+        return 1;
     case Core::System::ResultStatus::ErrorLoader_ErrorEncrypted:
+        vvctreShutdown(&plugin_manager);
         pfd::message("vvctre", "Encrypted file", pfd::choice::ok, pfd::icon::error);
-        return -1;
+        return 1;
     case Core::System::ResultStatus::ErrorLoader_ErrorUnsupportedFormat:
+        vvctreShutdown(&plugin_manager);
         pfd::message("vvctre", "Unsupported file format", pfd::choice::ok, pfd::icon::error);
-        return -1;
+        return 1;
     case Core::System::ResultStatus::ErrorFileNotFound:
+        vvctreShutdown(&plugin_manager);
         pfd::message("vvctre", "File not found", pfd::choice::ok, pfd::icon::error);
-        return -1;
+        return 1;
     default:
         break;
     }
