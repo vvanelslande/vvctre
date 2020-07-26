@@ -105,6 +105,7 @@ private:
     // IPC recorder
     IPCDebugger::CallbackHandle ipc_recorder_callback;
     std::map<int, IPCDebugger::RequestRecord> ipc_records;
+    std::string ipc_recorder_filter;
     bool show_ipc_recorder_window = false;
 
     // Installed
