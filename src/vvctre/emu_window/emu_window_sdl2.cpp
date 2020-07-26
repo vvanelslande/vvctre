@@ -663,7 +663,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("Camera")) {
-                    ImGui::TextUnformatted("Inner Camera Engine:");
+                    ImGui::TextUnformatted("Inner:");
+                    ImGui::Indent();
+                    ImGui::TextUnformatted("Engine:");
                     ImGui::SameLine();
                     if (ImGui::BeginCombo("##innercameraengine",
                                           Settings::values
@@ -690,10 +692,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                         ImGui::EndCombo();
                     }
-
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::InnerCamera)] == "image") {
-                        ImGui::TextUnformatted("Inner Camera Parameter:");
+                        ImGui::TextUnformatted("Parameter:");
                         ImGui::SameLine();
                         ImGui::PushItemWidth(200.0f);
                         if (ImGui::InputText(
@@ -718,7 +719,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                     }
 
-                    ImGui::TextUnformatted("Outer Left Camera Engine:");
+                    ImGui::Unindent();
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Outer Left:");
+                    ImGui::Indent();
+                    ImGui::TextUnformatted("Engine:");
                     ImGui::SameLine();
                     if (ImGui::BeginCombo("##outerleftcameraengine",
                                           Settings::values
@@ -745,10 +751,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                         ImGui::EndCombo();
                     }
-
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::OuterLeftCamera)] == "image") {
-                        ImGui::TextUnformatted("Outer Left Camera Parameter:");
+                        ImGui::TextUnformatted("Parameter:");
                         ImGui::SameLine();
                         ImGui::PushItemWidth(200.0f);
                         if (ImGui::InputText(
@@ -773,7 +778,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                     }
 
-                    ImGui::TextUnformatted("Outer Right Camera Engine:");
+                    ImGui::Unindent();
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Outer Right:");
+                    ImGui::Indent();
+                    ImGui::TextUnformatted("Engine:");
                     ImGui::SameLine();
                     if (ImGui::BeginCombo("##outerrightengine",
                                           Settings::values
@@ -800,10 +810,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                         ImGui::EndCombo();
                     }
-
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::OuterRightCamera)] == "image") {
-                        ImGui::TextUnformatted("Outer Right Camera Parameter:");
+                        ImGui::TextUnformatted("Parameter:");
                         ImGui::SameLine();
                         ImGui::PushItemWidth(200.0f);
                         if (ImGui::InputText(
