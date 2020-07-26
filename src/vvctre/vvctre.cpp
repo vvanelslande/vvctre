@@ -31,6 +31,7 @@
 #include "common/logging/log.h"
 #include "common/param_package.h"
 #include "common/scope_exit.h"
+#include "core/3ds.h"
 #include "core/core.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/cfg/cfg.h"
@@ -96,14 +97,16 @@ int main(int argc, char** argv) {
                              .c_str(),
                          SDL_WINDOWPOS_UNDEFINED, // x position
                          SDL_WINDOWPOS_UNDEFINED, // y position
-                         640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+                         Core::kScreenTopWidth, Core::kScreenTopHeight + Core::kScreenBottomHeight,
+                         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (window == nullptr) {
         pfd::message("vvctre", fmt::format("Failed to create window: {}", SDL_GetError()),
                      pfd::choice::ok, pfd::icon::error);
         vvctreShutdown(nullptr);
         std::exit(1);
     }
-    SDL_SetWindowMinimumSize(window, 640, 480);
+    SDL_SetWindowMinimumSize(window, Core::kScreenTopWidth,
+                             Core::kScreenTopHeight + Core::kScreenBottomHeight);
     SDL_GLContext context = SDL_GL_CreateContext(window);
     if (context == nullptr) {
         pfd::message("vvctre", fmt::format("Failed to create OpenGL context: {}", SDL_GetError()),

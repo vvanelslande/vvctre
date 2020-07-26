@@ -210,12 +210,6 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
                                            vvctre_version_minor, vvctre_version_patch)
                                    .c_str());
 
-    SDL_SetWindowMinimumSize(window, Core::kScreenTopWidth,
-                             Core::kScreenTopHeight + Core::kScreenBottomHeight);
-    SDL_RestoreWindow(window);
-    SDL_SetWindowSize(window, Core::kScreenTopWidth,
-                      Core::kScreenTopHeight + Core::kScreenBottomHeight);
-
     SDL_GL_SetSwapInterval(Settings::values.enable_vsync ? 1 : 0);
 
     OnResize();
@@ -401,7 +395,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::SameLine();
                         ImGui::TextUnformatted("To");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(45);
+                        ImGui::PushItemWidth(45.0f);
                         ImGui::InputScalar("##speedlimit", ImGuiDataType_U16,
                                            &Settings::values.speed_limit);
                         ImGui::PopItemWidth();
@@ -658,7 +652,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                     u8 factor_3d = Settings::values.factor_3d;
                     const u8 factor_3d_min = 0;
                     const u8 factor_3d_max = 100;
-                    ImGui::PushItemWidth(135);
+                    ImGui::PushItemWidth(135.0f);
                     if (ImGui::SliderScalar("##factor_3d", ImGuiDataType_U8, &factor_3d,
                                             &factor_3d_min, &factor_3d_max, "%d%%")) {
                         Settings::values.factor_3d = factor_3d;
@@ -701,7 +695,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             Service::CAM::CameraIndex::InnerCamera)] == "image") {
                         ImGui::TextUnformatted("Inner Camera Parameter:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(316);
+                        ImGui::PushItemWidth(200.0f);
                         if (ImGui::InputText(
                                 "##innercameraparameter",
                                 &Settings::values.camera_parameter[static_cast<std::size_t>(
@@ -756,7 +750,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             Service::CAM::CameraIndex::OuterLeftCamera)] == "image") {
                         ImGui::TextUnformatted("Outer Left Camera Parameter:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(316);
+                        ImGui::PushItemWidth(200.0f);
                         if (ImGui::InputText(
                                 "##outerleftcameraparameter",
                                 &Settings::values.camera_parameter[static_cast<std::size_t>(
@@ -811,7 +805,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             Service::CAM::CameraIndex::OuterRightCamera)] == "image") {
                         ImGui::TextUnformatted("Outer Right Camera Parameter:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(316);
+                        ImGui::PushItemWidth(200.0f);
                         if (ImGui::InputText(
                                 "##outerrightcameraparameter",
                                 &Settings::values.camera_parameter[static_cast<std::size_t>(

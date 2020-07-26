@@ -507,7 +507,9 @@ if (match.groups.graphicsResolution !== "1") {
   names.push("vvctre_settings_set_resolution");
   types.push(["void", "u16 value"]);
   calls.push(
-    `vvctre_settings_set_resolution(${match.groups.graphicsResolution});`
+    match.groups.graphicsResolution === "Window Size"
+      ? "vvctre_settings_set_resolution(0);"
+      : `vvctre_settings_set_resolution(${match.groups.graphicsResolution});`
   );
   somethingChanged = true;
 }

@@ -42,8 +42,14 @@ static bool is_open = true;
 
 InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* window,
                                  Service::CFG::Module& cfg, bool& ok_multiplayer) {
-    signal(SIGINT, [](int) { is_open = false; });
-    signal(SIGTERM, [](int) { is_open = false; });
+    signal(SIGINT, [](int) {
+        Settings::values.file_path.clear();
+        is_open = false;
+    });
+    signal(SIGTERM, [](int) {
+        Settings::values.file_path.clear();
+        is_open = false;
+    });
 
     SDL_Event event;
     CitraRoomList public_rooms;
@@ -83,128 +89,130 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                 if (ImGui::BeginTabItem("Start")) {
                     ImGui::TextUnformatted("File:");
                     ImGui::SameLine();
-                    ImGui::PushItemWidth(250);
                     ImGui::InputText("##file", &Settings::values.file_path);
-                    ImGui::PopItemWidth();
                     ImGui::SameLine();
-                    if (ImGui::Button("Browse...##file")) {
-                        const std::vector<std::string> result =
-                            pfd::open_file("Browse", *asl::Process::myDir(),
-                                           {"All supported files",
-                                            "*.cci *.CCI *.3ds *.3DS *.cxi *.CXI *.3dsx *.3DSX "
-                                            "*.app *.APP *.elf *.ELF *.axf *.AXF",
-                                            "Cartridges", "*.cci *.CCI *.3ds *.3DS", "NCCHs",
-                                            "*.cxi *.CXI *.app *.APP", "Homebrew",
-                                            "*.3dsx *.3DSX *.elf *.ELF *.axf *.AXF"})
-                                .result();
-                        if (!result.empty()) {
-                            Settings::values.file_path = result[0];
+                    ImGui::Button("...##file");
+                    if (ImGui::BeginPopupContextItem("File", ImGuiPopupFlags_MouseButtonLeft)) {
+                        if (ImGui::MenuItem("Browse")) {
+                            const std::vector<std::string> result =
+                                pfd::open_file("Browse", *asl::Process::myDir(),
+                                               {"All supported files",
+                                                "*.cci *.CCI *.3ds *.3DS *.cxi *.CXI *.3dsx *.3DSX "
+                                                "*.app *.APP *.elf *.ELF *.axf *.AXF",
+                                                "Cartridges", "*.cci *.CCI *.3ds *.3DS", "NCCHs",
+                                                "*.cxi *.CXI *.app *.APP", "Homebrew",
+                                                "*.3dsx *.3DSX *.elf *.ELF *.axf *.AXF"})
+                                    .result();
+                            if (!result.empty()) {
+                                Settings::values.file_path = result[0];
+                            }
                         }
-                    }
 
-                    ImGui::SameLine();
-                    if (ImGui::Button("Install CIA")) {
-                        const std::vector<std::string> files =
-                            pfd::open_file("Install CIA", *asl::Process::myDir(),
-                                           {"CTR Importable Archive", "*.cia *.CIA"},
-                                           pfd::opt::multiselect)
-                                .result();
+                        if (ImGui::MenuItem("Install CIA")) {
+                            const std::vector<std::string> files =
+                                pfd::open_file("Install CIA", *asl::Process::myDir(),
+                                               {"CTR Importable Archive", "*.cia *.CIA"},
+                                               pfd::opt::multiselect)
+                                    .result();
 
-                        for (const auto& file : files) {
-                            const Service::AM::InstallStatus status = Service::AM::InstallCIA(
-                                file, [&](std::size_t current, std::size_t total) {
-                                    // Poll events
-                                    while (SDL_PollEvent(&event)) {
-                                        ImGui_ImplSDL2_ProcessEvent(&event);
+                            for (const auto& file : files) {
+                                const Service::AM::InstallStatus status = Service::AM::InstallCIA(
+                                    file, [&](std::size_t current, std::size_t total) {
+                                        // Poll events
+                                        while (SDL_PollEvent(&event)) {
+                                            ImGui_ImplSDL2_ProcessEvent(&event);
 
-                                        if (event.type == SDL_QUIT) {
-                                            if (pfd::message(
-                                                    "vvctre", "Would you like to exit now?",
-                                                    pfd::choice::yes_no, pfd::icon::question)
-                                                    .result() == pfd::button::yes) {
-                                                vvctreShutdown(&plugin_manager);
-                                                std::exit(1);
+                                            if (event.type == SDL_QUIT) {
+                                                if (pfd::message(
+                                                        "vvctre", "Would you like to exit now?",
+                                                        pfd::choice::yes_no, pfd::icon::question)
+                                                        .result() == pfd::button::yes) {
+                                                    vvctreShutdown(&plugin_manager);
+                                                    std::exit(1);
+                                                }
                                             }
                                         }
-                                    }
 
-                                    // Draw window
-                                    ImGui_ImplOpenGL3_NewFrame();
-                                    ImGui_ImplSDL2_NewFrame(window);
-                                    ImGui::NewFrame();
+                                        // Draw window
+                                        ImGui_ImplOpenGL3_NewFrame();
+                                        ImGui_ImplSDL2_NewFrame(window);
+                                        ImGui::NewFrame();
 
-                                    ImGui::OpenPopup("Installing CIA");
+                                        ImGui::OpenPopup("Installing CIA");
 
-                                    if (ImGui::BeginPopupModal(
-                                            "Installing CIA", nullptr,
-                                            ImGuiWindowFlags_NoSavedSettings |
-                                                ImGuiWindowFlags_AlwaysAutoResize |
-                                                ImGuiWindowFlags_NoMove)) {
-                                        ImGui::Text("Installing %s", file.c_str());
-                                        ImGui::ProgressBar(static_cast<float>(current) /
-                                                           static_cast<float>(total));
-                                        ImGui::EndPopup();
-                                    }
+                                        if (ImGui::BeginPopupModal(
+                                                "Installing CIA", nullptr,
+                                                ImGuiWindowFlags_NoSavedSettings |
+                                                    ImGuiWindowFlags_AlwaysAutoResize |
+                                                    ImGuiWindowFlags_NoMove)) {
+                                            ImGui::Text("Installing %s", file.c_str());
+                                            ImGui::ProgressBar(static_cast<float>(current) /
+                                                               static_cast<float>(total));
+                                            ImGui::EndPopup();
+                                        }
 
-                                    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-                                    glClear(GL_COLOR_BUFFER_BIT);
-                                    ImGui::Render();
-                                    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-                                    SDL_GL_SwapWindow(window);
-                                });
+                                        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                                        glClear(GL_COLOR_BUFFER_BIT);
+                                        ImGui::Render();
+                                        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+                                        SDL_GL_SwapWindow(window);
+                                    });
 
-                            switch (status) {
-                            case Service::AM::InstallStatus::Success:
-                                break;
-                            case Service::AM::InstallStatus::ErrorFailedToOpenFile:
-                                pfd::message("vvctre", fmt::format("Failed to open {}", file),
-                                             pfd::choice::ok, pfd::icon::error);
-                                break;
-                            case Service::AM::InstallStatus::ErrorFileNotFound:
-                                pfd::message("vvctre", fmt::format("{} not found", file),
-                                             pfd::choice::ok, pfd::icon::error);
-                                break;
-                            case Service::AM::InstallStatus::ErrorAborted:
-                                pfd::message("vvctre", fmt::format("{} installation aborted", file),
-                                             pfd::choice::ok, pfd::icon::error);
-                                break;
-                            case Service::AM::InstallStatus::ErrorInvalid:
-                                pfd::message("vvctre", fmt::format("{} is invalid", file),
-                                             pfd::choice::ok, pfd::icon::error);
-                                break;
-                            case Service::AM::InstallStatus::ErrorEncrypted:
-                                pfd::message("vvctre", fmt::format("{} is encrypted", file),
-                                             pfd::choice::ok, pfd::icon::error);
-                                break;
+                                switch (status) {
+                                case Service::AM::InstallStatus::Success:
+                                    break;
+                                case Service::AM::InstallStatus::ErrorFailedToOpenFile:
+                                    pfd::message("vvctre", fmt::format("Failed to open {}", file),
+                                                 pfd::choice::ok, pfd::icon::error);
+                                    break;
+                                case Service::AM::InstallStatus::ErrorFileNotFound:
+                                    pfd::message("vvctre", fmt::format("{} not found", file),
+                                                 pfd::choice::ok, pfd::icon::error);
+                                    break;
+                                case Service::AM::InstallStatus::ErrorAborted:
+                                    pfd::message("vvctre",
+                                                 fmt::format("{} installation aborted", file),
+                                                 pfd::choice::ok, pfd::icon::error);
+                                    break;
+                                case Service::AM::InstallStatus::ErrorInvalid:
+                                    pfd::message("vvctre", fmt::format("{} is invalid", file),
+                                                 pfd::choice::ok, pfd::icon::error);
+                                    break;
+                                case Service::AM::InstallStatus::ErrorEncrypted:
+                                    pfd::message("vvctre", fmt::format("{} is encrypted", file),
+                                                 pfd::choice::ok, pfd::icon::error);
+                                    break;
+                                }
                             }
+
+                            continue;
                         }
 
-                        continue;
-                    }
+                        if (ImGui::MenuItem("Installed")) {
+                            installed = GetInstalledList();
+                        }
 
-                    ImGui::SameLine();
-                    if (ImGui::Button("Installed")) {
-                        installed = GetInstalledList();
-                    }
-
-                    ImGui::SameLine();
-                    if (ImGui::Button("HOME Menu")) {
-                        if (Settings::values.region_value == Settings::REGION_VALUE_AUTO_SELECT) {
-                            pfd::message("vvctre", "Region is Auto-select", pfd::choice::ok,
-                                         pfd::icon::error);
-                        } else {
-                            const u64 title_id = Service::APT::GetTitleIdForApplet(
-                                Service::APT::AppletId::HomeMenu,
-                                static_cast<u32>(Settings::values.region_value));
-                            const std::string path = Service::AM::GetTitleContentPath(
-                                Service::FS::MediaType::NAND, title_id);
-                            if (FileUtil::Exists(path)) {
-                                Settings::values.file_path = path;
-                            } else {
-                                pfd::message("vvctre", "HOME Menu not installed", pfd::choice::ok,
+                        if (ImGui::MenuItem("HOME Menu")) {
+                            if (Settings::values.region_value ==
+                                Settings::REGION_VALUE_AUTO_SELECT) {
+                                pfd::message("vvctre", "Region is Auto-select", pfd::choice::ok,
                                              pfd::icon::error);
+                            } else {
+                                const u64 title_id = Service::APT::GetTitleIdForApplet(
+                                    Service::APT::AppletId::HomeMenu,
+                                    static_cast<u32>(Settings::values.region_value));
+                                const std::string path = Service::AM::GetTitleContentPath(
+                                    Service::FS::MediaType::NAND, title_id);
+                                if (FileUtil::Exists(path)) {
+                                    Settings::values.file_path = path;
+                                } else {
+                                    pfd::message("vvctre", "HOME Menu not installed",
+                                                 pfd::choice::ok, pfd::icon::error);
+                                }
                             }
                         }
+
+                        ImGui::EndPopup();
                     }
 
                     if (Settings::values.record_movie.empty()) {
@@ -212,7 +220,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::SameLine();
                         ImGui::InputText("##playmovie", &Settings::values.play_movie);
                         ImGui::SameLine();
-                        if (ImGui::Button("Browse...##playmovie")) {
+                        if (ImGui::Button("...##playmovie")) {
                             const std::vector<std::string> result =
                                 pfd::open_file("Play Movie", *asl::Process::myDir(),
                                                {"VvCtre Movie", "*.vcm"})
@@ -226,9 +234,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     if (Settings::values.play_movie.empty()) {
                         ImGui::TextUnformatted("Record Movie:");
                         ImGui::SameLine();
+                        ImGui::PushItemWidth(250.0f);
                         ImGui::InputText("##recordmovie", &Settings::values.record_movie);
+                        ImGui::PopItemWidth();
                         ImGui::SameLine();
-                        if (ImGui::Button("Browse...##recordmovie")) {
+                        if (ImGui::Button("...##recordmovie")) {
                             const std::string record_movie =
                                 pfd::save_file("Record Movie", "movie.vcm",
                                                {"VvCtre Movie", "*.vcm"})
@@ -296,6 +306,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     ImGui::TextUnformatted("Initial Time:");
                     ImGui::SameLine();
+                    ImGui::PushItemWidth(125.0f);
                     if (ImGui::BeginCombo("##initial_clock", [] {
                             switch (Settings::values.initial_clock) {
                             case Settings::InitialClock::SystemTime:
@@ -318,6 +329,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                         ImGui::EndCombo();
                     }
+                    ImGui::PopItemWidth();
                     if (Settings::values.initial_clock == Settings::InitialClock::FixedTime) {
                         ImGui::SameLine();
                         ImGui::InputScalar("##unix_timestamp", ImGuiDataType_U64,
@@ -335,7 +347,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::SameLine();
                         ImGui::TextUnformatted("Port:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(45);
+                        ImGui::PushItemWidth(45.0f);
                         ImGui::InputScalar("##gdbstubport", ImGuiDataType_U16,
                                            &Settings::values.gdbstub_port);
                         ImGui::PopItemWidth();
@@ -352,7 +364,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::SameLine();
                         ImGui::TextUnformatted("To");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(45);
+                        ImGui::PushItemWidth(45.0f);
                         ImGui::InputScalar("##speedlimit", ImGuiDataType_U16,
                                            &Settings::values.speed_limit);
                         ImGui::PopItemWidth();
@@ -364,18 +376,22 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::Checkbox("Custom CPU Ticks:",
                                         &Settings::values.use_custom_cpu_ticks);
                         ImGui::SameLine();
+                        ImGui::PushItemWidth(45.0f);
                         ImGui::InputScalar("##customcputicks", ImGuiDataType_U64,
                                            &Settings::values.custom_cpu_ticks);
+                        ImGui::PopItemWidth();
                     } else {
                         ImGui::Checkbox("Custom CPU Ticks", &Settings::values.use_custom_cpu_ticks);
                     }
 
                     ImGui::TextUnformatted("CPU Clock Percentage:");
                     ImGui::SameLine();
-                    u32 min = 5;
-                    u32 max = 400;
-                    ImGui::SliderScalar("##cpu_clock_percentage", ImGuiDataType_U32,
-                                        &Settings::values.cpu_clock_percentage, &min, &max, "%d%%");
+                    ImGui::PushItemWidth(45.0f);
+                    ImGui::InputScalar("##cpuclockpercentage", ImGuiDataType_U32,
+                                       &Settings::values.cpu_clock_percentage);
+                    ImGui::PopItemWidth();
+                    ImGui::SameLine();
+                    ImGui::TextUnformatted("%");
 
                     ImGui::EndTabItem();
                 }
@@ -396,6 +412,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     ImGui::TextUnformatted("Sink:");
                     ImGui::SameLine();
+                    ImGui::PushItemWidth(63.0f);
                     if (ImGui::BeginCombo("##sink", Settings::values.audio_sink_id.c_str())) {
                         if (ImGui::Selectable("auto")) {
                             Settings::values.audio_sink_id = "auto";
@@ -407,6 +424,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
                         ImGui::EndCombo();
                     }
+                    ImGui::PopItemWidth();
 
                     ImGui::TextUnformatted("Device:");
                     ImGui::SameLine();
@@ -427,6 +445,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     ImGui::TextUnformatted("Microphone Input Type:");
                     ImGui::SameLine();
+                    ImGui::PushItemWidth(110.0f);
                     if (ImGui::BeginCombo("##microphone_input_type", [] {
                             switch (Settings::values.microphone_input_type) {
                             case Settings::MicrophoneInputType::None:
@@ -455,12 +474,14 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
                         ImGui::EndCombo();
                     }
+                    ImGui::PopItemWidth();
 
                     if (Settings::values.microphone_input_type ==
                         Settings::MicrophoneInputType::Real) {
-                        ImGui::TextUnformatted("Microphone Device");
+                        ImGui::TextUnformatted("Microphone Device:");
                         ImGui::SameLine();
 
+                        ImGui::PushItemWidth(250.0f);
                         if (ImGui::BeginCombo("##microphonedevice",
                                               Settings::values.microphone_device.c_str())) {
                             if (ImGui::Selectable("auto")) {
@@ -476,13 +497,16 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             ImGui::EndCombo();
                         }
+                        ImGui::PopItemWidth();
                     }
 
                     ImGui::EndTabItem();
                 }
 
                 if (ImGui::BeginTabItem("Camera")) {
-                    ImGui::TextUnformatted("Inner Camera Engine:");
+                    ImGui::TextUnformatted("Inner:");
+                    ImGui::Indent();
+                    ImGui::TextUnformatted("Engine:");
                     ImGui::SameLine();
                     if (ImGui::BeginCombo("##innercameraengine",
                                           Settings::values
@@ -499,12 +523,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
                         ImGui::EndCombo();
                     }
-
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::InnerCamera)] == "image") {
-                        ImGui::TextUnformatted("Inner Camera Parameter:");
+                        ImGui::TextUnformatted("Parameter:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(316);
+                        ImGui::PushItemWidth(200.0f);
                         ImGui::InputText(
                             "##innercameraparameter",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
@@ -514,8 +537,13 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             "Browse...##innercamera",
                             static_cast<std::size_t>(Service::CAM::CameraIndex::InnerCamera));
                     }
+                    ImGui::Unindent();
 
-                    ImGui::TextUnformatted("Outer Left Camera Engine:");
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Outer Left:");
+                    ImGui::Indent();
+                    ImGui::TextUnformatted("Engine:");
                     ImGui::SameLine();
                     if (ImGui::BeginCombo("##outerleftcameraengine",
                                           Settings::values
@@ -532,12 +560,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
                         ImGui::EndCombo();
                     }
-
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::OuterLeftCamera)] == "image") {
-                        ImGui::TextUnformatted("Outer Left Camera Parameter:");
+                        ImGui::TextUnformatted("Parameter:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(316);
+                        ImGui::PushItemWidth(200.0f);
                         ImGui::InputText(
                             "##outerleftcameraparameter",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
@@ -547,8 +574,13 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             "Browse...##outerleftcamera",
                             static_cast<std::size_t>(Service::CAM::CameraIndex::OuterLeftCamera));
                     }
+                    ImGui::Unindent();
 
-                    ImGui::TextUnformatted("Outer Right Camera Engine");
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Outer Right:");
+                    ImGui::Indent();
+                    ImGui::TextUnformatted("Engine:");
                     ImGui::SameLine();
                     if (ImGui::BeginCombo("##outerrightcameraengine",
                                           Settings::values
@@ -565,12 +597,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
                         ImGui::EndCombo();
                     }
-
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::OuterRightCamera)] == "image") {
-                        ImGui::TextUnformatted("Outer Right Camera Parameter:");
+                        ImGui::TextUnformatted("Parameter:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(316);
+                        ImGui::PushItemWidth(200.0f);
                         ImGui::InputText(
                             "##outerrightcameraparameter",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
@@ -594,10 +625,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         update_config_savegame = true;
                     }
 
-                    ImGui::TextUnformatted("Birthday:");
-                    ImGui::SameLine();
-
                     auto [month, day] = cfg.GetBirthday();
+
+                    ImGui::TextUnformatted("Birthday Month:");
+                    ImGui::SameLine();
 
                     if (ImGui::BeginCombo("##birthday_month", [&] {
                             switch (month) {
@@ -694,6 +725,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::EndCombo();
                     }
 
+                    ImGui::TextUnformatted("Birthday Day:");
                     ImGui::SameLine();
 
                     if (ImGui::InputScalar("##birthday_day", ImGuiDataType_U8, &day)) {
@@ -801,6 +833,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     ImGui::TextUnformatted("Sound output mode:");
                     ImGui::SameLine();
+                    ImGui::PushItemWidth(85.0f);
                     if (ImGui::BeginCombo("##soundoutputmode", [&] {
                             switch (cfg.GetSoundOutputMode()) {
                             case Service::CFG::SoundOutputMode::SOUND_MONO:
@@ -829,6 +862,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
                         ImGui::EndCombo();
                     }
+                    ImGui::PopItemWidth();
 
                     ImGui::TextUnformatted("Country:");
                     ImGui::SameLine();
@@ -1699,7 +1733,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::Checkbox("Sharper Distant Objects",
                                     &Settings::values.sharper_distant_objects);
 
-                    ImGui::TextUnformatted("Resolution");
+                    ImGui::TextUnformatted("Resolution:");
                     ImGui::SameLine();
                     const u16 min = 0;
                     const u16 max = 10;
@@ -1707,22 +1741,24 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                         &Settings::values.resolution, &min, &max,
                                         Settings::values.resolution == 0 ? "Window Size" : "%d");
 
-                    ImGui::TextUnformatted("Background Color");
+                    ImGui::TextUnformatted("Background Color:");
                     ImGui::SameLine();
                     ImGui::ColorEdit3("##backgroundcolor", &Settings::values.background_color_red,
                                       ImGuiColorEditFlags_NoInputs);
 
-                    ImGui::TextUnformatted("Post Processing Shader");
+                    ImGui::TextUnformatted("Post Processing Shader:");
                     ImGui::SameLine();
+                    ImGui::PushItemWidth(200.0f);
                     ImGui::InputText("##postprocessingshader",
                                      &Settings::values.post_processing_shader);
+                    ImGui::PopItemWidth();
                     if (ImGui::IsItemHovered()) {
                         ImGui::BeginTooltip();
                         ImGui::TextUnformatted("File name without extension and folder");
                         ImGui::EndTooltip();
                     }
 
-                    ImGui::TextUnformatted("Texture Filter");
+                    ImGui::TextUnformatted("Texture Filter:");
                     ImGui::SameLine();
                     if (ImGui::BeginCombo("##texturefilter",
                                           Settings::values.texture_filter.c_str())) {
@@ -1737,9 +1773,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::EndCombo();
                     }
 
-                    ImGui::TextUnformatted("3D");
+                    ImGui::TextUnformatted("3D:");
                     ImGui::SameLine();
 
+                    ImGui::PushItemWidth(110.0f);
                     if (ImGui::BeginCombo("##render_3d", [] {
                             switch (Settings::values.render_3d) {
                             case Settings::StereoRenderOption::Off:
@@ -1756,7 +1793,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             return "Invalid value";
                         }())) {
-
                         if (ImGui::Selectable("Off", Settings::values.render_3d ==
                                                          Settings::StereoRenderOption::Off)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Off;
@@ -1786,13 +1822,14 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                         ImGui::EndCombo();
                     }
+                    ImGui::PopItemWidth();
 
                     ImGui::SameLine();
 
                     u8 factor_3d = Settings::values.factor_3d;
                     const u8 factor_3d_min = 0;
                     const u8 factor_3d_max = 100;
-                    ImGui::PushItemWidth(100);
+                    ImGui::PushItemWidth(110.0f);
                     if (ImGui::SliderScalar("##factor_3d", ImGuiDataType_U8, &factor_3d,
                                             &factor_3d_min, &factor_3d_max, "%d%%")) {
                         Settings::values.factor_3d = factor_3d;
@@ -2160,8 +2197,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
                     };
 
-                    // Buttons
-                    ImGui::BeginGroup();
                     ImGui::TextUnformatted("Buttons");
 
                     ImGui::TextUnformatted("A:");
@@ -2307,13 +2342,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         Settings::values.buttons[Settings::NativeButton::Home] =
                             GetInput(InputCommon::Polling::DeviceType::Button);
                     }
-                    ImGui::EndGroup();
 
-                    ImGui::SameLine();
+                    ImGui::NewLine();
 
-                    // Circle Pad
-                    ImGui::BeginGroup();
                     ImGui::TextUnformatted("Circle Pad");
+
                     ImGui::TextUnformatted("Up:");
                     ImGui::SameLine();
                     if (ImGui::Button(
@@ -2431,7 +2464,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             float deadzone = params.Get("deadzone", 0.0f);
                             ImGui::TextUnformatted("Deadzone:");
                             ImGui::SameLine();
-                            ImGui::PushItemWidth(100);
+                            ImGui::PushItemWidth(100.0f);
                             if (ImGui::SliderFloat("##deadzoneCirclePad", &deadzone, 0.0f, 1.0f)) {
                                 params.Set("deadzone", deadzone);
                                 Settings::values.analogs[Settings::NativeAnalog::CirclePad] =
@@ -2441,7 +2474,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         } else if (params.Get("engine", "") == "analog_from_button") {
                             float modifier_scale = params.Get("modifier_scale", 0.5f);
                             ImGui::SameLine();
-                            ImGui::PushItemWidth(100);
+                            ImGui::PushItemWidth(100.0f);
                             if (ImGui::InputFloat("##modifierScaleCirclePad", &modifier_scale)) {
                                 params.Set("modifier_scale", modifier_scale);
                                 Settings::values.analogs[Settings::NativeAnalog::CirclePad] =
@@ -2461,13 +2494,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                                "the stick to the right, and then to the bottom.");
                         ImGui::EndTooltip();
                     }
-                    ImGui::EndGroup();
 
-                    ImGui::SameLine();
+                    ImGui::NewLine();
 
-                    // Circle Pad Pro
-                    ImGui::BeginGroup();
                     ImGui::TextUnformatted("Circle Pad Pro");
+
                     ImGui::TextUnformatted("Up:");
                     ImGui::SameLine();
                     if (ImGui::Button(
@@ -2585,7 +2616,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             float deadzone = params.Get("deadzone", 0.0f);
                             ImGui::TextUnformatted("Deadzone:");
                             ImGui::SameLine();
-                            ImGui::PushItemWidth(100);
+                            ImGui::PushItemWidth(100.0f);
                             if (ImGui::SliderFloat("##deadzoneCirclePadPro", &deadzone, 0.0f,
                                                    1.0f)) {
                                 params.Set("deadzone", deadzone);
@@ -2596,7 +2627,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         } else if (params.Get("engine", "") == "analog_from_button") {
                             float modifier_scale = params.Get("modifier_scale", 0.5f);
                             ImGui::SameLine();
-                            ImGui::PushItemWidth(100);
+                            ImGui::PushItemWidth(100.0f);
                             if (ImGui::InputFloat("##modifierScaleCirclePadPro", &modifier_scale)) {
                                 params.Set("modifier_scale", modifier_scale);
                                 Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] =
@@ -2616,13 +2647,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                                "the stick to the right, and then to the bottom.");
                         ImGui::EndTooltip();
                     }
-                    ImGui::EndGroup();
 
-                    ImGui::SameLine();
+                    ImGui::NewLine();
 
-                    // D-Pad
-                    ImGui::BeginGroup();
                     ImGui::TextUnformatted("D-Pad");
+
                     ImGui::TextUnformatted("Up:");
                     ImGui::SameLine();
                     if (ImGui::Button((InputCommon::ButtonToText(
@@ -2660,14 +2689,12 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         Settings::values.buttons[Settings::NativeButton::Right] =
                             GetInput(InputCommon::Polling::DeviceType::Button);
                     }
-                    ImGui::EndGroup();
 
                     ImGui::NewLine();
 
                     ImGui::TextUnformatted("Motion:");
                     ImGui::SameLine();
 
-                    ImGui::PushItemWidth(100);
                     if (ImGui::BeginCombo("##motion_device", [] {
                             const std::string engine =
                                 Common::ParamPackage(Settings::values.motion_device)
@@ -2691,7 +2718,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                         ImGui::EndCombo();
                     }
-                    ImGui::PopItemWidth();
 
                     Common::ParamPackage motion_device(Settings::values.motion_device);
 
@@ -2700,42 +2726,42 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         float sensitivity = motion_device.Get("sensitivity", 0.01f);
                         float clamp = motion_device.Get("tilt_clamp", 90.0f);
 
-                        ImGui::SameLine();
-                        ImGui::Spacing();
-                        ImGui::SameLine();
+                        ImGui::Indent();
+
                         ImGui::TextUnformatted("Update Period:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(30);
+                        ImGui::PushItemWidth(200.0f);
                         if (ImGui::InputInt("##update_period", &update_period, 0)) {
                             motion_device.Set("update_period", update_period);
                             Settings::values.motion_device = motion_device.Serialize();
                         }
                         ImGui::PopItemWidth();
 
-                        ImGui::SameLine();
                         ImGui::TextUnformatted("Sensitivity:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(40);
+                        ImGui::PushItemWidth(200.0f);
                         if (ImGui::InputFloat("##sensitivity", &sensitivity)) {
                             motion_device.Set("sensitivity", sensitivity);
                             Settings::values.motion_device = motion_device.Serialize();
                         }
                         ImGui::PopItemWidth();
 
-                        ImGui::SameLine();
                         ImGui::TextUnformatted("Clamp:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(50);
+                        ImGui::PushItemWidth(200.0f);
                         if (ImGui::InputFloat("##clamp", &clamp)) {
                             motion_device.Set("tilt_clamp", clamp);
                             Settings::values.motion_device = motion_device.Serialize();
                         }
                         ImGui::PopItemWidth();
+
+                        ImGui::Unindent();
                     }
+
+                    ImGui::NewLine();
 
                     ImGui::TextUnformatted("Touch:");
                     ImGui::SameLine();
-                    ImGui::PushItemWidth(100);
                     if (ImGui::BeginCombo("##touch_device", [] {
                             const std::string engine =
                                 Common::ParamPackage(Settings::values.touch_device)
@@ -2759,7 +2785,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                         ImGui::EndCombo();
                     }
-                    ImGui::PopItemWidth();
 
                     Common::ParamPackage touch_device(Settings::values.touch_device);
 
@@ -2769,71 +2794,59 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         int max_x = touch_device.Get("max_x", 1800);
                         int max_y = touch_device.Get("max_y", 850);
 
+                        ImGui::Indent();
+
+                        ImGui::TextUnformatted("Minimum X:");
                         ImGui::SameLine();
-                        ImGui::Spacing();
-                        ImGui::SameLine();
-                        ImGui::TextUnformatted("Min X:");
-                        ImGui::SameLine();
-                        ImGui::PushItemWidth(45);
                         if (ImGui::InputInt("##min_x", &min_x, 0)) {
                             touch_device.Set("min_x", min_x);
                             Settings::values.touch_device = touch_device.Serialize();
                         }
-                        ImGui::PopItemWidth();
 
+                        ImGui::TextUnformatted("Minimum Y:");
                         ImGui::SameLine();
-                        ImGui::TextUnformatted("Min Y:");
-                        ImGui::SameLine();
-                        ImGui::PushItemWidth(45);
                         if (ImGui::InputInt("##min_y", &min_y, 0)) {
                             touch_device.Set("min_y", min_y);
                             Settings::values.touch_device = touch_device.Serialize();
                         }
-                        ImGui::PopItemWidth();
 
+                        ImGui::TextUnformatted("Maximum X:");
                         ImGui::SameLine();
-                        ImGui::TextUnformatted("Max X:");
-                        ImGui::SameLine();
-                        ImGui::PushItemWidth(45);
                         if (ImGui::InputInt("##max_x", &max_x, 0)) {
                             touch_device.Set("max_x", max_x);
                             Settings::values.touch_device = touch_device.Serialize();
                         }
-                        ImGui::PopItemWidth();
 
+                        ImGui::TextUnformatted("Maximum Y:");
                         ImGui::SameLine();
-                        ImGui::TextUnformatted("Max Y:");
-                        ImGui::SameLine();
-                        ImGui::PushItemWidth(45);
                         if (ImGui::InputInt("##max_y", &max_y, 0)) {
                             touch_device.Set("max_y", max_y);
                             Settings::values.touch_device = touch_device.Serialize();
                         }
-                        ImGui::PopItemWidth();
+                        ImGui::Unindent();
                     }
 
                     if (motion_device.Get("engine", "") == "cemuhookudp" ||
                         touch_device.Get("engine", "") == "cemuhookudp") {
-                        ImGui::TextUnformatted("CemuhookUDP:");
+                        ImGui::NewLine();
 
+                        ImGui::TextUnformatted("CemuhookUDP Address:");
                         ImGui::SameLine();
-                        ImGui::PushItemWidth(110);
+                        ImGui::PushItemWidth(200.0f);
                         ImGui::InputText("##cemuhookudp_address",
                                          &Settings::values.cemuhookudp_address);
                         ImGui::PopItemWidth();
 
+                        ImGui::TextUnformatted("CemuhookUDP Port:");
                         ImGui::SameLine();
-                        ImGui::TextUnformatted(":");
-                        ImGui::SameLine();
-                        ImGui::PushItemWidth(45);
+                        ImGui::PushItemWidth(200.0f);
                         ImGui::InputScalar("##cemuhookudp_port", ImGuiDataType_U16,
                                            &Settings::values.cemuhookudp_port);
                         ImGui::PopItemWidth();
 
+                        ImGui::TextUnformatted("CemuhookUDP Pad:");
                         ImGui::SameLine();
-                        ImGui::TextUnformatted("Pad");
-                        ImGui::SameLine();
-                        ImGui::PushItemWidth(15);
+                        ImGui::PushItemWidth(200.0f);
                         ImGui::InputScalar("##cemuhookudp_pad_index", ImGuiDataType_U8,
                                            &Settings::values.cemuhookudp_pad_index);
                         ImGui::PopItemWidth();
