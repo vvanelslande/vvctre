@@ -2801,7 +2801,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                 public_rooms = GetPublicCitraRooms();
             }
 
-            if (ImGui::BeginChildFrame(ImGui::GetID("publicrooms"),
+            if (ImGui::BeginChildFrame(ImGui::GetID("Public Room List"),
                                        ImVec2(-1.0f, ImGui::GetContentRegionAvail().y - 40.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
                 for (const auto& room : public_rooms) {

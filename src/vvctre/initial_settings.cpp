@@ -2989,7 +2989,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         public_rooms = GetPublicCitraRooms();
                     }
                     if (ImGui::BeginChildFrame(
-                            ImGui::GetID("publicrooms"),
+                            ImGui::GetID("Public Room List"),
                             ImVec2(-1.0f, ImGui::GetContentRegionAvail().y - 40.0f),
                             ImGuiWindowFlags_HorizontalScrollbar)) {
                         for (const auto& room : public_rooms) {
