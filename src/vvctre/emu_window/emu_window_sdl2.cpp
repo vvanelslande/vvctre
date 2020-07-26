@@ -836,6 +836,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }
                         }
                     }
+                    ImGui::Unindent();
 
                     ImGui::EndMenu();
                 }

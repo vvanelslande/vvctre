@@ -611,6 +611,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             "Browse...##outerrightcamera",
                             static_cast<std::size_t>(Service::CAM::CameraIndex::OuterRightCamera));
                     }
+                    ImGui::Unindent();
 
                     ImGui::EndTabItem();
                 }
