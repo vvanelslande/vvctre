@@ -10,7 +10,7 @@ if (process.env.ISSUE_BODY === "X Y\r\n") {
 const fs = require("fs");
 
 const match = process.env.ISSUE_BODY.match(
-  /^(?<x>\d+) (?<y>\d+)(?:\r\n)?$/
+  /^(?<x>-?\d+) (?<y>-?\d+)(?:\r\n)?$/
 );
 
 let code = `// Copyright 2020 Valentin Vanelslande
