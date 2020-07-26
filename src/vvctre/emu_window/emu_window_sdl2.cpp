@@ -2441,7 +2441,8 @@ void EmuWindow_SDL2::SwapBuffers() {
             }
             ImGui::SameLine();
             ImGui::InputTextWithHint("##filter", "Filter", &ipc_recorder_filter);
-            if (ImGui::ListBoxHeader("##records", ImVec2(-1.0f, -1.0f))) {
+            if (ImGui::BeginChildFrame(ImGui::GetID("Records"), ImVec2(-1.0f, -1.0f),
+                                       ImGuiWindowFlags_HorizontalScrollbar)) {
                 for (const auto& record : ipc_records) {
                     std::string service_name;
                     std::string function_name = "Unknown";
@@ -2528,8 +2529,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                     }
                 }
-                ImGui::ListBoxFooter();
             }
+            ImGui::EndChildFrame();
         }
         if (!show_ipc_recorder_window) {
             IPCDebugger::Recorder& r = system.Kernel().GetIPCRecorder();
