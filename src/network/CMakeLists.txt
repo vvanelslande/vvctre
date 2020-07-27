@@ -1,7 +1,5 @@
 add_library(network STATIC
     common.h
-    network.cpp
-    network.h
     packet.cpp
     packet.h
     room.cpp

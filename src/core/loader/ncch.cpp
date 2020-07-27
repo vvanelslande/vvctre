@@ -25,7 +25,7 @@
 #include "core/loader/ncch.h"
 #include "core/loader/smdh.h"
 #include "core/memory.h"
-#include "network/network.h"
+#include "network/room_member.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Loader namespace
@@ -196,12 +196,10 @@ ResultStatus AppLoader_NCCH::Load(std::shared_ptr<Kernel::Process>& process) {
         return result;
     }
 
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        Network::GameInfo game_info;
-        ReadTitle(game_info.name);
-        game_info.id = ncch_program_id;
-        room_member->SendGameInfo(game_info);
-    }
+    Network::GameInfo game_info;
+    ReadTitle(game_info.name);
+    game_info.id = ncch_program_id;
+    Core::System::GetInstance().RoomMember().SendGameInfo(game_info);
 
     Core::System::GetInstance().ArchiveManager().RegisterSelfNCCH(*this);
 

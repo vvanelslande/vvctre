@@ -18,11 +18,11 @@
 #include "common/common_types.h"
 #include "common/swap.h"
 #include "core/hle/service/service.h"
-#include "network/network.h"
+#include "network/room_member.h"
 
 namespace Core {
 class System;
-}
+} // namespace Core
 
 namespace Kernel {
 class Event;
@@ -179,6 +179,8 @@ private:
      * specified wlan_comm_id since the last call.
      */
     std::list<Network::WifiPacket> GetReceivedBeacons(const MacAddress& sender, u32 wlan_comm_id);
+
+    void SendPacket(Network::WifiPacket& packet);
 
     /*
      * Returns an available index in the nodes array for the

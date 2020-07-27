@@ -45,7 +45,6 @@
 #include "input_common/main.h"
 #include "input_common/motion_emu.h"
 #include "input_common/sdl/sdl.h"
-#include "network/network.h"
 #include "video_core/renderer_base.h"
 #include "video_core/renderer_opengl/texture_filters/texture_filterer.h"
 #include "video_core/video_core.h"
@@ -150,60 +149,57 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
     signal(SIGINT, [](int) { is_open = false; });
     signal(SIGTERM, [](int) { is_open = false; });
 
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        multiplayer_on_error =
-            room_member->BindOnError([&](const Network::RoomMember::Error& error) {
-                pfd::message("vvctre", Network::GetErrorStr(error), pfd::choice::ok,
-                             pfd::icon::error);
+    Network::RoomMember& room_member = system.RoomMember();
 
-                multiplayer_message.clear();
-                multiplayer_messages.clear();
-            });
+    multiplayer_on_error = room_member.BindOnError([&](const Network::RoomMember::Error& error) {
+        pfd::message("vvctre", Network::GetErrorStr(error), pfd::choice::ok, pfd::icon::error);
 
-        multiplayer_on_chat_message =
-            room_member->BindOnChatMessageReceived([&](const Network::ChatEntry& entry) {
-                if (multiplayer_blocked_nicknames.count(entry.nickname)) {
-                    return;
-                }
+        multiplayer_message.clear();
+        multiplayer_messages.clear();
+    });
 
-                if (multiplayer_messages.size() == 100) {
-                    multiplayer_messages.pop_front();
-                }
+    multiplayer_on_chat_message =
+        room_member.BindOnChatMessageReceived([&](const Network::ChatEntry& entry) {
+            if (multiplayer_blocked_nicknames.count(entry.nickname)) {
+                return;
+            }
 
-                asl::Date date = asl::Date::now();
-                multiplayer_messages.push_back(fmt::format("[{}:{}] <{}> {}", date.hours(),
-                                                           date.minutes(), entry.nickname,
-                                                           entry.message));
-            });
+            if (multiplayer_messages.size() == 100) {
+                multiplayer_messages.pop_front();
+            }
 
-        multiplayer_on_status_message =
-            room_member->BindOnStatusMessageReceived([&](const Network::StatusMessageEntry& entry) {
-                if (multiplayer_messages.size() == 100) {
-                    multiplayer_messages.pop_front();
-                }
+            asl::Date date = asl::Date::now();
+            multiplayer_messages.push_back(fmt::format(
+                "[{}:{}] <{}> {}", date.hours(), date.minutes(), entry.nickname, entry.message));
+        });
 
-                switch (entry.type) {
-                case Network::StatusMessageTypes::IdMemberJoin:
-                    multiplayer_messages.push_back(fmt::format("{} joined", entry.nickname));
-                    break;
-                case Network::StatusMessageTypes::IdMemberLeave:
-                    multiplayer_messages.push_back(fmt::format("{} left", entry.nickname));
-                    break;
-                case Network::StatusMessageTypes::IdMemberKicked:
-                    multiplayer_messages.push_back(fmt::format("{} was kicked", entry.nickname));
-                    break;
-                case Network::StatusMessageTypes::IdMemberBanned:
-                    multiplayer_messages.push_back(fmt::format("{} was banned", entry.nickname));
-                    break;
-                case Network::StatusMessageTypes::IdAddressUnbanned:
-                    multiplayer_messages.push_back("Someone was unbanned");
-                    break;
-                }
-            });
+    multiplayer_on_status_message =
+        room_member.BindOnStatusMessageReceived([&](const Network::StatusMessageEntry& entry) {
+            if (multiplayer_messages.size() == 100) {
+                multiplayer_messages.pop_front();
+            }
 
-        if (ok_multiplayer) {
-            ConnectToCitraRoom();
-        }
+            switch (entry.type) {
+            case Network::StatusMessageTypes::IdMemberJoin:
+                multiplayer_messages.push_back(fmt::format("{} joined", entry.nickname));
+                break;
+            case Network::StatusMessageTypes::IdMemberLeave:
+                multiplayer_messages.push_back(fmt::format("{} left", entry.nickname));
+                break;
+            case Network::StatusMessageTypes::IdMemberKicked:
+                multiplayer_messages.push_back(fmt::format("{} was kicked", entry.nickname));
+                break;
+            case Network::StatusMessageTypes::IdMemberBanned:
+                multiplayer_messages.push_back(fmt::format("{} was banned", entry.nickname));
+                break;
+            case Network::StatusMessageTypes::IdAddressUnbanned:
+                multiplayer_messages.push_back("Someone was unbanned");
+                break;
+            }
+        });
+
+    if (ok_multiplayer) {
+        ConnectToCitraRoom();
     }
 
     SDL_SetWindowTitle(window, fmt::format("vvctre {}.{}.{}", vvctre_version_major,
@@ -2264,18 +2260,15 @@ void EmuWindow_SDL2::SwapBuffers() {
                 ImGui::EndMenu();
             }
 
-            if (std::shared_ptr<Network::RoomMember> room_member =
-                    Network::GetRoomMember().lock()) {
-                if (room_member->GetState() == Network::RoomMember::State::Idle) {
-                    if (ImGui::BeginMenu("Multiplayer")) {
-                        if (ImGui::MenuItem("Connect To Citra Room")) {
-                            if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
-                                public_rooms = GetPublicCitraRooms();
-                            }
-                            show_connect_to_citra_room = true;
+            if (system.RoomMember().GetState() == Network::RoomMember::State::Idle) {
+                if (ImGui::BeginMenu("Multiplayer")) {
+                    if (ImGui::MenuItem("Connect To Citra Room")) {
+                        if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
+                            public_rooms = GetPublicCitraRooms();
                         }
-                        ImGui::EndMenu();
+                        show_connect_to_citra_room = true;
                     }
+                    ImGui::EndMenu();
                 }
             }
 
@@ -2627,103 +2620,102 @@ void EmuWindow_SDL2::SwapBuffers() {
         }
     }
 
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        if (room_member->GetState() == Network::RoomMember::State::Joined) {
-            ImGui::SetNextWindowSize(ImVec2(640.f, 480.0f), ImGuiCond_Appearing);
+    Network::RoomMember& room_member = system.RoomMember();
+    if (room_member.GetState() == Network::RoomMember::State::Joined) {
+        ImGui::SetNextWindowSize(ImVec2(640.f, 480.0f), ImGuiCond_Appearing);
 
-            bool open = true;
-            const Network::RoomInformation room_information = room_member->GetRoomInformation();
-            const Network::RoomMember::MemberList& members = room_member->GetMemberInformation();
+        bool open = true;
+        const Network::RoomInformation room_information = room_member.GetRoomInformation();
+        const Network::RoomMember::MemberList& members = room_member.GetMemberInformation();
 
-            if (ImGui::Begin(fmt::format("{} ({}/{})###room", room_information.name, members.size(),
-                                         room_information.member_slots)
-                                 .c_str(),
-                             &open, ImGuiWindowFlags_NoSavedSettings)) {
-                ImGui::PushTextWrapPos();
-                ImGui::TextUnformatted(room_information.description.c_str());
-                ImGui::PopTextWrapPos();
+        if (ImGui::Begin(fmt::format("{} ({}/{})###room", room_information.name, members.size(),
+                                     room_information.member_slots)
+                             .c_str(),
+                         &open, ImGuiWindowFlags_NoSavedSettings)) {
+            ImGui::PushTextWrapPos();
+            ImGui::TextUnformatted(room_information.description.c_str());
+            ImGui::PopTextWrapPos();
 
-                float child_width = 0.0f;
+            float child_width = 0.0f;
 
-                if (ImGui::BeginChild("roomchild", ImVec2(0.0f, ImGui::GetWindowHeight() - 90.0f),
-                                      true)) {
-                    ImGui::Columns(2);
+            if (ImGui::BeginChild("roomchild", ImVec2(0.0f, ImGui::GetWindowHeight() - 90.0f),
+                                  true)) {
+                ImGui::Columns(2);
 
-                    if (ImGui::ListBoxHeader("##members", ImVec2(-1.0f, -1.0f))) {
-                        for (const auto& member : members) {
-                            ImGui::PushTextWrapPos();
-                            if (member.game_info.name.empty()) {
-                                ImGui::TextUnformatted(member.nickname.c_str());
-                            } else {
-                                ImGui::Text("%s is playing %s", member.nickname.c_str(),
-                                            member.game_info.name.c_str());
-                            }
-                            ImGui::PopTextWrapPos();
-                            if (member.nickname != room_member->GetNickname()) {
-                                if (ImGui::BeginPopupContextItem(member.nickname.c_str(),
-                                                                 ImGuiMouseButton_Right)) {
-                                    if (multiplayer_blocked_nicknames.count(member.nickname)) {
-                                        if (ImGui::MenuItem("Unblock")) {
-                                            multiplayer_blocked_nicknames.erase(member.nickname);
-                                        }
-                                    } else {
-                                        if (ImGui::MenuItem("Block")) {
-                                            multiplayer_blocked_nicknames.insert(member.nickname);
-                                        }
+                if (ImGui::ListBoxHeader("##members", ImVec2(-1.0f, -1.0f))) {
+                    for (const auto& member : members) {
+                        ImGui::PushTextWrapPos();
+                        if (member.game_info.name.empty()) {
+                            ImGui::TextUnformatted(member.nickname.c_str());
+                        } else {
+                            ImGui::Text("%s is playing %s", member.nickname.c_str(),
+                                        member.game_info.name.c_str());
+                        }
+                        ImGui::PopTextWrapPos();
+                        if (member.nickname != room_member.GetNickname()) {
+                            if (ImGui::BeginPopupContextItem(member.nickname.c_str(),
+                                                             ImGuiMouseButton_Right)) {
+                                if (multiplayer_blocked_nicknames.count(member.nickname)) {
+                                    if (ImGui::MenuItem("Unblock")) {
+                                        multiplayer_blocked_nicknames.erase(member.nickname);
                                     }
-
-                                    ImGui::EndPopup();
+                                } else {
+                                    if (ImGui::MenuItem("Block")) {
+                                        multiplayer_blocked_nicknames.insert(member.nickname);
+                                    }
                                 }
+
+                                ImGui::EndPopup();
                             }
                         }
-                        ImGui::ListBoxFooter();
                     }
-
-                    ImGui::NextColumn();
-
-                    if (ImGui::ListBoxHeader("##messages", ImVec2(-1.0f, -1.0f))) {
-                        for (const std::string& message : multiplayer_messages) {
-                            ImGui::PushTextWrapPos(ImGui::GetCursorPosX() +
-                                                   ImGui::GetContentRegionAvail().x);
-                            ImGui::TextUnformatted(message.c_str());
-                            ImGui::PopTextWrapPos();
-                        }
-                        if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
-                            ImGui::SetScrollHereY(1.0f);
-                        }
-                        ImGui::ListBoxFooter();
-                    }
-
-                    ImGui::Columns();
-
-                    child_width = ImGui::GetWindowWidth();
+                    ImGui::ListBoxFooter();
                 }
 
-                ImGui::EndChild();
+                ImGui::NextColumn();
 
-                ImGui::PushItemWidth(child_width);
-                if (ImGui::InputTextWithHint("##message", "Send Chat Message", &multiplayer_message,
-                                             ImGuiInputTextFlags_EnterReturnsTrue)) {
-                    room_member->SendChatMessage(multiplayer_message);
-                    if (multiplayer_messages.size() == 100) {
-                        multiplayer_messages.pop_front();
+                if (ImGui::ListBoxHeader("##messages", ImVec2(-1.0f, -1.0f))) {
+                    for (const std::string& message : multiplayer_messages) {
+                        ImGui::PushTextWrapPos(ImGui::GetCursorPosX() +
+                                               ImGui::GetContentRegionAvail().x);
+                        ImGui::TextUnformatted(message.c_str());
+                        ImGui::PopTextWrapPos();
                     }
-                    asl::Date date = asl::Date::now();
-                    multiplayer_messages.push_back(
-                        fmt::format("[{}:{}] <{}> {}", date.hours(), date.minutes(),
-                                    room_member->GetNickname(), multiplayer_message));
-                    multiplayer_message.clear();
-                    ImGui::SetKeyboardFocusHere();
+                    if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+                        ImGui::SetScrollHereY(1.0f);
+                    }
+                    ImGui::ListBoxFooter();
                 }
-                ImGui::PopItemWidth();
 
-                ImGui::EndPopup();
+                ImGui::Columns();
+
+                child_width = ImGui::GetWindowWidth();
             }
-            if (!open) {
+
+            ImGui::EndChild();
+
+            ImGui::PushItemWidth(child_width);
+            if (ImGui::InputTextWithHint("##message", "Send Chat Message", &multiplayer_message,
+                                         ImGuiInputTextFlags_EnterReturnsTrue)) {
+                room_member.SendChatMessage(multiplayer_message);
+                if (multiplayer_messages.size() == 100) {
+                    multiplayer_messages.pop_front();
+                }
+                asl::Date date = asl::Date::now();
+                multiplayer_messages.push_back(
+                    fmt::format("[{}:{}] <{}> {}", date.hours(), date.minutes(),
+                                room_member.GetNickname(), multiplayer_message));
                 multiplayer_message.clear();
-                multiplayer_messages.clear();
-                room_member->Leave();
+                ImGui::SetKeyboardFocusHere();
             }
+            ImGui::PopItemWidth();
+
+            ImGui::EndPopup();
+        }
+        if (!open) {
+            multiplayer_message.clear();
+            multiplayer_messages.clear();
+            room_member.Leave();
         }
     }
 
@@ -3000,11 +2992,9 @@ void EmuWindow_SDL2::CopyScreenshot() {
 void EmuWindow_SDL2::ConnectToCitraRoom() {
     if (!Settings::values.multiplayer_ip.empty() && Settings::values.multiplayer_port != 0 &&
         !Settings::values.multiplayer_nickname.empty()) {
-        if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-            room_member->Join(
-                Settings::values.multiplayer_nickname, Service::CFG::GetConsoleIdHash(system),
-                Settings::values.multiplayer_ip.c_str(), Settings::values.multiplayer_port,
-                Network::NO_PREFERRED_MAC_ADDRESS, Settings::values.multiplayer_password);
-        }
+        system.RoomMember().Join(
+            Settings::values.multiplayer_nickname, Service::CFG::GetConsoleIdHash(system),
+            Settings::values.multiplayer_ip.c_str(), Settings::values.multiplayer_port,
+            Network::NO_PREFERRED_MAC_ADDRESS, Settings::values.multiplayer_password);
     }
 }

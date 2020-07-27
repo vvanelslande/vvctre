@@ -429,7 +429,7 @@ add_library(core STATIC
 create_target_directory_groups(core)
 
 target_link_libraries(core PUBLIC common PRIVATE stb audio_core network video_core)
-target_link_libraries(core PUBLIC Boost::boost SDL2 PRIVATE cryptopp fmt system-archives asl)
+target_link_libraries(core PUBLIC Boost::boost SDL2 PRIVATE cryptopp enet fmt system-archives asl)
 
 if (ARCHITECTURE_x86_64)
     target_sources(core PRIVATE

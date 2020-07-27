@@ -78,12 +78,12 @@ std::list<Network::WifiPacket> NWM_UDS::GetReceivedBeacons(const MacAddress& sen
 }
 
 /// Sends a WifiPacket to the room we're currently connected to.
-void SendPacket(Network::WifiPacket& packet) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        if (room_member->GetState() == Network::RoomMember::State::Joined) {
-            packet.transmitter_address = room_member->GetMacAddress();
-            room_member->SendWifiPacket(packet);
-        }
+void NWM_UDS::SendPacket(Network::WifiPacket& packet) {
+    Network::RoomMember& room_member = system.RoomMember();
+
+    if (room_member.GetState() == Network::RoomMember::State::Joined) {
+        packet.transmitter_address = room_member.GetMacAddress();
+        room_member.SendWifiPacket(packet);
     }
 }
 
@@ -98,8 +98,8 @@ u16 NWM_UDS::GetNextAvailableNodeId() {
 }
 
 void NWM_UDS::BroadcastNodeMap() {
-    // Note: This is not how UDS on a 3ds does it but it shouldn't be
-    // necessary for citra
+    // Note: This is not how UDS on a 3DS does it but it shouldn't be
+    // necessary for vvctre
     Network::WifiPacket packet;
     packet.channel = network_channel;
     packet.type = Network::WifiPacket::PacketType::NodeMap;
@@ -566,8 +566,7 @@ boost::optional<Network::MacAddress> NWM_UDS::GetNodeMacAddress(u16 dest_node_id
 void NWM_UDS::Shutdown(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x03, 0, 0);
 
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock())
-        room_member->Unbind(wifi_packet_received);
+    system.RoomMember().Unbind(wifi_packet_received);
 
     for (auto bind_node : channel_data) {
         bind_node.second.event->Signal();
@@ -658,12 +657,8 @@ ResultVal<std::shared_ptr<Kernel::Event>> NWM_UDS::Initialize(
     recv_buffer_memory = std::move(sharedmem);
     ASSERT_MSG(recv_buffer_memory->GetSize() == sharedmem_size, "Invalid shared memory size.");
 
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        wifi_packet_received = room_member->BindOnWifiPacketReceived(
-            [this](const Network::WifiPacket& packet) { OnWifiPacketReceived(packet); });
-    } else {
-        LOG_ERROR(Service_NWM, "Network isn't initalized");
-    }
+    wifi_packet_received = system.RoomMember().BindOnWifiPacketReceived(
+        [this](const Network::WifiPacket& packet) { OnWifiPacketReceived(packet); });
 
     {
         std::lock_guard lock(connection_status_mutex);
@@ -889,13 +884,13 @@ ResultCode NWM_UDS::BeginHostingNetwork(const u8* network_info_buffer,
         // Notify the application that the first node was set.
         connection_status.changed_nodes |= 1;
 
-        if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-            if (room_member->IsConnected()) {
-                network_info.host_mac_address = room_member->GetMacAddress();
-            } else {
-                network_info.host_mac_address = {{0x0, 0x0, 0x0, 0x0, 0x0, 0x0}};
-            }
+        Network::RoomMember& room_member = system.RoomMember();
+        if (room_member.IsConnected()) {
+            network_info.host_mac_address = room_member.GetMacAddress();
+        } else {
+            network_info.host_mac_address = {{0x0, 0x0, 0x0, 0x0, 0x0, 0x0}};
         }
+
         node_info[0] = current_node;
 
         // If the game has a preferred channel, use that instead.
@@ -1474,10 +1469,9 @@ NWM_UDS::NWM_UDS(Core::System& system) : ServiceFramework("nwm::UDS"), system(sy
     // Keep the Nintendo 3DS MAC header and randomly generate the last 3 bytes
     rng.GenerateBlock(static_cast<CryptoPP::byte*>(mac.data() + 3), 3);
 
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        if (room_member->IsConnected()) {
-            mac = room_member->GetMacAddress();
-        }
+    Network::RoomMember& room_member = system.RoomMember();
+    if (room_member.IsConnected()) {
+        mac = room_member.GetMacAddress();
     }
 
     std::memcpy(&system.Kernel().GetSharedPageHandler().GetSharedPage().wifi_macaddr[0], mac.data(),
@@ -1485,9 +1479,7 @@ NWM_UDS::NWM_UDS(Core::System& system) : ServiceFramework("nwm::UDS"), system(sy
 }
 
 NWM_UDS::~NWM_UDS() {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        room_member->Unbind(wifi_packet_received);
-    }
+    system.RoomMember().Unbind(wifi_packet_received);
 
     system.CoreTiming().UnscheduleEvent(beacon_broadcast_event, 0);
 }

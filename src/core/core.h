@@ -46,6 +46,10 @@ namespace Cheats {
 class CheatEngine;
 } // namespace Cheats
 
+namespace Network {
+class RoomMember;
+} // namespace Network
+
 class RendererBase;
 
 namespace Core {
@@ -59,6 +63,9 @@ struct DeliveryArgument {
 
 class System {
 public:
+    System();
+    ~System();
+
     /**
      * Gets the instance of the System singleton class.
      * @returns Reference to the instance of the System singleton class.
@@ -197,6 +204,9 @@ public:
     /// Gets a const reference to the custom texture cache system
     const Core::CustomTexCache& CustomTexCache() const;
 
+    /// Gets a reference to the room member
+    Network::RoomMember& RoomMember();
+
     std::unique_ptr<PerfStats> perf_stats;
     FrameLimiter frame_limiter;
 
@@ -274,6 +284,9 @@ private:
     std::unique_ptr<Memory::MemorySystem> memory;
     std::unique_ptr<Kernel::KernelSystem> kernel;
     std::unique_ptr<Timing> timing;
+
+    // Room member
+    std::shared_ptr<Network::RoomMember> room_member;
 
     static System s_instance;
 

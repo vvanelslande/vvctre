@@ -15,7 +15,7 @@
 #include "core/frontend/applets/swkbd.h"
 #include "core/frontend/emu_window.h"
 #include "core/hle/kernel/ipc_debugger/recorder.h"
-#include "network/network.h"
+#include "network/room_member.h"
 #include "vvctre/common.h"
 
 class PluginManager;

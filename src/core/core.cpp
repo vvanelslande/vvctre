@@ -10,6 +10,7 @@
 #include "common/logging/log.h"
 #include "common/texture.h"
 #include "core/arm/arm_interface.h"
+#include "enet/enet.h"
 #ifdef ARCHITECTURE_x86_64
 #include "core/arm/dynarmic/arm_dynarmic.h"
 #endif
@@ -30,11 +31,30 @@
 #include "core/loader/loader.h"
 #include "core/movie.h"
 #include "core/settings.h"
+#include "network/room_member.h"
 #include "video_core/video_core.h"
 
 namespace Core {
 
 /*static*/ System System::s_instance;
+
+System::System() {
+    if (enet_initialize() != 0) {
+        LOG_ERROR(Network, "Error initializing ENet");
+        return;
+    }
+    room_member = std::make_shared<Network::RoomMember>();
+    LOG_DEBUG(Network, "initialized OK");
+}
+
+System::~System() {
+    if (room_member->IsConnected()) {
+        room_member->Leave();
+    }
+
+    enet_deinitialize();
+    LOG_DEBUG(Network, "shutdown OK");
+}
 
 System::ResultStatus System::RunLoop(bool tight_loop) {
     status = ResultStatus::Success;
@@ -281,6 +301,10 @@ Core::CustomTexCache& System::CustomTexCache() {
 
 const Core::CustomTexCache& System::CustomTexCache() const {
     return *custom_tex_cache;
+}
+
+Network::RoomMember& System::RoomMember() {
+    return *room_member;
 }
 
 void System::RegisterMiiSelector(std::shared_ptr<Frontend::MiiSelector> mii_selector) {

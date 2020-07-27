@@ -33,7 +33,6 @@
 #include "core/memory.h"
 #include "core/movie.h"
 #include "core/settings.h"
-#include "network/network.h"
 #include "network/room.h"
 #include "network/room_member.h"
 #include "video_core/renderer_base.h"
@@ -1808,138 +1807,98 @@ const char* vvctre_settings_get_multiplayer_password() {
 }
 
 void vvctre_multiplayer_join(void* core) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        room_member->Join(Settings::values.multiplayer_nickname,
-                          Service::CFG::GetConsoleIdHash(*static_cast<Core::System*>(core)),
-                          Settings::values.multiplayer_ip.c_str(),
-                          Settings::values.multiplayer_port, Network::NO_PREFERRED_MAC_ADDRESS,
-                          Settings::values.multiplayer_password);
-    }
+    Core::System* system = static_cast<Core::System*>(core);
+
+    system->RoomMember().Join(
+        Settings::values.multiplayer_nickname, Service::CFG::GetConsoleIdHash(*system),
+        Settings::values.multiplayer_ip.c_str(), Settings::values.multiplayer_port,
+        Network::NO_PREFERRED_MAC_ADDRESS, Settings::values.multiplayer_password);
 }
 
-void vvctre_multiplayer_leave(void* /* core, currently unused */) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        room_member->Leave();
-    }
+void vvctre_multiplayer_leave(void* core) {
+    static_cast<Core::System*>(core)->RoomMember().Leave();
 }
 
-u8 vvctre_multiplayer_get_state(void* /* core, currently unused */) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        return static_cast<u8>(room_member->GetState());
-    }
-
-    return static_cast<u8>(Network::RoomMember::State::Uninitialized);
+u8 vvctre_multiplayer_get_state(void* core) {
+    return static_cast<u8>(static_cast<Core::System*>(core)->RoomMember().GetState());
 }
 
-void vvctre_multiplayer_send_message(void* /* core, currently unused */, const char* message) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        room_member->SendChatMessage(std::string(message));
-    }
+void vvctre_multiplayer_send_message(void* core, const char* message) {
+    static_cast<Core::System*>(core)->RoomMember().SendChatMessage(std::string(message));
 }
 
-void vvctre_multiplayer_set_game(void* /* core, currently unused */, const char* name, u64 id) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        room_member->SendGameInfo(Network::GameInfo{name, id});
-    }
+void vvctre_multiplayer_set_game(void* core, const char* name, u64 id) {
+    static_cast<Core::System*>(core)->RoomMember().SendGameInfo(Network::GameInfo{name, id});
 }
 
-u8 vvctre_multiplayer_get_member_count(void* /* core, currently unused */) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        return static_cast<u8>(room_member->GetMemberInformation().size());
-    }
-
-    return 0;
+u8 vvctre_multiplayer_get_member_count(void* core) {
+    return static_cast<u8>(
+        static_cast<Core::System*>(core)->RoomMember().GetMemberInformation().size());
 }
 
-const char* vvctre_multiplayer_get_member_nickname(void* /* core, currently unused */,
-                                                   std::size_t index) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        return room_member->GetMemberInformation()[index].nickname.c_str();
-    }
-
-    return nullptr;
+const char* vvctre_multiplayer_get_member_nickname(void* core, std::size_t index) {
+    return static_cast<Core::System*>(core)
+        ->RoomMember()
+        .GetMemberInformation()[index]
+        .nickname.c_str();
 }
 
-u64 vvctre_multiplayer_get_member_game_id(void* /* core, currently unused */, std::size_t index) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        return room_member->GetMemberInformation()[index].game_info.id;
-    }
-
-    return 0;
+u64 vvctre_multiplayer_get_member_game_id(void* core, std::size_t index) {
+    return static_cast<Core::System*>(core)
+        ->RoomMember()
+        .GetMemberInformation()[index]
+        .game_info.id;
 }
 
-const char* vvctre_multiplayer_get_member_game_name(void* /* core, currently unused */,
-                                                    std::size_t index) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        return room_member->GetMemberInformation()[index].game_info.name.c_str();
-    }
-
-    return nullptr;
+const char* vvctre_multiplayer_get_member_game_name(void* core, std::size_t index) {
+    return static_cast<Core::System*>(core)
+        ->RoomMember()
+        .GetMemberInformation()[index]
+        .game_info.name.c_str();
 }
 
-const char* vvctre_multiplayer_get_room_name(void* /* core, currently unused */) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        return room_member->GetRoomInformation().name.c_str();
-    }
-
-    return nullptr;
+const char* vvctre_multiplayer_get_room_name(void* core) {
+    return static_cast<Core::System*>(core)->RoomMember().GetRoomInformation().name.c_str();
 }
 
-const char* vvctre_multiplayer_get_room_description(void* /* core, currently unused */) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        return room_member->GetRoomInformation().description.c_str();
-    }
-
-    return nullptr;
+const char* vvctre_multiplayer_get_room_description(void* core) {
+    return static_cast<Core::System*>(core)->RoomMember().GetRoomInformation().description.c_str();
 }
 
-u8 vvctre_multiplayer_get_room_member_slots(void* /* core, currently unused */) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        return static_cast<u8>(room_member->GetRoomInformation().member_slots);
-    }
-
-    return 0;
+u8 vvctre_multiplayer_get_room_member_slots(void* core) {
+    return static_cast<u8>(
+        static_cast<Core::System*>(core)->RoomMember().GetRoomInformation().member_slots);
 }
 
-void vvctre_multiplayer_on_chat_message(void* /* core, currently unused */,
-                                        void (*callback)(const char* nickname,
-                                                         const char* message)) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        room_member->BindOnChatMessageReceived([=](const Network::ChatEntry& entry) {
+void vvctre_multiplayer_on_chat_message(void* core, void (*callback)(const char* nickname,
+                                                                     const char* message)) {
+    static_cast<Core::System*>(core)->RoomMember().BindOnChatMessageReceived(
+        [=](const Network::ChatEntry& entry) {
             callback(entry.nickname.c_str(), entry.message.c_str());
         });
-    }
 }
 
-void vvctre_multiplayer_on_status_message(void* /* core, currently unused */,
+void vvctre_multiplayer_on_status_message(void* core,
                                           void (*callback)(u8 type, const char* nickname)) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        room_member->BindOnStatusMessageReceived([=](const Network::StatusMessageEntry& entry) {
+    static_cast<Core::System*>(core)->RoomMember().BindOnStatusMessageReceived(
+        [=](const Network::StatusMessageEntry& entry) {
             callback(static_cast<u8>(entry.type), entry.nickname.c_str());
         });
-    }
 }
 
-void vvctre_multiplayer_on_error(void* /* core, currently unused */, void (*callback)(u8 error)) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        room_member->BindOnError(
-            [=](const Network::RoomMember::Error& error) { callback(static_cast<u8>(error)); });
-    }
+void vvctre_multiplayer_on_error(void* core, void (*callback)(u8 error)) {
+    static_cast<Core::System*>(core)->RoomMember().BindOnError(
+        [=](const Network::RoomMember::Error& error) { callback(static_cast<u8>(error)); });
 }
 
-void vvctre_multiplayer_on_information_change(void* /* core, currently unused */,
-                                              void (*callback)()) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        room_member->BindOnRoomInformationChanged(
-            [=](const Network::RoomInformation&) { callback(); });
-    }
+void vvctre_multiplayer_on_information_change(void* core, void (*callback)()) {
+    static_cast<Core::System*>(core)->RoomMember().BindOnRoomInformationChanged(
+        [=](const Network::RoomInformation&) { callback(); });
 }
 
-void vvctre_multiplayer_on_state_change(void* /* core, currently unused */, void (*callback)()) {
-    if (std::shared_ptr<Network::RoomMember> room_member = Network::GetRoomMember().lock()) {
-        room_member->BindOnRoomInformationChanged(
-            [=](const Network::RoomInformation&) { callback(); });
-    }
+void vvctre_multiplayer_on_state_change(void* core, void (*callback)()) {
+    static_cast<Core::System*>(core)->RoomMember().BindOnRoomInformationChanged(
+        [=](const Network::RoomInformation&) { callback(); });
 }
 
 void vvctre_multiplayer_create_room(const char* ip, u16 port, u32 member_slots) {

@@ -8,7 +8,6 @@
 #include <tuple>
 #include <vector>
 #include "common/common_types.h"
-#include "network/room_member.h"
 
 class PluginManager;
 

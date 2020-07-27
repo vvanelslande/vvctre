@@ -20,7 +20,6 @@
 #include "core/movie.h"
 #include "core/settings.h"
 #include "input_common/main.h"
-#include "network/network.h"
 #include "vvctre/common.h"
 #include "vvctre/plugins.h"
 
@@ -35,7 +34,6 @@ void vvctreShutdown(PluginManager* plugin_manager) {
     Core::Movie::GetInstance().Shutdown();
     Core::System::GetInstance().Shutdown();
     InputCommon::Shutdown();
-    Network::Shutdown();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();

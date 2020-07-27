@@ -48,10 +48,9 @@ struct StatusMessageEntry {
 class RoomMember final {
 public:
     enum class State : u8 {
-        Uninitialized, ///< Not initialized
-        Idle,          ///< Default state (i.e. not connected)
-        Joining,       ///< The client is attempting to join a room.
-        Joined, ///< The client is connected to the room and is ready to send/receive packets.
+        Idle,    ///< Default state (i.e. not connected)
+        Joining, ///< The client is attempting to join a room.
+        Joined,  ///< The client is connected to the room and is ready to send/receive packets.
     };
 
     enum class Error : u8 {
@@ -242,8 +241,6 @@ private:
 
 inline const char* GetStateStr(const RoomMember::State& s) {
     switch (s) {
-    case RoomMember::State::Uninitialized:
-        return "Uninitialized";
     case RoomMember::State::Idle:
         return "Idle";
     case RoomMember::State::Joining:

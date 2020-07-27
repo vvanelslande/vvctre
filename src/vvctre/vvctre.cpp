@@ -39,7 +39,6 @@
 #include "core/movie.h"
 #include "core/settings.h"
 #include "input_common/main.h"
-#include "network/network.h"
 #include "video_core/renderer_base.h"
 #include "video_core/video_core.h"
 #include "vvctre/applets/mii_selector.h"
@@ -77,7 +76,6 @@ int main(int argc, char** argv) {
         std::exit(1);
     }
 
-    Network::Init();
     InputCommon::Init();
 
     SDL_SetMainReady();
