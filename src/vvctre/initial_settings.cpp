@@ -2866,20 +2866,22 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     return;
                 }
 
-                ImGui::SameLine();
+                if (update_found) {
+                    ImGui::SameLine();
 
-                if (ImGui::Button("Update")) {
+                    if (ImGui::Button("Update")) {
 #ifdef _WIN32
-                    [[maybe_unused]] const int code =
-                        std::system("start https://github.com/vvanelslande/vvctre/releases/latest");
+                        [[maybe_unused]] const int code = std::system(
+                            "start https://github.com/vvanelslande/vvctre/releases/latest");
 #else
-                    [[maybe_unused]] const int code =
-                        std::system("xdg-open "
-                                    "https://github.com/vvanelslande/vvctre/releases/latest");
+                        [[maybe_unused]] const int code =
+                            std::system("xdg-open "
+                                        "https://github.com/vvanelslande/vvctre/releases/latest");
 #endif
 
-                    Settings::values.file_path.clear();
-                    return;
+                        Settings::values.file_path.clear();
+                        return;
+                    }
                 }
             } else if (update_found) {
                 ImGui::Dummy(

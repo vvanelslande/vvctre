@@ -2496,6 +2496,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 system.Kernel().GetCurrentProcess()->codeset->program_id);
 
                             FileUtil::WriteStringToFile(true, filepath, cheats_file_content);
+
+                            system.CheatEngine().LoadCheatFile();
                         }
 
                         ImGui::EndMenu();
