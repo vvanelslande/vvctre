@@ -39,6 +39,7 @@
 #include "core/movie.h"
 #include "core/settings.h"
 #include "input_common/main.h"
+#include "network/room_member.h"
 #include "video_core/renderer_base.h"
 #include "video_core/video_core.h"
 #include "vvctre/applets/mii_selector.h"
@@ -140,6 +141,7 @@ int main(int argc, char** argv) {
     std::shared_ptr<Service::CFG::Module> cfg = std::make_shared<Service::CFG::Module>();
     plugin_manager.cfg = cfg.get();
     plugin_manager.InitialSettingsOpening();
+    std::atomic<bool> update_found{false};
     bool ok_multiplayer = false;
     if (argc < 2) {
         SDL_Event event;
@@ -163,33 +165,14 @@ int main(int argc, char** argv) {
                                         vvctre_version_patch);
                         const std::string latest_version = *json["tag_name"];
                         if (running_version != latest_version) {
-                            if (pfd::message(
-                                    "vvctre",
-                                    fmt::format(
-                                        "You have a old version.\nRunning: {}\nLatest: "
-                                        "{}\nOpen the latest version download page and exit?",
-                                        running_version, latest_version),
-                                    pfd::choice::yes_no, pfd::icon::question)
-                                    .result() == pfd::button::yes) {
-#ifdef _WIN32
-                                [[maybe_unused]] const int code = std::system(
-                                    "start https://github.com/vvanelslande/vvctre/releases/latest");
-#else
-                                [[maybe_unused]] const int code = std::system(
-                                    "xdg-open "
-                                    "https://github.com/vvanelslande/vvctre/releases/latest");
-#endif
-
-                                vvctreShutdown(&plugin_manager);
-                                std::exit(0);
-                            }
+                            update_found = true;
                         }
                     }
                 }
             }).detach();
         }
 
-        InitialSettings(plugin_manager, window, *cfg, ok_multiplayer);
+        InitialSettings(plugin_manager, window, *cfg, update_found, ok_multiplayer);
         if (Settings::values.file_path.empty()) {
             vvctreShutdown(&plugin_manager);
             return 0;

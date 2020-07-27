@@ -19,8 +19,8 @@
 namespace Settings {
 
 enum class InitialClock {
-    SystemTime = 0,
-    FixedTime = 1,
+    System = 0,
+    UnixTimestamp = 1,
 };
 
 enum class Layout {
@@ -106,7 +106,7 @@ struct Values {
     std::string record_movie;
     int region_value = REGION_VALUE_AUTO_SELECT;
     std::string log_filter = "*:Info";
-    InitialClock initial_clock = InitialClock::SystemTime;
+    InitialClock initial_clock = InitialClock::System;
     u64 unix_timestamp = 0;
     bool use_virtual_sd = true;
     bool record_frame_times = false;
@@ -128,7 +128,7 @@ struct Values {
     std::string audio_sink_id = "auto";
     std::string audio_device_id = "auto";
     MicrophoneInputType microphone_input_type = MicrophoneInputType::None;
-    std::string microphone_device;
+    std::string microphone_device = "auto";
 
     // Camera
     std::array<std::string, Service::CAM::NumCameras> camera_engine{

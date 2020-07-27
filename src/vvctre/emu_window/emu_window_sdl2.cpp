@@ -271,7 +271,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                         for (const auto& file : files) {
                             const Service::AM::InstallStatus status = Service::AM::InstallCIA(
                                 file, [&](std::size_t current, std::size_t total) {
-                                    // Poll events
                                     SDL_Event event;
                                     while (SDL_PollEvent(&event)) {
                                         ImGui_ImplSDL2_ProcessEvent(&event);
@@ -286,7 +285,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                                         }
                                     }
 
-                                    // Draw window
                                     ImGui_ImplOpenGL3_NewFrame();
                                     ImGui_ImplSDL2_NewFrame(window);
                                     ImGui::NewFrame();
@@ -388,28 +386,17 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::Checkbox("Limit Speed", &Settings::values.limit_speed);
 
                     if (Settings::values.limit_speed) {
-                        ImGui::SameLine();
-                        ImGui::TextUnformatted("To");
-                        ImGui::SameLine();
-                        ImGui::PushItemWidth(45.0f);
-                        ImGui::InputScalar("##speedlimit", ImGuiDataType_U16,
-                                           &Settings::values.speed_limit);
-                        ImGui::PopItemWidth();
-                        ImGui::SameLine();
-                        ImGui::TextUnformatted("%");
+                        ImGui::InputScalar("Speed Limit", ImGuiDataType_U16,
+                                           &Settings::values.speed_limit, nullptr, nullptr, "%d%%");
                     }
 
                     ImGui::EndMenu();
                 }
 
                 if (ImGui::BeginMenu("Audio")) {
-                    ImGui::TextUnformatted("Volume:");
-                    ImGui::SameLine();
-                    ImGui::SliderFloat("##volume", &Settings::values.audio_volume, 0.0f, 1.0f);
+                    ImGui::SliderFloat("Volume", &Settings::values.audio_volume, 0.0f, 1.0f);
 
-                    ImGui::TextUnformatted("Sink:");
-                    ImGui::SameLine();
-                    if (ImGui::BeginCombo("##sink", Settings::values.audio_sink_id.c_str())) {
+                    if (ImGui::BeginCombo("Sink", Settings::values.audio_sink_id.c_str())) {
                         if (ImGui::Selectable("auto")) {
                             Settings::values.audio_sink_id = "auto";
                             Settings::Apply();
@@ -423,9 +410,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::EndCombo();
                     }
 
-                    ImGui::TextUnformatted("Device:");
-                    ImGui::SameLine();
-                    if (ImGui::BeginCombo("##device", Settings::values.audio_device_id.c_str())) {
+                    if (ImGui::BeginCombo("Device", Settings::values.audio_device_id.c_str())) {
                         if (ImGui::Selectable("auto")) {
                             Settings::values.audio_device_id = "auto";
                             Settings::Apply();
@@ -442,9 +427,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::EndCombo();
                     }
 
-                    ImGui::TextUnformatted("Microphone Input Type:");
-                    ImGui::SameLine();
-                    if (ImGui::BeginCombo("##microphone_input_type", [] {
+                    if (ImGui::BeginCombo("Microphone Input Type", [] {
                             switch (Settings::values.microphone_input_type) {
                             case Settings::MicrophoneInputType::None:
                                 return "Disabled";
@@ -478,10 +461,7 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                     if (Settings::values.microphone_input_type ==
                         Settings::MicrophoneInputType::Real) {
-                        ImGui::TextUnformatted("Microphone Device:");
-                        ImGui::SameLine();
-
-                        if (ImGui::BeginCombo("##microphonedevice",
+                        if (ImGui::BeginCombo("Microphone Device",
                                               Settings::values.microphone_device.c_str())) {
                             if (ImGui::Selectable("auto")) {
                                 Settings::values.microphone_device = "auto";
@@ -540,25 +520,23 @@ void EmuWindow_SDL2::SwapBuffers() {
                         Settings::Apply();
                     }
 
-                    ImGui::TextUnformatted("Resolution:");
-                    ImGui::SameLine();
-                    const u16 min = 0;
-                    const u16 max = 10;
-                    ImGui::SliderScalar("##resolution", ImGuiDataType_U16,
-                                        &Settings::values.resolution, &min, &max,
-                                        Settings::values.resolution == 0 ? "Window Size" : "%d");
+                    ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
+                    ImGui::Checkbox("Use Custom Textures", &Settings::values.custom_textures);
+                    ImGui::Checkbox("Preload Custom Textures", &Settings::values.preload_textures);
 
-                    ImGui::TextUnformatted("Background Color:");
-                    ImGui::SameLine();
-                    if (ImGui::ColorEdit3("##backgroundcolor",
+                    if (ImGui::ColorEdit3("Background Color",
                                           &Settings::values.background_color_red,
                                           ImGuiColorEditFlags_NoInputs)) {
                         VideoCore::g_renderer_background_color_update_requested = true;
                     }
 
-                    ImGui::TextUnformatted("Post Processing Shader:");
-                    ImGui::SameLine();
-                    ImGui::InputText("##postprocessingshader",
+                    const u16 min = 0;
+                    const u16 max = 10;
+                    ImGui::SliderScalar("Resolution", ImGuiDataType_U16,
+                                        &Settings::values.resolution, &min, &max,
+                                        Settings::values.resolution == 0 ? "Window Size" : "%d");
+
+                    ImGui::InputText("Post Processing Shader",
                                      &Settings::values.post_processing_shader);
                     if (ImGui::IsItemDeactivatedAfterEdit()) {
                         Settings::Apply();
@@ -569,9 +547,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::EndTooltip();
                     }
 
-                    ImGui::TextUnformatted("Texture Filter:");
-                    ImGui::SameLine();
-                    if (ImGui::BeginCombo("##texturefilter",
+                    if (ImGui::BeginCombo("Texture Filter",
                                           Settings::values.texture_filter.c_str())) {
                         const auto& filters = OpenGL::TextureFilterer::GetFilterNames();
 
@@ -585,14 +561,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::EndCombo();
                     }
 
-                    ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
-                    ImGui::Checkbox("Use Custom Textures", &Settings::values.custom_textures);
-                    ImGui::Checkbox("Preload Custom Textures", &Settings::values.preload_textures);
-
-                    ImGui::TextUnformatted("3D:");
-                    ImGui::SameLine();
-
-                    if (ImGui::BeginCombo("##render_3d", [] {
+                    if (ImGui::BeginCombo("3D Mode", [] {
                             switch (Settings::values.render_3d) {
                             case Settings::StereoRenderOption::Off:
                                 return "Off";
@@ -643,27 +612,19 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::EndCombo();
                     }
 
-                    ImGui::SameLine();
-
                     u8 factor_3d = Settings::values.factor_3d;
                     const u8 factor_3d_min = 0;
                     const u8 factor_3d_max = 100;
-                    ImGui::PushItemWidth(135.0f);
-                    if (ImGui::SliderScalar("##factor_3d", ImGuiDataType_U8, &factor_3d,
+                    if (ImGui::SliderScalar("3D Factor", ImGuiDataType_U8, &factor_3d,
                                             &factor_3d_min, &factor_3d_max, "%d%%")) {
                         Settings::values.factor_3d = factor_3d;
                     }
-                    ImGui::PopItemWidth();
 
                     ImGui::EndMenu();
                 }
 
                 if (ImGui::BeginMenu("Camera")) {
-                    ImGui::TextUnformatted("Inner:");
-                    ImGui::Indent();
-                    ImGui::TextUnformatted("Engine:");
-                    ImGui::SameLine();
-                    if (ImGui::BeginCombo("##innercameraengine",
+                    if (ImGui::BeginCombo("Inner Engine",
                                           Settings::values
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::InnerCamera)]
@@ -690,11 +651,17 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::InnerCamera)] == "image") {
-                        ImGui::TextUnformatted("Parameter:");
-                        ImGui::SameLine();
-                        ImGui::PushItemWidth(200.0f);
+                        if (GUI_CameraAddBrowse(
+                                "...##Inner",
+                                static_cast<std::size_t>(Service::CAM::CameraIndex::InnerCamera))) {
+                            std::shared_ptr<Service::CAM::Module> cam =
+                                Service::CAM::GetModule(system);
+                            if (cam != nullptr) {
+                                cam->ReloadCameraDevices();
+                            }
+                        }
                         if (ImGui::InputText(
-                                "##innercameraparameter",
+                                "Inner Parameter",
                                 &Settings::values.camera_parameter[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::InnerCamera)])) {
                             std::shared_ptr<Service::CAM::Module> cam =
@@ -703,26 +670,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 cam->ReloadCameraDevices();
                             }
                         }
-                        ImGui::PopItemWidth();
-                        if (GUI_CameraAddBrowse(
-                                "Browse...##innercamera",
-                                static_cast<std::size_t>(Service::CAM::CameraIndex::InnerCamera))) {
-                            std::shared_ptr<Service::CAM::Module> cam =
-                                Service::CAM::GetModule(system);
-                            if (cam != nullptr) {
-                                cam->ReloadCameraDevices();
-                            }
-                        }
                     }
 
-                    ImGui::Unindent();
-                    ImGui::NewLine();
-
-                    ImGui::TextUnformatted("Outer Left:");
-                    ImGui::Indent();
-                    ImGui::TextUnformatted("Engine:");
-                    ImGui::SameLine();
-                    if (ImGui::BeginCombo("##outerleftcameraengine",
+                    if (ImGui::BeginCombo("Outer Left Engine",
                                           Settings::values
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::OuterLeftCamera)]
@@ -749,21 +699,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::OuterLeftCamera)] == "image") {
-                        ImGui::TextUnformatted("Parameter:");
-                        ImGui::SameLine();
-                        ImGui::PushItemWidth(200.0f);
-                        if (ImGui::InputText(
-                                "##outerleftcameraparameter",
-                                &Settings::values.camera_parameter[static_cast<std::size_t>(
-                                    Service::CAM::CameraIndex::OuterLeftCamera)])) {
-                            std::shared_ptr<Service::CAM::Module> cam =
-                                Service::CAM::GetModule(system);
-                            if (cam != nullptr) {
-                                cam->ReloadCameraDevices();
-                            }
-                        }
-                        ImGui::PopItemWidth();
-                        if (GUI_CameraAddBrowse("Browse...##outerleftcamera",
+                        if (GUI_CameraAddBrowse("...##Outer Left",
                                                 static_cast<std::size_t>(
                                                     Service::CAM::CameraIndex::OuterLeftCamera))) {
                             std::shared_ptr<Service::CAM::Module> cam =
@@ -772,16 +708,19 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 cam->ReloadCameraDevices();
                             }
                         }
+                        if (ImGui::InputText(
+                                "Outer Left Parameter",
+                                &Settings::values.camera_parameter[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)])) {
+                            std::shared_ptr<Service::CAM::Module> cam =
+                                Service::CAM::GetModule(system);
+                            if (cam != nullptr) {
+                                cam->ReloadCameraDevices();
+                            }
+                        }
                     }
 
-                    ImGui::Unindent();
-                    ImGui::NewLine();
-
-                    ImGui::TextUnformatted("Outer Right:");
-                    ImGui::Indent();
-                    ImGui::TextUnformatted("Engine:");
-                    ImGui::SameLine();
-                    if (ImGui::BeginCombo("##outerrightengine",
+                    if (ImGui::BeginCombo("Outer Right Engine",
                                           Settings::values
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::OuterRightCamera)]
@@ -808,23 +747,19 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::OuterRightCamera)] == "image") {
-                        ImGui::TextUnformatted("Parameter:");
-                        ImGui::SameLine();
-                        ImGui::PushItemWidth(200.0f);
-                        if (ImGui::InputText(
-                                "##outerrightcameraparameter",
-                                &Settings::values.camera_parameter[static_cast<std::size_t>(
-                                    Service::CAM::CameraIndex::OuterRightCamera)])) {
+                        if (GUI_CameraAddBrowse("...##Outer Right",
+                                                static_cast<std::size_t>(
+                                                    Service::CAM::CameraIndex::OuterRightCamera))) {
                             std::shared_ptr<Service::CAM::Module> cam =
                                 Service::CAM::GetModule(system);
                             if (cam != nullptr) {
                                 cam->ReloadCameraDevices();
                             }
                         }
-                        ImGui::PopItemWidth();
-                        if (GUI_CameraAddBrowse("Browse...##outerrightcamera",
-                                                static_cast<std::size_t>(
-                                                    Service::CAM::CameraIndex::OuterRightCamera))) {
+                        if (ImGui::InputText(
+                                "Outer Right Parameter",
+                                &Settings::values.camera_parameter[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)])) {
                             std::shared_ptr<Service::CAM::Module> cam =
                                 Service::CAM::GetModule(system);
                             if (cam != nullptr) {
@@ -844,22 +779,16 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::TextUnformatted("Will Restart");
                         ImGui::Indent();
 
-                        ImGui::TextUnformatted("Username:");
-                        ImGui::SameLine();
-
                         std::string username = Common::UTF16ToUTF8(cfg->GetUsername());
-                        if (ImGui::InputText("##username", &username)) {
+                        if (ImGui::InputText("Username", &username)) {
                             cfg->SetUsername(Common::UTF8ToUTF16(username));
                             cfg->UpdateConfigNANDSavegame();
                             system.RequestReset();
                         }
 
-                        ImGui::TextUnformatted("Birthday:");
-                        ImGui::SameLine();
-
                         auto [month, day] = cfg->GetBirthday();
 
-                        if (ImGui::BeginCombo("##birthday_month", [&] {
+                        if (ImGui::BeginCombo("Birthday Month", [&] {
                                 switch (month) {
                                 case 1:
                                     return "January";
@@ -954,18 +883,13 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::EndCombo();
                         }
 
-                        ImGui::SameLine();
-
-                        if (ImGui::InputScalar("##birthday_day", ImGuiDataType_U8, &day)) {
+                        if (ImGui::InputScalar("Birthday Day", ImGuiDataType_U8, &day)) {
                             cfg->SetBirthday(month, day);
                             cfg->UpdateConfigNANDSavegame();
                             system.RequestReset();
                         }
 
-                        ImGui::TextUnformatted("Language:");
-                        ImGui::SameLine();
-
-                        if (ImGui::BeginCombo("##language", [&] {
+                        if (ImGui::BeginCombo("Language", [&] {
                                 switch (cfg->GetSystemLanguage()) {
                                 case Service::CFG::SystemLanguage::LANGUAGE_JP:
                                     return "Japanese";
@@ -1060,9 +984,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::EndCombo();
                         }
 
-                        ImGui::TextUnformatted("Sound output mode:");
-                        ImGui::SameLine();
-                        if (ImGui::BeginCombo("##soundoutputmode", [&] {
+                        if (ImGui::BeginCombo("Sound Output Mode", [&] {
                                 switch (cfg->GetSoundOutputMode()) {
                                 case Service::CFG::SoundOutputMode::SOUND_MONO:
                                     return "Mono";
@@ -1093,9 +1015,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::EndCombo();
                         }
 
-                        ImGui::TextUnformatted("Country:");
-                        ImGui::SameLine();
-                        if (ImGui::BeginCombo("##country", [&] {
+                        if (ImGui::BeginCombo("Country", [&] {
                                 switch (cfg->GetCountryCode()) {
                                 case 1:
                                     return "Japan";
@@ -1910,14 +1830,12 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                     ImGui::TextUnformatted("Restart Recommended");
                     ImGui::Indent();
-                    ImGui::TextUnformatted("Play Coins:");
-                    ImGui::SameLine();
                     const u16 min = 0;
                     const u16 max = 300;
                     if (ImGui::IsWindowAppearing()) {
                         play_coins = Service::PTM::Module::GetPlayCoins();
                     }
-                    if (ImGui::SliderScalar("##playcoins", ImGuiDataType_U16, &play_coins, &min,
+                    if (ImGui::SliderScalar("Play Coins", ImGuiDataType_U16, &play_coins, &min,
                                             &max)) {
                         play_coins_changed = true;
                     }
@@ -1927,29 +1845,23 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("GUI")) {
-                    ImGui::TextUnformatted("FPS Color:");
-                    ImGui::SameLine();
-                    ImGui::ColorPicker4("##fps_color", (float*)&fps_color);
+                    ImGui::ColorPicker4("FPS Color", (float*)&fps_color);
 
                     ImGui::EndMenu();
                 }
 
                 if (ImGui::BeginMenu("Hacks")) {
+                    ImGui::Checkbox("Enable Custom CPU Ticks",
+                                    &Settings::values.use_custom_cpu_ticks);
+
                     if (Settings::values.use_custom_cpu_ticks) {
-                        ImGui::Checkbox("Custom CPU Ticks:",
-                                        &Settings::values.use_custom_cpu_ticks);
-                        ImGui::SameLine();
-                        ImGui::InputScalar("##customcputicks", ImGuiDataType_U64,
+                        ImGui::InputScalar("Custom CPU Ticks", ImGuiDataType_U64,
                                            &Settings::values.custom_cpu_ticks);
-                    } else {
-                        ImGui::Checkbox("Custom CPU Ticks", &Settings::values.use_custom_cpu_ticks);
                     }
 
-                    ImGui::TextUnformatted("CPU Clock Percentage:");
-                    ImGui::SameLine();
                     u32 min = 5;
                     u32 max = 400;
-                    ImGui::SliderScalar("##cpu_clock_percentage", ImGuiDataType_U32,
+                    ImGui::SliderScalar("CPU Clock Percentage", ImGuiDataType_U32,
                                         &Settings::values.cpu_clock_percentage, &min, &max, "%d%%");
 
                     ImGui::EndMenu();
@@ -1961,9 +1873,7 @@ void EmuWindow_SDL2::SwapBuffers() {
             if (ImGui::BeginMenu("View")) {
                 if (ImGui::BeginMenu("Layout")) {
                     if (!Settings::values.use_custom_layout) {
-                        ImGui::TextUnformatted("Layout:");
-                        ImGui::SameLine();
-                        if (ImGui::BeginCombo("##layout", [] {
+                        if (ImGui::BeginCombo("Layout", [] {
                                 switch (Settings::values.layout) {
                                 case Settings::Layout::Default:
                                     return "Default";
@@ -1983,89 +1893,73 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }())) {
                             if (ImGui::Selectable("Default")) {
                                 Settings::values.layout = Settings::Layout::Default;
-                                Settings::Apply();
+                                VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                             }
                             if (ImGui::Selectable("Single Screen")) {
                                 Settings::values.layout = Settings::Layout::SingleScreen;
-                                Settings::Apply();
+                                VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                             }
                             if (ImGui::Selectable("Large Screen")) {
                                 Settings::values.layout = Settings::Layout::LargeScreen;
-                                Settings::Apply();
+                                VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                             }
                             if (ImGui::Selectable("Side by Side")) {
                                 Settings::values.layout = Settings::Layout::SideScreen;
-                                Settings::Apply();
+                                VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                             }
                             if (ImGui::Selectable("Medium Screen")) {
                                 Settings::values.layout = Settings::Layout::MediumScreen;
-                                Settings::Apply();
+                                VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                             }
                             ImGui::EndCombo();
                         }
                     } else {
-                        ImGui::TextUnformatted("Top Left");
-                        ImGui::SameLine();
-                        if (ImGui::InputScalar("##topleft", ImGuiDataType_U16,
+                        if (ImGui::InputScalar("Top Left", ImGuiDataType_U16,
                                                &Settings::values.custom_layout_top_left)) {
-                            Settings::Apply();
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                         }
-                        ImGui::TextUnformatted("Top Top");
-                        ImGui::SameLine();
-                        if (ImGui::InputScalar("##toptop", ImGuiDataType_U16,
+                        if (ImGui::InputScalar("Top Top", ImGuiDataType_U16,
                                                &Settings::values.custom_layout_top_top)) {
-                            Settings::Apply();
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                         }
-                        ImGui::TextUnformatted("Top Right");
-                        ImGui::SameLine();
-                        if (ImGui::InputScalar("##topright", ImGuiDataType_U16,
+                        if (ImGui::InputScalar("Top Right", ImGuiDataType_U16,
                                                &Settings::values.custom_layout_top_right)) {
-                            Settings::Apply();
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                         }
-                        ImGui::TextUnformatted("Top Bottom");
-                        ImGui::SameLine();
-                        if (ImGui::InputScalar("##topbottom", ImGuiDataType_U16,
+                        if (ImGui::InputScalar("Top Bottom", ImGuiDataType_U16,
                                                &Settings::values.custom_layout_top_bottom)) {
-                            Settings::Apply();
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                         }
-                        ImGui::TextUnformatted("Bottom Left");
-                        ImGui::SameLine();
-                        if (ImGui::InputScalar("##bottomleft", ImGuiDataType_U16,
+                        if (ImGui::InputScalar("Bottom Left", ImGuiDataType_U16,
                                                &Settings::values.custom_layout_bottom_left)) {
-                            Settings::Apply();
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                         }
-                        ImGui::TextUnformatted("Bottom Top");
-                        ImGui::SameLine();
-                        if (ImGui::InputScalar("##bottomtop", ImGuiDataType_U16,
+                        if (ImGui::InputScalar("Bottom Top", ImGuiDataType_U16,
                                                &Settings::values.custom_layout_bottom_top)) {
-                            Settings::Apply();
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                         }
-                        ImGui::TextUnformatted("Bottom Right");
-                        ImGui::SameLine();
-                        if (ImGui::InputScalar("##bottomright", ImGuiDataType_U16,
+                        if (ImGui::InputScalar("Bottom Right", ImGuiDataType_U16,
                                                &Settings::values.custom_layout_bottom_right)) {
-                            Settings::Apply();
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                         }
-                        ImGui::TextUnformatted("Bottom Bottom");
-                        ImGui::SameLine();
-                        if (ImGui::InputScalar("##bottombottom", ImGuiDataType_U16,
+                        if (ImGui::InputScalar("Bottom Bottom", ImGuiDataType_U16,
                                                &Settings::values.custom_layout_bottom_bottom)) {
-                            Settings::Apply();
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                         }
                     }
 
                     ImGui::Separator();
 
                     if (ImGui::Checkbox("Use Custom Layout", &Settings::values.use_custom_layout)) {
-                        Settings::Apply();
+                        VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                     }
 
                     if (ImGui::Checkbox("Swap Screens", &Settings::values.swap_screens)) {
-                        Settings::Apply();
+                        VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                     }
 
                     if (ImGui::Checkbox("Upright Screens", &Settings::values.upright_screens)) {
-                        Settings::Apply();
+                        VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
                     }
 
                     ImGui::EndMenu();
@@ -2676,8 +2570,7 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                 if (ImGui::ListBoxHeader("##messages", ImVec2(-1.0f, -1.0f))) {
                     for (const std::string& message : multiplayer_messages) {
-                        ImGui::PushTextWrapPos(ImGui::GetCursorPosX() +
-                                               ImGui::GetContentRegionAvail().x);
+                        ImGui::PushTextWrapPos();
                         ImGui::TextUnformatted(message.c_str());
                         ImGui::PopTextWrapPos();
                     }
@@ -2722,6 +2615,7 @@ void EmuWindow_SDL2::SwapBuffers() {
     if (!installed.empty()) {
         ImGui::OpenPopup("Installed");
 
+        ImGui::SetNextWindowPos(ImVec2());
         ImGui::SetNextWindowSize(io.DisplaySize);
 
         bool open = true;
@@ -2729,9 +2623,7 @@ void EmuWindow_SDL2::SwapBuffers() {
         if (ImGui::BeginPopupModal("Installed", &open,
                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
                                        ImGuiWindowFlags_NoResize)) {
-            ImGui::TextUnformatted("Search:");
-            ImGui::SameLine();
-            ImGui::InputText("##search", &installed_query);
+            ImGui::InputText("Search", &installed_query);
 
             if (ImGui::ListBoxHeader("##installed", ImVec2(-1.0f, -1.0f))) {
                 for (const auto& title : installed) {
@@ -2766,32 +2658,19 @@ void EmuWindow_SDL2::SwapBuffers() {
         if (ImGui::BeginPopupModal("Connect To Citra Room", &show_connect_to_citra_room,
                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
                                        ImGuiWindowFlags_NoResize)) {
-            ImGui::TextUnformatted("IP:");
-            ImGui::SameLine();
-            ImGui::InputText("##ip", &Settings::values.multiplayer_ip);
-
-            ImGui::TextUnformatted("Port:");
-            ImGui::SameLine();
-            ImGui::InputScalar("##port", ImGuiDataType_U16, &Settings::values.multiplayer_port);
-
-            ImGui::TextUnformatted("Nickname:");
-            ImGui::SameLine();
-            ImGui::InputText("##nickname", &Settings::values.multiplayer_nickname);
-
-            ImGui::TextUnformatted("Password:");
-            ImGui::SameLine();
-            ImGui::InputText("##password", &Settings::values.multiplayer_password);
+            ImGui::InputText("IP", &Settings::values.multiplayer_ip);
+            ImGui::InputScalar("Port", ImGuiDataType_U16, &Settings::values.multiplayer_port);
+            ImGui::InputText("Nickname", &Settings::values.multiplayer_nickname);
+            ImGui::InputText("Password", &Settings::values.multiplayer_password);
 
             ImGui::NewLine();
             ImGui::TextUnformatted("Public Rooms");
 
-            ImGui::TextUnformatted("Search:");
-            ImGui::SameLine();
-            ImGui::InputText("##search", &public_rooms_query);
-            ImGui::SameLine();
             if (ImGui::Button("Refresh")) {
                 public_rooms = GetPublicCitraRooms();
             }
+            ImGui::SameLine();
+            ImGui::InputText("Search", &public_rooms_query);
 
             if (ImGui::BeginChildFrame(ImGui::GetID("Public Room List"),
                                        ImVec2(-1.0f, ImGui::GetContentRegionAvail().y - 40.0f),

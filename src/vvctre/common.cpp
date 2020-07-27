@@ -25,7 +25,7 @@
 
 const u8 vvctre_version_major = 35;
 const u8 vvctre_version_minor = 1;
-const u8 vvctre_version_patch = 0;
+const u8 vvctre_version_patch = 1;
 
 void vvctreShutdown(PluginManager* plugin_manager) {
     if (plugin_manager != nullptr) {
@@ -153,8 +153,6 @@ CitraRoomList GetPublicCitraRooms() {
 }
 
 bool GUI_CameraAddBrowse(const char* label, std::size_t index) {
-    ImGui::SameLine();
-
     if (ImGui::Button(label)) {
         const std::vector<std::string> result =
             pfd::open_file("Browse", *asl::Process::myDir(),
@@ -185,6 +183,8 @@ bool GUI_CameraAddBrowse(const char* label, std::size_t index) {
             return true;
         }
     }
+
+    ImGui::SameLine();
 
     return false;
 }

@@ -24,7 +24,7 @@ static std::chrono::seconds GetInitialTime() {
     }
 
     switch (Settings::values.initial_clock) {
-    case Settings::InitialClock::SystemTime: {
+    case Settings::InitialClock::System: {
         auto now = std::chrono::system_clock::now();
         // If the system time is in daylight saving, we give an additional hour to console time
         std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
@@ -33,7 +33,7 @@ static std::chrono::seconds GetInitialTime() {
             now = now + std::chrono::hours(1);
         return std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch());
     }
-    case Settings::InitialClock::FixedTime:
+    case Settings::InitialClock::UnixTimestamp:
         return std::chrono::seconds(Settings::values.unix_timestamp);
     default:
         UNREACHABLE_MSG("Invalid InitialClock value ({})",

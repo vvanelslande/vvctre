@@ -291,14 +291,14 @@ private:
     static System s_instance;
 
     ResultStatus status = ResultStatus::Success;
-    std::string status_details = "";
+    std::string status_details;
 
     /// Saved variables for reset and application jump
-    Frontend::EmuWindow* m_emu_window;
+    Frontend::EmuWindow* m_emu_window = nullptr;
     std::string m_filepath;
 
-    std::atomic<bool> reset_requested;
-    std::atomic<bool> shutdown_requested;
+    std::atomic<bool> reset_requested{false};
+    std::atomic<bool> shutdown_requested{false};
 };
 
 } // namespace Core

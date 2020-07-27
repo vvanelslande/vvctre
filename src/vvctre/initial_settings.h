@@ -4,12 +4,7 @@
 
 #pragma once
 
-#include <string>
-#include <tuple>
-#include <vector>
-#include "common/common_types.h"
-#include "network/common.h"
-#include "vvctre/common.h"
+#include <atomic>
 
 class PluginManager;
 struct SDL_Window;
@@ -21,19 +16,6 @@ class Module;
 class InitialSettings {
 public:
     explicit InitialSettings(PluginManager& plugin_manager, SDL_Window* window,
-                             Service::CFG::Module& cfg, bool& ok_multiplayer);
-
-private:
-    // System
-    bool update_config_savegame = false;
-
-    // Installed
-    std::vector<std::tuple<std::string, std::string>> installed;
-    std::string installed_query;
-
-    // Host Multiplayer Room
-    std::string host_multiplayer_room_ip = "0.0.0.0";
-    u16 host_multiplayer_room_port = Network::DEFAULT_PORT;
-    u32 host_multiplayer_room_member_slots = Network::DEFAULT_MEMBER_SLOTS;
-    bool host_multiplayer_room_room_created = false;
+                             Service::CFG::Module& cfg, std::atomic<bool>& update_found,
+                             bool& ok_multiplayer);
 };

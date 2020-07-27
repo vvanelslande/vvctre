@@ -415,7 +415,7 @@ void Movie::PrepareForPlayback(const std::string& movie_file) {
 }
 
 void Movie::PrepareForRecording() {
-    unix_timestamp = (Settings::values.initial_clock == Settings::InitialClock::SystemTime
+    unix_timestamp = (Settings::values.initial_clock == Settings::InitialClock::System
                           ? std::time(nullptr)
                           : Settings::values.unix_timestamp);
 }
