@@ -1947,6 +1947,10 @@ void vvctre_log_critical(const char* line) {
     LOG_CRITICAL(Plugins, "{}", line);
 }
 
+void vvctre_swap_buffers() {
+    VideoCore::g_renderer->SwapBuffers();
+}
+
 std::unordered_map<std::string, void*> PluginManager::function_map = {
     // File
     {"vvctre_load_file", (void*)&vvctre_load_file},
@@ -2353,4 +2357,5 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_log_warning", (void*)&vvctre_log_warning},
     {"vvctre_log_error", (void*)&vvctre_log_error},
     {"vvctre_log_critical", (void*)&vvctre_log_critical},
+    {"vvctre_swap_buffers", (void*)&vvctre_swap_buffers},
 };
