@@ -88,7 +88,7 @@ const calls = [];
     },
   },
   {
-    regex: /start.enable_gdb_stub (\d+)/,
+    regex: /start.gdb_stub enable (\d+)/,
     call: (match) => {
       names.push("vvctre_settings_enable_gdbstub");
       types.push(["void", "u16 port"]);
