@@ -4,18 +4,14 @@
 
 const fs = require("fs");
 
-if (!process.env.ISSUE_BODY) {
-  console.log("empty");
-  process.exit(1);
-}
-
+let matches = 0;
 const names = [];
 const types = [];
 const calls = [];
 
 [
   {
-    regex: /start.file (.+)/,
+    regex: /^start.file (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_file_path");
       types.push(["void", "const char* value"]);
@@ -25,7 +21,7 @@ const calls = [];
     },
   },
   {
-    regex: /start.play_movie (.+)/,
+    regex: /^start.play_movie (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_play_movie");
       types.push(["void", "const char* value"]);
@@ -33,7 +29,7 @@ const calls = [];
     },
   },
   {
-    regex: /start.record_movie (.+)/,
+    regex: /^start.record_movie (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_record_movie");
       types.push(["void", "const char* value"]);
@@ -41,7 +37,7 @@ const calls = [];
     },
   },
   {
-    regex: /start.region (Auto-select|Japan|USA|Europe|Australia|China|Korea|Taiwan)/,
+    regex: /^start.region (Auto-select|Japan|USA|Europe|Australia|China|Korea|Taiwan)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_region_value");
       types.push(["void", "int value"]);
@@ -62,7 +58,7 @@ const calls = [];
     },
   },
   {
-    regex: /start.log_filter (.+)/,
+    regex: /^start.log_filter (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_log_filter");
       types.push(["void", "const char* value"]);
@@ -70,7 +66,7 @@ const calls = [];
     },
   },
   {
-    regex: /start.initial_time (System|Unix Timestamp)/,
+    regex: /^start.initial_time (System|Unix Timestamp)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_initial_clock");
       types.push(["void", "int value"]);
@@ -85,7 +81,7 @@ const calls = [];
     },
   },
   {
-    regex: /start.unix_timestamp (\d+)/,
+    regex: /^start.unix_timestamp (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_unix_timestamp");
       types.push("void", "u64 value");
@@ -93,7 +89,7 @@ const calls = [];
     },
   },
   {
-    regex: /start.use_virtual_sd_card disable/,
+    regex: /^start.use_virtual_sd_card disable$/m,
     call: () => {
       names.push("vvctre_settings_set_use_virtual_sd");
       types.push(["void", "bool value"]);
@@ -101,7 +97,7 @@ const calls = [];
     },
   },
   {
-    regex: /start.record_frame_times enable/,
+    regex: /^start.record_frame_times enable$/m,
     call: () => {
       names.push("vvctre_settings_set_record_frame_times");
       types.push(["void", "bool value"]);
@@ -109,7 +105,7 @@ const calls = [];
     },
   },
   {
-    regex: /start.gdb_stub enable (\d+)/,
+    regex: /^start.gdb_stub enable (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_enable_gdbstub");
       types.push(["void", "u16 port"]);
@@ -117,7 +113,7 @@ const calls = [];
     },
   },
   {
-    regex: /general.cpu_jit disable/,
+    regex: /^general.cpu_jit disable$/m,
     call: (match) => {
       names.push("vvctre_settings_set_use_cpu_jit");
       types.push(["void", "bool value"]);
@@ -125,7 +121,7 @@ const calls = [];
     },
   },
   {
-    regex: /general.limit_speed disable/,
+    regex: /^general.limit_speed disable$/m,
     call: () => {
       names.push("vvctre_settings_set_limit_speed");
       types.push(["void", "bool value"]);
@@ -133,7 +129,7 @@ const calls = [];
     },
   },
   {
-    regex: /general.enable_custom_cpu_ticks enable/,
+    regex: /^general.enable_custom_cpu_ticks enable$/m,
     call: (match) => {
       names.push("vvctre_settings_set_use_custom_cpu_ticks");
       types.push(["void", "bool value"]);
@@ -141,7 +137,7 @@ const calls = [];
     },
   },
   {
-    regex: /general.speed_limit (\d+)%?/,
+    regex: /^general.speed_limit (\d+)%?$/m,
     call: (match) => {
       names.push("vvctre_settings_set_speed_limit");
       types.push(["void", "u16 value"]);
@@ -149,7 +145,7 @@ const calls = [];
     },
   },
   {
-    regex: /general.custom_cpu_ticks (\d+)/,
+    regex: /^general.custom_cpu_ticks (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_custom_cpu_ticks");
       types.push(["void", "u64 value"]);
@@ -157,7 +153,7 @@ const calls = [];
     },
   },
   {
-    regex: /general.cpu_clock_percentage (\d+)%?/,
+    regex: /^general.cpu_clock_percentage (\d+)%?$/m,
     call: (match) => {
       names.push("vvctre_settings_set_cpu_clock_percentage");
       types.push(["void", "u32 value"]);
@@ -165,7 +161,7 @@ const calls = [];
     },
   },
   {
-    regex: /audio.dsp_lle enable/,
+    regex: /^audio.dsp_lle enable$/m,
     call: (match) => {
       names.push("vvctre_settings_set_enable_dsp_lle");
       types.push(["void", "bool value"]);
@@ -173,7 +169,7 @@ const calls = [];
     },
   },
   {
-    regex: /audio.dsp_lle_multiple_threads enable/,
+    regex: /^audio.dsp_lle_multiple_threads enable$/m,
     call: (match) => {
       names.push("vvctre_settings_set_enable_dsp_lle_multithread");
       types.push(["void", "bool value"]);
@@ -181,7 +177,7 @@ const calls = [];
     },
   },
   {
-    regex: /audio.volume (.+)/,
+    regex: /^audio.volume (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_audio_volume");
       types.push(["void", "float value"]);
@@ -189,7 +185,7 @@ const calls = [];
     },
   },
   {
-    regex: /audio.sink (.+)/,
+    regex: /^audio.sink (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_audio_sink_id");
       types.push(["void", "const char* value"]);
@@ -197,7 +193,7 @@ const calls = [];
     },
   },
   {
-    regex: /audio.device (.+)/,
+    regex: /^audio.device (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_audio_device_id");
       types.push(["void", "const char* value"]);
@@ -205,7 +201,7 @@ const calls = [];
     },
   },
   {
-    regex: /audio.microphone_input_type (Disabled|Real Device|Static Noise)/,
+    regex: /^audio.microphone_input_type (Disabled|Real Device|Static Noise)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_microphone_input_type");
       types.push(["void", "int value"]);
@@ -217,7 +213,7 @@ const calls = [];
     },
   },
   {
-    regex: /audio.microphone_device (.+)/,
+    regex: /^audio.microphone_device (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_microphone_device");
       types.push(["void", "const char* value"]);
@@ -225,7 +221,7 @@ const calls = [];
     },
   },
   {
-    regex: /camera.inner_engine (blank|image)/,
+    regex: /^camera.inner_engine (blank|image)$/m,
     call: (match) => {
       if (!names.includes("vvctre_settings_set_camera_engine")) {
         names.push("vvctre_settings_set_camera_engine");
@@ -235,7 +231,7 @@ const calls = [];
     },
   },
   {
-    regex: /camera.inner_parameter (.+)/,
+    regex: /^camera.inner_parameter (.+)$/m,
     call: (match) => {
       if (!names.includes("vvctre_settings_set_camera_parameter")) {
         names.push("vvctre_settings_set_camera_parameter");
@@ -245,7 +241,7 @@ const calls = [];
     },
   },
   {
-    regex: /camera.outer_left_engine (blank|image)/,
+    regex: /^camera.outer_left_engine (blank|image)$/m,
     call: (match) => {
       if (!names.includes("vvctre_settings_set_camera_engine")) {
         names.push("vvctre_settings_set_camera_engine");
@@ -255,7 +251,7 @@ const calls = [];
     },
   },
   {
-    regex: /camera.outer_left_parameter (.+)/,
+    regex: /^camera.outer_left_parameter (.+)$/m,
     call: (match) => {
       if (!names.includes("vvctre_settings_set_camera_parameter")) {
         names.push("vvctre_settings_set_camera_parameter");
@@ -265,7 +261,7 @@ const calls = [];
     },
   },
   {
-    regex: /camera.outer_right_parameter (blank|image)/,
+    regex: /^camera.outer_right_parameter (blank|image)$/m,
     call: (match) => {
       if (!names.includes("vvctre_settings_set_camera_engine")) {
         names.push("vvctre_settings_set_camera_engine");
@@ -275,7 +271,7 @@ const calls = [];
     },
   },
   {
-    regex: /camera.outer_right_parameter (.+)/,
+    regex: /^camera.outer_right_parameter (.+)$/m,
     call: (match) => {
       if (!names.includes("vvctre_settings_set_camera_parameter")) {
         names.push("vvctre_settings_set_camera_parameter");
@@ -285,7 +281,7 @@ const calls = [];
     },
   },
   {
-    regex: /system.play_coins (\d+)/,
+    regex: /^system.play_coins (\d+)$/m,
     call: (match) => {
       if (!names.includes("vvctre_set_play_coins")) {
         names.push("vvctre_set_play_coins");
@@ -295,7 +291,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.hardware_renderer disable/,
+    regex: /^graphics.hardware_renderer disable$/m,
     call: () => {
       names.push("vvctre_settings_set_use_hardware_renderer");
       types.push(["void", "bool value"]);
@@ -303,7 +299,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.hardware_shader disable/,
+    regex: /^graphics.hardware_shader disable$/m,
     call: () => {
       names.push("vvctre_settings_set_use_hardware_shader");
       types.push(["void", "bool value"]);
@@ -311,7 +307,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.hardware_shader_accurate_multiplication enable/,
+    regex: /^graphics.hardware_shader_accurate_multiplication enable$/m,
     call: () => {
       names.push("vvctre_settings_set_hardware_shader_accurate_multiplication");
       types.push(["void", "bool value"]);
@@ -321,7 +317,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.shader_jit disable/,
+    regex: /^graphics.shader_jit disable$/m,
     call: () => {
       names.push("vvctre_settings_set_use_shader_jit");
       types.push(["void", "bool value"]);
@@ -329,7 +325,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.vsync enable/,
+    regex: /^graphics.vsync enable$/m,
     call: () => {
       names.push("vvctre_settings_set_enable_vsync");
       types.push(["void", "bool value"]);
@@ -337,7 +333,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.dump_textures enable/,
+    regex: /^graphics.dump_textures enable$/m,
     call: () => {
       names.push("vvctre_settings_set_dump_textures");
       types.push(["void", "bool value"]);
@@ -345,7 +341,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.custom_textures enable/,
+    regex: /^graphics.custom_textures enable$/m,
     call: () => {
       names.push("vvctre_settings_set_custom_textures");
       types.push(["void", "bool value"]);
@@ -353,7 +349,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.preload_custom_textures enable/,
+    regex: /^graphics.preload_custom_textures enable$/m,
     call: () => {
       names.push("vvctre_settings_set_preload_textures");
       types.push(["void", "bool value"]);
@@ -361,7 +357,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.linear_filtering disable/,
+    regex: /^graphics.linear_filtering disable$/m,
     call: () => {
       names.push("vvctre_settings_set_enable_linear_filtering");
       types.push(["void", "bool value"]);
@@ -369,7 +365,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.sharper_distant_objects enable/,
+    regex: /^graphics.sharper_distant_objects enable$/m,
     call: () => {
       names.push("vvctre_settings_set_sharper_distant_objects");
       types.push(["void", "bool value"]);
@@ -377,7 +373,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.background_color (?:#)(\S\S\S\S\S\S)/,
+    regex: /^graphics.background_color (?:#)(\S\S\S\S\S\S)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_background_color_red");
       names.push("vvctre_settings_set_background_color_green");
@@ -403,7 +399,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.resolution (\d+|Window Size)/,
+    regex: /^graphics.resolution (\d+|Window Size)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_resolution");
       types.push(["void", "u16 value"]);
@@ -415,7 +411,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.post_processing_shader (.+)/,
+    regex: /^graphics.post_processing_shader (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_post_processing_shader");
       types.push(["void", "const char* value"]);
@@ -423,7 +419,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.texture_filter (none|Anime4K Ultrafast|Bicubic|ScaleForce|xBRZ freescale)/,
+    regex: /^graphics.texture_filter (none|Anime4K Ultrafast|Bicubic|ScaleForce|xBRZ freescale)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_texture_filter");
       types.push(["void", "const char* value"]);
@@ -431,7 +427,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.3d_mode (Off|Side by Side|Anaglyph|Interlaced)/,
+    regex: /^graphics.3d_mode (Off|Side by Side|Anaglyph|Interlaced)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_render_3d");
       types.push(["void", "int value"]);
@@ -448,7 +444,7 @@ const calls = [];
     },
   },
   {
-    regex: /graphics.3d_factor (\d+)%?/,
+    regex: /^graphics.3d_factor (\d+)%?$/m,
     call: (match) => {
       names.push("vvctre_settings_set_factor_3d");
       types.push(["void", "u8 value"]);
@@ -456,7 +452,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.layout (Default|Single Screen|Large Screen|Side by Side|Medium Screen)/,
+    regex: /^layout.layout (Default|Single Screen|Large Screen|Side by Side|Medium Screen)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_layout");
       types.push(["void", "int value"]);
@@ -474,7 +470,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.use_custom_layout enable/,
+    regex: /^layout.use_custom_layout enable$/m,
     call: () => {
       names.push("vvctre_settings_set_use_custom_layout");
       types.push(["void", "bool value"]);
@@ -482,7 +478,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.swap_screens enable/,
+    regex: /^layout.swap_screens enable$/m,
     call: () => {
       names.push("vvctre_settings_set_swap_screens");
       types.push(["void", "bool value"]);
@@ -490,7 +486,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.upright_screens enable/,
+    regex: /^layout.upright_screens enable$/m,
     call: () => {
       names.push("vvctre_settings_set_upright_screens");
       types.push(["void", "bool value"]);
@@ -498,7 +494,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.top_left (\d+)/,
+    regex: /^layout.top_left (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_custom_layout_top_left");
       types.push(["void", "u16 value"]);
@@ -506,7 +502,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.top_top (\d+)/,
+    regex: /^layout.top_top (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_custom_layout_top_top");
       types.push(["void", "u16 value"]);
@@ -514,7 +510,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.top_right (\d+)/,
+    regex: /^layout.top_right (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_custom_layout_top_right");
       types.push(["void", "u16 value"]);
@@ -522,7 +518,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.top_bottom (\d+)/,
+    regex: /^layout.top_bottom (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_custom_layout_top_bottom");
       types.push(["void", "u16 value"]);
@@ -530,7 +526,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.bottom_left (\d+)/,
+    regex: /^layout.bottom_left (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_custom_layout_bottom_left");
       types.push(["void", "u16 value"]);
@@ -538,7 +534,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.bottom_top (\d+)/,
+    regex: /^layout.bottom_top (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_custom_layout_bottom_top");
       types.push(["void", "u16 value"]);
@@ -546,7 +542,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.bottom_right (\d+)/,
+    regex: /^layout.bottom_right (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_custom_layout_bottom_right");
       types.push(["void", "u16 value"]);
@@ -556,7 +552,7 @@ const calls = [];
     },
   },
   {
-    regex: /layout.bottom_bottom (\d+)/,
+    regex: /^layout.bottom_bottom (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_custom_layout_bottom_bottom");
       types.push(["void", "u16 value"]);
@@ -566,7 +562,7 @@ const calls = [];
     },
   },
   {
-    regex: /multiplayer.ip (.+)/,
+    regex: /^multiplayer.ip (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_multiplayer_ip");
       types.push(["void", "const char* value"]);
@@ -574,7 +570,7 @@ const calls = [];
     },
   },
   {
-    regex: /multiplayer.port (\d+)/,
+    regex: /^multiplayer.port (\d+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_multiplayer_port");
       types.push(["void", "u16 value"]);
@@ -582,7 +578,7 @@ const calls = [];
     },
   },
   {
-    regex: /multiplayer.nickname (.+)/,
+    regex: /^multiplayer.nickname (.+)$/m,
     call: (match) => {
       names.push("vvctre_settings_set_nickname");
       types.push(["void", "const char* value"]);
@@ -590,7 +586,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.spi enable/,
+    regex: /^lle.spi enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -600,7 +596,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.gpio enable/,
+    regex: /^lle.gpio enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -610,7 +606,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.mp enable/,
+    regex: /^lle.mp enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -620,7 +616,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.cdc enable/,
+    regex: /^lle.cdc enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -630,7 +626,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.http enable/,
+    regex: /^lle.http enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -640,7 +636,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.csnd enable/,
+    regex: /^lle.csnd enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -650,7 +646,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.ns enable/,
+    regex: /^lle.ns enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -660,7 +656,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.nfc enable/,
+    regex: /^lle.nfc enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -670,7 +666,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.ptm enable/,
+    regex: /^lle.ptm enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -680,7 +676,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.news enable/,
+    regex: /^lle.news enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -690,7 +686,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.ndm enable/,
+    regex: /^lle.ndm enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -700,7 +696,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.mic enable/,
+    regex: /^lle.mic enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -710,7 +706,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.i2c enable/,
+    regex: /^lle.i2c enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -720,7 +716,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.ir enable/,
+    regex: /^lle.ir enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -730,7 +726,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.pdn enable/,
+    regex: /^lle.pdn enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -740,7 +736,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.nim enable/,
+    regex: /^lle.nim enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -750,7 +746,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.hid enable/,
+    regex: /^lle.hid enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -760,7 +756,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.gsp enable/,
+    regex: /^lle.gsp enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -770,7 +766,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.frd enable/,
+    regex: /^lle.frd enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -780,7 +776,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.cfg enable/,
+    regex: /^lle.cfg enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -790,7 +786,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.ps enable/,
+    regex: /^lle.ps enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -800,7 +796,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.cecd enable/,
+    regex: /^lle.cecd enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -810,7 +806,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.dsp enable/,
+    regex: /^lle.dsp enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -820,7 +816,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.cam enable/,
+    regex: /^lle.cam enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -830,7 +826,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.mcu enable/,
+    regex: /^lle.mcu enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -840,7 +836,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.ssl enable/,
+    regex: /^lle.ssl enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -850,7 +846,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.boss enable/,
+    regex: /^lle.boss enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -860,7 +856,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.act enable/,
+    regex: /^lle.act enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -870,7 +866,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.ac enable/,
+    regex: /^lle.ac enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -880,7 +876,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.am enable/,
+    regex: /^lle.am enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -890,7 +886,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.err enable/,
+    regex: /^lle.err enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -900,7 +896,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.pxi enable/,
+    regex: /^lle.pxi enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -910,7 +906,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.nwm enable/,
+    regex: /^lle.nwm enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -920,7 +916,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.dlp enable/,
+    regex: /^lle.dlp enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -930,7 +926,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.ldr enable/,
+    regex: /^lle.ldr enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -940,7 +936,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.pm enable/,
+    regex: /^lle.pm enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -950,7 +946,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.soc enable/,
+    regex: /^lle.soc enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -960,7 +956,7 @@ const calls = [];
     },
   },
   {
-    regex: /lle.fs enable/,
+    regex: /^lle.fs enable$/m,
     call: () => {
       if (!names.includes("vvctre_settings_set_use_lle_module")) {
         names.push("vvctre_settings_set_use_lle_module");
@@ -970,7 +966,7 @@ const calls = [];
     },
   },
   {
-    regex: /hacks.priority_boost disable/,
+    regex: /^hacks.priority_boost disable$/m,
     call: () => {
       names.push("vvctre_settings_set_enable_priority_boost");
       types.push(["void", "bool value"]);
@@ -981,8 +977,15 @@ const calls = [];
   if (test.regex.test(process.env.ISSUE_BODY)) {
     const match = process.env.ISSUE_BODY.match(test.regex);
     test.call(match);
+
+    ++matches;
   }
 });
+
+if (matches === 0) {
+  console.log("no matches");
+  process.exit(1);
+}
 
 let code = `// Copyright 2020 Valentin Vanelslande
 // Licensed under GPLv2 or any later version
