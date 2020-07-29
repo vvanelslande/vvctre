@@ -2147,7 +2147,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::TextUnformatted("R");
 
                     if (ImGui::Button((InputCommon::ButtonToText(
-                                           Settings::values.buttons[Settings::NativeButton::ZR]) +
+                                           Settings::values.buttons[Settings::NativeButton::ZL]) +
                                        "##ZL")
                                           .c_str())) {
                         Settings::values.buttons[Settings::NativeButton::ZL] =
