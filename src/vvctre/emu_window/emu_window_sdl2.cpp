@@ -385,10 +385,23 @@ void EmuWindow_SDL2::SwapBuffers() {
                 if (ImGui::BeginMenu("General")) {
                     ImGui::Checkbox("Limit Speed", &Settings::values.limit_speed);
 
+                    ImGui::Checkbox("Enable Custom CPU Ticks",
+                                    &Settings::values.use_custom_cpu_ticks);
+
                     if (Settings::values.limit_speed) {
                         ImGui::InputScalar("Speed Limit", ImGuiDataType_U16,
                                            &Settings::values.speed_limit, nullptr, nullptr, "%d%%");
                     }
+
+                    if (Settings::values.use_custom_cpu_ticks) {
+                        ImGui::InputScalar("Custom CPU Ticks", ImGuiDataType_U64,
+                                           &Settings::values.custom_cpu_ticks);
+                    }
+
+                    u32 min = 5;
+                    u32 max = 400;
+                    ImGui::SliderScalar("CPU Clock Percentage", ImGuiDataType_U32,
+                                        &Settings::values.cpu_clock_percentage, &min, &max, "%d%%");
 
                     ImGui::EndMenu();
                 }
@@ -1846,23 +1859,6 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                 if (ImGui::BeginMenu("GUI")) {
                     ImGui::ColorPicker4("FPS Color", (float*)&fps_color);
-
-                    ImGui::EndMenu();
-                }
-
-                if (ImGui::BeginMenu("Hacks")) {
-                    ImGui::Checkbox("Enable Custom CPU Ticks",
-                                    &Settings::values.use_custom_cpu_ticks);
-
-                    if (Settings::values.use_custom_cpu_ticks) {
-                        ImGui::InputScalar("Custom CPU Ticks", ImGuiDataType_U64,
-                                           &Settings::values.custom_cpu_ticks);
-                    }
-
-                    u32 min = 5;
-                    u32 max = 400;
-                    ImGui::SliderScalar("CPU Clock Percentage", ImGuiDataType_U32,
-                                        &Settings::values.cpu_clock_percentage, &min, &max, "%d%%");
 
                     ImGui::EndMenu();
                 }
