@@ -10,8 +10,8 @@
 
 namespace Frontend {
 
-/// Default English button text mappings.
-constexpr char MII_BUTTON_OKAY[] = "Ok";
+/// Default button texts.
+constexpr char MII_BUTTON_OKAY[] = "OK";
 constexpr char MII_BUTTON_CANCEL[] = "Cancel";
 
 /// Configuration that's relevant to frontend implementation of applet. Anything missing that we

@@ -29,8 +29,8 @@ enum class ButtonConfig {
     None,   /// No button (returned by swkbdInputText in special cases)
 };
 
-/// Default English button text mappings.
-constexpr char SWKBD_BUTTON_OKAY[] = "Ok";
+/// Default button texts.
+constexpr char SWKBD_BUTTON_OKAY[] = "OK";
 constexpr char SWKBD_BUTTON_CANCEL[] = "Cancel";
 constexpr char SWKBD_BUTTON_FORGOT[] = "I Forgot";
 
