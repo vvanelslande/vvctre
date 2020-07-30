@@ -35,6 +35,7 @@
 #include "core/core.h"
 #include "core/file_sys/archive_extsavedata.h"
 #include "core/file_sys/archive_source_sd_savedata.h"
+#include "core/hle/applets/mii_selector.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/cfg/cfg.h"
 #include "core/hle/service/nfc/nfc.h"
@@ -222,6 +223,7 @@ void EmuWindow_SDL2::SwapBuffers() {
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
     ImGuiIO& io = ImGui::GetIO();
+    ImGuiStyle& style = ImGui::GetStyle();
 
     plugin_manager.BeforeDrawingFPS();
 
@@ -2278,15 +2280,32 @@ void EmuWindow_SDL2::SwapBuffers() {
                          nullptr,
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize)) {
             if (ImGui::ListBoxHeader("##miis")) {
-                for (std::size_t index = 0; index < mii_selector_data->miis.size(); ++index) {
-                    const HLE::Applets::MiiData& mii = mii_selector_data->miis[index];
-                    if (ImGui::Selectable((Common::UTF16BufferToUTF8(mii.mii_name) +
-                                           fmt::format("##{}", static_cast<u32>(mii.mii_id)))
-                                              .c_str())) {
-                        mii_selector_data->code = 0;
-                        mii_selector_data->selected_mii = mii_selector_data->miis.at(index);
-                        mii_selector_data = nullptr;
-                        break;
+                ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
+                ImGui::TextUnformatted("Standard Mii");
+                ImGui::PopStyleColor();
+                if (ImGui::Selectable("vvctre")) {
+                    mii_selector_data->code = 0;
+                    mii_selector_data->selected_mii =
+                        HLE::Applets::MiiSelector::GetStandardMiiResult().selected_mii_data;
+                    mii_selector_data = nullptr;
+                }
+                if (mii_selector_data != nullptr && !mii_selector_data->miis.empty()) {
+                    ImGui::Separator();
+
+                    ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
+                    ImGui::TextUnformatted("Your Miis");
+                    ImGui::PopStyleColor();
+
+                    for (std::size_t index = 0; index < mii_selector_data->miis.size(); ++index) {
+                        const HLE::Applets::MiiData& mii = mii_selector_data->miis[index];
+                        if (ImGui::Selectable((Common::UTF16BufferToUTF8(mii.mii_name) +
+                                               fmt::format("##{}", static_cast<u32>(mii.mii_id)))
+                                                  .c_str())) {
+                            mii_selector_data->code = 0;
+                            mii_selector_data->selected_mii = mii;
+                            mii_selector_data = nullptr;
+                            break;
+                        }
                     }
                 }
                 ImGui::ListBoxFooter();

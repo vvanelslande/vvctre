@@ -21,8 +21,7 @@ void SDL2_MiiSelector::Setup(const MiiSelectorConfig& config) {
     const std::string nand_directory = FileUtil::GetUserPath(FileUtil::UserPath::NANDDir);
     FileSys::ArchiveFactory_ExtSaveData extdata_archive_factory(nand_directory, true);
 
-    std::vector<HLE::Applets::MiiData> miis{
-        HLE::Applets::MiiSelector::GetStandardMiiResult().selected_mii_data};
+    std::vector<HLE::Applets::MiiData> miis;
 
     auto archive_result = extdata_archive_factory.Open(Service::PTM::ptm_shared_extdata_id, 0);
     if (archive_result.Succeeded()) {
