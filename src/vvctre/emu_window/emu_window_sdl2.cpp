@@ -2279,9 +2279,10 @@ void EmuWindow_SDL2::SwapBuffers() {
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize)) {
             if (ImGui::ListBoxHeader("##miis")) {
                 for (std::size_t index = 0; index < mii_selector_data->miis.size(); ++index) {
-                    if (ImGui::Selectable(
-                            Common::UTF16BufferToUTF8(mii_selector_data->miis.at(index).mii_name)
-                                .c_str())) {
+                    const HLE::Applets::MiiData& mii = mii_selector_data->miis[index];
+                    if (ImGui::Selectable((Common::UTF16BufferToUTF8(mii.mii_name) +
+                                           fmt::format("##{}", static_cast<u32>(mii.mii_id)))
+                                              .c_str())) {
                         mii_selector_data->code = 0;
                         mii_selector_data->selected_mii = mii_selector_data->miis.at(index);
                         mii_selector_data = nullptr;
