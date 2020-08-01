@@ -2609,13 +2609,6 @@ void EmuWindow_SDL2::SwapBuffers() {
             if (ImGui::InputTextWithHint("##message", "Send Chat Message", &multiplayer_message,
                                          ImGuiInputTextFlags_EnterReturnsTrue)) {
                 room_member.SendChatMessage(multiplayer_message);
-                if (multiplayer_messages.size() == 100) {
-                    multiplayer_messages.pop_front();
-                }
-                asl::Date date = asl::Date::now();
-                multiplayer_messages.push_back(
-                    fmt::format("[{}:{}] <{}> {}", date.hours(), date.minutes(),
-                                room_member.GetNickname(), multiplayer_message));
                 multiplayer_message.clear();
                 ImGui::SetKeyboardFocusHere();
             }

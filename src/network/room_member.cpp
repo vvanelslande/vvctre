@@ -543,6 +543,7 @@ void RoomMember::SendChatMessage(const std::string& message) {
     packet << static_cast<u8>(IdChatMessage);
     packet << message;
     room_member_impl->Send(std::move(packet));
+    room_member_impl->Invoke(ChatEntry{room_member_impl->nickname, message});
 }
 
 void RoomMember::SendGameInfo(const GameInfo& game_info) {

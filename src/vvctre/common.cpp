@@ -23,8 +23,8 @@
 #include "vvctre/common.h"
 #include "vvctre/plugins.h"
 
-const u8 vvctre_version_major = 35;
-const u8 vvctre_version_minor = 3;
+const u8 vvctre_version_major = 36;
+const u8 vvctre_version_minor = 0;
 const u8 vvctre_version_patch = 0;
 
 void vvctreShutdown(PluginManager* plugin_manager) {
