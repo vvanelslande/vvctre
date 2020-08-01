@@ -2664,6 +2664,7 @@ void EmuWindow_SDL2::SwapBuffers() {
     if (show_connect_to_citra_room) {
         ImGui::OpenPopup("Connect To Citra Room");
 
+        ImGui::SetNextWindowPos(ImVec2());
         ImGui::SetNextWindowSize(io.DisplaySize);
 
         if (ImGui::BeginPopupModal("Connect To Citra Room", &show_connect_to_citra_room,
