@@ -327,6 +327,7 @@ void System::Shutdown() {
     kernel.reset();
     timing.reset();
     app_loader.reset();
+    room_member->SendGameInfo(Network::GameInfo{});
 }
 
 void System::Reset() {
