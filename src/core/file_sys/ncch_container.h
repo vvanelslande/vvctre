@@ -372,4 +372,6 @@ private:
     FileUtil::IOFile exefs_file;
 };
 
+u64 GetModId(u64 program_id);
+
 } // namespace FileSys

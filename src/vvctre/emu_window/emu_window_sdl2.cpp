@@ -35,6 +35,7 @@
 #include "core/core.h"
 #include "core/file_sys/archive_extsavedata.h"
 #include "core/file_sys/archive_source_sd_savedata.h"
+#include "core/file_sys/ncch_container.h"
 #include "core/hle/applets/mii_selector.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/cfg/cfg.h"
@@ -2063,11 +2064,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::MenuItem("Copy Save Data Folder Path")) {
-                    u64 program_id = 0;
-                    system.GetAppLoader().ReadProgramId(program_id);
                     ImGui::SetClipboardText(
-                        FileSys::ArchiveSource_SDSaveData::GetSaveDataPathFor(
-                            FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir), program_id)
+                        FileUtil::SanitizePath(
+                            FileSys::ArchiveSource_SDSaveData::GetSaveDataPathFor(
+                                FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                                system.Kernel().GetCurrentProcess()->codeset->program_id),
+                            FileUtil::DirectorySeparator::PlatformDefault)
                             .c_str());
                 }
 
@@ -2075,8 +2077,47 @@ void EmuWindow_SDL2::SwapBuffers() {
                     u64 extdata_id = 0;
                     system.GetAppLoader().ReadExtdataId(extdata_id);
                     ImGui::SetClipboardText(
-                        FileSys::GetExtDataPathFromId(
-                            FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir), extdata_id)
+                        FileUtil::SanitizePath(
+                            FileSys::GetExtDataPathFromId(
+                                FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir), extdata_id),
+                            FileUtil::DirectorySeparator::PlatformDefault)
+                            .c_str());
+                }
+
+                if (ImGui::MenuItem("Copy Custom Textures Folder Path")) {
+                    ImGui::SetClipboardText(
+                        FileUtil::SanitizePath(
+                            fmt::format("{}textures/{:016X}",
+                                        FileUtil::GetUserPath(FileUtil::UserPath::LoadDir),
+                                        system.Kernel().GetCurrentProcess()->codeset->program_id))
+                            .c_str());
+                }
+
+                if (ImGui::MenuItem("Copy Dumped Textures Folder Path")) {
+                    ImGui::SetClipboardText(
+                        FileUtil::SanitizePath(
+                            fmt::format("{}textures/{:016X}",
+                                        FileUtil::GetUserPath(FileUtil::UserPath::DumpDir),
+                                        system.Kernel().GetCurrentProcess()->codeset->program_id))
+                            .c_str());
+                }
+
+                if (ImGui::MenuItem("Copy Title Folder Path")) {
+                    const u64 program_id = system.Kernel().GetCurrentProcess()->codeset->program_id;
+                    ImGui::SetClipboardText(
+                        FileUtil::SanitizePath(
+                            Service::AM::GetTitlePath(Service::AM::GetTitleMediaType(program_id),
+                                                      program_id))
+                            .c_str());
+                }
+
+                if (ImGui::MenuItem("Copy Mod Folder Path")) {
+                    const u64 program_id = system.Kernel().GetCurrentProcess()->codeset->program_id;
+                    ImGui::SetClipboardText(
+                        FileUtil::SanitizePath(
+                            fmt::format("{}luma/titles/{:016X}/",
+                                        FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                                        FileSys::GetModId(program_id)))
                             .c_str());
                 }
 
