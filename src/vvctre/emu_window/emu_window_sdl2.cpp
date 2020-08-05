@@ -1995,58 +1995,6 @@ void EmuWindow_SDL2::SwapBuffers() {
             }
 
             if (ImGui::BeginMenu("Tools")) {
-                if (ImGui::MenuItem("Save Screenshot")) {
-                    const auto& layout = GetFramebufferLayout();
-                    u8* data = new u8[layout.width * layout.height * 4];
-                    if (VideoCore::RequestScreenshot(
-                            data,
-                            [=] {
-                                const auto filename =
-                                    pfd::save_file("Save Screenshot", "screenshot.png",
-                                                   {"Portable Network Graphics", "*.png"})
-                                        .result();
-                                if (!filename.empty()) {
-                                    std::vector<u8> v(layout.width * layout.height * 4);
-                                    std::memcpy(v.data(), data, v.size());
-                                    delete[] data;
-
-                                    const auto convert_bgra_to_rgba =
-                                        [](const std::vector<u8>& input,
-                                           const Layout::FramebufferLayout& layout) {
-                                            int offset = 0;
-                                            std::vector<u8> output(input.size());
-
-                                            for (u32 y = 0; y < layout.height; ++y) {
-                                                for (u32 x = 0; x < layout.width; ++x) {
-                                                    output[offset] = input[offset + 2];
-                                                    output[offset + 1] = input[offset + 1];
-                                                    output[offset + 2] = input[offset];
-                                                    output[offset + 3] = input[offset + 3];
-
-                                                    offset += 4;
-                                                }
-                                            }
-
-                                            return output;
-                                        };
-
-                                    v = convert_bgra_to_rgba(v, layout);
-                                    Common::FlipRGBA8Texture(v, static_cast<u64>(layout.width),
-                                                             static_cast<u64>(layout.height));
-
-                                    stbi_write_png(filename.c_str(), layout.width, layout.height, 4,
-                                                   v.data(), layout.width * 4);
-                                }
-                            },
-                            layout)) {
-                        delete[] data;
-                    }
-                }
-
-                if (ImGui::MenuItem("Copy Screenshot")) {
-                    CopyScreenshot();
-                }
-
                 if (ImGui::MenuItem("Dump RomFS")) {
                     const std::string folder = pfd::select_folder("Dump RomFS").result();
 
@@ -2063,62 +2011,174 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
                 }
 
-                if (ImGui::MenuItem("Copy Save Data Folder Path")) {
-                    ImGui::SetClipboardText(
-                        FileUtil::SanitizePath(
-                            FileSys::ArchiveSource_SDSaveData::GetSaveDataPathFor(
-                                FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
-                                system.Kernel().GetCurrentProcess()->codeset->program_id),
-                            FileUtil::DirectorySeparator::PlatformDefault)
-                            .c_str());
+                if (ImGui::BeginMenu("Screenshot")) {
+                    if (ImGui::MenuItem("Save Screenshot")) {
+                        const auto& layout = GetFramebufferLayout();
+                        u8* data = new u8[layout.width * layout.height * 4];
+                        if (VideoCore::RequestScreenshot(
+                                data,
+                                [=] {
+                                    const auto filename =
+                                        pfd::save_file("Save Screenshot", "screenshot.png",
+                                                       {"Portable Network Graphics", "*.png"})
+                                            .result();
+                                    if (!filename.empty()) {
+                                        std::vector<u8> v(layout.width * layout.height * 4);
+                                        std::memcpy(v.data(), data, v.size());
+                                        delete[] data;
+
+                                        const auto convert_bgra_to_rgba =
+                                            [](const std::vector<u8>& input,
+                                               const Layout::FramebufferLayout& layout) {
+                                                int offset = 0;
+                                                std::vector<u8> output(input.size());
+
+                                                for (u32 y = 0; y < layout.height; ++y) {
+                                                    for (u32 x = 0; x < layout.width; ++x) {
+                                                        output[offset] = input[offset + 2];
+                                                        output[offset + 1] = input[offset + 1];
+                                                        output[offset + 2] = input[offset];
+                                                        output[offset + 3] = input[offset + 3];
+
+                                                        offset += 4;
+                                                    }
+                                                }
+
+                                                return output;
+                                            };
+
+                                        v = convert_bgra_to_rgba(v, layout);
+                                        Common::FlipRGBA8Texture(v, static_cast<u64>(layout.width),
+                                                                 static_cast<u64>(layout.height));
+
+                                        stbi_write_png(filename.c_str(), layout.width,
+                                                       layout.height, 4, v.data(),
+                                                       layout.width * 4);
+                                    }
+                                },
+                                layout)) {
+                            delete[] data;
+                        }
+                    }
+
+                    if (ImGui::MenuItem("Copy Screenshot")) {
+                        CopyScreenshot();
+                    }
+
+                    ImGui::EndMenu();
                 }
 
-                if (ImGui::MenuItem("Copy Extra Data Folder Path")) {
-                    u64 extdata_id = 0;
-                    system.GetAppLoader().ReadExtdataId(extdata_id);
-                    ImGui::SetClipboardText(
-                        FileUtil::SanitizePath(
-                            FileSys::GetExtDataPathFromId(
-                                FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir), extdata_id),
-                            FileUtil::DirectorySeparator::PlatformDefault)
-                            .c_str());
+                if (ImGui::BeginMenu("Files")) {
+                    if (ImGui::MenuItem("Copy Cheats File Path")) {
+                        const u64 program_id =
+                            system.Kernel().GetCurrentProcess()->codeset->program_id;
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                fmt::format("{}{:016X}.txt",
+                                            FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
+                                            program_id),
+                                FileUtil::DirectorySeparator::PlatformDefault)
+                                .c_str());
+                    }
+
+                    ImGui::EndMenu();
                 }
 
-                if (ImGui::MenuItem("Copy Custom Textures Folder Path")) {
-                    ImGui::SetClipboardText(
-                        FileUtil::SanitizePath(
-                            fmt::format("{}textures/{:016X}",
-                                        FileUtil::GetUserPath(FileUtil::UserPath::LoadDir),
-                                        system.Kernel().GetCurrentProcess()->codeset->program_id))
-                            .c_str());
-                }
+                if (ImGui::BeginMenu("Folders")) {
+                    if (ImGui::MenuItem("Copy Save Data Folder Path")) {
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                FileSys::ArchiveSource_SDSaveData::GetSaveDataPathFor(
+                                    FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                                    system.Kernel().GetCurrentProcess()->codeset->program_id),
+                                FileUtil::DirectorySeparator::PlatformDefault)
+                                .c_str());
+                    }
 
-                if (ImGui::MenuItem("Copy Dumped Textures Folder Path")) {
-                    ImGui::SetClipboardText(
-                        FileUtil::SanitizePath(
-                            fmt::format("{}textures/{:016X}",
-                                        FileUtil::GetUserPath(FileUtil::UserPath::DumpDir),
-                                        system.Kernel().GetCurrentProcess()->codeset->program_id))
-                            .c_str());
-                }
+                    if (ImGui::MenuItem("Copy Extra Data Folder Path")) {
+                        u64 extdata_id = 0;
+                        system.GetAppLoader().ReadExtdataId(extdata_id);
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                FileSys::GetExtDataPathFromId(
+                                    FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir), extdata_id),
+                                FileUtil::DirectorySeparator::PlatformDefault)
+                                .c_str());
+                    }
 
-                if (ImGui::MenuItem("Copy Title Folder Path")) {
-                    const u64 program_id = system.Kernel().GetCurrentProcess()->codeset->program_id;
-                    ImGui::SetClipboardText(
-                        FileUtil::SanitizePath(
-                            Service::AM::GetTitlePath(Service::AM::GetTitleMediaType(program_id),
-                                                      program_id))
-                            .c_str());
-                }
+                    if (ImGui::MenuItem("Copy Title Folder Path")) {
+                        const u64 program_id =
+                            system.Kernel().GetCurrentProcess()->codeset->program_id;
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                Service::AM::GetTitlePath(
+                                    Service::AM::GetTitleMediaType(program_id), program_id))
+                                .c_str());
+                    }
 
-                if (ImGui::MenuItem("Copy Mod Folder Path")) {
-                    const u64 program_id = system.Kernel().GetCurrentProcess()->codeset->program_id;
-                    ImGui::SetClipboardText(
-                        FileUtil::SanitizePath(
-                            fmt::format("{}luma/titles/{:016X}/",
-                                        FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
-                                        FileSys::GetModId(program_id)))
-                            .c_str());
+                    if (ImGui::MenuItem("Copy Update Folder Path")) {
+                        const u64 program_id =
+                            system.Kernel().GetCurrentProcess()->codeset->program_id;
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                Service::AM::GetTitlePath(Service::FS::MediaType::SDMC,
+                                                          program_id + 0xe00000000))
+                                .c_str());
+                    }
+
+                    if (ImGui::MenuItem("Copy Mod Folder Path")) {
+                        const u64 program_id =
+                            system.Kernel().GetCurrentProcess()->codeset->program_id;
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                fmt::format("{}luma/titles/{:016X}",
+                                            FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                                            FileSys::GetModId(program_id)))
+                                .c_str());
+                    }
+
+                    if (ImGui::MenuItem("Copy Cheats Folder Path")) {
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir))
+                                .c_str());
+                    }
+
+                    if (ImGui::MenuItem("Copy SysData Folder Path")) {
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                FileUtil::GetUserPath(FileUtil::UserPath::SysDataDir))
+                                .c_str());
+                    }
+
+                    if (ImGui::MenuItem("Copy Custom Textures Folder Path")) {
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                fmt::format(
+                                    "{}textures/{:016X}",
+                                    FileUtil::GetUserPath(FileUtil::UserPath::LoadDir),
+                                    system.Kernel().GetCurrentProcess()->codeset->program_id))
+                                .c_str());
+                    }
+
+                    if (ImGui::MenuItem("Copy Dumped Textures Folder Path")) {
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                fmt::format(
+                                    "{}textures/{:016X}",
+                                    FileUtil::GetUserPath(FileUtil::UserPath::DumpDir),
+                                    system.Kernel().GetCurrentProcess()->codeset->program_id))
+                                .c_str());
+                    }
+
+                    if (ImGui::MenuItem("Copy Post Processing Shaders Folder Path")) {
+                        ImGui::SetClipboardText(
+                            FileUtil::SanitizePath(
+                                FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir))
+                                .c_str());
+                    }
+
+                    ImGui::EndMenu();
                 }
 
                 if (ImGui::BeginMenu("Movie")) {
