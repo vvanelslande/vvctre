@@ -34,8 +34,8 @@ static bool NeedToEnableHacks() {
     const std::string_view gpu_vendor{reinterpret_cast<char const*>(glGetString(GL_VENDOR))};
     const std::string_view gpu_renderer{reinterpret_cast<char const*>(glGetString(GL_RENDERER))};
     return gpu_vendor == "ATI Technologies Inc." || gpu_vendor == "Advanced Micro Devices, Inc." ||
-           gpu_renderer == "Intel(R) HD Graphics 4600" ||
            gpu_renderer == "Intel(R) HD Graphics 4400" ||
+           gpu_renderer == "Intel(R) HD Graphics 4600" ||
            gpu_renderer == "Intel(R) HD Graphics 5500";
 }
 
