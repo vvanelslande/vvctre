@@ -71,7 +71,7 @@ jobs:
           name: vvctre-${{runner.os}}
           path: build/bin/Release
   success:
-    if: github.event_name == 'push' && success()
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-18.04
     steps:
@@ -80,23 +80,8 @@ jobs:
           export VERSION=${GITHUB_REF:10}
           echo ::set-env name=VERSION::$VERSION
       - name: Discord notification
-        uses: Ilshidur/action-discord@master
+        uses: Ilshidur/action-discord@0.2.0
         env:
-          DISCORD_WEBHOOK: ${{secrets.SUCCESS_WEBHOOK}}
+          DISCORD_WEBHOOK: ${{secrets.VVCTRE_RELEASES_CHANNEL_WEBHOOK}}
         with:
           args: "<https://github.com/vvanelslande/vvctre/releases/tag/${{env.VERSION}}>"
-  error:
-    if: github.event_name == 'push' && failure()
-    needs: build
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Set version
-        run: |
-          export VERSION=${GITHUB_REF:10}
-          echo ::set-env name=VERSION::$VERSION
-      - name: Discord notification
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{secrets.ERROR_WEBHOOK}}
-        with:
-          args: "<https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}>"
