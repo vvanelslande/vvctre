@@ -2011,63 +2011,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
                 }
 
-                if (ImGui::BeginMenu("Screenshot")) {
-                    if (ImGui::MenuItem("Save Screenshot")) {
-                        const auto& layout = GetFramebufferLayout();
-                        u8* data = new u8[layout.width * layout.height * 4];
-                        if (VideoCore::RequestScreenshot(
-                                data,
-                                [=] {
-                                    const auto filename =
-                                        pfd::save_file("Save Screenshot", "screenshot.png",
-                                                       {"Portable Network Graphics", "*.png"})
-                                            .result();
-                                    if (!filename.empty()) {
-                                        std::vector<u8> v(layout.width * layout.height * 4);
-                                        std::memcpy(v.data(), data, v.size());
-                                        delete[] data;
-
-                                        const auto convert_bgra_to_rgba =
-                                            [](const std::vector<u8>& input,
-                                               const Layout::FramebufferLayout& layout) {
-                                                int offset = 0;
-                                                std::vector<u8> output(input.size());
-
-                                                for (u32 y = 0; y < layout.height; ++y) {
-                                                    for (u32 x = 0; x < layout.width; ++x) {
-                                                        output[offset] = input[offset + 2];
-                                                        output[offset + 1] = input[offset + 1];
-                                                        output[offset + 2] = input[offset];
-                                                        output[offset + 3] = input[offset + 3];
-
-                                                        offset += 4;
-                                                    }
-                                                }
-
-                                                return output;
-                                            };
-
-                                        v = convert_bgra_to_rgba(v, layout);
-                                        Common::FlipRGBA8Texture(v, static_cast<u64>(layout.width),
-                                                                 static_cast<u64>(layout.height));
-
-                                        stbi_write_png(filename.c_str(), layout.width,
-                                                       layout.height, 4, v.data(),
-                                                       layout.width * 4);
-                                    }
-                                },
-                                layout)) {
-                            delete[] data;
-                        }
-                    }
-
-                    if (ImGui::MenuItem("Copy Screenshot")) {
-                        CopyScreenshot();
-                    }
-
-                    ImGui::EndMenu();
-                }
-
                 if (ImGui::BeginMenu("Files")) {
                     if (ImGui::MenuItem("Copy Cheats File Path")) {
                         const u64 program_id =
@@ -2176,6 +2119,63 @@ void EmuWindow_SDL2::SwapBuffers() {
                             FileUtil::SanitizePath(
                                 FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir))
                                 .c_str());
+                    }
+
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Screenshot")) {
+                    if (ImGui::MenuItem("Save Screenshot")) {
+                        const auto& layout = GetFramebufferLayout();
+                        u8* data = new u8[layout.width * layout.height * 4];
+                        if (VideoCore::RequestScreenshot(
+                                data,
+                                [=] {
+                                    const auto filename =
+                                        pfd::save_file("Save Screenshot", "screenshot.png",
+                                                       {"Portable Network Graphics", "*.png"})
+                                            .result();
+                                    if (!filename.empty()) {
+                                        std::vector<u8> v(layout.width * layout.height * 4);
+                                        std::memcpy(v.data(), data, v.size());
+                                        delete[] data;
+
+                                        const auto convert_bgra_to_rgba =
+                                            [](const std::vector<u8>& input,
+                                               const Layout::FramebufferLayout& layout) {
+                                                int offset = 0;
+                                                std::vector<u8> output(input.size());
+
+                                                for (u32 y = 0; y < layout.height; ++y) {
+                                                    for (u32 x = 0; x < layout.width; ++x) {
+                                                        output[offset] = input[offset + 2];
+                                                        output[offset + 1] = input[offset + 1];
+                                                        output[offset + 2] = input[offset];
+                                                        output[offset + 3] = input[offset + 3];
+
+                                                        offset += 4;
+                                                    }
+                                                }
+
+                                                return output;
+                                            };
+
+                                        v = convert_bgra_to_rgba(v, layout);
+                                        Common::FlipRGBA8Texture(v, static_cast<u64>(layout.width),
+                                                                 static_cast<u64>(layout.height));
+
+                                        stbi_write_png(filename.c_str(), layout.width,
+                                                       layout.height, 4, v.data(),
+                                                       layout.width * 4);
+                                    }
+                                },
+                                layout)) {
+                            delete[] data;
+                        }
+                    }
+
+                    if (ImGui::MenuItem("Copy Screenshot")) {
+                        CopyScreenshot();
                     }
 
                     ImGui::EndMenu();
