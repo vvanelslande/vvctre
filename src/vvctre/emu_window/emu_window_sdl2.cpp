@@ -2586,15 +2586,16 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
             }
 
-            if (ImGui::ListBoxHeader("##cheats", ImVec2(-1.0f, -1.0f))) {
+            if (ImGui::BeginChildFrame(ImGui::GetID("Cheats"), ImVec2(-1.0f, -1.0f),
+                                       ImGuiWindowFlags_HorizontalScrollbar)) {
                 for (const auto& cheat : system.CheatEngine().GetCheats()) {
                     bool enabled = cheat->IsEnabled();
                     if (ImGui::Checkbox(cheat->GetName().c_str(), &enabled)) {
                         cheat->SetEnabled(enabled);
                     }
                 }
-                ImGui::ListBoxFooter();
             }
+            ImGui::EndChildFrame();
         }
 
         ImGui::End();
