@@ -2550,7 +2550,8 @@ void EmuWindow_SDL2::SwapBuffers() {
     }
 
     if (show_cheats_window) {
-        ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_Appearing);
+        ImGui::SetNextWindowSize(ImVec2(480.0f, 640.0f), ImGuiCond_Appearing);
+
         if (ImGui::Begin("Cheats", &show_cheats_window, ImGuiWindowFlags_NoSavedSettings)) {
             if (ImGui::Button("Edit File")) {
                 const std::string filepath = fmt::format(
@@ -2571,12 +2572,21 @@ void EmuWindow_SDL2::SwapBuffers() {
 
             if (ImGui::Button("Reload File")) {
                 system.CheatEngine().LoadCheatFile();
+
+                if (show_cheats_text_editor) {
+                    const std::string filepath = fmt::format(
+                        "{}{:016X}.txt", FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
+                        system.Kernel().GetCurrentProcess()->codeset->program_id);
+
+                    FileUtil::ReadFileToString(true, filepath, cheats_file_content);
+                }
             }
 
             ImGui::SameLine();
 
             if (ImGui::Button("Save File")) {
                 system.CheatEngine().SaveCheatFile();
+
                 if (show_cheats_text_editor) {
                     const std::string filepath = fmt::format(
                         "{}{:016X}.txt", FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
@@ -2596,6 +2606,11 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
             }
             ImGui::EndChildFrame();
+        }
+
+        if (!show_cheats_window) {
+            show_cheats_text_editor = false;
+            cheats_file_content.clear();
         }
 
         ImGui::End();
