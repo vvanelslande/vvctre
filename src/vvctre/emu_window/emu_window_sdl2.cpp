@@ -2738,7 +2738,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                        ImGuiWindowFlags_NoResize)) {
             ImGui::InputText("Search", &installed_query);
 
-            if (ImGui::ListBoxHeader("##installed", ImVec2(-1.0f, -1.0f))) {
+            if (ImGui::BeginChildFrame(ImGui::GetID("Installed"), ImVec2(-1.0f, -1.0f),
+                                       ImGuiWindowFlags_HorizontalScrollbar)) {
                 for (const auto& title : installed) {
                     const auto [path, name] = title;
 
@@ -2753,8 +2754,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                         return;
                     }
                 }
-                ImGui::ListBoxFooter();
             }
+            ImGui::EndChildFrame();
             ImGui::EndPopup();
         }
         if (!open) {

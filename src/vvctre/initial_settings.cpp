@@ -2914,7 +2914,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                            ImGuiWindowFlags_NoResize)) {
                 ImGui::InputText("Search", &installed_query);
 
-                if (ImGui::ListBoxHeader("##installed", ImVec2(-1.0f, -1.0f))) {
+                if (ImGui::BeginChildFrame(ImGui::GetID("Installed"), ImVec2(-1.0f, -1.0f),
+                                           ImGuiWindowFlags_HorizontalScrollbar)) {
                     for (const auto& title : installed) {
                         const auto [path, name] = title;
 
@@ -2928,8 +2929,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             break;
                         }
                     }
-                    ImGui::ListBoxFooter();
                 }
+                ImGui::EndChildFrame();
                 ImGui::EndPopup();
             }
             if (!open) {
