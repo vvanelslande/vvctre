@@ -125,7 +125,7 @@ constexpr u64 cyclesToMs(s64 cycles) {
 
 namespace Core {
 
-using TimedCallback = std::function<void(u64 userdata, int cycles_late)>;
+using TimedCallback = std::function<void(std::uintptr_t user_data, int cycles_late)>;
 
 struct TimingEventType {
     TimedCallback callback;
@@ -154,7 +154,8 @@ public:
      * event is scheduled earlier than the current values. Scheduling from a callback will not
      * update the downcount until the Advance() completes.
      */
-    void ScheduleEvent(s64 cycles_into_future, const TimingEventType* event_type, u64 userdata = 0);
+    void ScheduleEvent(s64 cycles_into_future, const TimingEventType* event_type,
+                       std::uintptr_t user_data = 0);
 
     /**
      * This is to be called when outside of hle threads, such as the graphics thread, wants to
@@ -163,9 +164,9 @@ public:
      * with a delay of up to MAX_SLICE_LENGTH
      */
     void ScheduleEventThreadsafe(s64 cycles_into_future, const TimingEventType* event_type,
-                                 u64 userdata);
+                                 std::uintptr_t user_data);
 
-    void UnscheduleEvent(const TimingEventType* event_type, u64 userdata);
+    void UnscheduleEvent(const TimingEventType* event_type, std::uintptr_t user_data);
 
     /// We only permit one event of each type in the queue at a time.
     void RemoveEvent(const TimingEventType* event_type);
@@ -194,7 +195,7 @@ private:
     struct Event {
         s64 time;
         u64 fifo_order;
-        u64 userdata;
+        std::uintptr_t user_data;
         const TimingEventType* type;
 
         bool operator>(const Event& right) const;

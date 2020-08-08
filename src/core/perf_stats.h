@@ -31,17 +31,17 @@ public:
      * Gets the ratio between walltime and the emulated time of the previous system frame. This is
      * useful for scaling inputs or outputs moving between the two time domains.
      */
-    double GetLastFrameTimeScale();
+    double GetLastFrameTimeScale() const;
 
 private:
-    std::mutex object_mutex{};
+    mutable std::mutex object_mutex;
 
     /// Current index for writing to the perf_history array
     std::size_t current_index{0};
 
     /// Stores an hour of historical frametime data useful for processing and tracking performance
     /// regressions with code changes.
-    std::array<double, 216000> perf_history = {};
+    std::array<double, 216000> perf_history{};
 
     /// Point when the previous system frame ended
     Clock::time_point previous_frame_end = Clock::now();

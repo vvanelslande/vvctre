@@ -35,7 +35,7 @@ public:
     void SaveCheatFile() const;
 
 private:
-    void RunCallback(u64 userdata, int cycles_late);
+    void RunCallback(std::uintptr_t user_data, int cycles_late);
 
     std::vector<std::shared_ptr<CheatBase>> cheats_list;
     mutable std::shared_mutex cheats_list_mutex;

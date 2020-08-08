@@ -72,7 +72,7 @@ void PerfStats::EndSystemFrame() {
     previous_frame_end = frame_end;
 }
 
-double PerfStats::GetLastFrameTimeScale() {
+double PerfStats::GetLastFrameTimeScale() const {
     std::lock_guard<std::mutex> lock(object_mutex);
 
     constexpr double FRAME_LENGTH = 1.0 / GPU::SCREEN_REFRESH_RATE;

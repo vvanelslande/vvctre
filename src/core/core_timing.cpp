@@ -51,7 +51,7 @@ u64 Timing::GetIdleTicks() const {
 }
 
 void Timing::ScheduleEvent(s64 cycles_into_future, const TimingEventType* event_type,
-                           u64 userdata) {
+                           std::uintptr_t user_data) {
     ASSERT(event_type != nullptr);
     s64 timeout = GetTicks() + cycles_into_future;
 
@@ -60,18 +60,18 @@ void Timing::ScheduleEvent(s64 cycles_into_future, const TimingEventType* event_
         ForceExceptionCheck(cycles_into_future);
     }
 
-    event_queue.emplace_back(Event{timeout, event_fifo_id++, userdata, event_type});
+    event_queue.emplace_back(Event{timeout, event_fifo_id++, user_data, event_type});
     std::push_heap(event_queue.begin(), event_queue.end(), std::greater<>());
 }
 
 void Timing::ScheduleEventThreadsafe(s64 cycles_into_future, const TimingEventType* event_type,
-                                     u64 userdata) {
-    ts_queue.Push(Event{global_timer + cycles_into_future, 0, userdata, event_type});
+                                     std::uintptr_t user_data) {
+    ts_queue.Push(Event{global_timer + cycles_into_future, 0, user_data, event_type});
 }
 
-void Timing::UnscheduleEvent(const TimingEventType* event_type, u64 userdata) {
+void Timing::UnscheduleEvent(const TimingEventType* event_type, std::uintptr_t user_data) {
     auto itr = std::remove_if(event_queue.begin(), event_queue.end(), [&](const Event& e) {
-        return e.type == event_type && e.userdata == userdata;
+        return e.type == event_type && e.user_data == user_data;
     });
 
     // Removing random items breaks the invariant so we have to re-establish it.
@@ -126,7 +126,7 @@ void Timing::Advance() {
         Event evt = std::move(event_queue.front());
         std::pop_heap(event_queue.begin(), event_queue.end(), std::greater<>());
         event_queue.pop_back();
-        evt.type->callback(evt.userdata, global_timer - evt.time);
+        evt.type->callback(evt.user_data, global_timer - evt.time);
     }
 
     is_global_timer_sane = false;
