@@ -7,7 +7,7 @@ const getRegexes = require("./common/regexes");
 
 module.exports = (github, context) => {
   const linesAfterEdit = [];
-  const lines = context.issue.body.split("\r\n");
+  const lines = context.payload.issue.body.split("\r\n");
   const regexes = getRegexes(null, null, null);
 
   lines.forEach((line) => {

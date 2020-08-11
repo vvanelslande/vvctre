@@ -61,4 +61,4 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const script = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/custom-default-settings-plugin-request-remove-useless-lines.js`)
-            script({github, context})
+            script(github, context)
