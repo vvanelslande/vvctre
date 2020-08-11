@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
         with:
-          node-version: "14.5.0"
+          node-version: "14.7.0"
       - name: Script
         shell: bash
         working-directory: ${{github.workspace}}
@@ -48,3 +48,17 @@ jobs:
         with:
           issue-number: ${{github.event.issue.number}}
           body: "Error: https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}"
+  remove-useless-lines:
+    if: github.event.label.name == 'Custom Default Settings Plugin Request'
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: "14.7.0"
+      - uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const script = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/custom-default-settings-plugin-request-remove-useless-lines.js`)
+            script({github, context})
