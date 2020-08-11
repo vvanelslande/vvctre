@@ -17,6 +17,7 @@
 #include "core/hw/hw.h"
 #include "core/hw/lcd.h"
 #include "core/memory.h"
+#include "video_core/renderer_base.h"
 
 namespace Service::GSP {
 
@@ -726,6 +727,24 @@ void GSP_GPU::SetLedForceOff(Kernel::HLERequestContext& ctx) {
     LOG_DEBUG(Service_GSP, "(STUBBED) called");
 }
 
+void GSP_GPU::SaveVramSysArea(Kernel::HLERequestContext& ctx) {
+    system.Renderer().Rasterizer()->FlushAll();
+    std::memcpy(vram.data(), system.Memory().GetPhysicalPointer(Memory::VRAM_PADDR), vram.size());
+    std::memcpy(&lcd_regs, &LCD::g_regs, sizeof(lcd_regs));
+
+    IPC::RequestBuilder rb(ctx, 0x19, 1, 0);
+    rb.Push(RESULT_SUCCESS);
+}
+
+void GSP_GPU::RestoreVramSysArea(Kernel::HLERequestContext& ctx) {
+    std::memcpy(system.Memory().GetPhysicalPointer(Memory::VRAM_PADDR), vram.data(), vram.size());
+    std::memcpy(&LCD::g_regs, &lcd_regs, sizeof(lcd_regs));
+    system.Renderer().Rasterizer()->InvalidateRegion(0, 0xFFFFFFFF);
+
+    IPC::RequestBuilder rb(ctx, 0x1A, 1, 0);
+    rb.Push(RESULT_SUCCESS);
+}
+
 SessionData* GSP_GPU::FindRegisteredThreadData(u32 thread_id) {
     for (auto& session_info : connected_sessions) {
         SessionData* data = static_cast<SessionData*>(session_info.data.get());
@@ -763,8 +782,8 @@ GSP_GPU::GSP_GPU(Core::System& system) : ServiceFramework("gsp::Gpu", 2), system
         {0x00160042, &GSP_GPU::AcquireRight, "AcquireRight"},
         {0x00170000, &GSP_GPU::ReleaseRight, "ReleaseRight"},
         {0x00180000, &GSP_GPU::ImportDisplayCaptureInfo, "ImportDisplayCaptureInfo"},
-        {0x00190000, nullptr, "SaveVramSysArea"},
-        {0x001A0000, nullptr, "RestoreVramSysArea"},
+        {0x00190000, &GSP_GPU::SaveVramSysArea, "SaveVramSysArea"},
+        {0x001A0000, &GSP_GPU::RestoreVramSysArea, "RestoreVramSysArea"},
         {0x001B0000, nullptr, "ResetGpuCore"},
         {0x001C0040, &GSP_GPU::SetLedForceOff, "SetLedForceOff"},
         {0x001D0040, nullptr, "SetTestCommand"},

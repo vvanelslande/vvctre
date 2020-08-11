@@ -4,6 +4,7 @@
 
 #include "core/core.h"
 #include "core/hle/applets/applet.h"
+#include "core/hle/kernel/svc.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/apt/applet_manager.h"
 #include "core/hle/service/apt/errors.h"
@@ -423,11 +424,15 @@ ResultCode AppletManager::CloseLibraryApplet(std::shared_ptr<Kernel::Object> obj
                                              std::vector<u8> buffer) {
     auto& slot = applet_slots[static_cast<std::size_t>(AppletSlot::LibraryApplet)];
 
+    u64 program_id = 0;
+    system.GetAppLoader().ReadProgramId(program_id);
+
     MessageParameter param;
-    // TODO(Subv): The destination id should be the "current applet slot id", which changes
-    // constantly depending on what is going on in the system. Most of the time it is the running
-    // application, but it could be something else if a system applet is launched.
-    param.destination_id = AppletId::Application;
+    param.destination_id = (program_id == 0x0004003000008202 || program_id == 0x0004003000008F02 ||
+                            program_id == 0x0004003000009802 || program_id == 0x000400300000A102 ||
+                            program_id == 0x000400300000A902 || program_id == 0x000400300000B102)
+                               ? AppletId::HomeMenu
+                               : AppletId::Application;
     param.sender_id = slot.applet_id;
     param.object = std::move(object);
     param.signal = library_applet_closing_command;
@@ -436,7 +441,7 @@ ResultCode AppletManager::CloseLibraryApplet(std::shared_ptr<Kernel::Object> obj
     ResultCode result = SendParameter(param);
 
     if (library_applet_closing_command != SignalType::WakeupByPause) {
-        // TODO(Subv): Terminate the running applet title
+        Kernel::SVCContext(system).CallSVC(0x03); // ExitProcess
         slot.Reset();
     }
 

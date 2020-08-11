@@ -13,6 +13,7 @@
 #include "core/hle/kernel/hle_ipc.h"
 #include "core/hle/result.h"
 #include "core/hle/service/service.h"
+#include "core/hw/lcd.h"
 
 namespace Core {
 class System;
@@ -250,6 +251,8 @@ private:
     void ImportDisplayCaptureInfo(Kernel::HLERequestContext& ctx);
     void StoreDataCache(Kernel::HLERequestContext& ctx);
     void SetLedForceOff(Kernel::HLERequestContext& ctx);
+    void SaveVramSysArea(Kernel::HLERequestContext& ctx);
+    void RestoreVramSysArea(Kernel::HLERequestContext& ctx);
 
     /// Returns the session data for the specified registered thread id, or nullptr if not found.
     SessionData* FindRegisteredThreadData(u32 thread_id);
@@ -273,6 +276,10 @@ private:
 
     /// Thread ids currently in use by the sessions connected to the GSPGPU service.
     std::array<bool, MaxGSPThreads> used_thread_ids = {false, false, false, false};
+
+    /// {Save,Restore}VramSysArea
+    std::array<u8, Memory::VRAM_SIZE> vram{};
+    LCD::Regs lcd_regs{};
 
     friend class SessionData;
 };

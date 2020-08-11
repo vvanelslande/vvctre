@@ -278,6 +278,7 @@ void SVC::ExitProcess() {
     ASSERT_MSG(current_process->status == ProcessStatus::Running, "Process has already exited");
 
     current_process->status = ProcessStatus::Exited;
+    current_process->handle_table.Clear();
 
     // Stop all the process threads that are currently waiting for objects.
     auto& thread_list = kernel.GetThreadManager().GetThreadList();
