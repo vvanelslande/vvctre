@@ -3,7 +3,7 @@
 // Refer to the license.txt file included.
 
 const fs = require("fs");
-const getRegexes = require("./common/regexes");
+const getRegexes = require("./common/custom-default-settings-plugin-request-regexes");
 
 module.exports = (github, context) => {
   const linesAfterEdit = [];
