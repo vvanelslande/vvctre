@@ -47,7 +47,7 @@ jobs:
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{github.event.issue.number}}
-          body: "Error: https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}"
+          body: "Build Error: https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}"
   remove-useless-lines:
     if: github.event.label.name == 'Custom Default Settings Plugin Request'
     runs-on: ubuntu-18.04
