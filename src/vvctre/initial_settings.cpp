@@ -2749,28 +2749,38 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::Checkbox("Upright Screens", &Settings::values.upright_screens);
 
                     if (Settings::values.use_custom_layout) {
-                        ImGui::InputScalar("Top Left", ImGuiDataType_U16,
+                        ImGui::NewLine();
+
+                        ImGui::TextUnformatted("Top Screen");
+                        ImGui::Separator();
+
+                        ImGui::InputScalar("Left##Top Screen", ImGuiDataType_U16,
                                            &Settings::values.custom_layout_top_left);
 
-                        ImGui::InputScalar("Top Top", ImGuiDataType_U16,
+                        ImGui::InputScalar("Top##Top Screen", ImGuiDataType_U16,
                                            &Settings::values.custom_layout_top_top);
 
-                        ImGui::InputScalar("Top Right", ImGuiDataType_U16,
+                        ImGui::InputScalar("Right##Top Screen", ImGuiDataType_U16,
                                            &Settings::values.custom_layout_top_right);
 
-                        ImGui::InputScalar("Top Bottom", ImGuiDataType_U16,
+                        ImGui::InputScalar("Bottom##Top Screen", ImGuiDataType_U16,
                                            &Settings::values.custom_layout_top_bottom);
 
-                        ImGui::InputScalar("Bottom Left", ImGuiDataType_U16,
+                        ImGui::NewLine();
+
+                        ImGui::TextUnformatted("Bottom Screen");
+                        ImGui::Separator();
+
+                        ImGui::InputScalar("Left##Bottom Screen", ImGuiDataType_U16,
                                            &Settings::values.custom_layout_bottom_left);
 
-                        ImGui::InputScalar("Bottom Top", ImGuiDataType_U16,
+                        ImGui::InputScalar("Top##Bottom Screen", ImGuiDataType_U16,
                                            &Settings::values.custom_layout_bottom_top);
 
-                        ImGui::InputScalar("Bottom Right", ImGuiDataType_U16,
+                        ImGui::InputScalar("Right##Bottom Screen", ImGuiDataType_U16,
                                            &Settings::values.custom_layout_bottom_right);
 
-                        ImGui::InputScalar("Bottom Bottom", ImGuiDataType_U16,
+                        ImGui::InputScalar("Bottom##Bottom Screen", ImGuiDataType_U16,
                                            &Settings::values.custom_layout_bottom_bottom);
                     }
 
