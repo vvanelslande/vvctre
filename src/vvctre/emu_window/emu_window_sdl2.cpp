@@ -410,9 +410,13 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("Audio")) {
-                    ImGui::SliderFloat("Volume", &Settings::values.audio_volume, 0.0f, 1.0f);
+                    ImGui::TextUnformatted("Output");
+                    ImGui::Separator();
 
-                    if (ImGui::BeginCombo("Sink", Settings::values.audio_sink_id.c_str())) {
+                    ImGui::SliderFloat("Volume##Output", &Settings::values.audio_volume, 0.0f,
+                                       1.0f);
+
+                    if (ImGui::BeginCombo("Sink##Output", Settings::values.audio_sink_id.c_str())) {
                         if (ImGui::Selectable("auto")) {
                             Settings::values.audio_sink_id = "auto";
                             Settings::Apply();
@@ -426,7 +430,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::EndCombo();
                     }
 
-                    if (ImGui::BeginCombo("Device", Settings::values.audio_device_id.c_str())) {
+                    if (ImGui::BeginCombo("Device##Output",
+                                          Settings::values.audio_device_id.c_str())) {
                         if (ImGui::Selectable("auto")) {
                             Settings::values.audio_device_id = "auto";
                             Settings::Apply();
@@ -443,7 +448,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::EndCombo();
                     }
 
-                    if (ImGui::BeginCombo("Microphone Input Type", [] {
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Microphone");
+                    ImGui::Separator();
+
+                    if (ImGui::BeginCombo("Source##Microphone", [] {
                             switch (Settings::values.microphone_input_type) {
                             case Settings::MicrophoneInputType::None:
                                 return "Disabled";
@@ -477,7 +487,7 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                     if (Settings::values.microphone_input_type ==
                         Settings::MicrophoneInputType::Real) {
-                        if (ImGui::BeginCombo("Microphone Device",
+                        if (ImGui::BeginCombo("Device##Microphone",
                                               Settings::values.microphone_device.c_str())) {
                             if (ImGui::Selectable("auto")) {
                                 Settings::values.microphone_device = "auto";
