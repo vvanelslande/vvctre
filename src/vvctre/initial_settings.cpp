@@ -440,7 +440,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                 }
 
                 if (ImGui::BeginTabItem("Camera")) {
-                    if (ImGui::BeginCombo("Inner Engine",
+                    ImGui::TextUnformatted("Inner");
+                    ImGui::Separator();
+
+                    if (ImGui::BeginCombo("Engine##Inner",
                                           Settings::values
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::InnerCamera)]
@@ -461,12 +464,17 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             "...##Inner",
                             static_cast<std::size_t>(Service::CAM::CameraIndex::InnerCamera));
                         ImGui::InputText(
-                            "Inner\nParameter",
+                            "Parameter##Inner",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::InnerCamera)]);
                     }
 
-                    if (ImGui::BeginCombo("Outer Left Engine",
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Outer Left");
+                    ImGui::Separator();
+
+                    if (ImGui::BeginCombo("Engine##Outer Left",
                                           Settings::values
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::OuterLeftCamera)]
@@ -487,12 +495,17 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             "...##Outer Left",
                             static_cast<std::size_t>(Service::CAM::CameraIndex::OuterLeftCamera));
                         ImGui::InputText(
-                            "Outer Left\nParameter",
+                            "Parameter##Outer Left",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterLeftCamera)]);
                     }
 
-                    if (ImGui::BeginCombo("Outer Right\nEngine",
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Outer Right");
+                    ImGui::Separator();
+
+                    if (ImGui::BeginCombo("Engine##Outer Right",
                                           Settings::values
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::OuterRightCamera)]
@@ -513,7 +526,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             "...##Outer Right",
                             static_cast<std::size_t>(Service::CAM::CameraIndex::OuterRightCamera));
                         ImGui::InputText(
-                            "Outer Right\nParameter",
+                            "Parameter##Outer Right",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterRightCamera)]);
                     }
