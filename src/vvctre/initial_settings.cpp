@@ -90,8 +90,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                              ImGuiWindowFlags_NoMove)) {
             ImGui::SetWindowPos(ImVec2(), ImGuiCond_Once);
             ImGui::SetWindowSize(io.DisplaySize);
-            if (ImGui::BeginTabBar("##tabBar", ImGuiTabBarFlags_TabListPopupButton |
-                                                   ImGuiTabBarFlags_FittingPolicyScroll)) {
+            if (ImGui::BeginTabBar("Tab Bar", ImGuiTabBarFlags_TabListPopupButton |
+                                                  ImGuiTabBarFlags_FittingPolicyScroll)) {
                 if (ImGui::BeginTabItem("Start")) {
                     ImGui::Button("...##file");
                     if (ImGui::BeginPopupContextItem("File", ImGuiPopupFlags_MouseButtonLeft)) {

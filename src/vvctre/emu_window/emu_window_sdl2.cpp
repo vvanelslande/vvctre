@@ -234,7 +234,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                          ImGuiWindowFlags_NoFocusOnAppearing)) {
         ImGui::SetWindowPos(ImVec2(), ImGuiCond_Once);
         ImGui::TextColored(fps_color, "%d FPS", static_cast<int>(io.Framerate));
-        if (ImGui::BeginPopupContextItem("##menu", ImGuiMouseButton_Right)) {
+        if (ImGui::BeginPopupContextItem("Menu", ImGuiMouseButton_Right)) {
             if (ImGui::IsWindowAppearing() && !ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
                 paused = true;
             }
