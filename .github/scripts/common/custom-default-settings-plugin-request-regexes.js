@@ -171,7 +171,7 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^audio.volume (.+)$/m,
+      regex: /^audio.volume (\d*\.?\d+f?)$/m,
       call: (match) => {
         names.push("vvctre_settings_set_audio_volume");
         types.push(["void", "float value"]);
@@ -179,7 +179,7 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^audio.sink (.+)$/m,
+      regex: /^audio.sink (cubeb|sdl2|null)$/m,
       call: (match) => {
         names.push("vvctre_settings_set_audio_sink_id");
         types.push(["void", "const char* value"]);
