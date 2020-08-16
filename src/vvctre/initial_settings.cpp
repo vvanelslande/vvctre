@@ -1608,6 +1608,14 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         update_config_savegame = true;
                     }
 
+                    if (ImGui::BeginPopupContextItem("Console ID",
+                                                     ImGuiPopupFlags_MouseButtonRight)) {
+                        std::string console_id = fmt::format("0x{:016X}", cfg.GetConsoleUniqueId());
+                        ImGui::InputText("##Console ID", &console_id[0], 18,
+                                         ImGuiInputTextFlags_ReadOnly);
+                        ImGui::EndPopup();
+                    }
+
                     ImGui::EndTabItem();
                 }
 
