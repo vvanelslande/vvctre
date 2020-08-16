@@ -1846,9 +1846,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                                      ImGuiPopupFlags_MouseButtonLeft)) {
                         ImGuiStyle& style = ImGui::GetStyle();
 
-                        ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted("Buttons");
-                        ImGui::PopStyleColor();
+                        ImGui::Separator();
 
                         if (ImGui::Selectable("A##Buttons")) {
                             ImGui::SetClipboardText(
@@ -1917,9 +1916,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                         ImGui::NewLine();
 
-                        ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted("Circle Pad");
-                        ImGui::PopStyleColor();
+                        ImGui::Separator();
 
                         if (ImGui::Selectable("Up##Circle Pad")) {
                             ImGui::SetClipboardText(
@@ -1969,9 +1967,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                         ImGui::NewLine();
 
-                        ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted("Circle Pad Pro");
-                        ImGui::PopStyleColor();
+                        ImGui::Separator();
 
                         if (ImGui::Selectable("Up##Circle Pad Pro")) {
                             ImGui::SetClipboardText(
@@ -2021,9 +2018,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                         ImGui::NewLine();
 
-                        ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted("D-Pad");
-                        ImGui::PopStyleColor();
+                        ImGui::Separator();
 
                         if (ImGui::Selectable("Up##D-Pad")) {
                             ImGui::SetClipboardText(
@@ -2047,15 +2043,14 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                         ImGui::NewLine();
 
-                        ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
                         ImGui::TextUnformatted("Motion & Touch");
-                        ImGui::PopStyleColor();
+                        ImGui::Separator();
 
-                        if (ImGui::Selectable("Motion")) {
+                        if (ImGui::Selectable("Motion##Motion & Touch")) {
                             ImGui::SetClipboardText(Settings::values.motion_device.c_str());
                         }
 
-                        if (ImGui::Selectable("Touch")) {
+                        if (ImGui::Selectable("Touch##Motion & Touch")) {
                             ImGui::SetClipboardText(Settings::values.touch_device.c_str());
                         }
 
@@ -2084,7 +2079,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                                "the stick to the right, and then to the bottom.");
                         ImGui::EndTooltip();
                     }
+
                     ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Buttons");
+                    ImGui::Separator();
 
                     if (ImGui::Button((InputCommon::ButtonToText(
                                            Settings::values.buttons[Settings::NativeButton::A]) +
@@ -2230,6 +2229,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::SameLine();
                     ImGui::TextUnformatted("HOME");
 
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Circle Pad");
+                    ImGui::Separator();
+
                     if (ImGui::Button(
                             (InputCommon::AnalogToText(
                                  Settings::values.analogs[Settings::NativeAnalog::CirclePad],
@@ -2251,7 +2255,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             params.Serialize();
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("Circle Pad Up");
+                    ImGui::TextUnformatted("Up");
 
                     if (ImGui::Button(
                             (InputCommon::AnalogToText(
@@ -2274,7 +2278,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             params.Serialize();
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("Circle Pad Down");
+                    ImGui::TextUnformatted("Down");
 
                     if (ImGui::Button(
                             (InputCommon::AnalogToText(
@@ -2297,7 +2301,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             params.Serialize();
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("Circle Pad Left");
+                    ImGui::TextUnformatted("Left");
 
                     if (ImGui::Button(
                             (InputCommon::AnalogToText(
@@ -2320,7 +2324,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             params.Serialize();
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("Circle Pad Right");
+                    ImGui::TextUnformatted("Right");
 
                     if (ImGui::Button(
                             (InputCommon::AnalogToText(
@@ -2343,27 +2347,32 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             params.Serialize();
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("Circle Pad Modifier");
+                    ImGui::TextUnformatted("Modifier");
 
                     {
                         Common::ParamPackage params(
                             Settings::values.analogs[Settings::NativeAnalog::CirclePad]);
                         if (params.Get("engine", "") == "sdl") {
                             float deadzone = params.Get("deadzone", 0.0f);
-                            if (ImGui::SliderFloat("Circle Pad Deadzone", &deadzone, 0.0f, 1.0f)) {
+                            if (ImGui::SliderFloat("Deadzone##Circle Pad", &deadzone, 0.0f, 1.0f)) {
                                 params.Set("deadzone", deadzone);
                                 Settings::values.analogs[Settings::NativeAnalog::CirclePad] =
                                     params.Serialize();
                             }
                         } else if (params.Get("engine", "") == "analog_from_button") {
                             float modifier_scale = params.Get("modifier_scale", 0.5f);
-                            if (ImGui::InputFloat("Circle Pad\nModifier Scale", &modifier_scale)) {
+                            if (ImGui::InputFloat("Modifier Scale##Circle Pad", &modifier_scale)) {
                                 params.Set("modifier_scale", modifier_scale);
                                 Settings::values.analogs[Settings::NativeAnalog::CirclePad] =
                                     params.Serialize();
                             }
                         }
                     }
+
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Circle Pad Pro");
+                    ImGui::Separator();
 
                     if (ImGui::Button(
                             (InputCommon::AnalogToText(
@@ -2386,7 +2395,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             params.Serialize();
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("Circle Pad Pro Up");
+                    ImGui::TextUnformatted("Up");
 
                     if (ImGui::Button(
                             (InputCommon::AnalogToText(
@@ -2409,7 +2418,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             params.Serialize();
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("Circle Pad Pro Down");
+                    ImGui::TextUnformatted("Down");
 
                     if (ImGui::Button(
                             (InputCommon::AnalogToText(
@@ -2432,7 +2441,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             params.Serialize();
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("Circle Pad Pro Left");
+                    ImGui::TextUnformatted("Left");
 
                     if (ImGui::Button(
                             (InputCommon::AnalogToText(
@@ -2455,7 +2464,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             params.Serialize();
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("Circle Pad Pro Right");
+                    ImGui::TextUnformatted("Right");
 
                     if (ImGui::Button(
                             (InputCommon::AnalogToText(
@@ -2478,14 +2487,14 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             params.Serialize();
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("Circle Pad Pro Modifier");
+                    ImGui::TextUnformatted("Modifier");
 
                     {
                         Common::ParamPackage params(
                             Settings::values.analogs[Settings::NativeAnalog::CirclePadPro]);
                         if (params.Get("engine", "") == "sdl") {
                             float deadzone = params.Get("deadzone", 0.0f);
-                            if (ImGui::SliderFloat("Circle Pad Pro Deadzone", &deadzone, 0.0f,
+                            if (ImGui::SliderFloat("Deadzone##Circle Pad Pro", &deadzone, 0.0f,
                                                    1.0f)) {
                                 params.Set("deadzone", deadzone);
                                 Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] =
@@ -2493,7 +2502,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             }
                         } else if (params.Get("engine", "") == "analog_from_button") {
                             float modifier_scale = params.Get("modifier_scale", 0.5f);
-                            if (ImGui::InputFloat("Circle Pad Pro\nModifier Scale",
+                            if (ImGui::InputFloat("Modifier Scale##Circle Pad Pro",
                                                   &modifier_scale)) {
                                 params.Set("modifier_scale", modifier_scale);
                                 Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] =
@@ -2501,6 +2510,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             }
                         }
                     }
+
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("D-Pad");
+                    ImGui::Separator();
 
                     if (ImGui::Button((InputCommon::ButtonToText(
                                            Settings::values.buttons[Settings::NativeButton::Up]) +
@@ -2510,7 +2524,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             GetInput(InputCommon::Polling::DeviceType::Button);
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("D-Pad Up");
+                    ImGui::TextUnformatted("Up");
 
                     if (ImGui::Button((InputCommon::ButtonToText(
                                            Settings::values.buttons[Settings::NativeButton::Down]) +
@@ -2520,7 +2534,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             GetInput(InputCommon::Polling::DeviceType::Button);
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("D-Pad Down");
+                    ImGui::TextUnformatted("Down");
 
                     if (ImGui::Button((InputCommon::ButtonToText(
                                            Settings::values.buttons[Settings::NativeButton::Left]) +
@@ -2530,7 +2544,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             GetInput(InputCommon::Polling::DeviceType::Button);
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("D-Pad Left");
+                    ImGui::TextUnformatted("Left");
 
                     if (ImGui::Button(
                             (InputCommon::ButtonToText(
@@ -2541,9 +2555,14 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             GetInput(InputCommon::Polling::DeviceType::Button);
                     }
                     ImGui::SameLine();
-                    ImGui::TextUnformatted("D-Pad Right");
+                    ImGui::TextUnformatted("Right");
 
-                    if (ImGui::BeginCombo("Motion Device", [] {
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Motion");
+                    ImGui::Separator();
+
+                    if (ImGui::BeginCombo("Device##Motion", [] {
                             const std::string engine =
                                 Common::ParamPackage(Settings::values.motion_device)
                                     .Get("engine", "");
@@ -2574,21 +2593,26 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         float sensitivity = motion_device.Get("sensitivity", 0.01f);
                         float clamp = motion_device.Get("tilt_clamp", 90.0f);
 
-                        if (ImGui::InputInt("Motion Update\nPeriod", &update_period, 0)) {
+                        if (ImGui::InputInt("Update Period##Motion", &update_period, 0)) {
                             motion_device.Set("update_period", update_period);
                             Settings::values.motion_device = motion_device.Serialize();
                         }
-                        if (ImGui::InputFloat("Motion\nSensitivity", &sensitivity)) {
+                        if (ImGui::InputFloat("Sensitivity##Motion", &sensitivity)) {
                             motion_device.Set("sensitivity", sensitivity);
                             Settings::values.motion_device = motion_device.Serialize();
                         }
-                        if (ImGui::InputFloat("Motion Clamp", &clamp)) {
+                        if (ImGui::InputFloat("Clamp##Motion", &clamp)) {
                             motion_device.Set("tilt_clamp", clamp);
                             Settings::values.motion_device = motion_device.Serialize();
                         }
                     }
 
-                    if (ImGui::BeginCombo("Touch Device", [] {
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Touch");
+                    ImGui::Separator();
+
+                    if (ImGui::BeginCombo("Device##Touch", [] {
                             const std::string engine =
                                 Common::ParamPackage(Settings::values.touch_device)
                                     .Get("engine", "");
@@ -2620,19 +2644,19 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         int max_x = touch_device.Get("max_x", 1800);
                         int max_y = touch_device.Get("max_y", 850);
 
-                        if (ImGui::InputInt("Touch Minimum X", &min_x, 0)) {
+                        if (ImGui::InputInt("Minimum X##Touch", &min_x, 0)) {
                             touch_device.Set("min_x", min_x);
                             Settings::values.touch_device = touch_device.Serialize();
                         }
-                        if (ImGui::InputInt("Touch Minimum Y", &min_y, 0)) {
+                        if (ImGui::InputInt("Minimum Y##Touch", &min_y, 0)) {
                             touch_device.Set("min_y", min_y);
                             Settings::values.touch_device = touch_device.Serialize();
                         }
-                        if (ImGui::InputInt("Touch Maximum X", &max_x, 0)) {
+                        if (ImGui::InputInt("Maximum X##Touch", &max_x, 0)) {
                             touch_device.Set("max_x", max_x);
                             Settings::values.touch_device = touch_device.Serialize();
                         }
-                        if (ImGui::InputInt("Touch Maximum Y", &max_y, 0)) {
+                        if (ImGui::InputInt("Maximum Y##Touch", &max_y, 0)) {
                             touch_device.Set("max_y", max_y);
                             Settings::values.touch_device = touch_device.Serialize();
                         }
@@ -2640,11 +2664,16 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     if (motion_device.Get("engine", "") == "cemuhookudp" ||
                         touch_device.Get("engine", "") == "cemuhookudp") {
-                        ImGui::InputText("CemuhookUDP\nAddress",
+                        ImGui::NewLine();
+
+                        ImGui::TextUnformatted("CemuhookUDP");
+                        ImGui::Separator();
+
+                        ImGui::InputText("Address##CemuhookUDP",
                                          &Settings::values.cemuhookudp_address);
-                        ImGui::InputScalar("CemuhookUDP Port", ImGuiDataType_U16,
+                        ImGui::InputScalar("Port##CemuhookUDP", ImGuiDataType_U16,
                                            &Settings::values.cemuhookudp_port);
-                        ImGui::InputScalar("CemuhookUDP Pad", ImGuiDataType_U8,
+                        ImGui::InputScalar("Pad##CemuhookUDP", ImGuiDataType_U8,
                                            &Settings::values.cemuhookudp_pad_index);
                     }
 
