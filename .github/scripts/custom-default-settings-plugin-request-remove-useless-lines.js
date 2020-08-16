@@ -18,12 +18,10 @@ module.exports = (github, context) => {
     });
   });
 
-  if (linesAfterEdit.length > 0) {
-    github.issues.update({
-      issue_number: context.issue.number,
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      body: linesAfterEdit.join("\r\n"),
-    });
-  }
+  github.issues.update({
+    issue_number: context.issue.number,
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    body: linesAfterEdit.join("\r\n"),
+  });
 };
