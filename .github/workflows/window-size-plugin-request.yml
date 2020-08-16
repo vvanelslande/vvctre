@@ -2,11 +2,11 @@ name: Window Size Plugin Request
 
 on:
   issues:
-    types: [labeled]
+    types: [labeled, edited]
 
 jobs:
   build:
-    if: github.event.label.name == 'Window Size Plugin Request'
+    if: contains(github.event.issue.labels.*.name, 'Window Size Plugin Request')
     runs-on: ${{matrix.os}}
     strategy:
       matrix:

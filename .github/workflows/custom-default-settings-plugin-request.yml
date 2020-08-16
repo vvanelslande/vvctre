@@ -2,11 +2,11 @@ name: Custom Default Settings Plugin Request
 
 on:
   issues:
-    types: [labeled]
+    types: [labeled, edited]
 
 jobs:
   build:
-    if: github.event.label.name == 'Custom Default Settings Plugin Request'
+    if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
@@ -49,7 +49,7 @@ jobs:
           issue-number: ${{github.event.issue.number}}
           body: "Build Error: https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}"
   remove-useless-lines:
-    if: github.event.label.name == 'Custom Default Settings Plugin Request'
+    if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2

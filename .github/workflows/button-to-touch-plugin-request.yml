@@ -2,11 +2,11 @@ name: Button To Touch Plugin Request
 
 on:
   issues:
-    types: [labeled]
+    types: [labeled, edited]
 
 jobs:
   build:
-    if: github.event.label.name == 'Button To Touch Plugin Request'
+    if: contains(github.event.issue.labels.*.name, 'Button To Touch Plugin Request')
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
