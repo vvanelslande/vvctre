@@ -63,7 +63,7 @@ module.exports = async (github, context) => {
         issue_number: context.issue.number,
         owner: context.repo.owner,
         repo: context.repo.repo,
-        body: `Useless lines removed:\n\`\`\`${uselessLines.join(
+        body: `Useless lines removed:\n\`\`\`\n${uselessLines.join(
           "\n"
         )}\n\`\`\`\n\nLines that aren't in https://vvanelslande.github.io/vvctre/Custom-Default-Settings-Plugin-Request are useless lines.`,
       });
