@@ -2514,58 +2514,43 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::Selectable(label.c_str());
                         if (ImGui::IsItemHovered()) {
                             ImGui::BeginTooltip();
+
                             ImGui::TextUnformatted(
                                 fmt::format(
-                                    "id: {}\n"
-                                    "status: {}\n"
-                                    "client_process.type: {}\n"
-                                    "client_process.name: {}\n"
-                                    "client_process.id: {}\n"
-                                    "client_thread.type: {}\n"
-                                    "client_thread.name: {}\n"
-                                    "client_thread.id: {}\n"
-                                    "client_session.type: {}\n"
-                                    "client_session.name: {}\n"
-                                    "client_session.id: {}\n"
-                                    "client_port.type: {}\n"
-                                    "client_port.name: {}\n"
-                                    "client_port.id: {}\n"
-                                    "server_process.type: {}\n"
-                                    "server_process.name: {}\n"
-                                    "server_process.id: {}\n"
-                                    "server_thread.type: {}\n"
-                                    "server_thread.name: {}\n"
-                                    "server_thread.id: {}\n"
-                                    "server_session.type: {}\n"
-                                    "server_session.name: {}\n"
-                                    "server_session.id: {}\n"
-                                    "function_name: {}\n"
-                                    "is_hle: {}\n"
-                                    "untranslated_request_cmdbuf: 0x{:08X}\n"
-                                    "translated_request_cmdbuf: 0x{:08X}\n"
-                                    "untranslated_reply_cmdbuf: 0x{:08X}\n"
-                                    "translated_reply_cmdbuf: 0x{:08X}",
-                                    record.first, static_cast<int>(record.second.status),
-                                    record.second.client_process.type,
+                                    "ID: {}\n"
+                                    "Status: {} ({})\n"
+                                    "HLE: {}\n"
+                                    "Function: {}\n"
+                                    "Client Process: {} ({})\n"
+                                    "Client Thread: {} ({})\n"
+                                    "Client Session: {} ({})\n"
+                                    "Client Port: {} ({})\n"
+                                    "Server Process: {} ({})\n"
+                                    "Server Thread: {} ({})\n"
+                                    "Server Session: {} ({})\n"
+                                    "Untranslated Request Command Buffer: 0x{:08X}\n"
+                                    "Translated Request Command Buffer: 0x{:08X}\n"
+                                    "Untranslated Reply Command Buffer: 0x{:08X}\n"
+                                    "Translated Reply Command Buffer: 0x{:08X}",
+                                    record.first,
+                                    IPC_Recorder_GetStatusString(record.second.status),
+                                    static_cast<int>(record.second.status),
+                                    record.second.is_hle ? "Yes" : "No",
+                                    record.second.function_name.empty()
+                                        ? "Unknown"
+                                        : record.second.function_name,
                                     record.second.client_process.name,
                                     record.second.client_process.id,
-                                    record.second.client_thread.type,
                                     record.second.client_thread.name,
                                     record.second.client_thread.id,
-                                    record.second.client_session.type,
                                     record.second.client_session.name,
-                                    record.second.client_session.id, record.second.client_port.type,
-                                    record.second.client_port.name, record.second.client_port.id,
-                                    record.second.server_process.type,
-                                    record.second.server_process.name,
+                                    record.second.client_session.id, record.second.client_port.name,
+                                    record.second.client_port.id, record.second.server_process.name,
                                     record.second.server_process.id,
-                                    record.second.server_thread.type,
                                     record.second.server_thread.name,
                                     record.second.server_thread.id,
-                                    record.second.server_session.type,
                                     record.second.server_session.name,
-                                    record.second.server_session.id, record.second.function_name,
-                                    record.second.is_hle,
+                                    record.second.server_session.id,
                                     fmt::join(record.second.untranslated_request_cmdbuf, ", 0x"),
                                     fmt::join(record.second.translated_request_cmdbuf, ", 0x"),
                                     fmt::join(record.second.untranslated_reply_cmdbuf, ", 0x"),
