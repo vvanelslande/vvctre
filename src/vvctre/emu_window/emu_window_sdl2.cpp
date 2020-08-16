@@ -640,7 +640,10 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("Camera")) {
-                    if (ImGui::BeginCombo("Inner Engine",
+                    ImGui::TextUnformatted("Inner");
+                    ImGui::Separator();
+
+                    if (ImGui::BeginCombo("Engine##Inner",
                                           Settings::values
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::InnerCamera)]
@@ -677,7 +680,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }
                         }
                         if (ImGui::InputText(
-                                "Inner Parameter",
+                                "Parameter##Inner",
                                 &Settings::values.camera_parameter[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::InnerCamera)])) {
                             std::shared_ptr<Service::CAM::Module> cam =
@@ -688,7 +691,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                     }
 
-                    if (ImGui::BeginCombo("Outer Left Engine",
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Outer Left");
+                    ImGui::Separator();
+
+                    if (ImGui::BeginCombo("Engine##Outer Left",
                                           Settings::values
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::OuterLeftCamera)]
@@ -725,7 +733,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }
                         }
                         if (ImGui::InputText(
-                                "Outer Left Parameter",
+                                "Parameter##Outer Left",
                                 &Settings::values.camera_parameter[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterLeftCamera)])) {
                             std::shared_ptr<Service::CAM::Module> cam =
@@ -736,7 +744,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                     }
 
-                    if (ImGui::BeginCombo("Outer Right Engine",
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Outer Right");
+                    ImGui::Separator();
+
+                    if (ImGui::BeginCombo("Engine##Outer Right",
                                           Settings::values
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::OuterRightCamera)]
@@ -773,7 +786,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }
                         }
                         if (ImGui::InputText(
-                                "Outer Right Parameter",
+                                "Parameter##Outer Right",
                                 &Settings::values.camera_parameter[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterRightCamera)])) {
                             std::shared_ptr<Service::CAM::Module> cam =
