@@ -62,8 +62,10 @@ std::size_t TimeStretcher::Process(const s16* in, std::size_t num_in, s16* out,
     LOG_TRACE(Audio, "{:5}/{:5} ratio:{:0.6f} backlog:{:0.6f}", num_in, num_out, stretch_ratio,
               backlog_fullness);
 
-    sound_touch->putSamples(in, static_cast<u32>(num_in));
-    return sound_touch->receiveSamples(out, static_cast<u32>(num_out));
+    sound_touch->putSamples(reinterpret_cast<const soundtouch::SAMPLETYPE*>(in),
+                            static_cast<uint>(num_in));
+    return sound_touch->receiveSamples(reinterpret_cast<soundtouch::SAMPLETYPE*>(out),
+                                       static_cast<uint>(num_out));
 }
 
 void TimeStretcher::Clear() {
