@@ -1936,42 +1936,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }
                             ImGui::EndCombo();
                         }
-                    } else {
-                        if (ImGui::InputScalar("Top Left", ImGuiDataType_U16,
-                                               &Settings::values.custom_layout_top_left)) {
-                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
-                        }
-                        if (ImGui::InputScalar("Top Top", ImGuiDataType_U16,
-                                               &Settings::values.custom_layout_top_top)) {
-                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
-                        }
-                        if (ImGui::InputScalar("Top Right", ImGuiDataType_U16,
-                                               &Settings::values.custom_layout_top_right)) {
-                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
-                        }
-                        if (ImGui::InputScalar("Top Bottom", ImGuiDataType_U16,
-                                               &Settings::values.custom_layout_top_bottom)) {
-                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
-                        }
-                        if (ImGui::InputScalar("Bottom Left", ImGuiDataType_U16,
-                                               &Settings::values.custom_layout_bottom_left)) {
-                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
-                        }
-                        if (ImGui::InputScalar("Bottom Top", ImGuiDataType_U16,
-                                               &Settings::values.custom_layout_bottom_top)) {
-                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
-                        }
-                        if (ImGui::InputScalar("Bottom Right", ImGuiDataType_U16,
-                                               &Settings::values.custom_layout_bottom_right)) {
-                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
-                        }
-                        if (ImGui::InputScalar("Bottom Bottom", ImGuiDataType_U16,
-                                               &Settings::values.custom_layout_bottom_bottom)) {
-                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
-                        }
                     }
-
-                    ImGui::Separator();
 
                     if (ImGui::Checkbox("Use Custom Layout", &Settings::values.use_custom_layout)) {
                         VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
@@ -1983,6 +1948,58 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                     if (ImGui::Checkbox("Upright Screens", &Settings::values.upright_screens)) {
                         VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
+                    }
+
+                    if (Settings::values.use_custom_layout) {
+                        ImGui::NewLine();
+
+                        ImGui::TextUnformatted("Top Screen");
+                        ImGui::Separator();
+
+                        if (ImGui::InputScalar("Left##Top Screen", ImGuiDataType_U16,
+                                               &Settings::values.custom_layout_top_left)) {
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
+                        }
+
+                        if (ImGui::InputScalar("Top##Top Screen", ImGuiDataType_U16,
+                                               &Settings::values.custom_layout_top_top)) {
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
+                        }
+
+                        if (ImGui::InputScalar("Right##Top Screen", ImGuiDataType_U16,
+                                               &Settings::values.custom_layout_top_right)) {
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
+                        }
+
+                        if (ImGui::InputScalar("Bottom##Top Screen", ImGuiDataType_U16,
+                                               &Settings::values.custom_layout_top_bottom)) {
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
+                        }
+
+                        ImGui::NewLine();
+
+                        ImGui::TextUnformatted("Bottom Screen");
+                        ImGui::Separator();
+
+                        if (ImGui::InputScalar("Left##Bottom Screen", ImGuiDataType_U16,
+                                               &Settings::values.custom_layout_bottom_left)) {
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
+                        }
+
+                        if (ImGui::InputScalar("Top##Bottom Screen", ImGuiDataType_U16,
+                                               &Settings::values.custom_layout_bottom_top)) {
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
+                        }
+
+                        if (ImGui::InputScalar("Right##Bottom Screen", ImGuiDataType_U16,
+                                               &Settings::values.custom_layout_bottom_right)) {
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
+                        }
+
+                        if (ImGui::InputScalar("Bottom##Bottom Screen", ImGuiDataType_U16,
+                                               &Settings::values.custom_layout_bottom_bottom)) {
+                            VideoCore::g_renderer->UpdateCurrentFramebufferLayout();
+                        }
                     }
 
                     ImGui::EndMenu();
