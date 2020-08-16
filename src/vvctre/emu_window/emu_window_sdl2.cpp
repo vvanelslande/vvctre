@@ -1884,7 +1884,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("GUI")) {
-                    ImGui::ColorPicker4("FPS Color", (float*)&fps_color);
+                    ImGui::ColorEdit4("Background Color", &fps_color.x,
+                                      ImGuiColorEditFlags_NoInputs);
 
                     ImGui::EndMenu();
                 }
