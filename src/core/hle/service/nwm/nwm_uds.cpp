@@ -543,7 +543,7 @@ void NWM_UDS::OnWifiPacketReceived(const Network::WifiPacket& packet) {
     }
 }
 
-boost::optional<Network::MacAddress> NWM_UDS::GetNodeMacAddress(u16 dest_node_id, u8 flags) {
+std::optional<Network::MacAddress> NWM_UDS::GetNodeMacAddress(u16 dest_node_id, u8 flags) {
     constexpr u8 BroadcastFlag = 0x2;
     if ((flags & BroadcastFlag) || dest_node_id == BroadcastNetworkNodeId) {
         // Broadcast
@@ -1460,8 +1460,9 @@ NWM_UDS::NWM_UDS(Core::System& system) : ServiceFramework("nwm::UDS"), system(sy
     RegisterHandlers(functions);
 
     beacon_broadcast_event = system.CoreTiming().RegisterEvent(
-        "UDS::BeaconBroadcastCallback",
-        [this](std::uintptr_t user_data, s64 cycles_late) { BeaconBroadcastCallback(user_data, cycles_late); });
+        "UDS::BeaconBroadcastCallback", [this](std::uintptr_t user_data, s64 cycles_late) {
+            BeaconBroadcastCallback(user_data, cycles_late);
+        });
 
     CryptoPP::AutoSeededRandomPool rng;
     auto mac = SharedPage::DefaultMac;

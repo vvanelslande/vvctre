@@ -79,7 +79,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
 
 # Boost
-
 set(BOOST_ROOT "${PROJECT_SOURCE_DIR}/externals/boost")
 set(Boost_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/externals/boost")
 set(Boost_NO_SYSTEM_PATHS OFF)
@@ -160,7 +159,8 @@ function(create_target_directory_groups target_name)
 endfunction()
 
 # Prevent Boost from linking against libs when building
-add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY
+add_definitions(
+    -DBOOST_ERROR_CODE_HEADER_ONLY
     -DBOOST_SYSTEM_NO_LIB
     -DBOOST_DATE_TIME_NO_LIB
     -DBOOST_REGEX_NO_LIB
