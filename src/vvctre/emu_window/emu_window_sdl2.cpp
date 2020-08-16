@@ -2422,21 +2422,21 @@ void EmuWindow_SDL2::SwapBuffers() {
                          nullptr,
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize)) {
             if (ImGui::ListBoxHeader("##miis")) {
-                ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
                 ImGui::TextUnformatted("Standard Mii");
-                ImGui::PopStyleColor();
+                ImGui::Separator();
+
                 if (ImGui::Selectable("vvctre")) {
                     mii_selector_data->code = 0;
                     mii_selector_data->selected_mii =
                         HLE::Applets::MiiSelector::GetStandardMiiResult().selected_mii_data;
                     mii_selector_data = nullptr;
                 }
-                if (mii_selector_data != nullptr && !mii_selector_data->miis.empty()) {
-                    ImGui::Separator();
 
-                    ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_TextDisabled]);
+                if (mii_selector_data != nullptr && !mii_selector_data->miis.empty()) {
+                    ImGui::NewLine();
+
                     ImGui::TextUnformatted("Your Miis");
-                    ImGui::PopStyleColor();
+                    ImGui::Separator();
 
                     for (std::size_t index = 0; index < mii_selector_data->miis.size(); ++index) {
                         const HLE::Applets::MiiData& mii = mii_selector_data->miis[index];
@@ -2452,6 +2452,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
                 ImGui::ListBoxFooter();
             }
+
             if (mii_selector_data != nullptr && mii_selector_data->config.enable_cancel_button &&
                 ImGui::Button("Cancel")) {
                 mii_selector_data = nullptr;
