@@ -11,6 +11,7 @@
 #include <string>
 #include <thread>
 #include <tuple>
+#include <map>
 #include <unordered_map>
 #include <utility>
 #include <vector>
