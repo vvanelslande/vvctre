@@ -99,8 +99,6 @@ ResultCode SoftwareKeyboard::StartImpl(Service::APT::AppletStartupParameter cons
     memcpy(&config, parameter.buffer.data(), parameter.buffer.size());
     text_memory = std::static_pointer_cast<Kernel::SharedMemory, Kernel::Object>(parameter.object);
 
-    DrawScreenKeyboard();
-
     using namespace Frontend;
     frontend_applet = Core::System::GetInstance().GetSoftwareKeyboard();
     ASSERT(frontend_applet);
@@ -163,10 +161,6 @@ void SoftwareKeyboard::Update() {
     } else {
         Finalize();
     }
-}
-
-void SoftwareKeyboard::DrawScreenKeyboard() {
-    // TODO(Subv): Draw the HLE keyboard, for now just do nothing
 }
 
 void SoftwareKeyboard::Finalize() {

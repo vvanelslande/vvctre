@@ -183,11 +183,6 @@ public:
     void Update() override;
 
     /**
-     * Draws a keyboard to the current bottom screen framebuffer.
-     */
-    void DrawScreenKeyboard();
-
-    /**
      * Sends the LibAppletClosing signal to the application,
      * along with the relevant data buffers.
      */
