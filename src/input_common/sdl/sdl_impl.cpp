@@ -588,8 +588,17 @@ public:
         while (state.event_queue.Pop(event)) {
             switch (event.type) {
             case SDL_JOYAXISMOTION:
-                if (std::abs(event.jaxis.value / 32767.0) < 0.5) {
+                if (axis_memory.find(event.jaxis.axis) == axis_memory.end())
+                {
+                    axis_memory[event.jaxis.axis] = event.jaxis.value;
                     break;
+                } else {
+                    if (std::abs((event.jaxis.value - axis_memory[event.jaxis.axis]) / 32767.0) < 0.5) {
+                        break;
+                    } else {
+                        event.jaxis.value = std::copysign(32767, event.jaxis.value - axis_memory[event.jaxis.axis]);
+                        axis_memory.clear();
+                    }
                 }
             case SDL_JOYBUTTONUP:
             case SDL_JOYHATMOTION:
@@ -598,6 +607,9 @@ public:
         }
         return {};
     }
+
+private:
+    std::map<int, int> axis_memory;
 };
 
 class SDLAnalogPoller final : public SDLPoller {
