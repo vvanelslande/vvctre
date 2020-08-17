@@ -279,6 +279,13 @@ void SVC::ExitProcess() {
 
     current_process->status = ProcessStatus::Exited;
     current_process->handle_table.Clear();
+    kernel.memory.UnregisterPageTable(&current_process->vm_manager.page_table);
+    current_process->vm_manager.Reset();
+    for (const auto& memory : current_process->memory) {
+        current_process->memory_region->Free(memory.first, memory.second);
+    }
+    current_process->memory.clear();
+    current_process->memory_used = 0;
 
     // Stop all the process threads that are currently waiting for objects.
     auto& thread_list = kernel.GetThreadManager().GetThreadList();

@@ -73,6 +73,8 @@ public:
     virtual bool AccelerateDrawBatch(bool is_indexed) {
         return false;
     }
+
+    virtual void ClearCache() {}
 };
 
 } // namespace VideoCore

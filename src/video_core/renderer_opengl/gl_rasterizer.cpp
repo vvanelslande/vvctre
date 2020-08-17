@@ -2157,4 +2157,8 @@ void RasterizerOpenGL::UploadUniforms(bool accelerate_draw) {
     uniform_buffer.Unmap(used_bytes);
 }
 
+void RasterizerOpenGL::ClearCache() {
+    res_cache.Clear();
+}
+
 } // namespace OpenGL

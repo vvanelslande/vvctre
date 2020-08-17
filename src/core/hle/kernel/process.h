@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <boost/container/static_vector.hpp>
 #include "common/bit_field.h"
@@ -180,6 +181,8 @@ public:
     /// page as a bitmask.
     /// This vector will grow as more pages are allocated for new threads.
     std::vector<std::bitset<8>> tls_slots;
+
+    std::unordered_map<VAddr, u32> memory;
 
     VAddr GetLinearHeapAreaAddress() const;
     VAddr GetLinearHeapBase() const;

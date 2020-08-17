@@ -210,6 +210,7 @@ ResultVal<VAddr> Process::HeapAllocate(VAddr target, u32 size, VMAPermission per
                                                interval_size, memory_state);
         ASSERT(vma.Succeeded());
         vm_manager.Reprotect(vma.Unwrap(), perms);
+        memory.insert(std::make_pair(interval.lower(), interval_size));
         interval_target += interval_size;
     }
 
@@ -234,7 +235,9 @@ ResultCode Process::HeapFree(VAddr target, u32 size) {
     // Free heaps block by block
     CASCADE_RESULT(auto backing_blocks, vm_manager.GetBackingBlocksForRange(target, size));
     for (const auto [backing_memory, block_size] : backing_blocks) {
-        memory_region->Free(kernel.memory.GetFCRAMOffset(backing_memory), block_size);
+        u32 offset = kernel.memory.GetFCRAMOffset(backing_memory);
+        memory_region->Free(offset, block_size);
+        memory.erase(offset);
     }
 
     ResultCode result = vm_manager.UnmapRange(target, size);
@@ -288,6 +291,8 @@ ResultVal<VAddr> Process::LinearAllocate(VAddr target, u32 size, VMAPermission p
     memory_used += size;
     resource_limit->current_commit += size;
 
+    memory.insert(std::make_pair(physical_offset, size));
+
     LOG_DEBUG(Kernel, "Allocated at target={:08X}", target);
     return MakeResult<VAddr>(target);
 }
@@ -315,6 +320,7 @@ ResultCode Process::LinearFree(VAddr target, u32 size) {
 
     u32 physical_offset = target - GetLinearHeapAreaAddress(); // relative to FCRAM
     memory_region->Free(physical_offset, size);
+    memory.erase(physical_offset);
 
     return RESULT_SUCCESS;
 }
@@ -422,6 +428,10 @@ Kernel::Process::Process(KernelSystem& kernel)
     kernel.memory.RegisterPageTable(&vm_manager.page_table);
 }
 Kernel::Process::~Process() {
+    if (status == Kernel::ProcessStatus::Exited) {
+        return;
+    }
+
     // Release all objects this process owns first so that their potential destructor can do clean
     // up with this process before further destruction.
     // TODO(wwylele): explicitly destroy or invalidate objects this process owns (threads, shared

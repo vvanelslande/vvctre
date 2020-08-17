@@ -97,7 +97,7 @@ static_assert(sizeof(MiiData) == 0x5C, "MiiData structure has incorrect size");
 #pragma pack(pop)
 
 struct MiiResult {
-    u32_be return_code;
+    u32_le return_code;
     u32_be is_guest_mii_selected;
     u32_be selected_guest_mii_index;
     MiiData selected_mii_data;

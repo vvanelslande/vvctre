@@ -13,6 +13,7 @@
 #include "core/hle/kernel/hle_ipc.h"
 #include "core/hle/result.h"
 #include "core/hle/service/service.h"
+#include "core/hw/gpu.h"
 #include "core/hw/lcd.h"
 
 namespace Core {
@@ -280,6 +281,7 @@ private:
     /// {Save,Restore}VramSysArea
     std::array<u8, Memory::VRAM_SIZE> vram{};
     LCD::Regs lcd_regs{};
+    GPU::Regs gpu_regs{};
 
     friend class SessionData;
 };

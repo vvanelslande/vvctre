@@ -115,38 +115,74 @@ void SoftwareKeyboard::Update() {
 
     using namespace Frontend;
     const KeyboardData& data = frontend_applet->ReceiveData();
-    std::u16string text = Common::UTF8ToUTF16(data.text);
-    // Include a null terminator
-    memcpy(text_memory->GetPointer(), text.c_str(), (text.length() + 1) * sizeof(char16_t));
+
     switch (config.num_buttons_m1) {
-    case SoftwareKeyboardButtonConfig::SingleButton:
+    case SoftwareKeyboardButtonConfig::SingleButton: {
         config.return_code = SoftwareKeyboardResult::D0Click;
+
+        std::u16string text = Common::UTF8ToUTF16(data.text);
+        config.text_length = static_cast<u16>(text.size());
+
+        // Include a null terminator
+        std::memcpy(text_memory->GetPointer(), text.c_str(),
+                    (text.length() + 1) * sizeof(char16_t));
+
         break;
-    case SoftwareKeyboardButtonConfig::DualButton:
-        if (data.button == 0)
+    }
+    case SoftwareKeyboardButtonConfig::DualButton: {
+        if (data.button == 0) {
             config.return_code = SoftwareKeyboardResult::D1Click0;
-        else
+        } else {
             config.return_code = SoftwareKeyboardResult::D1Click1;
+
+            std::u16string text = Common::UTF8ToUTF16(data.text);
+            config.text_length = static_cast<u16>(text.size());
+
+            // Include a null terminator
+            std::memcpy(text_memory->GetPointer(), text.c_str(),
+                        (text.length() + 1) * sizeof(char16_t));
+        }
+
         break;
-    case SoftwareKeyboardButtonConfig::TripleButton:
-        if (data.button == 0)
+    }
+    case SoftwareKeyboardButtonConfig::TripleButton: {
+        if (data.button == 0) {
             config.return_code = SoftwareKeyboardResult::D2Click0;
-        else if (data.button == 1)
+        } else if (data.button == 1) {
             config.return_code = SoftwareKeyboardResult::D2Click1;
-        else
+
+            std::u16string text = Common::UTF8ToUTF16(data.text);
+            config.text_length = static_cast<u16>(text.size());
+
+            // Include a null terminator
+            std::memcpy(text_memory->GetPointer(), text.c_str(),
+                        (text.length() + 1) * sizeof(char16_t));
+        } else {
             config.return_code = SoftwareKeyboardResult::D2Click2;
+
+            std::u16string text = Common::UTF8ToUTF16(data.text);
+            config.text_length = static_cast<u16>(text.size());
+
+            // Include a null terminator
+            std::memcpy(text_memory->GetPointer(), text.c_str(),
+                        (text.length() + 1) * sizeof(char16_t));
+        }
         break;
-    case SoftwareKeyboardButtonConfig::NoButton:
+    }
+    case SoftwareKeyboardButtonConfig::NoButton: {
         // TODO: find out what is actually returned
         config.return_code = SoftwareKeyboardResult::None;
+
+        config.text_length = 0;
+
         break;
+    }
     default:
         LOG_CRITICAL(Applet_SWKBD, "Unknown button config {}",
                      static_cast<u32>(config.num_buttons_m1));
         UNREACHABLE();
     }
 
-    config.text_length = static_cast<u16>(text.size());
     config.text_offset = 0;
 
     if (config.filter_flags & HLE::Applets::SoftwareKeyboardFilter::Callback) {

@@ -1043,9 +1043,15 @@ RasterizerCacheOpenGL::RasterizerCacheOpenGL() {
 }
 
 RasterizerCacheOpenGL::~RasterizerCacheOpenGL() {
+    Clear();
+}
+
+void RasterizerCacheOpenGL::Clear() {
     FlushAll();
-    while (!surface_cache.empty())
+    while (!surface_cache.empty()) {
         UnregisterSurface(*surface_cache.begin()->second.begin());
+    }
+    texture_cube_cache.clear();
 }
 
 bool RasterizerCacheOpenGL::BlitSurfaces(const Surface& src_surface,
@@ -1428,10 +1434,7 @@ SurfaceSurfaceRect_Tuple RasterizerCacheOpenGL::GetFramebufferSurfaces(
         (VideoCore::g_texture_filter_update_requested.exchange(false) &&
          texture_filterer->Reset(Settings::values.texture_filter, resolution_scale_factor))) {
         resolution_scale_factor = VideoCore::GetResolutionScaleFactor();
-        FlushAll();
-        while (!surface_cache.empty())
-            UnregisterSurface(*surface_cache.begin()->second.begin());
-        texture_cube_cache.clear();
+        Clear();
     }
 
     Common::Rectangle<u32> viewport_clamped{

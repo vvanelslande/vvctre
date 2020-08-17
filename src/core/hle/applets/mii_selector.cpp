@@ -74,14 +74,13 @@ void MiiSelector::Update() {
     using namespace Frontend;
     const MiiSelectorData& data = frontend_applet->ReceiveData();
     result.return_code = data.return_code;
-    result.selected_mii_data = data.mii;
-    // Calculate the checksum of the selected Mii, see https://www.3dbrew.org/wiki/Mii#Checksum
-    result.mii_data_checksum = boost::crc<16, 0x1021, 0, 0, false, false>(
-        &result.selected_mii_data, sizeof(HLE::Applets::MiiData) + sizeof(result.unknown1));
-    result.selected_guest_mii_index = 0xFFFFFFFF;
-
-    // TODO(Subv): We're finalizing the applet immediately after it's started,
-    // but we should defer this call until after all the input has been collected.
+    if (result.return_code == 0) {
+        result.selected_mii_data = data.mii;
+        // Calculate the checksum of the selected Mii, see https://www.3dbrew.org/wiki/Mii#Checksum
+        result.mii_data_checksum = boost::crc<16, 0x1021, 0, 0, false, false>(
+            &result.selected_mii_data, sizeof(HLE::Applets::MiiData) + sizeof(result.unknown1));
+        result.selected_guest_mii_index = 0xFFFFFFFF;
+    }
     Finalize();
 }
 

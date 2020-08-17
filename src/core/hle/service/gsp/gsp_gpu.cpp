@@ -728,9 +728,10 @@ void GSP_GPU::SetLedForceOff(Kernel::HLERequestContext& ctx) {
 }
 
 void GSP_GPU::SaveVramSysArea(Kernel::HLERequestContext& ctx) {
-    system.Renderer().Rasterizer()->FlushAll();
+    system.Renderer().Rasterizer()->ClearCache();
     std::memcpy(vram.data(), system.Memory().GetPhysicalPointer(Memory::VRAM_PADDR), vram.size());
     std::memcpy(&lcd_regs, &LCD::g_regs, sizeof(lcd_regs));
+    std::memcpy(&gpu_regs, &GPU::g_regs, sizeof(gpu_regs));
 
     IPC::RequestBuilder rb(ctx, 0x19, 1, 0);
     rb.Push(RESULT_SUCCESS);
@@ -739,7 +740,9 @@ void GSP_GPU::SaveVramSysArea(Kernel::HLERequestContext& ctx) {
 void GSP_GPU::RestoreVramSysArea(Kernel::HLERequestContext& ctx) {
     std::memcpy(system.Memory().GetPhysicalPointer(Memory::VRAM_PADDR), vram.data(), vram.size());
     std::memcpy(&LCD::g_regs, &lcd_regs, sizeof(lcd_regs));
+    std::memcpy(&GPU::g_regs, &gpu_regs, sizeof(gpu_regs));
     system.Renderer().Rasterizer()->InvalidateRegion(0, 0xFFFFFFFF);
+    system.Renderer().Rasterizer()->ClearCache();
 
     IPC::RequestBuilder rb(ctx, 0x1A, 1, 0);
     rb.Push(RESULT_SUCCESS);
