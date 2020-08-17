@@ -2185,11 +2185,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         Settings::values.buttons[Settings::NativeButton::ZL] =
                             GetInput(InputCommon::Polling::DeviceType::Button);
                     }
-                    if (ImGui::IsItemHovered()) {
-                        ImGui::BeginTooltip();
-                        ImGui::TextUnformatted("If it says -, make sure it says +");
-                        ImGui::EndTooltip();
-                    }
                     ImGui::SameLine();
                     ImGui::TextUnformatted("ZL");
 
@@ -2199,11 +2194,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                           .c_str())) {
                         Settings::values.buttons[Settings::NativeButton::ZR] =
                             GetInput(InputCommon::Polling::DeviceType::Button);
-                    }
-                    if (ImGui::IsItemHovered()) {
-                        ImGui::BeginTooltip();
-                        ImGui::TextUnformatted("If it says -, make sure it says +");
-                        ImGui::EndTooltip();
                     }
                     ImGui::SameLine();
                     ImGui::TextUnformatted("ZR");
