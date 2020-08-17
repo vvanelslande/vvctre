@@ -2094,10 +2094,14 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             GetInput(InputCommon::Polling::DeviceType::Analog);
                     }
                     if (ImGui::IsItemHovered()) {
+                        ImGui::SetNextWindowSize(ImVec2(350.0f, 60.0f), ImGuiCond_Appearing);
                         ImGui::BeginTooltip();
-                        ImGui::TextUnformatted("Keyboard: Press the keys to use for Up, Down, "
-                                               "Left, Right, and Modifier.\nReal stick: first move "
-                                               "the stick to the right, and then to the bottom.");
+                        ImGui::PushTextWrapPos();
+                        ImGui::TextUnformatted(
+                            "Keyboard: Press the keys to use for Up, Down, "
+                            "Left, Right, and Modifier.\n\nReal stick: first move "
+                            "the stick to the right, and then to the bottom.");
+                        ImGui::PopTextWrapPos();
                         ImGui::EndTooltip();
                     }
                     ImGui::SameLine();
@@ -2106,10 +2110,14 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             GetInput(InputCommon::Polling::DeviceType::Analog);
                     }
                     if (ImGui::IsItemHovered()) {
+                        ImGui::SetNextWindowSize(ImVec2(350.0f, 60.0f), ImGuiCond_Appearing);
                         ImGui::BeginTooltip();
-                        ImGui::TextUnformatted("Keyboard: Press the keys to use for Up, Down, "
-                                               "Left, Right, and Modifier.\nReal stick: first move "
-                                               "the stick to the right, and then to the bottom.");
+                        ImGui::PushTextWrapPos();
+                        ImGui::TextUnformatted(
+                            "Keyboard: Press the keys to use for Up, Down, "
+                            "Left, Right, and Modifier.\n\nReal stick: first move "
+                            "the stick to the right, and then to the bottom.");
+                        ImGui::PopTextWrapPos();
                         ImGui::EndTooltip();
                     }
 
