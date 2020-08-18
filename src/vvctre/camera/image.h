@@ -33,7 +33,8 @@ private:
     bool basic_flip_horizontal{};
     bool basic_flip_vertical{};
 
-    unsigned char* image = nullptr;
+    std::vector<unsigned char> unmodified_image;
+    std::vector<unsigned char> resized_image;
 };
 
 class ImageCameraFactory : public CameraFactory {

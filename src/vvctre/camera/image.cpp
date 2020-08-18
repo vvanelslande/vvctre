@@ -44,31 +44,46 @@ ImageCamera::ImageCamera(const std::string& file, const Service::CAM::Flip& flip
     flip_vertical = basic_flip_vertical =
         (flip == Service::CAM::Flip::Vertical) || (flip == Service::CAM::Flip::Reverse);
 
-    while (image == nullptr) {
+    while (unmodified_image.empty()) {
         if (asl::parseUrl(file.c_str()).protocol.startsWith("http")) {
             asl::HttpResponse r = asl::Http::get(file.c_str());
 
             if (r.ok()) {
-                image = stbi_load_from_memory(r.body().ptr(), r.body().length(), &file_width,
-                                              &file_height, nullptr, 3);
+                unsigned char* uc = stbi_load_from_memory(r.body().ptr(), r.body().length(),
+                                                          &file_width, &file_height, nullptr, 3);
+                if (uc != nullptr) {
+                    unmodified_image.resize(file_width * file_height * 3);
+                    std::memcpy(unmodified_image.data(), uc, unmodified_image.size());
+                    resized_image = unmodified_image;
+                    std::free(uc);
+                }
             }
         } else {
-            image = stbi_load(file.c_str(), &file_width, &file_height, nullptr, 3);
+            unsigned char* uc = stbi_load(file.c_str(), &file_width, &file_height, nullptr, 3);
+            if (uc != nullptr) {
+                unmodified_image.resize(file_width * file_height * 3);
+                std::memcpy(unmodified_image.data(), uc, unmodified_image.size());
+                resized_image = unmodified_image;
+                std::free(uc);
+            }
         }
 
-        if (image == nullptr) {
+        if (unmodified_image.empty()) {
             LOG_DEBUG(Service_CAM, "Failed to load image");
         }
     }
 }
 
-ImageCamera::~ImageCamera() {
-    free(image);
-}
+ImageCamera::~ImageCamera() = default;
 
 void ImageCamera::SetResolution(const Service::CAM::Resolution& resolution) {
     requested_width = resolution.width;
     requested_height = resolution.height;
+
+    resized_image.resize(requested_width * requested_height * 3);
+
+    ASSERT(stbir_resize_uint8(unmodified_image.data(), file_width, file_height, 0,
+                              resized_image.data(), requested_width, requested_height, 0, 3) == 1);
 }
 
 void ImageCamera::SetFormat(Service::CAM::OutputFormat format) {
@@ -76,16 +91,14 @@ void ImageCamera::SetFormat(Service::CAM::OutputFormat format) {
 }
 
 std::vector<u16> ImageCamera::ReceiveFrame() {
-    std::vector<unsigned char> resized(requested_width * requested_height * 3, 0);
-    ASSERT(stbir_resize_uint8(image, file_width, file_height, 0, resized.data(), requested_width,
-                              requested_height, 0, 3) == 1);
+    std::vector<unsigned char> image = resized_image;
 
     if (flip_horizontal) {
-        resized = FlipRgbImageHorizontally(requested_width, requested_height, resized);
+        image = FlipRgbImageHorizontally(requested_width, requested_height, image);
     }
 
     if (flip_vertical) {
-        resized = FlipRgbImageVertically(requested_width, requested_height, resized);
+        image = FlipRgbImageVertically(requested_width, requested_height, image);
     }
 
     if (format == Service::CAM::OutputFormat::RGB565) {
@@ -93,16 +106,16 @@ std::vector<u16> ImageCamera::ReceiveFrame() {
         std::size_t resized_offset = 0;
         std::size_t pixel = 0;
 
-        while (resized_offset < resized.size()) {
-            const unsigned char r = resized[resized_offset++];
-            const unsigned char g = resized[resized_offset++];
-            const unsigned char b = resized[resized_offset++];
+        while (resized_offset < image.size()) {
+            const unsigned char r = image[resized_offset++];
+            const unsigned char g = image[resized_offset++];
+            const unsigned char b = image[resized_offset++];
             frame[pixel++] = ((r & 0b11111000) << 8) | ((g & 0b11111100) << 3) | (b >> 3);
         }
 
         return frame;
     } else if (format == Service::CAM::OutputFormat::YUV422) {
-        return convert_rgb888_to_yuyv(resized, requested_width, requested_height);
+        return convert_rgb888_to_yuyv(image, requested_width, requested_height);
     }
 
     UNIMPLEMENTED();
