@@ -11,7 +11,7 @@ namespace Camera {
 
 class ImageCamera : public CameraInterface {
 public:
-    ImageCamera(const std::string& file);
+    ImageCamera(const std::string& file, const Service::CAM::Flip& flip);
     ~ImageCamera();
     void StartCapture() override;
     void StopCapture() override;
@@ -28,6 +28,10 @@ private:
     int requested_width{};
     int requested_height{};
     Service::CAM::OutputFormat format{};
+    bool flip_horizontal{};
+    bool flip_vertical{};
+    bool basic_flip_horizontal{};
+    bool basic_flip_vertical{};
 
     unsigned char* image = nullptr;
 };

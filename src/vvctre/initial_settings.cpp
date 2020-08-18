@@ -514,6 +514,43 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             "Parameter##Inner",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::InnerCamera)]);
+                        if (ImGui::BeginCombo("Flip##Inner", [] {
+                                switch (Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)]) {
+                                case Service::CAM::Flip::None:
+                                    return "None";
+                                case Service::CAM::Flip::Horizontal:
+                                    return "Horizontal";
+                                case Service::CAM::Flip::Vertical:
+                                    return "Vertical";
+                                case Service::CAM::Flip::Reverse:
+                                    return "Reverse";
+                                default:
+                                    return "Invalid";
+                                }
+                            }())) {
+                            if (ImGui::Selectable("None")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)] =
+                                    Service::CAM::Flip::None;
+                            }
+                            if (ImGui::Selectable("Horizontal")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)] =
+                                    Service::CAM::Flip::Horizontal;
+                            }
+                            if (ImGui::Selectable("Vertical")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)] =
+                                    Service::CAM::Flip::Vertical;
+                            }
+                            if (ImGui::Selectable("Reverse")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)] =
+                                    Service::CAM::Flip::Reverse;
+                            }
+                            ImGui::EndCombo();
+                        }
                     }
 
                     ImGui::NewLine();
@@ -545,6 +582,43 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             "Parameter##Outer Left",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterLeftCamera)]);
+                        if (ImGui::BeginCombo("Flip##Outer Left", [] {
+                                switch (Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)]) {
+                                case Service::CAM::Flip::None:
+                                    return "None";
+                                case Service::CAM::Flip::Horizontal:
+                                    return "Horizontal";
+                                case Service::CAM::Flip::Vertical:
+                                    return "Vertical";
+                                case Service::CAM::Flip::Reverse:
+                                    return "Reverse";
+                                default:
+                                    return "Invalid";
+                                }
+                            }())) {
+                            if (ImGui::Selectable("None")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] =
+                                    Service::CAM::Flip::None;
+                            }
+                            if (ImGui::Selectable("Horizontal")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] =
+                                    Service::CAM::Flip::Horizontal;
+                            }
+                            if (ImGui::Selectable("Vertical")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] =
+                                    Service::CAM::Flip::Vertical;
+                            }
+                            if (ImGui::Selectable("Reverse")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] =
+                                    Service::CAM::Flip::Reverse;
+                            }
+                            ImGui::EndCombo();
+                        }
                     }
 
                     ImGui::NewLine();
@@ -576,6 +650,43 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             "Parameter##Outer Right",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterRightCamera)]);
+                        if (ImGui::BeginCombo("Flip##Outer Right", [] {
+                                switch (Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)]) {
+                                case Service::CAM::Flip::None:
+                                    return "None";
+                                case Service::CAM::Flip::Horizontal:
+                                    return "Horizontal";
+                                case Service::CAM::Flip::Vertical:
+                                    return "Vertical";
+                                case Service::CAM::Flip::Reverse:
+                                    return "Reverse";
+                                default:
+                                    return "Invalid";
+                                }
+                            }())) {
+                            if (ImGui::Selectable("None")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] =
+                                    Service::CAM::Flip::None;
+                            }
+                            if (ImGui::Selectable("Horizontal")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] =
+                                    Service::CAM::Flip::Horizontal;
+                            }
+                            if (ImGui::Selectable("Vertical")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] =
+                                    Service::CAM::Flip::Vertical;
+                            }
+                            if (ImGui::Selectable("Reverse")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] =
+                                    Service::CAM::Flip::Reverse;
+                            }
+                            ImGui::EndCombo();
+                        }
                     }
 
                     ImGui::EndTabItem();

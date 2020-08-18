@@ -723,6 +723,67 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 cam->ReloadCameraDevices();
                             }
                         }
+                        if (ImGui::BeginCombo("Flip##Inner", [] {
+                                switch (Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)]) {
+                                case Service::CAM::Flip::None:
+                                    return "None";
+                                case Service::CAM::Flip::Horizontal:
+                                    return "Horizontal";
+                                case Service::CAM::Flip::Vertical:
+                                    return "Vertical";
+                                case Service::CAM::Flip::Reverse:
+                                    return "Reverse";
+                                default:
+                                    return "Invalid";
+                                }
+                            }())) {
+                            if (ImGui::Selectable("None")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)] =
+                                    Service::CAM::Flip::None;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            if (ImGui::Selectable("Horizontal")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)] =
+                                    Service::CAM::Flip::Horizontal;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            if (ImGui::Selectable("Vertical")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)] =
+                                    Service::CAM::Flip::Vertical;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            if (ImGui::Selectable("Reverse")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)] =
+                                    Service::CAM::Flip::Reverse;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            ImGui::EndCombo();
+                        }
                     }
 
                     ImGui::NewLine();
@@ -776,6 +837,67 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 cam->ReloadCameraDevices();
                             }
                         }
+                        if (ImGui::BeginCombo("Flip##Outer Left", [] {
+                                switch (Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)]) {
+                                case Service::CAM::Flip::None:
+                                    return "None";
+                                case Service::CAM::Flip::Horizontal:
+                                    return "Horizontal";
+                                case Service::CAM::Flip::Vertical:
+                                    return "Vertical";
+                                case Service::CAM::Flip::Reverse:
+                                    return "Reverse";
+                                default:
+                                    return "Invalid";
+                                }
+                            }())) {
+                            if (ImGui::Selectable("None")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] =
+                                    Service::CAM::Flip::None;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            if (ImGui::Selectable("Horizontal")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] =
+                                    Service::CAM::Flip::Horizontal;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            if (ImGui::Selectable("Vertical")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] =
+                                    Service::CAM::Flip::Vertical;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            if (ImGui::Selectable("Reverse")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] =
+                                    Service::CAM::Flip::Reverse;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            ImGui::EndCombo();
+                        }
                     }
 
                     ImGui::NewLine();
@@ -828,6 +950,67 @@ void EmuWindow_SDL2::SwapBuffers() {
                             if (cam != nullptr) {
                                 cam->ReloadCameraDevices();
                             }
+                        }
+                        if (ImGui::BeginCombo("Flip##Outer Right", [] {
+                                switch (Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)]) {
+                                case Service::CAM::Flip::None:
+                                    return "None";
+                                case Service::CAM::Flip::Horizontal:
+                                    return "Horizontal";
+                                case Service::CAM::Flip::Vertical:
+                                    return "Vertical";
+                                case Service::CAM::Flip::Reverse:
+                                    return "Reverse";
+                                default:
+                                    return "Invalid";
+                                }
+                            }())) {
+                            if (ImGui::Selectable("None")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] =
+                                    Service::CAM::Flip::None;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            if (ImGui::Selectable("Horizontal")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] =
+                                    Service::CAM::Flip::Horizontal;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            if (ImGui::Selectable("Vertical")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] =
+                                    Service::CAM::Flip::Vertical;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            if (ImGui::Selectable("Reverse")) {
+                                Settings::values.camera_flip[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] =
+                                    Service::CAM::Flip::Reverse;
+
+                                std::shared_ptr<Service::CAM::Module> cam =
+                                    Service::CAM::GetModule(system);
+                                if (cam != nullptr) {
+                                    cam->ReloadCameraDevices();
+                                }
+                            }
+                            ImGui::EndCombo();
                         }
                     }
                     ImGui::Unindent();

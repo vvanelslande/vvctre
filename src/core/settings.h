@@ -137,7 +137,7 @@ struct Values {
         "blank",
     };
     std::array<std::string, Service::CAM::NumCameras> camera_parameter;
-    std::array<Service::CAM::Flip, Service::CAM::NumCameras> camera_flip;
+    std::array<Service::CAM::Flip, Service::CAM::NumCameras> camera_flip{};
 
     // Graphics
     bool use_hardware_renderer = true;
