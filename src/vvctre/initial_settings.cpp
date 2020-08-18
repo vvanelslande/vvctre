@@ -3,6 +3,7 @@
 // Refer to the license.txt file included.
 
 #include <algorithm>
+#include <atomic>
 #include <csignal>
 #include <cstdlib>
 #include <string>
@@ -116,67 +117,101 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                                pfd::opt::multiselect)
                                     .result();
 
-                            for (const auto& file : files) {
-                                const Service::AM::InstallStatus status = Service::AM::InstallCIA(
-                                    file, [&](std::size_t current, std::size_t total) {
-                                        while (SDL_PollEvent(&event)) {
-                                            ImGui_ImplSDL2_ProcessEvent(&event);
-                                            if (event.type == SDL_QUIT) {
-                                                if (pfd::message(
-                                                        "vvctre", "Would you like to exit now?",
-                                                        pfd::choice::yes_no, pfd::icon::question)
-                                                        .result() == pfd::button::yes) {
-                                                    vvctreShutdown(&plugin_manager);
-                                                    std::exit(1);
-                                                }
-                                            }
-                                        }
-                                        ImGui_ImplOpenGL3_NewFrame();
-                                        ImGui_ImplSDL2_NewFrame(window);
-                                        ImGui::NewFrame();
-                                        ImGui::OpenPopup("Installing CIA");
-                                        if (ImGui::BeginPopupModal(
-                                                "Installing CIA", nullptr,
-                                                ImGuiWindowFlags_NoSavedSettings |
-                                                    ImGuiWindowFlags_AlwaysAutoResize |
-                                                    ImGuiWindowFlags_NoMove)) {
-                                            ImGui::Text("Installing %s", file.c_str());
-                                            ImGui::ProgressBar(static_cast<float>(current) /
-                                                               static_cast<float>(total));
-                                            ImGui::EndPopup();
-                                        }
-                                        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-                                        glClear(GL_COLOR_BUFFER_BIT);
-                                        ImGui::Render();
-                                        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-                                        SDL_GL_SwapWindow(window);
-                                    });
-                                switch (status) {
-                                case Service::AM::InstallStatus::Success:
-                                    break;
-                                case Service::AM::InstallStatus::ErrorFailedToOpenFile:
-                                    pfd::message("vvctre", fmt::format("Failed to open {}", file),
-                                                 pfd::choice::ok, pfd::icon::error);
-                                    break;
-                                case Service::AM::InstallStatus::ErrorFileNotFound:
-                                    pfd::message("vvctre", fmt::format("{} not found", file),
-                                                 pfd::choice::ok, pfd::icon::error);
-                                    break;
-                                case Service::AM::InstallStatus::ErrorAborted:
-                                    pfd::message("vvctre",
-                                                 fmt::format("{} installation aborted", file),
-                                                 pfd::choice::ok, pfd::icon::error);
-                                    break;
-                                case Service::AM::InstallStatus::ErrorInvalid:
-                                    pfd::message("vvctre", fmt::format("{} is invalid", file),
-                                                 pfd::choice::ok, pfd::icon::error);
-                                    break;
-                                case Service::AM::InstallStatus::ErrorEncrypted:
-                                    pfd::message("vvctre", fmt::format("{} is encrypted", file),
-                                                 pfd::choice::ok, pfd::icon::error);
-                                    break;
-                                }
+                            if (files.empty()) {
+                                continue;
                             }
+
+                            std::atomic<bool> installing{true};
+                            std::mutex mutex;
+                            std::string current_file;
+                            std::size_t current_file_current = 0;
+                            std::size_t current_file_total = 0;
+
+                            std::thread([&] {
+                                for (const auto& file : files) {
+                                    {
+                                        std::lock_guard<std::mutex> lock(mutex);
+                                        current_file = file;
+                                    }
+
+                                    const Service::AM::InstallStatus status =
+                                        Service::AM::InstallCIA(
+                                            file, [&](std::size_t current, std::size_t total) {
+                                                std::lock_guard<std::mutex> lock(mutex);
+                                                current_file_current = current;
+                                                current_file_total = total;
+                                            });
+
+                                    switch (status) {
+                                    case Service::AM::InstallStatus::Success:
+                                        break;
+                                    case Service::AM::InstallStatus::ErrorFailedToOpenFile:
+                                        pfd::message("vvctre",
+                                                     fmt::format("Failed to open {}", file),
+                                                     pfd::choice::ok, pfd::icon::error);
+                                        break;
+                                    case Service::AM::InstallStatus::ErrorFileNotFound:
+                                        pfd::message("vvctre", fmt::format("{} not found", file),
+                                                     pfd::choice::ok, pfd::icon::error);
+                                        break;
+                                    case Service::AM::InstallStatus::ErrorAborted:
+                                        pfd::message("vvctre",
+                                                     fmt::format("{} installation aborted", file),
+                                                     pfd::choice::ok, pfd::icon::error);
+                                        break;
+                                    case Service::AM::InstallStatus::ErrorInvalid:
+                                        pfd::message("vvctre", fmt::format("{} is invalid", file),
+                                                     pfd::choice::ok, pfd::icon::error);
+                                        break;
+                                    case Service::AM::InstallStatus::ErrorEncrypted:
+                                        pfd::message("vvctre", fmt::format("{} is encrypted", file),
+                                                     pfd::choice::ok, pfd::icon::error);
+                                        break;
+                                    }
+                                }
+
+                                installing = false;
+                            }).detach();
+
+                            while (installing) {
+                                while (SDL_PollEvent(&event)) {
+                                    ImGui_ImplSDL2_ProcessEvent(&event);
+
+                                    if (event.type == SDL_QUIT) {
+                                        if (pfd::message("vvctre", "Would you like to exit now?",
+                                                         pfd::choice::yes_no, pfd::icon::question)
+                                                .result() == pfd::button::yes) {
+                                            vvctreShutdown(&plugin_manager);
+                                            std::exit(1);
+                                        }
+                                    }
+                                }
+
+                                ImGui_ImplOpenGL3_NewFrame();
+                                ImGui_ImplSDL2_NewFrame(window);
+                                ImGui::NewFrame();
+
+                                ImGui::OpenPopup("Installing CIA");
+                                ImGui::SetNextWindowSize(ImVec2(320.0f, 100.0f),
+                                                         ImGuiCond_Appearing);
+                                if (ImGui::BeginPopupModal("Installing CIA", nullptr,
+                                                           ImGuiWindowFlags_NoSavedSettings)) {
+                                    std::lock_guard<std::mutex> lock(mutex);
+                                    ImGui::PushTextWrapPos();
+                                    ImGui::Text("Installing %s", current_file.c_str());
+                                    ImGui::PopTextWrapPos();
+                                    ImGui::ProgressBar(static_cast<float>(current_file_current) /
+                                                       static_cast<float>(current_file_total));
+                                    ImGui::EndPopup();
+                                }
+
+                                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                                glClear(GL_COLOR_BUFFER_BIT);
+                                ImGui::Render();
+                                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+                                SDL_GL_SwapWindow(window);
+                            }
+
                             continue;
                         }
                         if (ImGui::MenuItem("Installed")) {

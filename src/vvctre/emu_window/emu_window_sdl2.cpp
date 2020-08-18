@@ -268,48 +268,30 @@ void EmuWindow_SDL2::SwapBuffers() {
                                        pfd::opt::multiselect)
                             .result();
 
-                    if (!files.empty()) {
-                        auto am = Service::AM::GetModule(system);
+                    if (files.empty()) {
+                        return;
+                    }
 
+                    std::shared_ptr<Service::AM::Module> am = Service::AM::GetModule(system);
+
+                    std::atomic<bool> installing{true};
+                    std::mutex mutex;
+                    std::string current_file;
+                    std::size_t current_file_current = 0;
+                    std::size_t current_file_total = 0;
+
+                    std::thread([&] {
                         for (const auto& file : files) {
+                            {
+                                std::lock_guard<std::mutex> lock(mutex);
+                                current_file = file;
+                            }
+
                             const Service::AM::InstallStatus status = Service::AM::InstallCIA(
                                 file, [&](std::size_t current, std::size_t total) {
-                                    SDL_Event event;
-                                    while (SDL_PollEvent(&event)) {
-                                        ImGui_ImplSDL2_ProcessEvent(&event);
-
-                                        if (event.type == SDL_QUIT) {
-                                            if (pfd::message(
-                                                    "vvctre", "Would you like to exit now?",
-                                                    pfd::choice::yes_no, pfd::icon::question)
-                                                    .result() == pfd::button::yes) {
-                                                std::exit(1);
-                                            }
-                                        }
-                                    }
-
-                                    ImGui_ImplOpenGL3_NewFrame();
-                                    ImGui_ImplSDL2_NewFrame(window);
-                                    ImGui::NewFrame();
-
-                                    ImGui::OpenPopup("Installing CIA");
-
-                                    if (ImGui::BeginPopupModal(
-                                            "Installing CIA", nullptr,
-                                            ImGuiWindowFlags_NoSavedSettings |
-                                                ImGuiWindowFlags_AlwaysAutoResize |
-                                                ImGuiWindowFlags_NoMove)) {
-                                        ImGui::Text("Installing %s", file.c_str());
-                                        ImGui::ProgressBar(static_cast<float>(current) /
-                                                           static_cast<float>(total));
-                                        ImGui::EndPopup();
-                                    }
-
-                                    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-                                    glClear(GL_COLOR_BUFFER_BIT);
-                                    ImGui::Render();
-                                    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-                                    SDL_GL_SwapWindow(window);
+                                    std::lock_guard<std::mutex> lock(mutex);
+                                    current_file_current = current;
+                                    current_file_total = total;
                                 });
 
                             switch (status) {
@@ -341,8 +323,50 @@ void EmuWindow_SDL2::SwapBuffers() {
                             }
                         }
 
-                        return;
+                        installing = false;
+                    }).detach();
+
+                    SDL_Event event;
+
+                    while (installing) {
+                        while (SDL_PollEvent(&event)) {
+                            ImGui_ImplSDL2_ProcessEvent(&event);
+
+                            if (event.type == SDL_QUIT) {
+                                if (pfd::message("vvctre", "Would you like to exit now?",
+                                                 pfd::choice::yes_no, pfd::icon::question)
+                                        .result() == pfd::button::yes) {
+                                    vvctreShutdown(&plugin_manager);
+                                    std::exit(1);
+                                }
+                            }
+                        }
+
+                        ImGui_ImplOpenGL3_NewFrame();
+                        ImGui_ImplSDL2_NewFrame(window);
+                        ImGui::NewFrame();
+
+                        ImGui::OpenPopup("Installing CIA");
+                        ImGui::SetNextWindowSize(ImVec2(320.0f, 100.0f), ImGuiCond_Appearing);
+                        if (ImGui::BeginPopupModal("Installing CIA", nullptr,
+                                                   ImGuiWindowFlags_NoSavedSettings)) {
+                            std::lock_guard<std::mutex> lock(mutex);
+                            ImGui::PushTextWrapPos();
+                            ImGui::Text("Installing %s", current_file.c_str());
+                            ImGui::PopTextWrapPos();
+                            ImGui::ProgressBar(static_cast<float>(current_file_current) /
+                                               static_cast<float>(current_file_total));
+                            ImGui::EndPopup();
+                        }
+
+                        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                        glClear(GL_COLOR_BUFFER_BIT);
+                        ImGui::Render();
+                        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+                        SDL_GL_SwapWindow(window);
                     }
+
+                    return;
                 }
 
                 if (ImGui::BeginMenu("Amiibo")) {
