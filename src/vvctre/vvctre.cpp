@@ -63,14 +63,6 @@ __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 
 static std::function<void()> play_movie_loop_callback;
 
-static void InitializeLogging() {
-    Log::Filter log_filter(Log::Level::Debug);
-    log_filter.ParseFilterString(Settings::values.log_filter);
-    Log::SetGlobalFilter(log_filter);
-
-    Log::AddBackend(std::make_unique<Log::ColorConsoleBackend>());
-}
-
 int main(int argc, char** argv) {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0) {
         pfd::message("vvctre", fmt::format("Failed to initialize SDL2: {}", SDL_GetError()),
@@ -115,7 +107,7 @@ int main(int argc, char** argv) {
         std::exit(1);
     }
     if (!gladLoadGLLoader(static_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
-        pfd::message("vvctre", fmt::format("Failed to initialize OpenGL: {}", SDL_GetError()),
+        pfd::message("vvctre", fmt::format("Failed to load OpenGL functions: {}", SDL_GetError()),
                      pfd::choice::ok, pfd::icon::error);
         vvctreShutdown(nullptr);
         std::exit(1);
@@ -184,7 +176,10 @@ int main(int argc, char** argv) {
     }
     plugin_manager.InitialSettingsOkPressed();
 
-    InitializeLogging();
+    Log::Filter log_filter(Log::Level::Debug);
+    log_filter.ParseFilterString(Settings::values.log_filter);
+    Log::SetGlobalFilter(log_filter);
+    Log::AddBackend(std::make_unique<Log::ColorConsoleBackend>());
 
     if (!Settings::values.record_movie.empty()) {
         Core::Movie::GetInstance().PrepareForRecording();
@@ -197,11 +192,8 @@ int main(int argc, char** argv) {
     std::unique_ptr<EmuWindow_SDL2> emu_window =
         std::make_unique<EmuWindow_SDL2>(system, plugin_manager, window, ok_multiplayer);
 
-    // Register frontend applets
     system.RegisterSoftwareKeyboard(std::make_shared<Frontend::SDL2_SoftwareKeyboard>(*emu_window));
     system.RegisterMiiSelector(std::make_shared<Frontend::SDL2_MiiSelector>(*emu_window));
-
-    // Register camera implementations
     Camera::RegisterFactory("image", std::make_unique<Camera::ImageCameraFactory>());
 
     plugin_manager.BeforeLoading();
