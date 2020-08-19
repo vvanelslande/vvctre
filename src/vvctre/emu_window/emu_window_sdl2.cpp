@@ -347,11 +347,15 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::NewFrame();
 
                         ImGui::OpenPopup("Installing CIA");
-                        ImGui::SetNextWindowSize(ImVec2(320.0f, 100.0f), ImGuiCond_Appearing);
+                        ImGui::SetNextWindowPos(
+                            ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
+                            ImGuiCond_Always, ImVec2(0.5f, 0.5f));
                         if (ImGui::BeginPopupModal("Installing CIA", nullptr,
-                                                   ImGuiWindowFlags_NoSavedSettings)) {
+                                                   ImGuiWindowFlags_NoSavedSettings |
+                                                       ImGuiWindowFlags_NoMove |
+                                                       ImGuiWindowFlags_AlwaysAutoResize)) {
                             std::lock_guard<std::mutex> lock(mutex);
-                            ImGui::PushTextWrapPos();
+                            ImGui::PushTextWrapPos(io.DisplaySize.x * 0.9f);
                             ImGui::Text("Installing %s", current_file.c_str());
                             ImGui::PopTextWrapPos();
                             ImGui::ProgressBar(static_cast<float>(current_file_current) /
