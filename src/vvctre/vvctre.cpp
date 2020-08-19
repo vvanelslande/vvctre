@@ -73,8 +73,9 @@ static void InitializeLogging() {
 
 int main(int argc, char** argv) {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0) {
-        std::cerr << "Failed to initialize SDL2! Exiting..." << std::endl;
-        std::exit(1);
+        pfd::message("vvctre", fmt::format("Failed to initialize SDL2: {}", SDL_GetError()),
+                     pfd::choice::ok, pfd::icon::error);
+        return 1;
     }
 
     InputCommon::Init();
