@@ -7,11 +7,11 @@
 #include <cmath>
 #include <functional>
 #include <iterator>
+#include <map>
 #include <mutex>
 #include <string>
 #include <thread>
 #include <tuple>
-#include <map>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -468,12 +468,9 @@ SDLState::SDLState() {
     // If the frontend is going to manage the event loop, then we don't start one here
     start_thread = !SDL_WasInit(SDL_INIT_JOYSTICK);
     if (start_thread && SDL_Init(SDL_INIT_JOYSTICK) < 0) {
-        LOG_CRITICAL(Input, "SDL_Init(SDL_INIT_JOYSTICK) failed with: {}", SDL_GetError());
         return;
     }
-    if (SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1") == SDL_FALSE) {
-        LOG_ERROR(Input, "Failed to set Hint for background events", SDL_GetError());
-    }
+    SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
 
     SDL_AddEventWatch(&SDLEventWatcher, this);
 
@@ -589,15 +586,16 @@ public:
         while (state.event_queue.Pop(event)) {
             switch (event.type) {
             case SDL_JOYAXISMOTION:
-                if (axis_memory.find(event.jaxis.axis) == axis_memory.end())
-                {
+                if (axis_memory.find(event.jaxis.axis) == axis_memory.end()) {
                     axis_memory[event.jaxis.axis] = event.jaxis.value;
                     break;
                 } else {
-                    if (std::abs((event.jaxis.value - axis_memory[event.jaxis.axis]) / 32767.0) < 0.5) {
+                    if (std::abs((event.jaxis.value - axis_memory[event.jaxis.axis]) / 32767.0) <
+                        0.5) {
                         break;
                     } else {
-                        event.jaxis.value = std::copysign(32767, event.jaxis.value - axis_memory[event.jaxis.axis]);
+                        event.jaxis.value =
+                            std::copysign(32767, event.jaxis.value - axis_memory[event.jaxis.axis]);
                         axis_memory.clear();
                     }
                 }
