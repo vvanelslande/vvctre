@@ -49,6 +49,7 @@ static_assert(sizeof(SaveFileConfig) == 0x455C,
               "SaveFileConfig header must be exactly 0x455C bytes");
 
 enum ConfigBlockID {
+    BacklightControlsBlockID = 0x00050001,
     StereoCameraSettingsBlockID = 0x00050005,
     SoundOutputModeBlockID = 0x00070001,
     ConsoleUniqueID1BlockID = 0x00090000,
@@ -62,6 +63,7 @@ enum ConfigBlockID {
     StateNameBlockID = 0x000B0002,
     EULAVersionBlockID = 0x000D0000,
     ConsoleModelBlockID = 0x000F0004,
+    SystemSetupRequiredBlockID = 0x00110000,
     DebugModeBlockID = 0x00130000,
 };
 
@@ -556,8 +558,28 @@ ResultCode Module::FormatConfig() {
         return res;
     }
 
+    // 0x00050001 - Backlight controls (u8 ABL_powersave_enable, u8 brightness_level) (read by GSP)
+    u8 backlight_controls[0x2];
+    backlight_controls[0] = 0;
+    backlight_controls[1] = 5;
+    res = CreateConfigInfoBlk(BacklightControlsBlockID, 0x2, 0xC, backlight_controls);
+    if (!res.IsSuccess()) {
+        return res;
+    }
+
     // 0x00F0006 - Unknown
     res = CreateConfigInfoBlk(0x00F0006, 0x28, 0xC, zero_buffer);
+    if (!res.IsSuccess()) {
+        return res;
+    }
+
+    // 0x00110000 - System setup required
+    u8 system_setup_required[0x4];
+    system_setup_required[0] = 0;
+    system_setup_required[1] = 1;
+    system_setup_required[2] = 0;
+    system_setup_required[3] = 0;
+    res = CreateConfigInfoBlk(SystemSetupRequiredBlockID, 0x4, 0xE, system_setup_required);
     if (!res.IsSuccess()) {
         return res;
     }
