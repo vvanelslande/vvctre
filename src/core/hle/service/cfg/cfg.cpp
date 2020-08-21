@@ -94,23 +94,7 @@ struct ConsoleCountryInfo {
 };
 static_assert(sizeof(ConsoleCountryInfo) == 4, "ConsoleCountryInfo must be exactly 4 bytes");
 
-struct LocalizedCountryNames {
-    std::array<char16_t, 0x40> JP;
-    std::array<char16_t, 0x40> EN;
-    std::array<char16_t, 0x40> FR;
-    std::array<char16_t, 0x40> DE;
-    std::array<char16_t, 0x40> IT;
-    std::array<char16_t, 0x40> ES;
-    std::array<char16_t, 0x40> ZH;
-    std::array<char16_t, 0x40> KO;
-    std::array<char16_t, 0x40> NL;
-    std::array<char16_t, 0x40> PT;
-    std::array<char16_t, 0x40> RU;
-    std::array<char16_t, 0x40> TW;
-    INSERT_PADDING_BYTES(0x200);
-};
-
-struct LocalizedStateNames {
+struct LocalizedNames {
     std::array<char16_t, 0x40> JP;
     std::array<char16_t, 0x40> EN;
     std::array<char16_t, 0x40> FR;
@@ -545,7 +529,7 @@ ResultCode Module::FormatConfig() {
     }
 
     // 0x000B0001 - Localized country names
-    LocalizedCountryNames localized_country_names{
+    LocalizedNames localized_country_names{
         COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][0],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][1],
         COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][2],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][3],
         COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][4],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][5],
@@ -559,8 +543,8 @@ ResultCode Module::FormatConfig() {
     }
 
     // 0x000B0002 - Localized state names
-    LocalizedStateNames localized_state_names{u"—", u"—", u"—", u"—", u"—", u"—",
-                                              u"—", u"—", u"—", u"—", u"—", u"—"};
+    LocalizedNames localized_state_names{u"—", u"—", u"—", u"—", u"—", u"—",
+                                         u"—", u"—", u"—", u"—", u"—", u"—"};
     res = CreateConfigInfoBlk(LocalizedStateNamesBlockID, sizeof(localized_state_names), 0xE,
                               &localized_state_names);
     if (!res.IsSuccess()) {
@@ -804,7 +788,7 @@ void Module::SetCountry(u8 country_code) {
     ConsoleCountryInfo block = {{0, 0}, 0, country_code};
     SetConfigInfoBlock(CountryInfoBlockID, sizeof(block), 4, &block);
 
-    LocalizedCountryNames localized_country_names{
+    LocalizedNames localized_country_names{
         COUNTRY_CODE_TO_NAME[country_code][0],  COUNTRY_CODE_TO_NAME[country_code][1],
         COUNTRY_CODE_TO_NAME[country_code][2],  COUNTRY_CODE_TO_NAME[country_code][3],
         COUNTRY_CODE_TO_NAME[country_code][4],  COUNTRY_CODE_TO_NAME[country_code][5],
@@ -814,8 +798,8 @@ void Module::SetCountry(u8 country_code) {
     SetConfigInfoBlock(LocalizedCountryNamesBlockID, sizeof(localized_country_names), 0xE,
                        &localized_country_names);
 
-    LocalizedStateNames localized_state_names{u"—", u"—", u"—", u"—", u"—", u"—",
-                                              u"—", u"—", u"—", u"—", u"—", u"—"};
+    LocalizedNames localized_state_names{u"—", u"—", u"—", u"—", u"—", u"—",
+                                         u"—", u"—", u"—", u"—", u"—", u"—"};
     SetConfigInfoBlock(LocalizedStateNamesBlockID, sizeof(localized_state_names), 0xE,
                        &localized_state_names);
 }
