@@ -529,13 +529,18 @@ ResultCode Module::FormatConfig() {
     }
 
     // 0x000B0001 - Localized country names
-    LocalizedNames localized_country_names{
-        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][0],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][1],
-        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][2],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][3],
-        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][4],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][5],
-        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][6],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][7],
-        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][8],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][9],
-        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][10], COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][11]};
+    LocalizedNames localized_country_names{LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][0],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][1],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][2],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][3],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][4],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][5],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][6],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][7],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][8],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][9],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][10],
+                                           LOCALIZED_COUNTRY_NAMES[MEXICO_COUNTRY_ID][11]};
     res = CreateConfigInfoBlk(LocalizedCountryNamesBlockID, sizeof(localized_country_names), 0xE,
                               &localized_country_names);
     if (!res.IsSuccess()) {
@@ -789,12 +794,12 @@ void Module::SetCountry(u8 country_code) {
     SetConfigInfoBlock(CountryInfoBlockID, sizeof(block), 4, &block);
 
     LocalizedNames localized_country_names{
-        COUNTRY_CODE_TO_NAME[country_code][0],  COUNTRY_CODE_TO_NAME[country_code][1],
-        COUNTRY_CODE_TO_NAME[country_code][2],  COUNTRY_CODE_TO_NAME[country_code][3],
-        COUNTRY_CODE_TO_NAME[country_code][4],  COUNTRY_CODE_TO_NAME[country_code][5],
-        COUNTRY_CODE_TO_NAME[country_code][6],  COUNTRY_CODE_TO_NAME[country_code][7],
-        COUNTRY_CODE_TO_NAME[country_code][8],  COUNTRY_CODE_TO_NAME[country_code][9],
-        COUNTRY_CODE_TO_NAME[country_code][10], COUNTRY_CODE_TO_NAME[country_code][11]};
+        LOCALIZED_COUNTRY_NAMES[country_code][0],  LOCALIZED_COUNTRY_NAMES[country_code][1],
+        LOCALIZED_COUNTRY_NAMES[country_code][2],  LOCALIZED_COUNTRY_NAMES[country_code][3],
+        LOCALIZED_COUNTRY_NAMES[country_code][4],  LOCALIZED_COUNTRY_NAMES[country_code][5],
+        LOCALIZED_COUNTRY_NAMES[country_code][6],  LOCALIZED_COUNTRY_NAMES[country_code][7],
+        LOCALIZED_COUNTRY_NAMES[country_code][8],  LOCALIZED_COUNTRY_NAMES[country_code][9],
+        LOCALIZED_COUNTRY_NAMES[country_code][10], LOCALIZED_COUNTRY_NAMES[country_code][11]};
     SetConfigInfoBlock(LocalizedCountryNamesBlockID, sizeof(localized_country_names), 0xE,
                        &localized_country_names);
 

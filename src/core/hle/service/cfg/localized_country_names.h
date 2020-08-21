@@ -4,7 +4,7 @@
 
 #include <array>
 
-constexpr std::array<std::array<std::array<char16_t, 0x40>, 12>, 187> COUNTRY_CODE_TO_NAME = {{
+constexpr std::array<std::array<std::array<char16_t, 0x40>, 12>, 187> LOCALIZED_COUNTRY_NAMES = {{
     {
         u"",
         u"",
