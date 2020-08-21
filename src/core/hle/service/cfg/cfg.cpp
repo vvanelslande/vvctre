@@ -451,7 +451,7 @@ ResultCode Module::UpdateConfigNANDSavegame() {
 ResultCode Module::FormatConfig() {
     ResultCode res = DeleteConfigNANDSaveFile();
     // The delete command fails if the file doesn't exist, so we have to check that too
-    if (!res.IsSuccess() && res != FileSys::ERROR_FILE_NOT_FOUND) {
+    if (!res.IsSuccess() && res != FileSys::FS_ERROR_FILE_NOT_FOUND) {
         return res;
     }
 
@@ -643,7 +643,7 @@ ResultCode Module::LoadConfigNANDSaveFile() {
     auto archive_result = systemsavedata_factory.Open(archive_path, 0);
 
     // If the archive didn't exist, create the files inside
-    if (archive_result.Code() == FileSys::ERR_NOT_FORMATTED) {
+    if (archive_result.Code() == FileSys::FS_ERROR_NOT_FORMATTED) {
         // Format the archive to create the directories
         systemsavedata_factory.Format(archive_path, FileSys::ArchiveFormatInfo(), 0);
 

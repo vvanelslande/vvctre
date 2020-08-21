@@ -399,7 +399,7 @@ void FS_USER::FormatSaveData(Kernel::HLERequestContext& ctx) {
     if (archive_id != FS::ArchiveIdCode::SaveData) {
         LOG_ERROR(Service_FS, "tried to format an archive different than SaveData, {}",
                   static_cast<u32>(archive_id));
-        rb.Push(FileSys::ERROR_INVALID_PATH);
+        rb.Push(FileSys::FS_ERROR_INVALID_PATH);
         return;
     }
 

@@ -43,17 +43,17 @@ ResultVal<std::unique_ptr<FileBackend>> SaveDataArchive::OpenFile(const Path& pa
 
     if (!path_parser.IsValid()) {
         LOG_ERROR(Service_FS, "Invalid path {}", path.DebugStr());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     if (mode.hex == 0) {
         LOG_ERROR(Service_FS, "Empty open mode");
-        return ERROR_UNSUPPORTED_OPEN_FLAGS;
+        return FS_ERROR_UNSUPPORTED_OPEN_FLAGS;
     }
 
     if (mode.create_flag && !mode.write_flag) {
         LOG_ERROR(Service_FS, "Create flag set but write flag not set");
-        return ERROR_UNSUPPORTED_OPEN_FLAGS;
+        return FS_ERROR_UNSUPPORTED_OPEN_FLAGS;
     }
 
     const auto full_path = path_parser.BuildHostPath(mount_point);
@@ -61,19 +61,19 @@ ResultVal<std::unique_ptr<FileBackend>> SaveDataArchive::OpenFile(const Path& pa
     switch (path_parser.GetHostStatus(mount_point)) {
     case PathParser::InvalidMountPoint:
         LOG_CRITICAL(Service_FS, "(unreachable) Invalid mount point {}", mount_point);
-        return ERROR_FILE_NOT_FOUND;
+        return FS_ERROR_FILE_NOT_FOUND;
     case PathParser::PathNotFound:
         LOG_ERROR(Service_FS, "Path not found {}", full_path);
-        return ERROR_PATH_NOT_FOUND;
+        return FS_ERROR_PATH_NOT_FOUND;
     case PathParser::FileInPath:
     case PathParser::DirectoryFound:
         LOG_ERROR(Service_FS, "Unexpected file or directory in {}", full_path);
-        return ERROR_UNEXPECTED_FILE_OR_DIRECTORY;
+        return FS_ERROR_UNEXPECTED_FILE_OR_DIRECTORY;
     case PathParser::NotFound:
         if (!mode.create_flag) {
             LOG_ERROR(Service_FS, "Non-existing file {} can't be open without mode create.",
                       full_path);
-            return ERROR_FILE_NOT_FOUND;
+            return FS_ERROR_FILE_NOT_FOUND;
         } else {
             // Create the file
             FileUtil::CreateEmptyFile(full_path);
@@ -86,7 +86,7 @@ ResultVal<std::unique_ptr<FileBackend>> SaveDataArchive::OpenFile(const Path& pa
     FileUtil::IOFile file(full_path, mode.write_flag ? "r+b" : "rb");
     if (!file.IsOpen()) {
         LOG_CRITICAL(Service_FS, "(unreachable) Unknown error opening {}", full_path);
-        return ERROR_FILE_NOT_FOUND;
+        return FS_ERROR_FILE_NOT_FOUND;
     }
 
     std::unique_ptr<DelayGenerator> delay_generator = std::make_unique<SaveDataDelayGenerator>();
@@ -99,7 +99,7 @@ ResultCode SaveDataArchive::DeleteFile(const Path& path) const {
 
     if (!path_parser.IsValid()) {
         LOG_ERROR(Service_FS, "Invalid path {}", path.DebugStr());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     const auto full_path = path_parser.BuildHostPath(mount_point);
@@ -107,15 +107,15 @@ ResultCode SaveDataArchive::DeleteFile(const Path& path) const {
     switch (path_parser.GetHostStatus(mount_point)) {
     case PathParser::InvalidMountPoint:
         LOG_CRITICAL(Service_FS, "(unreachable) Invalid mount point {}", mount_point);
-        return ERROR_FILE_NOT_FOUND;
+        return FS_ERROR_FILE_NOT_FOUND;
     case PathParser::PathNotFound:
         LOG_ERROR(Service_FS, "Path not found {}", full_path);
-        return ERROR_PATH_NOT_FOUND;
+        return FS_ERROR_PATH_NOT_FOUND;
     case PathParser::FileInPath:
     case PathParser::DirectoryFound:
     case PathParser::NotFound:
         LOG_ERROR(Service_FS, "File not found {}", full_path);
-        return ERROR_FILE_NOT_FOUND;
+        return FS_ERROR_FILE_NOT_FOUND;
     case PathParser::FileFound:
         break; // Expected 'success' case
     }
@@ -125,7 +125,7 @@ ResultCode SaveDataArchive::DeleteFile(const Path& path) const {
     }
 
     LOG_CRITICAL(Service_FS, "(unreachable) Unknown error deleting {}", full_path);
-    return ERROR_FILE_NOT_FOUND;
+    return FS_ERROR_FILE_NOT_FOUND;
 }
 
 ResultCode SaveDataArchive::RenameFile(const Path& src_path, const Path& dest_path) const {
@@ -134,14 +134,14 @@ ResultCode SaveDataArchive::RenameFile(const Path& src_path, const Path& dest_pa
     // TODO: Verify these return codes with HW
     if (!path_parser_src.IsValid()) {
         LOG_ERROR(Service_FS, "Invalid src path {}", src_path.DebugStr());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     const PathParser path_parser_dest(dest_path);
 
     if (!path_parser_dest.IsValid()) {
         LOG_ERROR(Service_FS, "Invalid dest path {}", dest_path.DebugStr());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     const auto src_path_full = path_parser_src.BuildHostPath(mount_point);
@@ -164,26 +164,26 @@ static ResultCode DeleteDirectoryHelper(const Path& path, const std::string& mou
 
     if (!path_parser.IsValid()) {
         LOG_ERROR(Service_FS, "Invalid path {}", path.DebugStr());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     if (path_parser.IsRootDirectory())
-        return ERROR_DIRECTORY_NOT_EMPTY;
+        return FS_ERROR_DIRECTORY_NOT_EMPTY;
 
     const auto full_path = path_parser.BuildHostPath(mount_point);
 
     switch (path_parser.GetHostStatus(mount_point)) {
     case PathParser::InvalidMountPoint:
         LOG_CRITICAL(Service_FS, "(unreachable) Invalid mount point {}", mount_point);
-        return ERROR_PATH_NOT_FOUND;
+        return FS_ERROR_PATH_NOT_FOUND;
     case PathParser::PathNotFound:
     case PathParser::NotFound:
         LOG_ERROR(Service_FS, "Path not found {}", full_path);
-        return ERROR_PATH_NOT_FOUND;
+        return FS_ERROR_PATH_NOT_FOUND;
     case PathParser::FileInPath:
     case PathParser::FileFound:
         LOG_ERROR(Service_FS, "Unexpected file or directory {}", full_path);
-        return ERROR_UNEXPECTED_FILE_OR_DIRECTORY;
+        return FS_ERROR_UNEXPECTED_FILE_OR_DIRECTORY;
     case PathParser::DirectoryFound:
         break; // Expected 'success' case
     }
@@ -193,7 +193,7 @@ static ResultCode DeleteDirectoryHelper(const Path& path, const std::string& mou
     }
 
     LOG_ERROR(Service_FS, "Directory not empty {}", full_path);
-    return ERROR_DIRECTORY_NOT_EMPTY;
+    return FS_ERROR_DIRECTORY_NOT_EMPTY;
 }
 
 ResultCode SaveDataArchive::DeleteDirectory(const Path& path) const {
@@ -210,7 +210,7 @@ ResultCode SaveDataArchive::CreateFile(const FileSys::Path& path, u64 size) cons
 
     if (!path_parser.IsValid()) {
         LOG_ERROR(Service_FS, "Invalid path {}", path.DebugStr());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     const auto full_path = path_parser.BuildHostPath(mount_point);
@@ -218,17 +218,17 @@ ResultCode SaveDataArchive::CreateFile(const FileSys::Path& path, u64 size) cons
     switch (path_parser.GetHostStatus(mount_point)) {
     case PathParser::InvalidMountPoint:
         LOG_CRITICAL(Service_FS, "(unreachable) Invalid mount point {}", mount_point);
-        return ERROR_FILE_NOT_FOUND;
+        return FS_ERROR_FILE_NOT_FOUND;
     case PathParser::PathNotFound:
         LOG_ERROR(Service_FS, "Path not found {}", full_path);
-        return ERROR_PATH_NOT_FOUND;
+        return FS_ERROR_PATH_NOT_FOUND;
     case PathParser::FileInPath:
         LOG_ERROR(Service_FS, "Unexpected file in path {}", full_path);
-        return ERROR_UNEXPECTED_FILE_OR_DIRECTORY;
+        return FS_ERROR_UNEXPECTED_FILE_OR_DIRECTORY;
     case PathParser::DirectoryFound:
     case PathParser::FileFound:
         LOG_ERROR(Service_FS, "{} already exists", full_path);
-        return ERROR_FILE_ALREADY_EXISTS;
+        return FS_ERROR_FILE_ALREADY_EXISTS;
     case PathParser::NotFound:
         break; // Expected 'success' case
     }
@@ -255,7 +255,7 @@ ResultCode SaveDataArchive::CreateDirectory(const Path& path) const {
 
     if (!path_parser.IsValid()) {
         LOG_ERROR(Service_FS, "Invalid path {}", path.DebugStr());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     const auto full_path = path_parser.BuildHostPath(mount_point);
@@ -263,17 +263,17 @@ ResultCode SaveDataArchive::CreateDirectory(const Path& path) const {
     switch (path_parser.GetHostStatus(mount_point)) {
     case PathParser::InvalidMountPoint:
         LOG_CRITICAL(Service_FS, "(unreachable) Invalid mount point {}", mount_point);
-        return ERROR_FILE_NOT_FOUND;
+        return FS_ERROR_FILE_NOT_FOUND;
     case PathParser::PathNotFound:
         LOG_ERROR(Service_FS, "Path not found {}", full_path);
-        return ERROR_PATH_NOT_FOUND;
+        return FS_ERROR_PATH_NOT_FOUND;
     case PathParser::FileInPath:
         LOG_ERROR(Service_FS, "Unexpected file in path {}", full_path);
-        return ERROR_UNEXPECTED_FILE_OR_DIRECTORY;
+        return FS_ERROR_UNEXPECTED_FILE_OR_DIRECTORY;
     case PathParser::DirectoryFound:
     case PathParser::FileFound:
         LOG_ERROR(Service_FS, "{} already exists", full_path);
-        return ERROR_DIRECTORY_ALREADY_EXISTS;
+        return FS_ERROR_DIRECTORY_ALREADY_EXISTS;
     case PathParser::NotFound:
         break; // Expected 'success' case
     }
@@ -293,14 +293,14 @@ ResultCode SaveDataArchive::RenameDirectory(const Path& src_path, const Path& de
     // TODO: Verify these return codes with HW
     if (!path_parser_src.IsValid()) {
         LOG_ERROR(Service_FS, "Invalid src path {}", src_path.DebugStr());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     const PathParser path_parser_dest(dest_path);
 
     if (!path_parser_dest.IsValid()) {
         LOG_ERROR(Service_FS, "Invalid dest path {}", dest_path.DebugStr());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     const auto src_path_full = path_parser_src.BuildHostPath(mount_point);
@@ -322,7 +322,7 @@ ResultVal<std::unique_ptr<DirectoryBackend>> SaveDataArchive::OpenDirectory(
 
     if (!path_parser.IsValid()) {
         LOG_ERROR(Service_FS, "Invalid path {}", path.DebugStr());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     const auto full_path = path_parser.BuildHostPath(mount_point);
@@ -330,15 +330,15 @@ ResultVal<std::unique_ptr<DirectoryBackend>> SaveDataArchive::OpenDirectory(
     switch (path_parser.GetHostStatus(mount_point)) {
     case PathParser::InvalidMountPoint:
         LOG_CRITICAL(Service_FS, "(unreachable) Invalid mount point {}", mount_point);
-        return ERROR_FILE_NOT_FOUND;
+        return FS_ERROR_FILE_NOT_FOUND;
     case PathParser::PathNotFound:
     case PathParser::NotFound:
         LOG_ERROR(Service_FS, "Path not found {}", full_path);
-        return ERROR_PATH_NOT_FOUND;
+        return FS_ERROR_PATH_NOT_FOUND;
     case PathParser::FileInPath:
     case PathParser::FileFound:
         LOG_ERROR(Service_FS, "Unexpected file in path {}", full_path);
-        return ERROR_UNEXPECTED_FILE_OR_DIRECTORY;
+        return FS_ERROR_UNEXPECTED_FILE_OR_DIRECTORY;
     case PathParser::DirectoryFound:
         break; // Expected 'success' case
     }

@@ -171,8 +171,9 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
             }
 
             asl::Date date = asl::Date::now();
-            multiplayer_messages.push_back(fmt::format(
-                "[{}:{}] <{}> {}", date.hours(), date.minutes(), entry.nickname, entry.message));
+            multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] <{}> {}", date.hours(),
+                                                       date.minutes(), entry.nickname,
+                                                       entry.message));
         });
 
     multiplayer_on_status_message =

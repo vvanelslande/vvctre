@@ -141,7 +141,7 @@ static void WriteGameCoinData(GameCoin gamecoin_data) {
 
     FileSys::Path gamecoin_path("/gamecoin.dat");
     // If the archive didn't exist, create the files inside
-    if (archive_result.Code() == FileSys::ERR_NOT_FORMATTED) {
+    if (archive_result.Code() == FileSys::FS_ERROR_NOT_FORMATTED) {
         // Format the archive to create the directories
         extdata_archive_factory.Format(archive_path, FileSys::ArchiveFormatInfo(), 0);
         // Open it again to get a valid archive now that the folder exists
@@ -200,7 +200,7 @@ Module::Module() {
     const FileSys::Path archive_path(ptm_shared_extdata_id);
     const auto archive_result = extdata_archive_factory.Open(archive_path, 0);
     // If the archive didn't exist, write the default game coin file
-    if (archive_result.Code() == FileSys::ERR_NOT_FORMATTED) {
+    if (archive_result.Code() == FileSys::FS_ERROR_NOT_FORMATTED) {
         WriteGameCoinData(DefaultGameCoin());
     }
 }

@@ -71,13 +71,13 @@ ResultVal<std::unique_ptr<FileBackend>> NCCHArchive::OpenFile(const Path& path,
                                                               const Mode& mode) const {
     if (path.GetType() != LowPathType::Binary) {
         LOG_ERROR(Service_FS, "Path need to be Binary");
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     std::vector<u8> binary = path.AsBinary();
     if (binary.size() != sizeof(NCCHFilePath)) {
         LOG_ERROR(Service_FS, "Wrong path size {}", binary.size());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     NCCHFilePath openfile_path;
@@ -166,7 +166,7 @@ ResultVal<std::unique_ptr<FileBackend>> NCCHArchive::OpenFile(const Path& path,
                                                       romfs_size, std::move(delay_generator));
             return MakeResult<std::unique_ptr<FileBackend>>(std::move(file));
         }
-        return ERROR_NOT_FOUND;
+        return FS_ERROR_NOT_FOUND;
     }
 
     return MakeResult<std::unique_ptr<FileBackend>>(std::move(file));
@@ -272,13 +272,13 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_NCCH::Open(const Path&
                                                                      u64 program_id) {
     if (path.GetType() != LowPathType::Binary) {
         LOG_ERROR(Service_FS, "Path need to be Binary");
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     std::vector<u8> binary = path.AsBinary();
     if (binary.size() != sizeof(NCCHArchivePath)) {
         LOG_ERROR(Service_FS, "Wrong path size {}", binary.size());
-        return ERROR_INVALID_PATH;
+        return FS_ERROR_INVALID_PATH;
     }
 
     NCCHArchivePath open_path;

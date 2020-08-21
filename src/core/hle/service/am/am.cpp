@@ -121,7 +121,7 @@ ResultCode CIAFile::WriteTitleMetadata() {
 
     // Save TMD so that we can start getting new .app paths
     if (tmd.Save(tmd_path) != Loader::ResultStatus::Success) {
-        return FileSys::ERROR_INSUFFICIENT_SPACE;
+        return FileSys::FS_ERROR_INSUFFICIENT_SPACE;
     }
 
     // Create any other .app folders which may not exist yet
@@ -179,7 +179,7 @@ ResultVal<std::size_t> CIAFile::WriteContentData(u64 offset, std::size_t length,
                                   content_written[i] ? "ab" : "wb");
 
             if (!file.IsOpen()) {
-                return FileSys::ERROR_INSUFFICIENT_SPACE;
+                return FileSys::FS_ERROR_INSUFFICIENT_SPACE;
             }
 
             std::vector<u8> temp(buffer + (range_min - offset),

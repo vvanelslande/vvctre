@@ -41,7 +41,7 @@ ResultVal<std::unique_ptr<FileBackend>> SDMCWriteOnlyArchive::OpenFile(const Pat
                                                                        const Mode& mode) const {
     if (mode.read_flag) {
         LOG_ERROR(Service_FS, "Read flag is not supported");
-        return ERROR_INVALID_READ_FLAG;
+        return FS_ERROR_INVALID_READ_FLAG;
     }
     return SDMCArchive::OpenFileBase(path, mode);
 }
@@ -49,7 +49,7 @@ ResultVal<std::unique_ptr<FileBackend>> SDMCWriteOnlyArchive::OpenFile(const Pat
 ResultVal<std::unique_ptr<DirectoryBackend>> SDMCWriteOnlyArchive::OpenDirectory(
     const Path& path) const {
     LOG_ERROR(Service_FS, "Not supported");
-    return ERROR_UNSUPPORTED_OPEN_FLAGS;
+    return FS_ERROR_UNSUPPORTED_OPEN_FLAGS;
 }
 
 ArchiveFactory_SDMCWriteOnly::ArchiveFactory_SDMCWriteOnly(const std::string& mount_point)

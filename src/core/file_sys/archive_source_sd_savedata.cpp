@@ -47,7 +47,7 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveSource_SDSaveData::Open(u64 pr
         // save file/directory structure expected by the game has not yet been initialized.
         // Returning the NotFormatted error code will signal the game to provision the SaveData
         // archive with the files and folders that it expects.
-        return ERR_NOT_FORMATTED;
+        return FS_ERROR_NOT_FORMATTED;
     }
 
     auto archive = std::make_unique<SaveDataArchive>(std::move(concrete_mount_point));
@@ -78,7 +78,7 @@ ResultVal<ArchiveFormatInfo> ArchiveSource_SDSaveData::GetFormatInfo(u64 program
     if (!file.IsOpen()) {
         LOG_ERROR(Service_FS, "Could not open metadata information for archive");
         // TODO(Subv): Verify error code
-        return ERR_NOT_FORMATTED;
+        return FS_ERROR_NOT_FORMATTED;
     }
 
     ArchiveFormatInfo info = {};

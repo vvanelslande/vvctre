@@ -94,7 +94,7 @@ void File::Write(Kernel::HLERequestContext& ctx) {
 
     // Subfiles can not be written to
     if (file->subfile) {
-        rb.Push(FileSys::ERROR_UNSUPPORTED_OPEN_FLAGS);
+        rb.Push(FileSys::FS_ERROR_UNSUPPORTED_OPEN_FLAGS);
         rb.Push<u32>(0);
         rb.PushMappedBuffer(buffer);
         return;
@@ -137,7 +137,7 @@ void File::SetSize(Kernel::HLERequestContext& ctx) {
 
     // SetSize can not be called on subfiles.
     if (file->subfile) {
-        rb.Push(FileSys::ERROR_UNSUPPORTED_OPEN_FLAGS);
+        rb.Push(FileSys::FS_ERROR_UNSUPPORTED_OPEN_FLAGS);
         return;
     }
 
@@ -168,7 +168,7 @@ void File::Flush(Kernel::HLERequestContext& ctx) {
 
     // Subfiles can not be flushed.
     if (file->subfile) {
-        rb.Push(FileSys::ERROR_UNSUPPORTED_OPEN_FLAGS);
+        rb.Push(FileSys::FS_ERROR_UNSUPPORTED_OPEN_FLAGS);
         return;
     }
 
@@ -227,21 +227,21 @@ void File::OpenSubFile(Kernel::HLERequestContext& ctx) {
 
     if (original_file->subfile) {
         // OpenSubFile can not be called on a file which is already as subfile
-        rb.Push(FileSys::ERROR_UNSUPPORTED_OPEN_FLAGS);
+        rb.Push(FileSys::FS_ERROR_UNSUPPORTED_OPEN_FLAGS);
         return;
     }
 
     if (offset < 0 || size < 0) {
-        rb.Push(FileSys::ERR_WRITE_BEYOND_END);
+        rb.Push(FileSys::FS_ERROR_WRITE_BEYOND_END);
         return;
     }
 
     std::size_t end = offset + size;
 
-    // TODO(Subv): Check for overflow and return ERR_WRITE_BEYOND_END
+    // TODO(Subv): Check for overflow and return FS_ERROR_WRITE_BEYOND_END
 
     if (end > original_file->size) {
-        rb.Push(FileSys::ERR_WRITE_BEYOND_END);
+        rb.Push(FileSys::FS_ERROR_WRITE_BEYOND_END);
         return;
     }
 
