@@ -1160,7 +1160,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 case Service::CFG::SystemLanguage::LANGUAGE_NL:
                                     return "Dutch";
                                 case Service::CFG::SystemLanguage::LANGUAGE_PT:
-                                    return "Portugese";
+                                    return "Portuguese";
                                 case Service::CFG::SystemLanguage::LANGUAGE_RU:
                                     return "Russian";
                                 case Service::CFG::SystemLanguage::LANGUAGE_TW:
@@ -1216,7 +1216,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 config_savegame_changed = true;
                             }
 
-                            if (ImGui::Selectable("Portugese")) {
+                            if (ImGui::Selectable("Portuguese")) {
                                 cfg->SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_PT);
                                 config_savegame_changed = true;
                             }

@@ -253,8 +253,8 @@ public:
     SoundOutputMode GetSoundOutputMode();
 
     /**
-     * Sets the country code in config savegame.
-     * @param country_code the country code to set
+     * Sets the country in config savegame.
+     * @param country_code the country to set
      */
     void SetCountry(u8 country_code);
 

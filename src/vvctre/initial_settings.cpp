@@ -826,7 +826,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             case Service::CFG::SystemLanguage::LANGUAGE_NL:
                                 return "Dutch";
                             case Service::CFG::SystemLanguage::LANGUAGE_PT:
-                                return "Portugese";
+                                return "Portuguese";
                             case Service::CFG::SystemLanguage::LANGUAGE_RU:
                                 return "Russian";
                             case Service::CFG::SystemLanguage::LANGUAGE_TW:
@@ -882,7 +882,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("Portugese")) {
+                        if (ImGui::Selectable("Portuguese")) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_PT);
                             config_savegame_changed = true;
                         }
