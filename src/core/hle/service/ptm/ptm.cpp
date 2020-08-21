@@ -3,6 +3,7 @@
 // Refer to the license.txt file included.
 
 #include <cinttypes>
+#include <asl/Date.h>
 #include "common/file_util.h"
 #include "common/logging/log.h"
 #include "core/core.h"
@@ -19,8 +20,17 @@
 
 namespace Service::PTM {
 
-/// Values for the default gamecoin.dat file
-static const GameCoin default_game_coin = {0x4F00, 42, 0, 0, 0, 2014, 12, 29};
+const GameCoin DefaultGameCoin() {
+    const asl::Date now = asl::Date::now();
+    return GameCoin{0x4F00,
+                    300,
+                    0,
+                    0,
+                    0,
+                    static_cast<u16>(now.year()),
+                    static_cast<u8>(now.month()),
+                    static_cast<u8>(now.day())};
+}
 
 void Module::Interface::GetAdapterState(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x5, 0, 0);
@@ -162,7 +172,7 @@ static GameCoin ReadGameCoinData() {
     auto archive_result = extdata_archive_factory.Open(archive_path, 0);
     if (!archive_result.Succeeded()) {
         LOG_ERROR(Service_PTM, "Could not open the PTM SharedExtSaveData archive!");
-        return default_game_coin;
+        return DefaultGameCoin();
     }
 
     FileSys::Path gamecoin_path("/gamecoin.dat");
@@ -172,7 +182,7 @@ static GameCoin ReadGameCoinData() {
     auto gamecoin_result = (*archive_result)->OpenFile(gamecoin_path, open_mode);
     if (!gamecoin_result.Succeeded()) {
         LOG_ERROR(Service_PTM, "Could not open the game coin data file!");
-        return default_game_coin;
+        return DefaultGameCoin();
     }
 
     auto gamecoin = std::move(gamecoin_result).Unwrap();
@@ -191,7 +201,7 @@ Module::Module() {
     const auto archive_result = extdata_archive_factory.Open(archive_path, 0);
     // If the archive didn't exist, write the default game coin file
     if (archive_result.Code() == FileSys::ERR_NOT_FORMATTED) {
-        WriteGameCoinData(default_game_coin);
+        WriteGameCoinData(DefaultGameCoin());
     }
 }
 
