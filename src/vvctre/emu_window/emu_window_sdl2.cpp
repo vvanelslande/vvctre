@@ -1023,11 +1023,11 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("System")) {
-                    auto cfg = Service::CFG::GetModule(system);
+                    std::shared_ptr<Service::CFG::Module> cfg = Service::CFG::GetModule(system);
 
                     if (cfg != nullptr) {
                         ImGui::TextUnformatted("Will Restart");
-                        ImGui::Indent();
+                        ImGui::Separator();
 
                         std::string username = Common::UTF16ToUTF8(cfg->GetUsername());
                         if (ImGui::InputText("Username", &username)) {
@@ -2091,12 +2091,11 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::EndPopup();
                         }
 
-                        ImGui::Unindent();
                         ImGui::NewLine();
                     }
 
                     ImGui::TextUnformatted("Restart Recommended");
-                    ImGui::Indent();
+                    ImGui::Separator();
                     const u16 min = 0;
                     const u16 max = 300;
                     if (ImGui::IsWindowAppearing()) {
@@ -2106,7 +2105,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                                             &max)) {
                         play_coins_changed = true;
                     }
-                    ImGui::Unindent();
 
                     ImGui::EndMenu();
                 }
