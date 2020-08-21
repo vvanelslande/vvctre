@@ -96,7 +96,7 @@ private:
 
     // System
     Core::System& system;
-    bool update_config_savegame = false;
+    bool config_savegame_changed = false;
 
     // FPS color
     // Default: Green
