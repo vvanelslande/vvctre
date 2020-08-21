@@ -23,6 +23,7 @@
 #include "core/hle/service/cfg/cfg_nor.h"
 #include "core/hle/service/cfg/cfg_s.h"
 #include "core/hle/service/cfg/cfg_u.h"
+#include "core/hle/service/cfg/localized_country_names.h"
 #include "core/settings.h"
 
 namespace Service::CFG {
@@ -59,8 +60,8 @@ enum ConfigBlockID {
     BirthdayBlockID = 0x000A0001,
     LanguageBlockID = 0x000A0002,
     CountryInfoBlockID = 0x000B0000,
-    CountryNameBlockID = 0x000B0001,
-    StateNameBlockID = 0x000B0002,
+    LocalizedCountryNamesBlockID = 0x000B0001,
+    LocalizedStateNamesBlockID = 0x000B0002,
     EULAVersionBlockID = 0x000D0000,
     ConsoleModelBlockID = 0x000F0004,
     SystemSetupRequiredBlockID = 0x00110000,
@@ -92,6 +93,39 @@ struct ConsoleCountryInfo {
     u8 country;    ///< Country
 };
 static_assert(sizeof(ConsoleCountryInfo) == 4, "ConsoleCountryInfo must be exactly 4 bytes");
+
+struct LocalizedCountryNames {
+    std::array<char16_t, 0x40> JP;
+    std::array<char16_t, 0x40> EN;
+    std::array<char16_t, 0x40> FR;
+    std::array<char16_t, 0x40> DE;
+    std::array<char16_t, 0x40> IT;
+    std::array<char16_t, 0x40> ES;
+    std::array<char16_t, 0x40> ZH;
+    std::array<char16_t, 0x40> KO;
+    std::array<char16_t, 0x40> NL;
+    std::array<char16_t, 0x40> PT;
+    std::array<char16_t, 0x40> RU;
+    std::array<char16_t, 0x40> TW;
+    INSERT_PADDING_BYTES(0x200);
+};
+
+struct LocalizedStateNames {
+    std::array<char16_t, 0x40> JP;
+    std::array<char16_t, 0x40> EN;
+    std::array<char16_t, 0x40> FR;
+    std::array<char16_t, 0x40> DE;
+    std::array<char16_t, 0x40> IT;
+    std::array<char16_t, 0x40> ES;
+    std::array<char16_t, 0x40> ZH;
+    std::array<char16_t, 0x40> KO;
+    std::array<char16_t, 0x40> NL;
+    std::array<char16_t, 0x40> PT;
+    std::array<char16_t, 0x40> RU;
+    std::array<char16_t, 0x40> TW;
+    INSERT_PADDING_BYTES(0x200);
+};
+
 } // namespace
 
 constexpr EULAVersion MAX_EULA_VERSION = {0x7F, 0x7F};
@@ -102,7 +136,8 @@ constexpr BirthdayBlock PROFILE_BIRTHDAY = {1, 4};
 constexpr u8 SOUND_OUTPUT_MODE = SOUND_STEREO;
 
 /// TODO(Subv): Find what the other bytes are
-constexpr ConsoleCountryInfo COUNTRY_INFO = {{0, 0}, 0, 36};
+constexpr u8 MEXICO_COUNTRY_ID = 36;
+constexpr ConsoleCountryInfo COUNTRY_INFO = {{0, 0}, 0, MEXICO_COUNTRY_ID};
 
 /**
  * TODO(Subv): Find out what this actually is, these values fix some NaN uniforms in some games,
@@ -509,44 +544,25 @@ ResultCode Module::FormatConfig() {
         return res;
     }
 
-    // 0x000B0001 - Localized names for the profile Country
-    struct {
-        char16_t JP[0x40] = u"メキシコ";
-        char16_t EN[0x40] = u"Mexico";
-        char16_t FR[0x40] = u"Mexique";
-        char16_t DE[0x40] = u"Mexiko";
-        char16_t IT[0x40] = u"Messico";
-        char16_t ES[0x40] = u"México";
-        char16_t ZH[0x40] = u"墨西哥";
-        char16_t KO[0x40] = u"멕시코";
-        char16_t NL[0x40] = u"Mexico";
-        char16_t PT[0x40] = u"México";
-        char16_t RU[0x40] = u"Мексика";
-        char16_t TW[0x40] = u"墨西哥";
-        INSERT_PADDING_BYTES(0x200);
-    } country_name;
-    res = CreateConfigInfoBlk(CountryNameBlockID, sizeof(country_name), 0xE, &country_name);
+    // 0x000B0001 - Localized country names
+    LocalizedCountryNames localized_country_names{
+        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][0],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][1],
+        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][2],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][3],
+        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][4],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][5],
+        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][6],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][7],
+        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][8],  COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][9],
+        COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][10], COUNTRY_CODE_TO_NAME[MEXICO_COUNTRY_ID][11]};
+    res = CreateConfigInfoBlk(LocalizedCountryNamesBlockID, sizeof(localized_country_names), 0xE,
+                              &localized_country_names);
     if (!res.IsSuccess()) {
         return res;
     }
 
-    // 0x000B0002 - Localized names for the profile State/Province
-    struct {
-        char16_t JP[0x40] = u"—";
-        char16_t EN[0x40] = u"—";
-        char16_t FR[0x40] = u"—";
-        char16_t DE[0x40] = u"—";
-        char16_t IT[0x40] = u"—";
-        char16_t ES[0x40] = u"—";
-        char16_t ZH[0x40] = u"—";
-        char16_t KO[0x40] = u"—";
-        char16_t NL[0x40] = u"—";
-        char16_t PT[0x40] = u"—";
-        char16_t RU[0x40] = u"—";
-        char16_t TW[0x40] = u"—";
-        INSERT_PADDING_BYTES(0x200);
-    } state_name;
-    res = CreateConfigInfoBlk(StateNameBlockID, sizeof(state_name), 0xE, &state_name);
+    // 0x000B0002 - Localized state names
+    LocalizedStateNames localized_state_names{u"—", u"—", u"—", u"—", u"—", u"—",
+                                              u"—", u"—", u"—", u"—", u"—", u"—"};
+    res = CreateConfigInfoBlk(LocalizedStateNamesBlockID, sizeof(localized_state_names), 0xE,
+                              &localized_state_names);
     if (!res.IsSuccess()) {
         return res;
     }
@@ -787,6 +803,21 @@ SoundOutputMode Module::GetSoundOutputMode() {
 void Module::SetCountryCode(u8 country_code) {
     ConsoleCountryInfo block = {{0, 0}, 0, country_code};
     SetConfigInfoBlock(CountryInfoBlockID, sizeof(block), 4, &block);
+
+    LocalizedCountryNames localized_country_names{
+        COUNTRY_CODE_TO_NAME[country_code][0],  COUNTRY_CODE_TO_NAME[country_code][1],
+        COUNTRY_CODE_TO_NAME[country_code][2],  COUNTRY_CODE_TO_NAME[country_code][3],
+        COUNTRY_CODE_TO_NAME[country_code][4],  COUNTRY_CODE_TO_NAME[country_code][5],
+        COUNTRY_CODE_TO_NAME[country_code][6],  COUNTRY_CODE_TO_NAME[country_code][7],
+        COUNTRY_CODE_TO_NAME[country_code][8],  COUNTRY_CODE_TO_NAME[country_code][9],
+        COUNTRY_CODE_TO_NAME[country_code][10], COUNTRY_CODE_TO_NAME[country_code][11]};
+    SetConfigInfoBlock(LocalizedCountryNamesBlockID, sizeof(localized_country_names), 0xE,
+                       &localized_country_names);
+
+    LocalizedStateNames localized_state_names{u"—", u"—", u"—", u"—", u"—", u"—",
+                                              u"—", u"—", u"—", u"—", u"—", u"—"};
+    SetConfigInfoBlock(LocalizedStateNamesBlockID, sizeof(localized_state_names), 0xE,
+                       &localized_state_names);
 }
 
 u8 Module::GetCountryCode() {
