@@ -87,8 +87,9 @@ struct ConsoleModelInfo {
 static_assert(sizeof(ConsoleModelInfo) == 4, "ConsoleModelInfo must be exactly 4 bytes");
 
 struct ConsoleCountryInfo {
-    u8 unknown[3];   ///< Unknown data
-    u8 country_code; ///< The country code of the console
+    u8 unknown[2]; ///< Unknown
+    u8 state;      ///< State
+    u8 country;    ///< Country
 };
 static_assert(sizeof(ConsoleCountryInfo) == 4, "ConsoleCountryInfo must be exactly 4 bytes");
 } // namespace
@@ -101,7 +102,7 @@ constexpr BirthdayBlock PROFILE_BIRTHDAY = {1, 4};
 constexpr u8 SOUND_OUTPUT_MODE = SOUND_STEREO;
 
 /// TODO(Subv): Find what the other bytes are
-constexpr ConsoleCountryInfo COUNTRY_INFO = {{0, 0, 0}, 36};
+constexpr ConsoleCountryInfo COUNTRY_INFO = {{0, 0}, 0, 36};
 
 /**
  * TODO(Subv): Find out what this actually is, these values fix some NaN uniforms in some games,
@@ -508,21 +509,44 @@ ResultCode Module::FormatConfig() {
         return res;
     }
 
-    u16_le country_name_buffer[16][0x40] = {};
-    std::u16string region_name = Common::UTF8ToUTF16("Gensokyo");
-    for (std::size_t i = 0; i < 16; ++i) {
-        std::copy(region_name.cbegin(), region_name.cend(), country_name_buffer[i]);
-    }
     // 0x000B0001 - Localized names for the profile Country
-    res = CreateConfigInfoBlk(CountryNameBlockID, sizeof(country_name_buffer), 0xE,
-                              country_name_buffer);
+    struct {
+        char16_t JP[0x40] = u"メキシコ";
+        char16_t EN[0x40] = u"Mexico";
+        char16_t FR[0x40] = u"Mexique";
+        char16_t DE[0x40] = u"Mexiko";
+        char16_t IT[0x40] = u"Messico";
+        char16_t ES[0x40] = u"México";
+        char16_t ZH[0x40] = u"墨西哥";
+        char16_t KO[0x40] = u"멕시코";
+        char16_t NL[0x40] = u"Mexico";
+        char16_t PT[0x40] = u"México";
+        char16_t RU[0x40] = u"Мексика";
+        char16_t TW[0x40] = u"墨西哥";
+        INSERT_PADDING_BYTES(0x200);
+    } country_name;
+    res = CreateConfigInfoBlk(CountryNameBlockID, sizeof(country_name), 0xE, &country_name);
     if (!res.IsSuccess()) {
         return res;
     }
 
     // 0x000B0002 - Localized names for the profile State/Province
-    res = CreateConfigInfoBlk(StateNameBlockID, sizeof(country_name_buffer), 0xE,
-                              country_name_buffer);
+    struct {
+        char16_t JP[0x40] = u"—";
+        char16_t EN[0x40] = u"—";
+        char16_t FR[0x40] = u"—";
+        char16_t DE[0x40] = u"—";
+        char16_t IT[0x40] = u"—";
+        char16_t ES[0x40] = u"—";
+        char16_t ZH[0x40] = u"—";
+        char16_t KO[0x40] = u"—";
+        char16_t NL[0x40] = u"—";
+        char16_t PT[0x40] = u"—";
+        char16_t RU[0x40] = u"—";
+        char16_t TW[0x40] = u"—";
+        INSERT_PADDING_BYTES(0x200);
+    } state_name;
+    res = CreateConfigInfoBlk(StateNameBlockID, sizeof(state_name), 0xE, &state_name);
     if (!res.IsSuccess()) {
         return res;
     }
@@ -761,14 +785,14 @@ SoundOutputMode Module::GetSoundOutputMode() {
 }
 
 void Module::SetCountryCode(u8 country_code) {
-    ConsoleCountryInfo block = {{0, 0, 0}, country_code};
+    ConsoleCountryInfo block = {{0, 0}, 0, country_code};
     SetConfigInfoBlock(CountryInfoBlockID, sizeof(block), 4, &block);
 }
 
 u8 Module::GetCountryCode() {
     ConsoleCountryInfo block;
     GetConfigInfoBlock(CountryInfoBlockID, sizeof(block), 8, &block);
-    return block.country_code;
+    return block.country;
 }
 
 void Module::GenerateConsoleUniqueId(u32& random_number, u64& console_id) {
