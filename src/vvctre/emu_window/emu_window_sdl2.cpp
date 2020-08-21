@@ -2074,6 +2074,23 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::EndCombo();
                         }
 
+                        if (ImGui::Button("Regenerate Console ID")) {
+                            u32 random_number;
+                            u64 console_id;
+                            cfg->GenerateConsoleUniqueId(random_number, console_id);
+                            cfg->SetConsoleUniqueId(random_number, console_id);
+                            update_config_savegame = true;
+                        }
+
+                        if (ImGui::BeginPopupContextItem("Console ID",
+                                                         ImGuiPopupFlags_MouseButtonRight)) {
+                            std::string console_id =
+                                fmt::format("0x{:016X}", cfg->GetConsoleUniqueId());
+                            ImGui::InputText("##Console ID", &console_id[0], 18,
+                                             ImGuiInputTextFlags_ReadOnly);
+                            ImGui::EndPopup();
+                        }
+
                         ImGui::Unindent();
                         ImGui::NewLine();
                     }
