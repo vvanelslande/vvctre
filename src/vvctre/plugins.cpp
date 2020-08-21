@@ -1399,7 +1399,7 @@ int vvctre_settings_get_sound_output_mode(void* cfg) {
 }
 
 void vvctre_settings_set_country(void* cfg, u8 value) {
-    static_cast<Service::CFG::Module*>(cfg)->SetCountryCode(value);
+    static_cast<Service::CFG::Module*>(cfg)->SetCountry(value);
 }
 
 u8 vvctre_settings_get_country(void* cfg) {

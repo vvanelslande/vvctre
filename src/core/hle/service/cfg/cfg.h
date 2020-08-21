@@ -256,7 +256,7 @@ public:
      * Sets the country code in config savegame.
      * @param country_code the country code to set
      */
-    void SetCountryCode(u8 country_code);
+    void SetCountry(u8 country_code);
 
     /**
      * Gets the country code from config savegame.

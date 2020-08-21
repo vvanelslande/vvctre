@@ -800,7 +800,7 @@ SoundOutputMode Module::GetSoundOutputMode() {
     return static_cast<SoundOutputMode>(block);
 }
 
-void Module::SetCountryCode(u8 country_code) {
+void Module::SetCountry(u8 country_code) {
     ConsoleCountryInfo block = {{0, 0}, 0, country_code};
     SetConfigInfoBlock(CountryInfoBlockID, sizeof(block), 4, &block);
 
