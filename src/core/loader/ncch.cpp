@@ -32,8 +32,6 @@
 
 namespace Loader {
 
-static const u64 UPDATE_MASK = 0x0000000e00000000;
-
 FileType AppLoader_NCCH::IdentifyType(FileUtil::IOFile& file) {
     u32 magic;
     file.Seek(0x100, SEEK_SET);
@@ -182,8 +180,8 @@ ResultStatus AppLoader_NCCH::Load(std::shared_ptr<Kernel::Process>& process) {
 
     LOG_INFO(Loader, "Program ID: {}", program_id);
 
-    update_ncch.OpenFile(Service::AM::GetTitleContentPath(Service::FS::MediaType::SDMC,
-                                                          ncch_program_id | UPDATE_MASK));
+    update_ncch.OpenFile(Service::AM::GetTitleContentPath(
+        Service::FS::MediaType::SDMC, 0x0004000e00000000 | static_cast<u32>(ncch_program_id)));
     result = update_ncch.Load();
     if (result == ResultStatus::Success) {
         overlay_ncch = &update_ncch;
@@ -269,8 +267,8 @@ ResultStatus AppLoader_NCCH::ReadUpdateRomFS(std::shared_ptr<FileSys::RomFSReade
 ResultStatus AppLoader_NCCH::DumpUpdateRomFS(const std::string& target_path) {
     u64 program_id;
     ReadProgramId(program_id);
-    update_ncch.OpenFile(
-        Service::AM::GetTitleContentPath(Service::FS::MediaType::SDMC, program_id | UPDATE_MASK));
+    update_ncch.OpenFile(Service::AM::GetTitleContentPath(
+        Service::FS::MediaType::SDMC, 0x0004000e00000000 | static_cast<u32>(program_id)));
     return update_ncch.DumpRomFS(target_path);
 }
 

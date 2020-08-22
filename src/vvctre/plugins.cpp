@@ -13,6 +13,8 @@
 #include <imgui.h>
 #include "common/common_funcs.h"
 #include "common/file_util.h"
+#include "common/logging/backend.h"
+#include "common/logging/filter.h"
 #include "common/logging/log.h"
 #include "common/string_util.h"
 #include "common/texture.h"
@@ -1166,6 +1168,10 @@ int vvctre_settings_get_region_value() {
 
 void vvctre_settings_set_log_filter(const char* value) {
     Settings::values.log_filter = std::string(value);
+
+    Log::Filter log_filter(Log::Level::Debug);
+    log_filter.ParseFilterString(Settings::values.log_filter);
+    Log::SetGlobalFilter(log_filter);
 }
 
 const char* vvctre_settings_get_log_filter() {

@@ -183,7 +183,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                                          pfd::choice::yes_no, pfd::icon::question)
                                                 .result() == pfd::button::yes) {
                                             vvctreShutdown(&plugin_manager);
-                                            std::exit(1);
+                                            std::exit(0);
                                         }
                                     }
                                 }
@@ -697,6 +697,9 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                 }
 
                 if (ImGui::BeginTabItem("System")) {
+                    ImGui::TextUnformatted("Config Savegame");
+                    ImGui::Separator();
+
                     std::string username = Common::UTF16ToUTF8(cfg.GetUsername());
                     if (ImGui::InputText("Username", &username)) {
                         cfg.SetUsername(Common::UTF8ToUTF16(username));
@@ -1738,18 +1741,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::EndCombo();
                     }
 
-                    const u16 min = 0;
-                    const u16 max = 300;
-
-                    if (play_coins == 0xDEAD) {
-                        play_coins = Service::PTM::Module::GetPlayCoins();
-                    }
-
-                    if (ImGui::SliderScalar("Play Coins", ImGuiDataType_U16, &play_coins, &min,
-                                            &max)) {
-                        play_coins_changed = true;
-                    }
-
                     if (ImGui::Button("Regenerate Console ID")) {
                         u32 random_number;
                         u64 console_id;
@@ -1764,6 +1755,22 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::InputText("##Console ID", &console_id[0], 18,
                                          ImGuiInputTextFlags_ReadOnly);
                         ImGui::EndPopup();
+                    }
+
+                    ImGui::NewLine();
+                    ImGui::TextUnformatted("Play Coins");
+                    ImGui::Separator();
+
+                    const u16 min = 0;
+                    const u16 max = 300;
+
+                    if (play_coins == 0xDEAD) {
+                        play_coins = Service::PTM::Module::GetPlayCoins();
+                    }
+
+                    if (ImGui::SliderScalar("Play Coins", ImGuiDataType_U16, &play_coins, &min,
+                                            &max)) {
+                        play_coins_changed = true;
                     }
 
                     ImGui::EndTabItem();
@@ -1899,7 +1906,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                 poller->Start();
                             }
 
-                            for (;;) {
+                            while (is_open) {
                                 for (auto& poller : pollers) {
                                     const Common::ParamPackage params = poller->GetNextInput();
                                     if (params.Has("engine")) {
@@ -1917,11 +1924,23 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                         }
                                         return InputCommon::GenerateKeyboardParam(
                                             event.key.keysym.scancode);
+                                    } else if (event.type == SDL_QUIT) {
+                                        if (pfd::message("vvctre", "Would you like to exit now?",
+                                                         pfd::choice::yes_no, pfd::icon::question)
+                                                .result() == pfd::button::yes) {
+                                            vvctreShutdown(&plugin_manager);
+                                            std::exit(0);
+                                        }
                                     }
                                 }
                             }
 
-                            break;
+                            if (!is_open) {
+                                vvctreShutdown(&plugin_manager);
+                                std::exit(0);
+                            }
+
+                            return "engine:null";
                         }
                         case InputCommon::Polling::DeviceType::Analog: {
                             auto pollers = InputCommon::Polling::GetPollers(device_type);
@@ -1932,7 +1951,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             std::vector<int> keyboard_scancodes;
 
-                            for (;;) {
+                            while (is_open) {
                                 for (auto& poller : pollers) {
                                     const Common::ParamPackage params = poller->GetNextInput();
                                     if (params.Has("engine")) {
@@ -1956,12 +1975,23 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                                 keyboard_scancodes[2], keyboard_scancodes[3],
                                                 keyboard_scancodes[4], 0.5f);
                                         }
+                                    } else if (event.type == SDL_QUIT) {
+                                        if (pfd::message("vvctre", "Would you like to exit now?",
+                                                         pfd::choice::yes_no, pfd::icon::question)
+                                                .result() == pfd::button::yes) {
+                                            vvctreShutdown(&plugin_manager);
+                                            std::exit(0);
+                                        }
                                     }
                                 }
                             }
 
-                            break;
-                        }
+                            if (!is_open) {
+                                vvctreShutdown(&plugin_manager);
+                                std::exit(0);
+                            }
+                            return "engine:null";
+                                                }
                         default: {
                             return "engine:null";
                         }

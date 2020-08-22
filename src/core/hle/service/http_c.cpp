@@ -57,7 +57,7 @@ const ResultCode RESULT_DOWNLOADPENDING = // 0xD840A02B
 asl::Dic<> decodeUrlParams(const asl::String& querystring) {
     asl::Dic<> query;
     asl::Dic<> q = split(querystring.replace('+', ' '), '&', '=');
-    foreach2(asl::String & k, const asl::String& v, q) {
+    foreach2 (asl::String& k, const asl::String& v, q) {
         query[asl::decodeUrl(k)] = asl::decodeUrl(v);
     }
     return query;
@@ -82,7 +82,7 @@ void Context::MakeRequest() {
         const std::size_t pos = url.find('?');
         if (pos != std::string::npos) {
             asl::Dic<asl::String> params = decodeUrlParams(url.substr(pos + 1).c_str());
-            foreach2(asl::String & k, const asl::String& v, params) {
+            foreach2 (asl::String& k, const asl::String& v, params) {
                 post_data.emplace_back(std::string(*k), std::string(*v), PostData::Type::Ascii);
             }
         }
@@ -291,7 +291,7 @@ void HTTP_C::ReceiveData(Kernel::HLERequestContext& ctx) {
     const u32 size = std::min<u32>(
         buffer_size, (itr->second.response.hasHeader("Content-Length")
                           ? static_cast<u32>(itr->second.response.header("Content-Length").toInt())
-                          : static_cast<u32>(0)) -
+                          : static_cast<u32>(itr->second.response.body().length())) -
                          itr->second.current_offset);
     buffer.Write(itr->second.response.body().slice(itr->second.current_offset).ptr(), 0, size);
     itr->second.current_offset += size;
@@ -300,7 +300,7 @@ void HTTP_C::ReceiveData(Kernel::HLERequestContext& ctx) {
     rb.Push(itr->second.current_offset <
                     (itr->second.response.hasHeader("Content-Length")
                          ? static_cast<u32>(itr->second.response.header("Content-Length").toInt())
-                         : static_cast<u32>(0))
+                         : static_cast<u32>(itr->second.response.body().length()))
                 ? RESULT_DOWNLOADPENDING
                 : RESULT_SUCCESS);
     rb.PushMappedBuffer(buffer);
@@ -479,7 +479,7 @@ void HTTP_C::GetDownloadSizeState(Kernel::HLERequestContext& ctx) {
     rb.Push<u32>(static_cast<u32>(itr->second.current_offset));
     rb.Push<u32>(itr->second.response.hasHeader("Content-Length")
                      ? static_cast<u32>(itr->second.response.header("Content-Length").toInt())
-                     : static_cast<u32>(0));
+                     : static_cast<u32>(itr->second.response.body().length()));
 }
 
 void HTTP_C::AddRequestHeader(Kernel::HLERequestContext& ctx) {

@@ -90,6 +90,8 @@ private:
     void ConnectToCitraRoom();
 
     std::function<void()> play_movie_loop_callback;
+    bool request_reset = false;
+    bool menu_open = false;
 
     // Window
     SDL_Window* window = nullptr;

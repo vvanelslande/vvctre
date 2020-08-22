@@ -326,12 +326,14 @@ ResultCode AppletManager::PrepareToStartLibraryApplet(AppletId applet_id) {
                           ErrorSummary::InvalidState, ErrorLevel::Status);
     }
 
-    auto cfg = Service::CFG::GetModule(system);
-    u32 region_value = cfg->GetRegionValue();
-    auto process =
-        NS::LaunchTitle(FS::MediaType::NAND, GetTitleIdForApplet(applet_id, region_value));
-    if (process) {
-        return RESULT_SUCCESS;
+    if (applet_id != AppletId::Mint && applet_id != AppletId::Mint2) {
+        auto cfg = Service::CFG::GetModule(system);
+        u32 region_value = cfg->GetRegionValue();
+        auto process =
+            NS::LaunchTitle(FS::MediaType::NAND, GetTitleIdForApplet(applet_id, region_value));
+        if (process) {
+            return RESULT_SUCCESS;
+        }
     }
 
     // If we weren't able to load the native applet title, try to fallback to an HLE implementation.
@@ -353,12 +355,14 @@ ResultCode AppletManager::PreloadLibraryApplet(AppletId applet_id) {
                           ErrorSummary::InvalidState, ErrorLevel::Status);
     }
 
-    auto cfg = Service::CFG::GetModule(system);
-    u32 region_value = cfg->GetRegionValue();
-    auto process =
-        NS::LaunchTitle(FS::MediaType::NAND, GetTitleIdForApplet(applet_id, region_value));
-    if (process) {
-        return RESULT_SUCCESS;
+    if (applet_id != AppletId::Mint && applet_id != AppletId::Mint2) {
+        auto cfg = Service::CFG::GetModule(system);
+        u32 region_value = cfg->GetRegionValue();
+        auto process =
+            NS::LaunchTitle(FS::MediaType::NAND, GetTitleIdForApplet(applet_id, region_value));
+        if (process) {
+            return RESULT_SUCCESS;
+        }
     }
 
     // If we weren't able to load the native applet title, try to fallback to an HLE implementation.

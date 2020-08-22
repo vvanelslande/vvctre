@@ -26,6 +26,8 @@
 #include "audio_core/sink.h"
 #include "audio_core/sink_details.h"
 #include "common/file_util.h"
+#include "common/logging/backend.h"
+#include "common/logging/filter.h"
 #include "common/logging/log.h"
 #include "common/string_util.h"
 #include "common/texture.h"
@@ -240,6 +242,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                 paused = true;
             }
 
+            menu_open = true;
+
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Load File")) {
                     const std::vector<std::string> result =
@@ -338,7 +342,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                  pfd::choice::yes_no, pfd::icon::question)
                                         .result() == pfd::button::yes) {
                                     vvctreShutdown(&plugin_manager);
-                                    std::exit(1);
+                                    vvctreShutdown(&plugin_manager);
+                                    std::exit(0);
                                 }
                             }
                         }
@@ -378,7 +383,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                     if (ImGui::MenuItem("Load")) {
                         const std::vector<std::string> result =
                             pfd::open_file("Load Amiibo", *asl::Process::myDir(),
-                                           {"Amiibo Files", "*.bin *.BIN", "Anything", "*"})
+                                           {"Amiibo Files", "*.bin *.BIN"})
                                 .result();
 
                         if (!result.empty()) {
@@ -1027,14 +1032,19 @@ void EmuWindow_SDL2::SwapBuffers() {
                     std::shared_ptr<Service::CFG::Module> cfg = Service::CFG::GetModule(system);
 
                     if (cfg != nullptr) {
-                        ImGui::TextUnformatted("Will Restart");
+                        ImGui::PushTextWrapPos();
+                        ImGui::TextUnformatted("If you change anything here, emulation will "
+                                               "restart when the menu is closed.");
+                        ImGui::PopTextWrapPos();
+                        ImGui::NewLine();
+
+                        ImGui::TextUnformatted("Config Savegame");
                         ImGui::Separator();
 
                         std::string username = Common::UTF16ToUTF8(cfg->GetUsername());
                         if (ImGui::InputText("Username", &username)) {
                             cfg->SetUsername(Common::UTF8ToUTF16(username));
-                            cfg->UpdateConfigNANDSavegame();
-                            system.RequestReset();
+                            config_savegame_changed = true;
                         }
 
                         auto [month, day] = cfg->GetBirthday();
@@ -1136,8 +1146,7 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                         if (ImGui::InputScalar("Birthday Day", ImGuiDataType_U8, &day)) {
                             cfg->SetBirthday(month, day);
-                            cfg->UpdateConfigNANDSavegame();
-                            system.RequestReset();
+                            config_savegame_changed = true;
                         }
 
                         if (ImGui::BeginCombo("Language", [&] {
@@ -2095,7 +2104,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::NewLine();
                     }
 
-                    ImGui::TextUnformatted("Restart Recommended");
+                    ImGui::TextUnformatted("Play Coins");
                     ImGui::Separator();
                     const u16 min = 0;
                     const u16 max = 300;
@@ -2105,6 +2114,21 @@ void EmuWindow_SDL2::SwapBuffers() {
                     if (ImGui::SliderScalar("Play Coins", ImGuiDataType_U16, &play_coins, &min,
                                             &max)) {
                         play_coins_changed = true;
+                    }
+
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("LLE Modules")) {
+                    ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
+                    ImGui::TextUnformatted("If you enable or disable a LLE module, emulation will "
+                                           "restart when the menu is closed.");
+                    ImGui::PopTextWrapPos();
+
+                    for (auto& module : Settings::values.lle_modules) {
+                        if (ImGui::Checkbox(module.first.c_str(), &module.second)) {
+                            request_reset = true;
+                        }
                     }
 
                     ImGui::EndMenu();
@@ -2256,6 +2280,119 @@ void EmuWindow_SDL2::SwapBuffers() {
             if (ImGui::BeginMenu("Emulation")) {
                 if (ImGui::MenuItem("Restart")) {
                     system.RequestReset();
+                }
+
+                if (Settings::values.enable_priority_boost) {
+                    if (ImGui::MenuItem("Restart With Priority Boost Disabled")) {
+                        Settings::values.enable_priority_boost = false;
+                        request_reset = true;
+                    }
+                } else {
+                    if (ImGui::MenuItem("Restart With Priority Boost Enabled")) {
+                        Settings::values.enable_priority_boost = true;
+                        request_reset = true;
+                    }
+                }
+
+                if (ImGui::MenuItem("Restart With Different Log Filter")) {
+                    SDL_Event event;
+                    std::string new_log_filter = Settings::values.log_filter;
+                    bool new_log_filter_window_open = true;
+
+                    while (is_open) {
+                        while (SDL_PollEvent(&event)) {
+                            ImGui_ImplSDL2_ProcessEvent(&event);
+
+                            if (event.type == SDL_QUIT) {
+                                if (pfd::message("vvctre", "Would you like to exit now?",
+                                                 pfd::choice::yes_no, pfd::icon::question)
+                                        .result() == pfd::button::yes) {
+                                    vvctreShutdown(&plugin_manager);
+                                    vvctreShutdown(&plugin_manager);
+                                    std::exit(0);
+                                }
+                            }
+                        }
+
+                        ImGui_ImplOpenGL3_NewFrame();
+                        ImGui_ImplSDL2_NewFrame(window);
+                        ImGui::NewFrame();
+
+                        ImGui::OpenPopup("New Log Filter");
+                        ImGui::SetNextWindowPos(
+                            ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
+                            ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+                        if (ImGui::BeginPopupModal("New Log Filter", &new_log_filter_window_open,
+                                                   ImGuiWindowFlags_NoSavedSettings |
+                                                       ImGuiWindowFlags_NoMove |
+                                                       ImGuiWindowFlags_AlwaysAutoResize)) {
+                            if (ImGui::InputText("##New Log Filter", &new_log_filter,
+                                                 ImGuiInputTextFlags_EnterReturnsTrue)) {
+                                Settings::values.log_filter = new_log_filter;
+                                Log::Filter log_filter(Log::Level::Debug);
+                                log_filter.ParseFilterString(Settings::values.log_filter);
+                                Log::SetGlobalFilter(log_filter);
+                                request_reset = true;
+                                return;
+                            }
+                            ImGui::EndPopup();
+                        }
+
+                        if (!new_log_filter_window_open) {
+                            return;
+                        }
+
+                        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                        glClear(GL_COLOR_BUFFER_BIT);
+                        ImGui::Render();
+                        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+                        SDL_GL_SwapWindow(window);
+                    }
+                }
+
+                if (ImGui::BeginMenu("Restart With Different Region")) {
+                    if (Settings::values.region_value != Settings::REGION_VALUE_AUTO_SELECT &&
+                        ImGui::MenuItem("Auto-select")) {
+                        Settings::values.region_value = Settings::REGION_VALUE_AUTO_SELECT;
+                        request_reset = true;
+                    }
+
+                    if (Settings::values.region_value != 0 && ImGui::MenuItem("Japan")) {
+                        Settings::values.region_value = 0;
+                        request_reset = true;
+                    }
+
+                    if (Settings::values.region_value != 1 && ImGui::MenuItem("USA")) {
+                        Settings::values.region_value = 1;
+                        request_reset = true;
+                    }
+
+                    if (Settings::values.region_value != 2 && ImGui::MenuItem("Europe")) {
+                        Settings::values.region_value = 2;
+                        request_reset = true;
+                    }
+
+                    if (Settings::values.region_value != 3 && ImGui::MenuItem("Australia")) {
+                        Settings::values.region_value = 3;
+                        request_reset = true;
+                    }
+
+                    if (Settings::values.region_value != 4 && ImGui::MenuItem("China")) {
+                        Settings::values.region_value = 4;
+                        request_reset = true;
+                    }
+
+                    if (Settings::values.region_value != 5 && ImGui::MenuItem("Korea")) {
+                        Settings::values.region_value = 5;
+                        request_reset = true;
+                    }
+
+                    if (Settings::values.region_value != 6 && ImGui::MenuItem("Taiwan")) {
+                        Settings::values.region_value = 6;
+                        request_reset = true;
+                    }
+
+                    ImGui::EndMenu();
                 }
 
                 ImGui::EndMenu();
@@ -2538,17 +2675,23 @@ void EmuWindow_SDL2::SwapBuffers() {
             ImGui::MenuItem("Close Menu");
 
             ImGui::EndPopup();
-        } else {
+        } else if (menu_open) {
             if (play_coins_changed) {
                 Service::PTM::Module::SetPlayCoins(play_coins);
+                request_reset = true;
                 play_coins_changed = false;
             }
             if (config_savegame_changed) {
                 Service::CFG::GetModule(system)->UpdateConfigNANDSavegame();
-                system.RequestReset();
+                request_reset = true;
                 config_savegame_changed = false;
             }
+            if (request_reset) {
+                system.RequestReset();
+                request_reset = false;
+            }
             paused = false;
+            menu_open = false;
         }
     }
     ImGui::End();

@@ -27,9 +27,8 @@ static const int kMaxSections = 8;   ///< Maximum number of sections (files) in 
 static const int kBlockSize = 0x200; ///< Size of ExeFS blocks (in bytes)
 
 u64 GetModId(u64 program_id) {
-    constexpr u64 UPDATE_MASK = 0x0000000e'00000000;
-    if ((program_id & 0x000000ff'00000000) == UPDATE_MASK) { // Apply the mods to updates
-        return program_id & ~UPDATE_MASK;
+    if ((program_id >> 32) == 0x0004000e00000000) { // Apply the mods to updates
+        return 0x0004000000000000 | static_cast<u32>(program_id);
     }
     return program_id;
 }
