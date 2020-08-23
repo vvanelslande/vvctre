@@ -40,24 +40,25 @@ void Apply() {
     VideoCore::g_renderer_shader_update_requested = true;
     VideoCore::g_texture_filter_update_requested = true;
 
-    auto& system = Core::System::GetInstance();
+    Core::System& system = Core::System::GetInstance();
     if (system.IsPoweredOn()) {
         AudioCore::DspInterface& dsp = system.DSP();
         dsp.SetSink(values.audio_sink_id, values.audio_device_id);
 
-        auto hid = Service::HID::GetModule(system);
-        if (hid) {
+        std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(system);
+        if (hid != nullptr) {
             hid->ReloadInputDevices();
         }
 
-        auto sm = system.ServiceManager();
-        auto ir_user = sm.GetService<Service::IR::IR_USER>("ir:USER");
-        if (ir_user) {
+        Service::SM::ServiceManager& sm = system.ServiceManager();
+        std::shared_ptr<Service::IR::IR_USER> ir_user =
+            sm.GetService<Service::IR::IR_USER>("ir:USER");
+        if (ir_user != nullptr) {
             ir_user->ReloadInputDevices();
         }
 
-        auto cam = Service::CAM::GetModule(system);
-        if (cam) {
+        std::shared_ptr<Service::CAM::Module> cam = Service::CAM::GetModule(system);
+        if (cam != nullptr) {
             cam->ReloadCameraDevices();
         }
 

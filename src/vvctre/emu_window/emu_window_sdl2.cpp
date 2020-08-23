@@ -553,146 +553,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::EndMenu();
                 }
 
-                if (ImGui::BeginMenu("Graphics")) {
-                    if (ImGui::Checkbox("Use Hardware Renderer",
-                                        &Settings::values.use_hardware_renderer)) {
-                        Settings::Apply();
-                    }
-
-                    if (Settings::values.use_hardware_renderer) {
-                        ImGui::Indent();
-
-                        if (ImGui::Checkbox("Use Hardware Shader",
-                                            &Settings::values.use_hardware_shader)) {
-                            Settings::Apply();
-                        }
-
-                        if (Settings::values.use_hardware_shader) {
-                            ImGui::Indent();
-
-                            if (ImGui::Checkbox(
-                                    "Accurate Multiplication",
-                                    &Settings::values.hardware_shader_accurate_multiplication)) {
-                                Settings::Apply();
-                            }
-
-                            ImGui::Unindent();
-                        }
-
-                        ImGui::Unindent();
-                    }
-
-                    ImGui::Checkbox("Use Shader JIT", &Settings::values.use_shader_jit);
-                    ImGui::Checkbox("Enable VSync", &Settings::values.enable_vsync);
-
-                    if (ImGui::Checkbox("Enable Linear Filtering",
-                                        &Settings::values.enable_linear_filtering)) {
-                        Settings::Apply();
-                    }
-
-                    ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
-                    ImGui::Checkbox("Use Custom Textures", &Settings::values.custom_textures);
-                    ImGui::Checkbox("Preload Custom Textures", &Settings::values.preload_textures);
-
-                    if (ImGui::ColorEdit3("Background Color",
-                                          &Settings::values.background_color_red,
-                                          ImGuiColorEditFlags_NoInputs)) {
-                        VideoCore::g_renderer_background_color_update_requested = true;
-                    }
-
-                    const u16 min = 0;
-                    const u16 max = 10;
-                    ImGui::SliderScalar("Resolution", ImGuiDataType_U16,
-                                        &Settings::values.resolution, &min, &max,
-                                        Settings::values.resolution == 0 ? "Window Size" : "%d");
-
-                    ImGui::InputText("Post Processing Shader",
-                                     &Settings::values.post_processing_shader);
-                    if (ImGui::IsItemDeactivatedAfterEdit()) {
-                        Settings::Apply();
-                    }
-                    if (ImGui::IsItemHovered()) {
-                        ImGui::BeginTooltip();
-                        ImGui::TextUnformatted("File name without extension and folder");
-                        ImGui::EndTooltip();
-                    }
-
-                    if (ImGui::BeginCombo("Texture Filter",
-                                          Settings::values.texture_filter.c_str())) {
-                        const auto& filters = OpenGL::TextureFilterer::GetFilterNames();
-
-                        for (const auto& filter : filters) {
-                            if (ImGui::Selectable(std::string(filter).c_str())) {
-                                Settings::values.texture_filter = filter;
-                                Settings::Apply();
-                            }
-                        }
-
-                        ImGui::EndCombo();
-                    }
-
-                    if (ImGui::BeginCombo("3D Mode", [] {
-                            switch (Settings::values.render_3d) {
-                            case Settings::StereoRenderOption::Off:
-                                return "Off";
-                            case Settings::StereoRenderOption::SideBySide:
-                                return "Side by Side";
-                            case Settings::StereoRenderOption::Anaglyph:
-                                return "Anaglyph";
-                            case Settings::StereoRenderOption::Interlaced:
-                                return "Interlaced";
-                            default:
-                                break;
-                            }
-
-                            return "Invalid value";
-                        }())) {
-
-                        if (ImGui::Selectable("Off", Settings::values.render_3d ==
-                                                         Settings::StereoRenderOption::Off)) {
-                            Settings::values.render_3d = Settings::StereoRenderOption::Off;
-                            Settings::values.post_processing_shader = "none (builtin)";
-                            Settings::Apply();
-                        }
-
-                        if (ImGui::Selectable("Side by Side",
-                                              Settings::values.render_3d ==
-                                                  Settings::StereoRenderOption::SideBySide)) {
-                            Settings::values.render_3d = Settings::StereoRenderOption::SideBySide;
-                            Settings::values.post_processing_shader = "none (builtin)";
-                            Settings::Apply();
-                        }
-
-                        if (ImGui::Selectable("Anaglyph",
-                                              Settings::values.render_3d ==
-                                                  Settings::StereoRenderOption::Anaglyph)) {
-                            Settings::values.render_3d = Settings::StereoRenderOption::Anaglyph;
-                            Settings::values.post_processing_shader = "dubois (builtin)";
-                            Settings::Apply();
-                        }
-
-                        if (ImGui::Selectable("Interlaced",
-                                              Settings::values.render_3d ==
-                                                  Settings::StereoRenderOption::Interlaced)) {
-                            Settings::values.render_3d = Settings::StereoRenderOption::Interlaced;
-                            Settings::values.post_processing_shader = "horizontal (builtin)";
-                            Settings::Apply();
-                        }
-
-                        ImGui::EndCombo();
-                    }
-
-                    u8 factor_3d = Settings::values.factor_3d;
-                    const u8 factor_3d_min = 0;
-                    const u8 factor_3d_max = 100;
-                    if (ImGui::SliderScalar("3D Factor", ImGuiDataType_U8, &factor_3d,
-                                            &factor_3d_min, &factor_3d_max, "%d%%")) {
-                        Settings::values.factor_3d = factor_3d;
-                    }
-
-                    ImGui::EndMenu();
-                }
-
                 if (ImGui::BeginMenu("Camera")) {
                     ImGui::TextUnformatted("Inner");
                     ImGui::Separator();
@@ -2129,6 +1989,152 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::EndMenu();
                 }
 
+                if (ImGui::BeginMenu("Graphics")) {
+                    if (ImGui::Checkbox("Use Hardware Renderer",
+                                        &Settings::values.use_hardware_renderer)) {
+                        Settings::Apply();
+                    }
+
+                    if (Settings::values.use_hardware_renderer) {
+                        ImGui::Indent();
+
+                        if (ImGui::Checkbox("Use Hardware Shader",
+                                            &Settings::values.use_hardware_shader)) {
+                            Settings::Apply();
+                        }
+
+                        if (Settings::values.use_hardware_shader) {
+                            ImGui::Indent();
+
+                            if (ImGui::Checkbox(
+                                    "Accurate Multiplication",
+                                    &Settings::values.hardware_shader_accurate_multiplication)) {
+                                Settings::Apply();
+                            }
+
+                            ImGui::Unindent();
+                        }
+
+                        ImGui::Unindent();
+                    }
+
+                    ImGui::Checkbox("Use Shader JIT", &Settings::values.use_shader_jit);
+                    ImGui::Checkbox("Enable VSync", &Settings::values.enable_vsync);
+
+                    if (ImGui::Checkbox("Enable Linear Filtering",
+                                        &Settings::values.enable_linear_filtering)) {
+                        Settings::Apply();
+                    }
+
+                    ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
+                    ImGui::Checkbox("Use Custom Textures", &Settings::values.custom_textures);
+                    ImGui::Checkbox("Preload Custom Textures", &Settings::values.preload_textures);
+
+                    if (ImGui::ColorEdit3("Background Color",
+                                          &Settings::values.background_color_red,
+                                          ImGuiColorEditFlags_NoInputs)) {
+                        VideoCore::g_renderer_background_color_update_requested = true;
+                    }
+
+                    const u16 min = 0;
+                    const u16 max = 10;
+                    ImGui::SliderScalar("Resolution", ImGuiDataType_U16,
+                                        &Settings::values.resolution, &min, &max,
+                                        Settings::values.resolution == 0 ? "Window Size" : "%d");
+
+                    ImGui::InputText("Post Processing Shader",
+                                     &Settings::values.post_processing_shader);
+                    if (ImGui::IsItemDeactivatedAfterEdit()) {
+                        VideoCore::g_renderer_shader_update_requested = true;
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted("File name without extension and folder");
+                        ImGui::EndTooltip();
+                    }
+
+                    if (ImGui::BeginCombo("Texture Filter",
+                                          Settings::values.texture_filter.c_str())) {
+                        const auto& filters = OpenGL::TextureFilterer::GetFilterNames();
+
+                        for (const auto& filter : filters) {
+                            if (ImGui::Selectable(std::string(filter).c_str())) {
+                                Settings::values.texture_filter = filter;
+                                Settings::Apply();
+                            }
+                        }
+
+                        ImGui::EndCombo();
+                    }
+
+                    if (ImGui::BeginCombo("3D Mode", [] {
+                            switch (Settings::values.render_3d) {
+                            case Settings::StereoRenderOption::Off:
+                                return "Off";
+                            case Settings::StereoRenderOption::SideBySide:
+                                return "Side by Side";
+                            case Settings::StereoRenderOption::Anaglyph:
+                                return "Anaglyph";
+                            case Settings::StereoRenderOption::Interlaced:
+                                return "Interlaced";
+                            default:
+                                break;
+                            }
+
+                            return "Invalid value";
+                        }())) {
+
+                        if (ImGui::Selectable("Off", Settings::values.render_3d ==
+                                                         Settings::StereoRenderOption::Off)) {
+                            Settings::values.render_3d = Settings::StereoRenderOption::Off;
+                            Settings::values.post_processing_shader = "none (builtin)";
+                            Settings::Apply();
+                        }
+
+                        if (ImGui::Selectable("Side by Side",
+                                              Settings::values.render_3d ==
+                                                  Settings::StereoRenderOption::SideBySide)) {
+                            Settings::values.render_3d = Settings::StereoRenderOption::SideBySide;
+                            Settings::values.post_processing_shader = "none (builtin)";
+                            Settings::Apply();
+                        }
+
+                        if (ImGui::Selectable("Anaglyph",
+                                              Settings::values.render_3d ==
+                                                  Settings::StereoRenderOption::Anaglyph)) {
+                            Settings::values.render_3d = Settings::StereoRenderOption::Anaglyph;
+                            Settings::values.post_processing_shader = "dubois (builtin)";
+                            Settings::Apply();
+                        }
+
+                        if (ImGui::Selectable("Interlaced",
+                                              Settings::values.render_3d ==
+                                                  Settings::StereoRenderOption::Interlaced)) {
+                            Settings::values.render_3d = Settings::StereoRenderOption::Interlaced;
+                            Settings::values.post_processing_shader = "horizontal (builtin)";
+                            Settings::Apply();
+                        }
+
+                        ImGui::EndCombo();
+                    }
+
+                    u8 factor_3d = Settings::values.factor_3d;
+                    const u8 factor_3d_min = 0;
+                    const u8 factor_3d_max = 100;
+                    if (ImGui::SliderScalar("3D Factor", ImGuiDataType_U8, &factor_3d,
+                                            &factor_3d_min, &factor_3d_max, "%d%%")) {
+                        Settings::values.factor_3d = factor_3d;
+                    }
+
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Controls")) {
+                    GUI_AddControlsSettings(is_open, &system, plugin_manager, io);
+
+                    ImGui::EndMenu();
+                }
+
                 if (ImGui::BeginMenu("LLE Modules")) {
                     ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
                     ImGui::TextUnformatted("If you enable or disable a LLE module, emulation will "
@@ -2682,9 +2688,6 @@ void EmuWindow_SDL2::SwapBuffers() {
             }
 
             plugin_manager.AddMenus();
-
-            ImGui::Separator();
-            ImGui::MenuItem("Close Menu");
 
             ImGui::EndPopup();
         } else if (menu_open) {

@@ -10,6 +10,11 @@
 #include "common/common_types.h"
 
 class PluginManager;
+struct ImGuiIO;
+
+namespace Core {
+class System;
+} // namespace Core
 
 extern const u8 vvctre_version_major;
 extern const u8 vvctre_version_minor;
@@ -41,3 +46,5 @@ std::vector<std::tuple<std::string, std::string>> GetInstalledList();
 CitraRoomList GetPublicCitraRooms();
 
 bool GUI_CameraAddBrowse(const char* label, std::size_t index);
+void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager& plugin_manager,
+                             ImGuiIO& io);
