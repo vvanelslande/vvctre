@@ -342,7 +342,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                  pfd::choice::yes_no, pfd::icon::question)
                                         .result() == pfd::button::yes) {
                                     vvctreShutdown(&plugin_manager);
-                                    vvctreShutdown(&plugin_manager);
                                     std::exit(0);
                                 }
                             }
@@ -420,6 +419,17 @@ void EmuWindow_SDL2::SwapBuffers() {
 
             if (ImGui::BeginMenu("Settings")) {
                 if (ImGui::BeginMenu("General")) {
+                    if (ImGui::Checkbox("Use CPU JIT", &Settings::values.use_cpu_jit)) {
+                        request_reset = true;
+                    }
+
+                    ImGui::PushTextWrapPos();
+                    ImGui::TextUnformatted("If you enable or disable the CPU JIT, emulation will "
+                                           "restart when the menu is closed.");
+                    ImGui::PopTextWrapPos();
+
+                    ImGui::NewLine();
+
                     ImGui::Checkbox("Limit Speed", &Settings::values.limit_speed);
 
                     ImGui::Checkbox("Enable Custom CPU Ticks",
@@ -2134,6 +2144,21 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::EndMenu();
                 }
 
+                if (ImGui::BeginMenu("Hacks")) {
+                    if (ImGui::Checkbox("Priority Boost",
+                                        &Settings::values.enable_priority_boost)) {
+                        request_reset = true;
+                    }
+
+                    ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
+                    ImGui::TextUnformatted(
+                        "If you enable or disable Priority Boost, emulation will "
+                        "restart when the menu is closed.");
+                    ImGui::PopTextWrapPos();
+
+                    ImGui::EndMenu();
+                }
+
                 if (ImGui::BeginMenu("GUI")) {
                     ImGui::ColorEdit4("FPS Color", &fps_color.x, ImGuiColorEditFlags_NoInputs);
 
@@ -2279,19 +2304,7 @@ void EmuWindow_SDL2::SwapBuffers() {
 
             if (ImGui::BeginMenu("Emulation")) {
                 if (ImGui::MenuItem("Restart")) {
-                    system.RequestReset();
-                }
-
-                if (Settings::values.enable_priority_boost) {
-                    if (ImGui::MenuItem("Restart With Priority Boost Disabled")) {
-                        Settings::values.enable_priority_boost = false;
-                        request_reset = true;
-                    }
-                } else {
-                    if (ImGui::MenuItem("Restart With Priority Boost Enabled")) {
-                        Settings::values.enable_priority_boost = true;
-                        request_reset = true;
-                    }
+                    request_reset = true;
                 }
 
                 if (ImGui::MenuItem("Restart With Different Log Filter")) {
@@ -2307,7 +2320,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 if (pfd::message("vvctre", "Would you like to exit now?",
                                                  pfd::choice::yes_no, pfd::icon::question)
                                         .result() == pfd::button::yes) {
-                                    vvctreShutdown(&plugin_manager);
                                     vvctreShutdown(&plugin_manager);
                                     std::exit(0);
                                 }
