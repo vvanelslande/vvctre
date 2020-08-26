@@ -13,7 +13,7 @@ const match = process.env.ISSUE_BODY.match(
       "X Range: 0-319\r\n",
       "Y Range: 0-239\r\n\r\n",
 
-      "Get X and Y with https://github.com/vvanelslande/vvctre-plugin-get-touch-screen-x-y/releases/tag/1.0.1\r\n",
+      "Get X and Y with https://github.com/vvanelslande/vvctre-plugin-get-touch-screen-x-y/releases/tag/1.0.2\r\n",
       "-->\r\n\r\n",
 
       "X: (?<x>\\d+)\r\n",
