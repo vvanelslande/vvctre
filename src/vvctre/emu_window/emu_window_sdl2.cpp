@@ -454,6 +454,29 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("Audio")) {
+                    ImGui::TextUnformatted("DSP LLE");
+                    ImGui::Separator();
+
+                    if (ImGui::Checkbox("Enable", &Settings::values.enable_dsp_lle)) {
+                        config_savegame_changed = true;
+                    }
+
+                    if (Settings::values.enable_dsp_lle) {
+                        if (ImGui::Checkbox("Use multiple threads",
+                                            &Settings::values.enable_dsp_lle_multithread)) {
+                            config_savegame_changed = true;
+                        }
+                    }
+
+                    ImGui::NewLine();
+
+                    ImGui::PushTextWrapPos();
+                    ImGui::TextUnformatted("If you change anything here, emulation will "
+                                           "restart when the menu is closed.");
+                    ImGui::PopTextWrapPos();
+
+                    ImGui::NewLine();
+
                     ImGui::TextUnformatted("Output");
                     ImGui::Separator();
 
