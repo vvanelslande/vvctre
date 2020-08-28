@@ -1328,6 +1328,24 @@ void NWM_UDS::SetApplicationData(Kernel::HLERequestContext& ctx) {
     rb.Push(RESULT_SUCCESS);
 }
 
+void NWM_UDS::GetApplicationData(Kernel::HLERequestContext& ctx) {
+    IPC::RequestParser rp(ctx, 0x11, 1, 0);
+    const u32 input_size = rp.Pop<u32>();
+    const u32 size = input_size > 0x300 ? 0x300 : input_size;
+
+    IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
+    rb.Push(RESULT_SUCCESS);
+
+    if (network_info.application_data_size <= size) {
+        std::vector<u8> appdata(size);
+        std::memcpy(appdata.data(), network_info.application_data.data(), size);
+        rb.Push(size);
+        rb.PushStaticBuffer(std::move(appdata), 0);
+    } else {
+        rb.Push<u32>(0);
+    }
+}
+
 void NWM_UDS::DecryptBeaconData(Kernel::HLERequestContext& ctx, u16 command_id) {
     IPC::RequestParser rp(ctx, command_id, 0, 6);
 
@@ -1439,7 +1457,7 @@ NWM_UDS::NWM_UDS(Core::System& system) : ServiceFramework("nwm::UDS"), system(sy
         {0x000E0006, &NWM_UDS::DecryptBeaconData<0x0E>, "DecryptBeaconData (deprecated)"},
         {0x000F0404, &NWM_UDS::RecvBeaconBroadcastData, "RecvBeaconBroadcastData"},
         {0x00100042, &NWM_UDS::SetApplicationData, "SetApplicationData"},
-        {0x00110040, nullptr, "GetApplicationData"},
+        {0x00110040, &NWM_UDS::GetApplicationData, "GetApplicationData"},
         {0x00120100, &NWM_UDS::Bind, "Bind"},
         {0x00130040, &NWM_UDS::Unbind, "Unbind"},
         {0x001400C0, &NWM_UDS::PullPacket, "PullPacket"},

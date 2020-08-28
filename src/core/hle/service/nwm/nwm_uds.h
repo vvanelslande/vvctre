@@ -144,6 +144,7 @@ private:
     void GetNodeInformation(Kernel::HLERequestContext& ctx);
     void RecvBeaconBroadcastData(Kernel::HLERequestContext& ctx);
     void SetApplicationData(Kernel::HLERequestContext& ctx);
+    void GetApplicationData(Kernel::HLERequestContext& ctx);
     void Bind(Kernel::HLERequestContext& ctx);
     void Unbind(Kernel::HLERequestContext& ctx);
     void PullPacket(Kernel::HLERequestContext& ctx);
