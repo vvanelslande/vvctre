@@ -2894,6 +2894,7 @@ void EmuWindow_SDL2::SwapBuffers() {
             }
             ImGui::SameLine();
             ImGui::InputTextWithHint("##filter", "Filter", &ipc_recorder_filter);
+            const float width = ImGui::GetWindowWidth();
             if (ImGui::BeginChildFrame(ImGui::GetID("Records"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
                 for (const auto& record : ipc_records) {
@@ -2921,6 +2922,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::Selectable(label.c_str());
                         if (ImGui::IsItemHovered()) {
                             ImGui::BeginTooltip();
+
+                            ImGui::PushTextWrapPos(width * 0.7f);
 
                             ImGui::TextUnformatted(
                                 fmt::format(
@@ -2963,6 +2966,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                                     fmt::join(record.second.untranslated_reply_cmdbuf, ", 0x"),
                                     fmt::join(record.second.translated_reply_cmdbuf, ", 0x"))
                                     .c_str());
+
+                            ImGui::PopTextWrapPos();
+
                             ImGui::EndTooltip();
                         }
                     }
