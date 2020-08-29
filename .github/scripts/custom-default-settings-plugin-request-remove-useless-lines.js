@@ -50,7 +50,7 @@ module.exports = async (github, context) => {
       owner: context.repo.owner,
       repo: context.repo.repo,
     });
-  } else {
+  } else if (uselessLines.length > 0) {
     await github.issues.update({
       issue_number: context.issue.number,
       owner: context.repo.owner,
@@ -58,15 +58,13 @@ module.exports = async (github, context) => {
       body: linesAfterEdit.join("\n"),
     });
 
-    if (uselessLines.length > 0) {
-      await github.issues.createComment({
-        issue_number: context.issue.number,
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        body: `Useless lines removed:\n\`\`\`\n${uselessLines.join(
-          "\n"
-        )}\n\`\`\`\n\nLines that aren't in https://vvanelslande.github.io/vvctre/Custom-Default-Settings-Plugin-Request are useless lines.`,
-      });
-    }
+    await github.issues.createComment({
+      issue_number: context.issue.number,
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      body: `Useless lines removed:\n\`\`\`\n${uselessLines.join(
+        "\n"
+      )}\n\`\`\`\n\nLines that aren't in https://vvanelslande.github.io/vvctre/Custom-Default-Settings-Plugin-Request are useless lines.`,
+    });
   }
 };
