@@ -1329,19 +1329,28 @@ void NWM_UDS::SetApplicationData(Kernel::HLERequestContext& ctx) {
 }
 
 void NWM_UDS::GetApplicationData(Kernel::HLERequestContext& ctx) {
+    if (!initialized) {
+        IPC::RequestBuilder rb(ctx, 0x11, 1, 0);
+        rb.Push(ResultCode(ErrorDescription::NotInitialized, ErrorModule::UDS,
+                           ErrorSummary::StatusChanged, ErrorLevel::Status));
+        return;
+    }
+
     IPC::RequestParser rp(ctx, 0x11, 1, 0);
     const u32 input_size = rp.Pop<u32>();
     const u32 size = input_size > 0x300 ? 0x300 : input_size;
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
-    rb.Push(RESULT_SUCCESS);
-
     if (network_info.application_data_size <= size) {
         std::vector<u8> appdata(size);
         std::memcpy(appdata.data(), network_info.application_data.data(), size);
+
+        IPC::RequestBuilder rb(ctx, 0x11, 2, 2);
+        rb.Push(RESULT_SUCCESS);
         rb.Push(size);
         rb.PushStaticBuffer(std::move(appdata), 0);
     } else {
+        IPC::RequestBuilder rb(ctx, 0x11, 2, 0);
+        rb.Push(RESULT_SUCCESS);
         rb.Push<u32>(0);
     }
 }
