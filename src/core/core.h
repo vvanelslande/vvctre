@@ -30,12 +30,15 @@ class DspInterface;
 } // namespace AudioCore
 
 namespace Service {
+
 namespace SM {
 class ServiceManager;
 } // namespace SM
+
 namespace FS {
 class ArchiveManager;
 } // namespace FS
+
 } // namespace Service
 
 namespace Kernel {
@@ -74,8 +77,7 @@ public:
         return s_instance;
     }
 
-    /// Enumeration representing the return values of the System Initialize, Load, RunLoop, and
-    /// GetStatus functions.
+    /// Enumeration representing the return values of the System Init, Load, and Run functions.
     enum class ResultStatus : u32 {
         Success,                    ///< Succeeded
         ErrorNotInitialized,        ///< Error trying to use core prior to initialization
@@ -92,10 +94,9 @@ public:
      * This function runs the core for the specified number of CPU instructions before trying to
      * update hardware. NOTE: the number of instructions requested is not guaranteed to run, as this
      * will be interrupted preemptively if a hardware update is requested (e.g. on a thread switch).
-     * @param tight_loop If false, the CPU single-steps.
      * @return Result status, indicating whethor or not the operation succeeded.
      */
-    ResultStatus RunLoop(bool tight_loop = true);
+    ResultStatus Run();
 
     /// Shutdown the emulated system.
     void Shutdown();
@@ -104,18 +105,12 @@ public:
     void Reset();
 
     /// Request reset of the system
-    void RequestReset() {
-        reset_requested = true;
-    }
+    void RequestReset();
 
     /// Request shutdown of the system
-    void RequestShutdown() {
-        shutdown_requested = true;
-    }
+    void RequestShutdown();
 
-    void SetResetFilePath(const std::string filepath) {
-        m_filepath = filepath;
-    }
+    void SetResetFilePath(const std::string filepath);
 
     /**
      * Load an executable application.
@@ -207,26 +202,14 @@ public:
     /// Gets a reference to the room member
     Network::RoomMember& RoomMember();
 
+    /// Gets a reference to the AppLoader
+    Loader::AppLoader& GetAppLoader() const;
+
     std::unique_ptr<PerfStats> perf_stats;
     FrameLimiter frame_limiter;
 
-    void SetStatus(ResultStatus new_status, const char* details = nullptr) {
-        status = new_status;
-        if (details) {
-            status_details = details;
-        }
-    }
-
-    const ResultStatus& GetStatus() const {
-        return status;
-    }
-
-    const std::string& GetStatusDetails() const {
-        return status_details;
-    }
-
-    Loader::AppLoader& GetAppLoader() const {
-        return *app_loader;
+    void SetStatus(ResultStatus status) {
+        this->status = status;
     }
 
     /// Frontend Applets
@@ -291,7 +274,6 @@ private:
     static System s_instance;
 
     ResultStatus status = ResultStatus::Success;
-    std::string status_details;
 
     /// Saved variables for reset and application jump
     Frontend::EmuWindow* m_emu_window = nullptr;

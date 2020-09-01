@@ -2077,8 +2077,9 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::NewLine();
 
                     ImGui::PushTextWrapPos();
-                    ImGui::TextUnformatted("No more settings will be added here, and this doesn't "
-                                           "have message length limit and collision checks.");
+                    ImGui::TextUnformatted("No more settings will be added here, this doesn't "
+                                           "have message length limit, and there's no "
+                                           "nickname/console ID/MAC address checks.");
                     ImGui::PopTextWrapPos();
 
                     ImGui::NewLine();

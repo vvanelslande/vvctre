@@ -293,4 +293,6 @@ private:
     std::list<Network::WifiPacket> received_beacons;
 };
 
+extern std::function<bool(u32, u32)> OverrideWlanCommIdCheck;
+
 } // namespace Service::NWM

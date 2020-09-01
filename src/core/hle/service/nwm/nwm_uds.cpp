@@ -40,6 +40,8 @@ constexpr u16 BroadcastNetworkNodeId = 0xFFFF;
 // The Host has always dest_node_id 1
 constexpr u16 HostDestNodeId = 1;
 
+std::function<bool(u32, u32)> OverrideWlanCommIdCheck;
+
 std::list<Network::WifiPacket> NWM_UDS::GetReceivedBeacons(const MacAddress& sender,
                                                            u32 wlan_comm_id) {
     std::lock_guard lock(beacon_mutex);
@@ -59,8 +61,15 @@ std::list<Network::WifiPacket> NWM_UDS::GetReceivedBeacons(const MacAddress& sen
                         decrypted_beacon.network_info.network_info.data(),
                         decrypted_beacon.network_info.network_info.size());
 
-            if (static_cast<u32>(beacon_network_info.wlan_comm_id) != wlan_comm_id) {
-                return false;
+            if (OverrideWlanCommIdCheck) {
+                if (!OverrideWlanCommIdCheck(static_cast<u32>(beacon_network_info.wlan_comm_id),
+                                             wlan_comm_id)) {
+                    return false;
+                }
+            } else {
+                if (static_cast<u32>(beacon_network_info.wlan_comm_id) != wlan_comm_id) {
+                    return false;
+                }
             }
 
             if (sender == Network::BROADCAST_MAC_ADDRESS) {
@@ -606,8 +615,6 @@ void NWM_UDS::RecvBeaconBroadcastData(Kernel::HLERequestContext& ctx) {
 
     std::size_t cur_buffer_size = sizeof(BeaconDataReplyHeader);
 
-    // Retrieve all beacon frames that were received from the desired mac address and with the
-    // desired wlan_comm_id.
     auto beacons = GetReceivedBeacons(mac_address, wlan_comm_id);
 
     BeaconDataReplyHeader data_reply_header{};

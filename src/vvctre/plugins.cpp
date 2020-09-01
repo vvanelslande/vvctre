@@ -30,6 +30,7 @@
 #include "core/hle/service/hid/hid.h"
 #include "core/hle/service/ir/ir_user.h"
 #include "core/hle/service/nfc/nfc.h"
+#include "core/hle/service/nwm/nwm_uds.h"
 #include "core/hle/service/ptm/ptm.h"
 #include "core/hle/service/sm/sm.h"
 #include "core/memory.h"
@@ -86,6 +87,13 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
                         Log::AddBackend(std::make_unique<Log::FunctionLogger>(
                             (decltype(Log::FunctionLogger::function))log,
                             fmt::format("Plugin {}", *file.name())));
+                    }
+                    void* override_wlan_comm_id_check =
+                        SDL_LoadFunction(handle, "OverrideWlanCommIdCheck");
+                    if (override_wlan_comm_id_check != nullptr) {
+                        Service::NWM::OverrideWlanCommIdCheck =
+                            [f = (bool (*)(u32, u32))override_wlan_comm_id_check](
+                                u32 in_beacon, u32 requested) { return f(in_beacon, requested); };
                     }
 
                     int count = ((int (*)())get_required_function_count)();
@@ -546,8 +554,70 @@ bool vvctre_gui_is_item_hovered(int flags) {
     return ImGui::IsItemHovered(flags);
 }
 
+bool vvctre_gui_is_item_focused() {
+    return ImGui::IsItemFocused();
+}
+
+bool vvctre_gui_is_item_clicked(int button) {
+    return ImGui::IsItemClicked(button);
+}
+
+bool vvctre_gui_is_item_visible() {
+    return ImGui::IsItemVisible();
+}
+
+bool vvctre_gui_is_item_edited() {
+    return ImGui::IsItemEdited();
+}
+
+bool vvctre_gui_is_item_activated() {
+    return ImGui::IsItemActivated();
+}
+
+bool vvctre_gui_is_item_deactivated() {
+    return ImGui::IsItemDeactivated();
+}
+
 bool vvctre_gui_is_item_deactivated_after_edit() {
     return ImGui::IsItemDeactivatedAfterEdit();
+}
+
+bool vvctre_gui_is_item_toggled_open() {
+    return ImGui::IsItemToggledOpen();
+}
+
+bool vvctre_gui_is_any_item_hovered() {
+    return ImGui::IsAnyItemHovered();
+}
+
+bool vvctre_gui_is_any_item_active() {
+    return ImGui::IsAnyItemActive();
+}
+
+bool vvctre_gui_is_any_item_focused() {
+    return ImGui::IsAnyItemFocused();
+}
+
+void vvctre_gui_get_item_rect_min(float out[2]) {
+    const ImVec2 min = ImGui::GetItemRectMin();
+    out[0] = min.x;
+    out[1] = min.y;
+}
+
+void vvctre_gui_get_item_rect_max(float out[2]) {
+    const ImVec2 max = ImGui::GetItemRectMax();
+    out[0] = max.x;
+    out[1] = max.y;
+}
+
+void vvctre_gui_get_item_rect_size(float out[2]) {
+    const ImVec2 size = ImGui::GetItemRectSize();
+    out[0] = size.x;
+    out[1] = size.y;
+}
+
+void vvctre_gui_set_item_allow_overlap() {
+    ImGui::SetItemAllowOverlap();
 }
 
 void vvctre_gui_end_tooltip() {
@@ -585,12 +655,26 @@ bool vvctre_gui_radio_button(const char* label, bool active) {
     return ImGui::RadioButton(label, active);
 }
 
+bool vvctre_gui_image_button(void* texture_id, float width, float height, float uv0[2],
+                             float uv1[2], int frame_padding, float background_color[4],
+                             float tint_color[4]) {
+    return ImGui::ImageButton(
+        texture_id, ImVec2(width, height), ImVec2(uv0[0], uv0[1]), ImVec2(uv1[0], uv1[1]),
+        frame_padding,
+        ImVec4(background_color[0], background_color[1], background_color[2], background_color[3]),
+        ImVec4(tint_color[0], tint_color[1], tint_color[2], tint_color[3]));
+}
+
 bool vvctre_gui_checkbox(const char* label, bool* checked) {
     return ImGui::Checkbox(label, checked);
 }
 
 bool vvctre_gui_begin(const char* name) {
     return ImGui::Begin(name);
+}
+
+bool vvctre_gui_begin_ex(const char* name, bool* open, int flags) {
+    return ImGui::Begin(name, open, flags);
 }
 
 bool vvctre_gui_begin_overlay(const char* name, float initial_x, float initial_y) {
@@ -771,10 +855,86 @@ bool vvctre_gui_slider_double(const char* label, double* value, const double min
     return ImGui::SliderScalar(label, ImGuiDataType_Double, value, &minimum, &maximum, format);
 }
 
+void vvctre_gui_image(void* texture_id, float width, float height, float uv0[2], float uv1[2],
+                      float tint_color[4], float border_color[4]) {
+    ImGui::Image(texture_id, ImVec2(width, height), ImVec2(uv0[0], uv0[1]), ImVec2(uv1[0], uv1[1]),
+                 ImVec4(tint_color[0], tint_color[1], tint_color[2], tint_color[3]),
+                 ImVec4(border_color[0], border_color[1], border_color[2], border_color[3]));
+}
+
 void vvctre_gui_set_color(int index, float r, float g, float b, float a) {
     ImGui::GetStyle().Colors[index] = ImVec4(r, g, b, a);
 }
 
+void vvctre_gui_get_color(int index, float color_out[4]) {
+    const ImVec4 color = ImGui::GetStyle().Colors[index];
+    color_out[0] = color.x;
+    color_out[1] = color.y;
+    color_out[2] = color.z;
+    color_out[3] = color.w;
+}
+
+void vvctre_gui_set_font(void* data, int data_size, float font_size) {
+    ImGui::GetIO().Fonts->AddFontFromMemoryTTF(data, data_size, font_size);
+}
+
+bool vvctre_gui_is_window_appearing() {
+    return ImGui::IsWindowAppearing();
+}
+
+bool vvctre_gui_is_window_collapsed() {
+    return ImGui::IsWindowCollapsed();
+}
+
+bool vvctre_gui_is_window_focused(int flags) {
+    return ImGui::IsWindowFocused(flags);
+}
+
+bool vvctre_gui_is_window_hovered(int flags) {
+    return ImGui::IsWindowHovered(flags);
+}
+
+void vvctre_gui_get_window_pos(float out[2]) {
+    const ImVec2 pos = ImGui::GetWindowPos();
+    out[0] = pos.x;
+    out[1] = pos.y;
+}
+
+void vvctre_gui_get_window_size(float out[2]) {
+    const ImVec2 size = ImGui::GetWindowSize();
+    out[0] = size.x;
+    out[1] = size.y;
+}
+
+void vvctre_gui_set_next_window_pos(float x, float y, int condition, float pivot[2]) {
+    ImGui::SetNextWindowPos(ImVec2(x, y), condition, ImVec2(pivot[0], pivot[1]));
+}
+
+void vvctre_gui_set_next_window_size(float width, float height, int condition) {
+    ImGui::SetNextWindowSize(ImVec2(width, height), condition);
+}
+
+void vvctre_gui_set_next_window_size_constraints(float min[2], float max[2]) {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(min[0], min[1]), ImVec2(max[0], max[1]));
+}
+
+void vvctre_gui_set_next_window_content_size(float width, float height) {
+    ImGui::SetNextWindowContentSize(ImVec2(width, height));
+}
+
+void vvctre_gui_set_next_window_collapsed(bool collapsed, int condition) {
+    ImGui::SetNextWindowCollapsed(collapsed, condition);
+}
+
+void vvctre_gui_set_next_window_focus() {
+    ImGui::SetNextWindowFocus();
+}
+
+u64 vvctre_get_dear_imgui_version() {
+    return IMGUI_VERSION_NUM;
+}
+
+// OS window
 void vvctre_set_os_window_size(void* plugin_manager, int width, int height) {
     SDL_SetWindowSize(static_cast<PluginManager*>(plugin_manager)->window, width, height);
 }
@@ -1837,6 +1997,10 @@ void vvctre_multiplayer_set_game(void* core, const char* name, u64 id) {
     static_cast<Core::System*>(core)->RoomMember().SendGameInfo(Network::GameInfo{name, id});
 }
 
+const char* vvctre_multiplayer_get_nickname(void* core) {
+    return static_cast<Core::System*>(core)->RoomMember().GetNickname().c_str();
+}
+
 u8 vvctre_multiplayer_get_member_count(void* core) {
     return static_cast<u8>(
         static_cast<Core::System*>(core)->RoomMember().GetMemberInformation().size());
@@ -1861,6 +2025,15 @@ const char* vvctre_multiplayer_get_member_game_name(void* core, std::size_t inde
         ->RoomMember()
         .GetMemberInformation()[index]
         .game_info.name.c_str();
+}
+
+void vvctre_multiplayer_get_member_mac_address(void* core, std::size_t index, u8* mac_address) {
+    std::memcpy(mac_address,
+                static_cast<Core::System*>(core)
+                    ->RoomMember()
+                    .GetMemberInformation()[index]
+                    .mac_address.data(),
+                sizeof(Network::MacAddress));
 }
 
 const char* vvctre_multiplayer_get_room_name(void* core) {
@@ -1957,6 +2130,10 @@ void vvctre_swap_buffers() {
     VideoCore::g_renderer->SwapBuffers();
 }
 
+void* vvctre_get_opengl_function(const char* name) {
+    return SDL_GL_GetProcAddress(name);
+}
+
 std::unordered_map<std::string, void*> PluginManager::function_map = {
     // File
     {"vvctre_load_file", (void*)&vvctre_load_file},
@@ -2023,8 +2200,22 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_tooltip", (void*)&vvctre_gui_tooltip},
     {"vvctre_gui_begin_tooltip", (void*)&vvctre_gui_begin_tooltip},
     {"vvctre_gui_is_item_hovered", (void*)&vvctre_gui_is_item_hovered},
+    {"vvctre_gui_is_item_focused", (void*)&vvctre_gui_is_item_focused},
+    {"vvctre_gui_is_item_clicked", (void*)&vvctre_gui_is_item_clicked},
+    {"vvctre_gui_is_item_visible", (void*)&vvctre_gui_is_item_visible},
+    {"vvctre_gui_is_item_edited", (void*)&vvctre_gui_is_item_edited},
+    {"vvctre_gui_is_item_activated", (void*)&vvctre_gui_is_item_activated},
+    {"vvctre_gui_is_item_deactivated", (void*)&vvctre_gui_is_item_deactivated},
     {"vvctre_gui_is_item_deactivated_after_edit",
      (void*)&vvctre_gui_is_item_deactivated_after_edit},
+    {"vvctre_gui_is_item_toggled_open", (void*)&vvctre_gui_is_item_toggled_open},
+    {"vvctre_gui_is_any_item_hovered", (void*)&vvctre_gui_is_any_item_hovered},
+    {"vvctre_gui_is_any_item_active", (void*)&vvctre_gui_is_any_item_active},
+    {"vvctre_gui_is_any_item_focused", (void*)&vvctre_gui_is_any_item_focused},
+    {"vvctre_gui_get_item_rect_min", (void*)&vvctre_gui_get_item_rect_min},
+    {"vvctre_gui_get_item_rect_max", (void*)&vvctre_gui_get_item_rect_max},
+    {"vvctre_gui_get_item_rect_size", (void*)&vvctre_gui_get_item_rect_size},
+    {"vvctre_gui_set_item_allow_overlap", (void*)&vvctre_gui_set_item_allow_overlap},
     {"vvctre_gui_end_tooltip", (void*)&vvctre_gui_end_tooltip},
     {"vvctre_gui_text", (void*)&vvctre_gui_text},
     {"vvctre_gui_text_colored", (void*)&vvctre_gui_text_colored},
@@ -2033,10 +2224,12 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_color_button", (void*)&vvctre_gui_color_button},
     {"vvctre_gui_invisible_button", (void*)&vvctre_gui_invisible_button},
     {"vvctre_gui_radio_button", (void*)&vvctre_gui_radio_button},
+    {"vvctre_gui_image_button", (void*)&vvctre_gui_image_button},
     {"vvctre_gui_checkbox", (void*)&vvctre_gui_checkbox},
     {"vvctre_gui_begin", (void*)&vvctre_gui_begin},
     {"vvctre_gui_begin_overlay", (void*)&vvctre_gui_begin_overlay},
     {"vvctre_gui_begin_auto_resize", (void*)&vvctre_gui_begin_auto_resize},
+    {"vvctre_gui_begin_ex", (void*)&vvctre_gui_begin_ex},
     {"vvctre_gui_end", (void*)&vvctre_gui_end},
     {"vvctre_gui_begin_menu", (void*)&vvctre_gui_begin_menu},
     {"vvctre_gui_end_menu", (void*)&vvctre_gui_end_menu},
@@ -2076,7 +2269,24 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_slider_s64", (void*)&vvctre_gui_slider_s64},
     {"vvctre_gui_slider_float", (void*)&vvctre_gui_slider_float},
     {"vvctre_gui_slider_double", (void*)&vvctre_gui_slider_double},
+    {"vvctre_gui_image", (void*)&vvctre_gui_image},
     {"vvctre_gui_set_color", (void*)&vvctre_gui_set_color},
+    {"vvctre_gui_get_color", (void*)&vvctre_gui_get_color},
+    {"vvctre_gui_set_font", (void*)&vvctre_gui_set_font},
+    {"vvctre_gui_is_window_appearing", (void*)&vvctre_gui_is_window_appearing},
+    {"vvctre_gui_is_window_collapsed", (void*)&vvctre_gui_is_window_collapsed},
+    {"vvctre_gui_is_window_focused", (void*)&vvctre_gui_is_window_focused},
+    {"vvctre_gui_is_window_hovered", (void*)&vvctre_gui_is_window_hovered},
+    {"vvctre_gui_get_window_pos", (void*)&vvctre_gui_get_window_pos},
+    {"vvctre_gui_get_window_size", (void*)&vvctre_gui_get_window_size},
+    {"vvctre_gui_set_next_window_pos", (void*)&vvctre_gui_set_next_window_pos},
+    {"vvctre_gui_set_next_window_size", (void*)&vvctre_gui_set_next_window_size},
+    {"vvctre_gui_set_next_window_size_constraints",
+     (void*)&vvctre_gui_set_next_window_size_constraints},
+    {"vvctre_gui_set_next_window_collapsed", (void*)&vvctre_gui_set_next_window_collapsed},
+    {"vvctre_gui_set_next_window_focus", (void*)&vvctre_gui_set_next_window_focus},
+    {"vvctre_get_dear_imgui_version", (void*)&vvctre_get_dear_imgui_version},
+    // OS window
     {"vvctre_set_os_window_size", (void*)&vvctre_set_os_window_size},
     {"vvctre_get_os_window_size", (void*)&vvctre_get_os_window_size},
     {"vvctre_set_os_window_minimum_size", (void*)&vvctre_set_os_window_minimum_size},
@@ -2339,10 +2549,13 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_multiplayer_get_state", (void*)&vvctre_multiplayer_get_state},
     {"vvctre_multiplayer_send_message", (void*)&vvctre_multiplayer_send_message},
     {"vvctre_multiplayer_set_game", (void*)&vvctre_multiplayer_set_game},
+    {"vvctre_multiplayer_get_nickname", (void*)&vvctre_multiplayer_get_nickname},
     {"vvctre_multiplayer_get_member_count", (void*)&vvctre_multiplayer_get_member_count},
     {"vvctre_multiplayer_get_member_nickname", (void*)&vvctre_multiplayer_get_member_nickname},
     {"vvctre_multiplayer_get_member_game_id", (void*)&vvctre_multiplayer_get_member_game_id},
     {"vvctre_multiplayer_get_member_game_name", (void*)&vvctre_multiplayer_get_member_game_name},
+    {"vvctre_multiplayer_get_member_mac_address",
+     (void*)&vvctre_multiplayer_get_member_mac_address},
     {"vvctre_multiplayer_get_room_name", (void*)&vvctre_multiplayer_get_room_name},
     {"vvctre_multiplayer_get_room_description", (void*)&vvctre_multiplayer_get_room_description},
     {"vvctre_multiplayer_get_room_member_slots", (void*)&vvctre_multiplayer_get_room_member_slots},
@@ -2364,4 +2577,5 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_log_error", (void*)&vvctre_log_error},
     {"vvctre_log_critical", (void*)&vvctre_log_critical},
     {"vvctre_swap_buffers", (void*)&vvctre_swap_buffers},
+    {"vvctre_get_opengl_function", (void*)&vvctre_get_opengl_function},
 };

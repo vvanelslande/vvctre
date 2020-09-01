@@ -56,7 +56,9 @@ System::~System() {
     LOG_DEBUG(Network, "shutdown OK");
 }
 
-System::ResultStatus System::RunLoop(bool tight_loop) {
+System::ResultStatus System::Run() {
+    bool step = false;
+
     status = ResultStatus::Success;
     if (!cpu_core) {
         return ResultStatus::ErrorNotInitialized;
@@ -73,7 +75,7 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
         // execute. Otherwise, get out of the loop function.
         if (GDBStub::GetCpuHaltFlag()) {
             if (GDBStub::GetCpuStepFlag()) {
-                tight_loop = false;
+                step = true;
             } else {
                 return ResultStatus::Success;
             }
@@ -89,10 +91,10 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
         PrepareReschedule();
     } else {
         timing->Advance();
-        if (tight_loop) {
-            cpu_core->Run();
-        } else {
+        if (step) {
             cpu_core->Step();
+        } else {
+            cpu_core->Run();
         }
     }
 
@@ -307,6 +309,10 @@ Network::RoomMember& System::RoomMember() {
     return *room_member;
 }
 
+Loader::AppLoader& System::GetAppLoader() const {
+    return *app_loader;
+}
+
 void System::RegisterMiiSelector(std::shared_ptr<Frontend::MiiSelector> mii_selector) {
     registered_mii_selector = std::move(mii_selector);
 }
@@ -333,6 +339,18 @@ void System::Shutdown() {
 void System::Reset() {
     Shutdown();
     Load(*m_emu_window, m_filepath);
+}
+
+void System::RequestReset() {
+    reset_requested = true;
+}
+
+void System::RequestShutdown() {
+    shutdown_requested = true;
+}
+
+void System::SetResetFilePath(const std::string filepath) {
+    m_filepath = filepath;
 }
 
 } // namespace Core

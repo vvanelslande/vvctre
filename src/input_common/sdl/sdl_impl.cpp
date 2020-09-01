@@ -586,10 +586,7 @@ public:
         while (state.event_queue.Pop(event)) {
             switch (event.type) {
             case SDL_JOYAXISMOTION:
-                if (axis_memory.find(event.jaxis.axis) == axis_memory.end()) {
-                    axis_memory[event.jaxis.axis] = event.jaxis.value;
-                    break;
-                } else {
+                if (axis_memory.count(event.jaxis.axis)) {
                     if (std::abs((event.jaxis.value - axis_memory[event.jaxis.axis]) / 32767.0) <
                         0.5) {
                         break;
@@ -598,6 +595,9 @@ public:
                             std::copysign(32767, event.jaxis.value - axis_memory[event.jaxis.axis]);
                         axis_memory.clear();
                     }
+                } else {
+                    axis_memory[event.jaxis.axis] = event.jaxis.value;
+                    break;
                 }
             case SDL_JOYBUTTONUP:
             case SDL_JOYHATMOTION:

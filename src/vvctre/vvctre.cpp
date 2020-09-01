@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
             SDL_GL_SetSwapInterval(Settings::values.enable_vsync ? 1 : 0);
         }
 
-        switch (system.RunLoop()) {
+        switch (system.Run()) {
         case Core::System::ResultStatus::Success: {
             break;
         }
@@ -267,7 +267,6 @@ int main(int argc, char** argv) {
             pfd::message("vvctre", "Fatal error.\nCheck the console window for more details.",
                          pfd::choice::ok, pfd::icon::error);
             plugin_manager.FatalError();
-            system.SetStatus(Core::System::ResultStatus::Success);
             break;
         }
         case Core::System::ResultStatus::ShutdownRequested: {
