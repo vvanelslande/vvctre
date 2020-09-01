@@ -62,7 +62,7 @@ add_library(imgui
     imgui/imgui_draw.cpp
     imgui/imgui_internal.h
     imgui/imgui_widgets.cpp
-    imgui/imgui.cpp
+    imgui-temp/imgui.cpp
     imgui/imgui.h
     imgui/imstb_rectpack.h
     imgui/imstb_textedit.h
