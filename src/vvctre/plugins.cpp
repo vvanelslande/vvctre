@@ -45,6 +45,12 @@
 #include "vvctre/function_logger.h"
 #include "vvctre/plugins.h"
 
+#ifdef _WIN32
+#define VVCTRE_STRDUP _strdup
+#else
+#define VVCTRE_STRDUP strdup
+#endif
+
 PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(window) {
     asl::Array<asl::File> files = asl::Directory(asl::Process::myDir())
                                       .files(
@@ -356,7 +362,7 @@ void vvctre_write_u64(void* core, VAddr address, u64 value) {
     static_cast<Core::System*>(core)->Memory().Write64(address, value);
 }
 
-void vvctre_invalidate_cache_range(void* core, u32 address, size_t length) {
+void vvctre_invalidate_cache_range(void* core, u32 address, std::size_t length) {
     static_cast<Core::System*>(core)->CPU().InvalidateCacheRange(address, length);
 }
 
@@ -460,7 +466,8 @@ void vvctre_ipc_recorder_bind_callback(void* core, void (*callback)(const char* 
 }
 
 const char* vvctre_get_service_name_by_port_id(void* core, u32 port) {
-    return static_cast<Core::System*>(core)->ServiceManager().GetServiceNameByPortId(port).c_str();
+    return VVCTRE_STRDUP(
+        static_cast<Core::System*>(core)->ServiceManager().GetServiceNameByPortId(port).c_str());
 }
 
 // Cheats
@@ -469,27 +476,28 @@ int vvctre_cheat_count(void* core) {
 }
 
 const char* vvctre_get_cheat(void* core, int index) {
-    return static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->ToString().c_str();
+    return VVCTRE_STRDUP(
+        static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->ToString().c_str());
 }
 
 const char* vvctre_get_cheat_name(void* core, int index) {
-    return static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetName().c_str();
+    return VVCTRE_STRDUP(
+        static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetName().c_str());
 }
 
 const char* vvctre_get_cheat_comments(void* core, int index) {
-    return static_cast<Core::System*>(core)
-        ->CheatEngine()
-        .GetCheats()[index]
-        ->GetComments()
-        .c_str();
+    return VVCTRE_STRDUP(
+        static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetComments().c_str());
 }
 
 const char* vvctre_get_cheat_type(void* core, int index) {
-    return static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetType().c_str();
+    return VVCTRE_STRDUP(
+        static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetType().c_str());
 }
 
 const char* vvctre_get_cheat_code(void* core, int index) {
-    return static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetCode().c_str();
+    return VVCTRE_STRDUP(
+        static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetCode().c_str());
 }
 
 void vvctre_set_cheat_enabled(void* core, int index, bool enabled) {
@@ -1106,17 +1114,32 @@ bool vvctre_gui_selectable_with_selected(const char* label, bool* selected) {
     return ImGui::Selectable(label, selected);
 }
 
-bool vvctre_gui_text_input(const char* label, char* buffer, size_t buffer_size) {
+bool vvctre_gui_text_input(const char* label, char* buffer, std::size_t buffer_size) {
     return ImGui::InputText(label, buffer, buffer_size);
 }
 
-bool vvctre_gui_text_input_multiline(const char* label, char* buffer, size_t buffer_size) {
+bool vvctre_gui_text_input_multiline(const char* label, char* buffer, std::size_t buffer_size) {
     return ImGui::InputTextMultiline(label, buffer, buffer_size);
 }
 
 bool vvctre_gui_text_input_with_hint(const char* label, const char* hint, char* buffer,
-                                     size_t buffer_size) {
+                                     std::size_t buffer_size) {
     return ImGui::InputTextWithHint(label, hint, buffer, buffer_size);
+}
+
+bool vvctre_gui_text_input_ex(const char* label, char* buffer, std::size_t buffer_size,
+                              ImGuiInputTextFlags flags) {
+    return ImGui::InputText(label, buffer, buffer_size, flags);
+}
+
+bool vvctre_gui_text_input_multiline_ex(const char* label, char* buffer, std::size_t buffer_size,
+                                        float width, float height, ImGuiInputTextFlags flags) {
+    return ImGui::InputTextMultiline(label, buffer, buffer_size, ImVec2(width, height), flags);
+}
+
+bool vvctre_gui_text_input_with_hint_ex(const char* label, const char* hint, char* buffer,
+                                        std::size_t buffer_size, ImGuiInputTextFlags flags) {
+    return ImGui::InputTextWithHint(label, hint, buffer, buffer_size, flags);
 }
 
 bool vvctre_gui_u8_input(const char* label, u8* value) {
@@ -1701,6 +1724,34 @@ int vvctre_gui_get_columns_count() {
     return ImGui::GetColumnsCount();
 }
 
+bool vvctre_gui_tree_node_string(const char* label, ImGuiTreeNodeFlags flags) {
+    return ImGui::TreeNodeEx(label, flags);
+}
+
+void vvctre_gui_tree_push_string(const char* id) {
+    ImGui::TreePush(id);
+}
+
+void vvctre_gui_tree_push_void(const void* id) {
+    ImGui::TreePush(id);
+}
+
+void vvctre_gui_tree_pop() {
+    ImGui::TreePop();
+}
+
+float vvctre_gui_get_tree_node_to_label_spacing() {
+    return ImGui::GetTreeNodeToLabelSpacing();
+}
+
+bool vvctre_gui_collapsing_header(const char* label, ImGuiTreeNodeFlags flags) {
+    return ImGui::CollapsingHeader(label, flags);
+}
+
+void vvctre_gui_set_next_item_open(bool is_open) {
+    ImGui::SetNextItemOpen(is_open);
+}
+
 void vvctre_gui_set_color(int index, float r, float g, float b, float a) {
     ImGui::GetStyle().Colors[index] = ImVec4(r, g, b, a);
 }
@@ -2012,8 +2063,6 @@ void vvctre_gui_style_set_selectable_text_align(float value[2]) {
     style.SelectableTextAlign.x = value[0];
     style.SelectableTextAlign.y = value[1];
 }
-
-// GET STYLE
 
 float vvctre_gui_style_get_alpha() {
     return ImGui::GetStyle().Alpha;
@@ -3360,8 +3409,9 @@ s64 vvctre_coretiming_get_downcount(void* core) {
 
 // Other
 const char* vvctre_get_version() {
-    return fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor, vvctre_version_patch)
-        .c_str();
+    return VVCTRE_STRDUP(
+        fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor, vvctre_version_patch)
+            .c_str());
 }
 
 u8 vvctre_get_version_major() {
@@ -3621,6 +3671,9 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_text_input", (void*)&vvctre_gui_text_input},
     {"vvctre_gui_text_input_multiline", (void*)&vvctre_gui_text_input_multiline},
     {"vvctre_gui_text_input_with_hint", (void*)&vvctre_gui_text_input_with_hint},
+    {"vvctre_gui_text_input_ex", (void*)&vvctre_gui_text_input_ex},
+    {"vvctre_gui_text_input_multiline_ex", (void*)&vvctre_gui_text_input_multiline_ex},
+    {"vvctre_gui_text_input_with_hint_ex", (void*)&vvctre_gui_text_input_with_hint_ex},
     {"vvctre_gui_u8_input", (void*)&vvctre_gui_u8_input},
     {"vvctre_gui_u8_input_ex", (void*)&vvctre_gui_u8_input_ex},
     {"vvctre_gui_u8_inputs", (void*)&vvctre_gui_u8_inputs},
@@ -3726,6 +3779,14 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_get_column_offset", (void*)&vvctre_gui_get_column_offset},
     {"vvctre_gui_set_column_offset", (void*)&vvctre_gui_set_column_offset},
     {"vvctre_gui_get_columns_count", (void*)&vvctre_gui_get_columns_count},
+    {"vvctre_gui_tree_node_string", (void*)&vvctre_gui_tree_node_string},
+    {"vvctre_gui_tree_push_string", (void*)&vvctre_gui_tree_push_string},
+    {"vvctre_gui_tree_push_void", (void*)&vvctre_gui_tree_push_void},
+    {"vvctre_gui_tree_pop", (void*)&vvctre_gui_tree_pop},
+    {"vvctre_gui_get_tree_node_to_label_spacing",
+     (void*)&vvctre_gui_get_tree_node_to_label_spacing},
+    {"vvctre_gui_collapsing_header", (void*)&vvctre_gui_collapsing_header},
+    {"vvctre_gui_set_next_item_open", (void*)&vvctre_gui_set_next_item_open},
     {"vvctre_gui_set_color", (void*)&vvctre_gui_set_color},
     {"vvctre_gui_get_color", (void*)&vvctre_gui_get_color},
     {"vvctre_gui_set_font", (void*)&vvctre_gui_set_font},

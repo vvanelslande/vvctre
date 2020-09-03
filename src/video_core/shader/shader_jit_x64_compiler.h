@@ -5,13 +5,13 @@
 #pragma once
 
 #include <array>
+#include <bitset>
 #include <cstddef>
 #include <optional>
 #include <utility>
 #include <vector>
 #include <nihstro/shader_bytecode.h>
 #include <xbyak.h>
-#include "common/bit_set.h"
 #include "common/common_types.h"
 #include "video_core/shader/shader.h"
 
@@ -91,7 +91,7 @@ private:
      */
     void Compile_Return();
 
-    BitSet<u32> PersistentCallerSavedRegs();
+    std::bitset<32> PersistentCallerSavedRegs();
 
     /**
      * Assertion evaluated at compile-time, but only triggered if executed at runtime.
