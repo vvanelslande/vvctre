@@ -23,7 +23,9 @@ public:
     void InitialSettingsOpening();
     void InitialSettingsOkPressed();
     void BeforeLoading();
+    void BeforeLoadingAfterFirstTime();
     void EmulationStarting();
+    void EmulationStartingAfterFirstTime();
     void EmulatorClosing();
     void FatalError();
     void BeforeDrawingFPS();
@@ -38,6 +40,7 @@ public:
     bool paused = false;
     SDL_Window* window = nullptr;
     void* cfg = nullptr;
+    bool show_fatal_error_messages = true;
 
 private:
     struct Plugin {

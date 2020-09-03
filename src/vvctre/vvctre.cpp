@@ -130,6 +130,40 @@ int main(int argc, char** argv) {
 
     Core::System& system = Core::System::GetInstance();
     PluginManager plugin_manager(system, window);
+    system.SetBeforeLoadingAfterFirstTime(
+        [&plugin_manager] { plugin_manager.BeforeLoadingAfterFirstTime(); });
+    system.SetEmulationStartingAfterFirstTime(
+        [&plugin_manager] { plugin_manager.EmulationStartingAfterFirstTime(); });
+    if (!system.IsOnLoadFailedSet()) {
+        system.SetOnLoadFailed([&plugin_manager](Core::System::ResultStatus result) {
+            switch (result) {
+            case Core::System::ResultStatus::ErrorNotInitialized:
+                vvctreShutdown(&plugin_manager);
+                pfd::message("vvctre", "Not initialized", pfd::choice::ok, pfd::icon::error);
+                std::exit(1);
+            case Core::System::ResultStatus::ErrorSystemMode:
+                vvctreShutdown(&plugin_manager);
+                pfd::message("vvctre", "Failed to determine system mode", pfd::choice::ok,
+                             pfd::icon::error);
+                std::exit(1);
+            case Core::System::ResultStatus::ErrorLoader_ErrorEncrypted:
+                vvctreShutdown(&plugin_manager);
+                pfd::message("vvctre", "Encrypted file", pfd::choice::ok, pfd::icon::error);
+                std::exit(1);
+            case Core::System::ResultStatus::ErrorLoader_ErrorUnsupportedFormat:
+                vvctreShutdown(&plugin_manager);
+                pfd::message("vvctre", "Unsupported file format", pfd::choice::ok,
+                             pfd::icon::error);
+                std::exit(1);
+            case Core::System::ResultStatus::ErrorFileNotFound:
+                vvctreShutdown(&plugin_manager);
+                pfd::message("vvctre", "File not found", pfd::choice::ok, pfd::icon::error);
+                std::exit(1);
+            default:
+                break;
+            }
+        });
+    }
 
     std::shared_ptr<Service::CFG::Module> cfg = std::make_shared<Service::CFG::Module>();
     plugin_manager.cfg = cfg.get();
@@ -205,32 +239,6 @@ int main(int argc, char** argv) {
 
     plugin_manager.EmulationStarting();
 
-    switch (load_result) {
-    case Core::System::ResultStatus::ErrorNotInitialized:
-        vvctreShutdown(&plugin_manager);
-        pfd::message("vvctre", "Not initialized", pfd::choice::ok, pfd::icon::error);
-        return 1;
-    case Core::System::ResultStatus::ErrorSystemMode:
-        vvctreShutdown(&plugin_manager);
-        pfd::message("vvctre", "Failed to determine system mode", pfd::choice::ok,
-                     pfd::icon::error);
-        return 1;
-    case Core::System::ResultStatus::ErrorLoader_ErrorEncrypted:
-        vvctreShutdown(&plugin_manager);
-        pfd::message("vvctre", "Encrypted file", pfd::choice::ok, pfd::icon::error);
-        return 1;
-    case Core::System::ResultStatus::ErrorLoader_ErrorUnsupportedFormat:
-        vvctreShutdown(&plugin_manager);
-        pfd::message("vvctre", "Unsupported file format", pfd::choice::ok, pfd::icon::error);
-        return 1;
-    case Core::System::ResultStatus::ErrorFileNotFound:
-        vvctreShutdown(&plugin_manager);
-        pfd::message("vvctre", "File not found", pfd::choice::ok, pfd::icon::error);
-        return 1;
-    default:
-        break;
-    }
-
     if (!Settings::values.play_movie.empty()) {
         Core::Movie& movie = Core::Movie::GetInstance();
 
@@ -264,8 +272,10 @@ int main(int argc, char** argv) {
             break;
         }
         case Core::System::ResultStatus::FatalError: {
-            pfd::message("vvctre", "Fatal error.\nCheck the console window for more details.",
-                         pfd::choice::ok, pfd::icon::error);
+            if (plugin_manager.show_fatal_error_messages) {
+                pfd::message("vvctre", "Fatal error.\nCheck the console window for more details.",
+                             pfd::choice::ok, pfd::icon::error);
+            }
             plugin_manager.FatalError();
             break;
         }

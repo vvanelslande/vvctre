@@ -115,12 +115,19 @@ System::ResultStatus System::Run() {
 
 System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::string& filepath) {
     if (!FileUtil::Exists(filepath)) {
+        LOG_CRITICAL(Core, "File not found");
+        if (on_load_failed) {
+            on_load_failed(ResultStatus::ErrorFileNotFound);
+        }
         return ResultStatus::ErrorFileNotFound;
     }
 
     app_loader = Loader::GetLoader(filepath);
     if (!app_loader) {
         LOG_CRITICAL(Core, "Unsupported file format");
+        if (on_load_failed) {
+            on_load_failed(ResultStatus::ErrorLoader_ErrorUnsupportedFormat);
+        }
         return ResultStatus::ErrorLoader_ErrorUnsupportedFormat;
     }
     std::pair<std::optional<u32>, Loader::ResultStatus> system_mode =
@@ -132,10 +139,19 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
 
         switch (system_mode.second) {
         case Loader::ResultStatus::ErrorEncrypted:
+            if (on_load_failed) {
+                on_load_failed(ResultStatus::ErrorLoader_ErrorEncrypted);
+            }
             return ResultStatus::ErrorLoader_ErrorEncrypted;
         case Loader::ResultStatus::ErrorInvalidFormat:
+            if (on_load_failed) {
+                on_load_failed(ResultStatus::ErrorLoader_ErrorUnsupportedFormat);
+            }
             return ResultStatus::ErrorLoader_ErrorUnsupportedFormat;
         default:
+            if (on_load_failed) {
+                on_load_failed(ResultStatus::ErrorSystemMode);
+            }
             return ResultStatus::ErrorSystemMode;
         }
     }
@@ -147,6 +163,9 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
         LOG_CRITICAL(Core, "Failed to initialize system (Error {})!",
                      static_cast<u32>(init_result));
         System::Shutdown();
+        if (on_load_failed) {
+            on_load_failed(init_result);
+        }
         return init_result;
     }
 
@@ -159,8 +178,14 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
 
         switch (load_result) {
         case Loader::ResultStatus::ErrorEncrypted:
+            if (on_load_failed) {
+                on_load_failed(ResultStatus::ErrorLoader_ErrorEncrypted);
+            }
             return ResultStatus::ErrorLoader_ErrorEncrypted;
         case Loader::ResultStatus::ErrorInvalidFormat:
+            if (on_load_failed) {
+                on_load_failed(ResultStatus::ErrorLoader_ErrorUnsupportedFormat);
+            }
             return ResultStatus::ErrorLoader_ErrorUnsupportedFormat;
         default:
             UNREACHABLE();
@@ -232,6 +257,7 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window, u32 system_mo
     memory->SetDSP(*dsp_core);
 
     dsp_core->SetSink(Settings::values.audio_sink_id, Settings::values.audio_device_id);
+    dsp_core->EnableStretching(Settings::values.enable_audio_stretching);
 
     service_manager = std::make_shared<Service::SM::ServiceManager>(*this);
     archive_manager = std::make_unique<Service::FS::ArchiveManager>(*this);
@@ -338,7 +364,9 @@ void System::Shutdown() {
 
 void System::Reset() {
     Shutdown();
+    before_loading_after_first_time();
     Load(*m_emu_window, m_filepath);
+    emulation_starting_after_first_time();
 }
 
 void System::RequestReset() {
@@ -351,6 +379,22 @@ void System::RequestShutdown() {
 
 void System::SetResetFilePath(const std::string filepath) {
     m_filepath = filepath;
+}
+
+void System::SetBeforeLoadingAfterFirstTime(std::function<void()> function) {
+    before_loading_after_first_time = function;
+}
+
+void System::SetEmulationStartingAfterFirstTime(std::function<void()> function) {
+    emulation_starting_after_first_time = function;
+}
+
+void System::SetOnLoadFailed(std::function<void(System::ResultStatus)> function) {
+    on_load_failed = function;
+}
+
+const bool System::IsOnLoadFailedSet() const {
+    return static_cast<bool>(on_load_failed);
 }
 
 } // namespace Core

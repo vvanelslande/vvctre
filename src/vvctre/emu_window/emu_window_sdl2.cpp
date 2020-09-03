@@ -458,13 +458,13 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::Separator();
 
                     if (ImGui::Checkbox("Enable", &Settings::values.enable_dsp_lle)) {
-                        config_savegame_changed = true;
+                        request_reset = true;
                     }
 
                     if (Settings::values.enable_dsp_lle) {
-                        if (ImGui::Checkbox("Use multiple threads",
+                        if (ImGui::Checkbox("Use Multiple Threads",
                                             &Settings::values.enable_dsp_lle_multithread)) {
-                            config_savegame_changed = true;
+                            request_reset = true;
                         }
                     }
 
@@ -479,6 +479,11 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                     ImGui::TextUnformatted("Output");
                     ImGui::Separator();
+
+                    if (ImGui::Checkbox("Enable Stretching##Output",
+                                        &Settings::values.enable_audio_stretching)) {
+                        Settings::Apply();
+                    }
 
                     ImGui::SliderFloat("Volume##Output", &Settings::values.audio_volume, 0.0f,
                                        1.0f);
@@ -2510,7 +2515,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::SetClipboardText(
                             FileUtil::SanitizePath(
                                 Service::AM::GetTitlePath(Service::FS::MediaType::SDMC,
-                                                          program_id + 0xe00000000))
+                                                          0x0004000e00000000 |
+                                                              static_cast<u32>(program_id)))
                                 .c_str());
                     }
 
@@ -2698,16 +2704,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                 ImGui::EndMenu();
             }
 
-            if (system.RoomMember().GetState() == Network::RoomMember::State::Idle) {
-                if (ImGui::BeginMenu("Multiplayer")) {
-                    if (ImGui::MenuItem("Connect To Citra Room")) {
-                        if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
-                            public_rooms = GetPublicCitraRooms();
-                        }
-                        show_connect_to_citra_room = true;
+            if (ImGui::BeginMenu("Multiplayer")) {
+                if (ImGui::MenuItem("Connect To Citra Room")) {
+                    if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
+                        public_rooms = GetPublicCitraRooms();
                     }
-                    ImGui::EndMenu();
+                    show_connect_to_citra_room = true;
                 }
+                ImGui::EndMenu();
             }
 
             plugin_manager.AddMenus();
@@ -2881,7 +2885,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                 if (enabled) {
                     ipc_recorder_callback =
                         r.BindCallback([&](const IPCDebugger::RequestRecord& record) {
-                            ipc_records[record.id] = record;
+                            const int index = record.id - ipc_recorder_id_offset;
+                            if (ipc_records.size() > index) {
+                                ipc_records[index] = record;
+                            } else {
+                                ipc_records.emplace_back(record);
+                            }
                         });
                 } else {
                     r.UnbindCallback(ipc_recorder_callback);
@@ -2890,6 +2899,7 @@ void EmuWindow_SDL2::SwapBuffers() {
             }
             ImGui::SameLine();
             if (ImGui::Button("Clear")) {
+                ipc_recorder_id_offset += ipc_records.size();
                 ipc_records.clear();
             }
             ImGui::SameLine();
@@ -2897,79 +2907,77 @@ void EmuWindow_SDL2::SwapBuffers() {
             const float width = ImGui::GetWindowWidth();
             if (ImGui::BeginChildFrame(ImGui::GetID("Records"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
-                for (const auto& record : ipc_records) {
-                    std::string service_name;
-                    std::string function_name = "Unknown";
-                    if (record.second.client_port.id != -1) {
-                        service_name = system.ServiceManager().GetServiceNameByPortId(
-                            static_cast<u32>(record.second.client_port.id));
-                    }
-                    if (service_name.empty()) {
-                        service_name = record.second.server_session.name;
-                        service_name = Common::ReplaceAll(service_name, "_Server", "");
-                        service_name = Common::ReplaceAll(service_name, "_Client", "");
-                    }
-                    const std::string label = fmt::format(
-                        "#{} - {} - {} (0x{:08X}) - {} - {}", record.first, service_name,
-                        record.second.function_name.empty() ? "Unknown"
-                                                            : record.second.function_name,
-                        record.second.untranslated_request_cmdbuf.empty()
-                            ? 0xFFFFFFFF
-                            : record.second.untranslated_request_cmdbuf[0],
-                        record.second.is_hle ? "HLE" : "LLE",
-                        IPC_Recorder_GetStatusString(record.second.status));
-                    if (label.find(ipc_recorder_filter) != std::string::npos) {
-                        ImGui::Selectable(label.c_str());
-                        if (ImGui::IsItemHovered()) {
-                            ImGui::BeginTooltip();
+                ImGuiListClipper clipper(ipc_records.size());
 
-                            ImGui::PushTextWrapPos(width * 0.7f);
+                while (clipper.Step()) {
+                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
+                        const IPCDebugger::RequestRecord& record = ipc_records[i];
 
-                            ImGui::TextUnformatted(
-                                fmt::format(
-                                    "ID: {}\n"
-                                    "Status: {} ({})\n"
-                                    "HLE: {}\n"
-                                    "Function: {}\n"
-                                    "Client Process: {} ({})\n"
-                                    "Client Thread: {} ({})\n"
-                                    "Client Session: {} ({})\n"
-                                    "Client Port: {} ({})\n"
-                                    "Server Process: {} ({})\n"
-                                    "Server Thread: {} ({})\n"
-                                    "Server Session: {} ({})\n"
-                                    "Untranslated Request Command Buffer: 0x{:08X}\n"
-                                    "Translated Request Command Buffer: 0x{:08X}\n"
-                                    "Untranslated Reply Command Buffer: 0x{:08X}\n"
-                                    "Translated Reply Command Buffer: 0x{:08X}",
-                                    record.first,
-                                    IPC_Recorder_GetStatusString(record.second.status),
-                                    static_cast<int>(record.second.status),
-                                    record.second.is_hle ? "Yes" : "No",
-                                    record.second.function_name.empty()
-                                        ? "Unknown"
-                                        : record.second.function_name,
-                                    record.second.client_process.name,
-                                    record.second.client_process.id,
-                                    record.second.client_thread.name,
-                                    record.second.client_thread.id,
-                                    record.second.client_session.name,
-                                    record.second.client_session.id, record.second.client_port.name,
-                                    record.second.client_port.id, record.second.server_process.name,
-                                    record.second.server_process.id,
-                                    record.second.server_thread.name,
-                                    record.second.server_thread.id,
-                                    record.second.server_session.name,
-                                    record.second.server_session.id,
-                                    fmt::join(record.second.untranslated_request_cmdbuf, ", 0x"),
-                                    fmt::join(record.second.translated_request_cmdbuf, ", 0x"),
-                                    fmt::join(record.second.untranslated_reply_cmdbuf, ", 0x"),
-                                    fmt::join(record.second.translated_reply_cmdbuf, ", 0x"))
-                                    .c_str());
+                        std::string service_name;
+                        std::string function_name = "Unknown";
+                        if (record.client_port.id != -1) {
+                            service_name = system.ServiceManager().GetServiceNameByPortId(
+                                static_cast<u32>(record.client_port.id));
+                        }
+                        if (service_name.empty()) {
+                            service_name = record.server_session.name;
+                            service_name = Common::ReplaceAll(service_name, "_Server", "");
+                            service_name = Common::ReplaceAll(service_name, "_Client", "");
+                        }
+                        const std::string label = fmt::format(
+                            "#{} - {} - {} (0x{:08X}) - {} - {}", record.id, service_name,
+                            record.function_name.empty() ? "Unknown" : record.function_name,
+                            record.untranslated_request_cmdbuf.empty()
+                                ? 0xFFFFFFFF
+                                : record.untranslated_request_cmdbuf[0],
+                            record.is_hle ? "HLE" : "LLE",
+                            IPC_Recorder_GetStatusString(record.status));
+                        if (label.find(ipc_recorder_filter) != std::string::npos) {
+                            ImGui::Selectable(label.c_str());
+                            if (ImGui::IsItemHovered()) {
+                                ImGui::BeginTooltip();
 
-                            ImGui::PopTextWrapPos();
+                                ImGui::PushTextWrapPos(width * 0.7f);
 
-                            ImGui::EndTooltip();
+                                ImGui::TextUnformatted(
+                                    fmt::format(
+                                        "ID: {}\n"
+                                        "Status: {} ({})\n"
+                                        "HLE: {}\n"
+                                        "Function: {}\n"
+                                        "Client Process: {} ({})\n"
+                                        "Client Thread: {} ({})\n"
+                                        "Client Session: {} ({})\n"
+                                        "Client Port: {} ({})\n"
+                                        "Server Process: {} ({})\n"
+                                        "Server Thread: {} ({})\n"
+                                        "Server Session: {} ({})\n"
+                                        "Untranslated Request Command Buffer: 0x{:08X}\n"
+                                        "Translated Request Command Buffer: 0x{:08X}\n"
+                                        "Untranslated Reply Command Buffer: 0x{:08X}\n"
+                                        "Translated Reply Command Buffer: 0x{:08X}",
+                                        record.id, IPC_Recorder_GetStatusString(record.status),
+                                        static_cast<int>(record.status),
+                                        record.is_hle ? "Yes" : "No",
+                                        record.function_name.empty() ? "Unknown"
+                                                                     : record.function_name,
+                                        record.client_process.name, record.client_process.id,
+                                        record.client_thread.name, record.client_thread.id,
+                                        record.client_session.name, record.client_session.id,
+                                        record.client_port.name, record.client_port.id,
+                                        record.server_process.name, record.server_process.id,
+                                        record.server_thread.name, record.server_thread.id,
+                                        record.server_session.name, record.server_session.id,
+                                        fmt::join(record.untranslated_request_cmdbuf, ", 0x"),
+                                        fmt::join(record.translated_request_cmdbuf, ", 0x"),
+                                        fmt::join(record.untranslated_reply_cmdbuf, ", 0x"),
+                                        fmt::join(record.translated_reply_cmdbuf, ", 0x"))
+                                        .c_str());
+
+                                ImGui::PopTextWrapPos();
+
+                                ImGui::EndTooltip();
+                            }
                         }
                     }
                 }

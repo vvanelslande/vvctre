@@ -403,6 +403,9 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::TextUnformatted("Output");
                     ImGui::Separator();
 
+                    ImGui::Checkbox("Enable Stretching##Output",
+                                    &Settings::values.enable_audio_stretching);
+
                     ImGui::SliderFloat("Volume##Output", &Settings::values.audio_volume, 0.0f,
                                        1.0f);
 

@@ -171,6 +171,14 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
+      regex: /^audio.stretching disable$/m,
+      call: () => {
+        names.push("vvctre_settings_set_enable_audio_stretching");
+        types.push(["void", "bool value"]);
+        calls.push("vvctre_settings_set_enable_audio_stretching(false);");
+      },
+    },
+    {
       regex: /^audio.volume (\d*\.?\d+f?)$/m,
       call: (match) => {
         names.push("vvctre_settings_set_audio_volume");

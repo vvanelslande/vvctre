@@ -127,6 +127,7 @@ struct Values {
     float audio_volume = 1.0f;
     std::string audio_sink_id = "auto";
     std::string audio_device_id = "auto";
+    bool enable_audio_stretching = true;
     MicrophoneInputType microphone_input_type = MicrophoneInputType::None;
     std::string microphone_device = "auto";
 

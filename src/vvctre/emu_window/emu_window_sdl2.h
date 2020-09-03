@@ -6,10 +6,10 @@
 
 #include <deque>
 #include <functional>
-#include <map>
 #include <memory>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 #include <imgui.h>
 #include "core/frontend/applets/mii_selector.h"
 #include "core/frontend/applets/swkbd.h"
@@ -106,7 +106,8 @@ private:
 
     // IPC recorder
     IPCDebugger::CallbackHandle ipc_recorder_callback;
-    std::map<int, IPCDebugger::RequestRecord> ipc_records;
+    std::vector<IPCDebugger::RequestRecord> ipc_records;
+    int ipc_recorder_id_offset = 1;
     std::string ipc_recorder_filter;
     bool show_ipc_recorder_window = false;
 

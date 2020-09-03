@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -224,6 +225,11 @@ public:
 
     std::optional<DeliveryArgument> delivery_arg;
 
+    void SetBeforeLoadingAfterFirstTime(std::function<void()> function);
+    void SetEmulationStartingAfterFirstTime(std::function<void()> function);
+    void SetOnLoadFailed(std::function<void(ResultStatus)> function);
+    const bool IsOnLoadFailedSet() const;
+
 private:
     /**
      * Initialize the emulated system.
@@ -281,6 +287,10 @@ private:
 
     std::atomic<bool> reset_requested{false};
     std::atomic<bool> shutdown_requested{false};
+
+    std::function<void()> before_loading_after_first_time;
+    std::function<void()> emulation_starting_after_first_time;
+    std::function<void(ResultStatus)> on_load_failed;
 };
 
 } // namespace Core

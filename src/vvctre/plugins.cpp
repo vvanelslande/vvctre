@@ -27,6 +27,7 @@
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/cam/cam.h"
 #include "core/hle/service/cfg/cfg.h"
+#include "core/hle/service/err_f.h"
 #include "core/hle/service/hid/hid.h"
 #include "core/hle/service/ir/ir_user.h"
 #include "core/hle/service/nfc/nfc.h"
@@ -95,6 +96,13 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
                             [f = (bool (*)(u32, u32))override_wlan_comm_id_check](
                                 u32 in_beacon, u32 requested) { return f(in_beacon, requested); };
                     }
+                    void* override_on_load_failed_function =
+                        SDL_LoadFunction(handle, "OverrideOnLoadFailed");
+                    if (override_on_load_failed_function != nullptr) {
+                        core.SetOnLoadFailed([f = (void (*)(Core::System::ResultStatus))
+                                                  override_on_load_failed_function](
+                                                 Core::System::ResultStatus result) { f(result); });
+                    }
 
                     int count = ((int (*)())get_required_function_count)();
                     const char** required_function_names =
@@ -150,11 +158,31 @@ void PluginManager::BeforeLoading() {
     }
 }
 
+void PluginManager::BeforeLoadingAfterFirstTime() {
+    for (const auto& plugin : plugins) {
+        void* before_loading_after_first_time =
+            SDL_LoadFunction(plugin.handle, "BeforeLoadingAfterFirstTime");
+        if (before_loading_after_first_time != nullptr) {
+            ((void (*)())before_loading_after_first_time)();
+        }
+    }
+}
+
 void PluginManager::EmulationStarting() {
     for (const auto& plugin : plugins) {
         void* emulation_starting = SDL_LoadFunction(plugin.handle, "EmulationStarting");
         if (emulation_starting != nullptr) {
             ((void (*)())emulation_starting)();
+        }
+    }
+}
+
+void PluginManager::EmulationStartingAfterFirstTime() {
+    for (const auto& plugin : plugins) {
+        void* emulation_starting_after_first_time =
+            SDL_LoadFunction(plugin.handle, "EmulationStartingAfterFirstTime");
+        if (emulation_starting_after_first_time != nullptr) {
+            ((void (*)())emulation_starting_after_first_time)();
         }
     }
 }
@@ -506,6 +534,135 @@ void vvctre_gui_pop_item_width() {
     ImGui::PopItemWidth();
 }
 
+void vvctre_gui_get_content_region_max(float out[2]) {
+    const ImVec2 vec = ImGui::GetContentRegionMax();
+    out[0] = vec.x;
+    out[1] = vec.y;
+}
+
+void vvctre_gui_get_content_region_avail(float out[2]) {
+    const ImVec2 vec = ImGui::GetContentRegionAvail();
+    out[0] = vec.x;
+    out[1] = vec.y;
+}
+
+void vvctre_gui_get_window_content_region_min(float out[2]) {
+    const ImVec2 vec = ImGui::GetWindowContentRegionMin();
+    out[0] = vec.x;
+    out[1] = vec.y;
+}
+
+void vvctre_gui_get_window_content_region_max(float out[2]) {
+    const ImVec2 vec = ImGui::GetWindowContentRegionMax();
+    out[0] = vec.x;
+    out[1] = vec.y;
+}
+
+float vvctre_gui_get_window_content_region_width() {
+    return ImGui::GetWindowContentRegionWidth();
+}
+
+float vvctre_gui_get_scroll_x() {
+    return ImGui::GetScrollX();
+}
+
+float vvctre_gui_get_scroll_y() {
+    return ImGui::GetScrollY();
+}
+
+float vvctre_gui_get_scroll_max_x() {
+    return ImGui::GetScrollMaxX();
+}
+
+float vvctre_gui_get_scroll_max_y() {
+    return ImGui::GetScrollMaxY();
+}
+
+void vvctre_gui_set_scroll_x(float scroll_x) {
+    ImGui::SetScrollX(scroll_x);
+}
+
+void vvctre_gui_set_scroll_y(float scroll_y) {
+    ImGui::SetScrollY(scroll_y);
+}
+
+void vvctre_gui_set_scroll_here_x(float center_x_ratio) {
+    ImGui::SetScrollHereX(center_x_ratio);
+}
+
+void vvctre_gui_set_scroll_here_y(float center_y_ratio) {
+    ImGui::SetScrollHereY(center_y_ratio);
+}
+
+void vvctre_gui_set_scroll_from_pos_x(float local_x, float center_x_ratio) {
+    ImGui::SetScrollFromPosX(local_x, center_x_ratio);
+}
+
+void vvctre_gui_set_scroll_from_pos_y(float local_y, float center_y_ratio) {
+    ImGui::SetScrollFromPosY(local_y, center_y_ratio);
+}
+
+void vvctre_gui_set_next_item_width(float item_width) {
+    ImGui::SetNextItemWidth(item_width);
+}
+
+float vvctre_gui_calc_item_width() {
+    return ImGui::CalcItemWidth();
+}
+
+void vvctre_gui_push_text_wrap_pos(float wrap_local_pos_x) {
+    ImGui::PushTextWrapPos(wrap_local_pos_x);
+}
+
+void vvctre_gui_pop_text_wrap_pos() {
+    ImGui::PopTextWrapPos();
+}
+
+void vvctre_gui_push_allow_keyboard_focus(bool allow_keyboard_focus) {
+    ImGui::PushAllowKeyboardFocus(allow_keyboard_focus);
+}
+
+void vvctre_gui_pop_allow_keyboard_focus() {
+    ImGui::PopAllowKeyboardFocus();
+}
+
+void vvctre_gui_push_button_repeat(bool repeat) {
+    ImGui::PushButtonRepeat(repeat);
+}
+
+void vvctre_gui_pop_button_repeat() {
+    ImGui::PopButtonRepeat();
+}
+
+void vvctre_gui_push_font(void* font) {
+    ImGui::PushFont(static_cast<ImFont*>(font));
+}
+
+void vvctre_gui_pop_font() {
+    ImGui::PopFont();
+}
+
+void vvctre_gui_push_style_color(ImGuiCol idx, const float r, const float g, const float b,
+                                 const float a) {
+    ImGui::PushStyleColor(idx, ImVec4(r, g, b, a));
+}
+
+void vvctre_gui_pop_style_color(int count) {
+    ImGui::PopStyleColor(count);
+}
+
+void vvctre_gui_push_style_var_float(ImGuiStyleVar idx, float val) {
+    ImGui::PushStyleVar(idx, val);
+}
+
+void vvctre_gui_push_style_var_2floats(ImGuiStyleVar idx, float val[2]) {
+    ImGui::PushStyleVar(idx, ImVec2(val[0], val[1]));
+}
+
+void vvctre_gui_pop_style_var(int count) {
+    ImGui::PopStyleVar(count);
+}
+
 void vvctre_gui_same_line() {
     ImGui::SameLine();
 }
@@ -524,6 +681,96 @@ void vvctre_gui_indent() {
 
 void vvctre_gui_unindent() {
     ImGui::Unindent();
+}
+
+void vvctre_gui_begin_group() {
+    ImGui::BeginGroup();
+}
+
+void vvctre_gui_end_group() {
+    ImGui::EndGroup();
+}
+
+void vvctre_gui_get_cursor_pos(float out[2]) {
+    const ImVec2 vec = ImGui::GetCursorPos();
+    out[0] = vec.x;
+    out[1] = vec.y;
+}
+
+float vvctre_gui_get_cursor_pos_x() {
+    return ImGui::GetCursorPosX();
+}
+
+float vvctre_gui_get_cursor_pos_y() {
+    return ImGui::GetCursorPosY();
+}
+
+void vvctre_gui_set_cursor_pos(float local_x, float local_y) {
+    ImGui::SetCursorPos(ImVec2(local_x, local_y));
+}
+
+void vvctre_gui_set_cursor_pos_x(float local_x) {
+    ImGui::SetCursorPosX(local_x);
+}
+
+void vvctre_gui_set_cursor_pos_y(float local_y) {
+    ImGui::SetCursorPosY(local_y);
+}
+
+void vvctre_gui_get_cursor_start_pos(float out[2]) {
+    const ImVec2 vec = ImGui::GetCursorStartPos();
+    out[0] = vec.x;
+    out[1] = vec.y;
+}
+
+void vvctre_gui_get_cursor_screen_pos(float out[2]) {
+    const ImVec2 vec = ImGui::GetCursorScreenPos();
+    out[0] = vec.x;
+    out[1] = vec.y;
+}
+
+void vvctre_gui_set_cursor_screen_pos(float x, float y) {
+    ImGui::SetCursorScreenPos(ImVec2(x, y));
+}
+
+void vvctre_gui_align_text_to_frame_padding() {
+    ImGui::AlignTextToFramePadding();
+}
+
+float vvctre_gui_get_text_line_height() {
+    return ImGui::GetTextLineHeight();
+}
+
+float vvctre_gui_get_text_line_height_with_spacing() {
+    return ImGui::GetTextLineHeightWithSpacing();
+}
+
+float vvctre_gui_get_frame_height() {
+    return ImGui::GetFrameHeight();
+}
+
+float vvctre_gui_get_frame_height_with_spacing() {
+    return ImGui::GetFrameHeightWithSpacing();
+}
+
+void vvctre_gui_push_id_string(const char* id) {
+    ImGui::PushID(id);
+}
+
+void vvctre_gui_push_id_string_with_begin_and_end(const char* begin, const char* end) {
+    ImGui::PushID(begin, end);
+}
+
+void vvctre_gui_push_id_void(void* id) {
+    ImGui::PushID(id);
+}
+
+void vvctre_gui_push_id_int(int id) {
+    ImGui::PushID(id);
+}
+
+void vvctre_gui_pop_id() {
+    ImGui::PopID();
 }
 
 void vvctre_gui_spacing() {
@@ -550,7 +797,7 @@ void vvctre_gui_begin_tooltip() {
     ImGui::BeginTooltip();
 }
 
-bool vvctre_gui_is_item_hovered(int flags) {
+bool vvctre_gui_is_item_hovered(ImGuiHoveredFlags flags) {
     return ImGui::IsItemHovered(flags);
 }
 
@@ -620,6 +867,14 @@ void vvctre_gui_set_item_allow_overlap() {
     ImGui::SetItemAllowOverlap();
 }
 
+bool vvctre_gui_is_rect_visible_size(float width, float height) {
+    return ImGui::IsRectVisible(ImVec2(width, height));
+}
+
+bool vvctre_gui_is_rect_visible_min_max(float min[2], float max[2]) {
+    return ImGui::IsRectVisible(ImVec2(min[0], min[1]), ImVec2(max[0], max[1]));
+}
+
 void vvctre_gui_end_tooltip() {
     ImGui::EndTooltip();
 }
@@ -643,8 +898,14 @@ bool vvctre_gui_small_button(const char* label) {
 }
 
 bool vvctre_gui_color_button(const char* tooltip, float red, float green, float blue, float alpha,
-                             int flags) {
+                             ImGuiColorEditFlags flags) {
     return ImGui::ColorButton(tooltip, ImVec4(red, green, blue, alpha), flags);
+}
+
+bool vvctre_gui_color_button_ex(const char* tooltip, float red, float green, float blue,
+                                float alpha, ImGuiColorEditFlags flags, float width, float height) {
+    return ImGui::ColorButton(tooltip, ImVec4(red, green, blue, alpha), flags,
+                              ImVec2(width, height));
 }
 
 bool vvctre_gui_invisible_button(const char* id, float width, float height) {
@@ -673,7 +934,7 @@ bool vvctre_gui_begin(const char* name) {
     return ImGui::Begin(name);
 }
 
-bool vvctre_gui_begin_ex(const char* name, bool* open, int flags) {
+bool vvctre_gui_begin_ex(const char* name, bool* open, ImGuiWindowFlags flags) {
     return ImGui::Begin(name, open, flags);
 }
 
@@ -688,8 +949,66 @@ bool vvctre_gui_begin_auto_resize(const char* name) {
     return ImGui::Begin(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 }
 
+bool vvctre_gui_begin_child(const char* id, float width, float height, bool border,
+                            ImGuiWindowFlags flags) {
+    return ImGui::BeginChild(id, ImVec2(width, height), border, flags);
+}
+
+bool vvctre_gui_begin_child_frame(const char* id, float width, float height,
+                                  ImGuiWindowFlags flags) {
+    return ImGui::BeginChildFrame(ImGui::GetID(id), ImVec2(width, height), flags);
+}
+
+bool vvctre_gui_begin_popup(const char* id, ImGuiWindowFlags flags) {
+    return ImGui::BeginPopup(id, flags);
+}
+
+bool vvctre_gui_begin_popup_modal(const char* name, bool* open, ImGuiWindowFlags flags) {
+    return ImGui::BeginPopupModal(name, open, flags);
+}
+
+bool vvctre_gui_begin_popup_context_item(const char* id, ImGuiPopupFlags flags) {
+    return ImGui::BeginPopupContextItem(id, flags);
+}
+
+bool vvctre_gui_begin_popup_context_window(const char* id, ImGuiPopupFlags flags) {
+    return ImGui::BeginPopupContextWindow(id, flags);
+}
+
+bool vvctre_gui_begin_popup_context_void(const char* id, ImGuiPopupFlags flags) {
+    return ImGui::BeginPopupContextVoid(id, flags);
+}
+
 void vvctre_gui_end() {
     ImGui::End();
+}
+
+void vvctre_gui_end_child() {
+    ImGui::EndChild();
+}
+
+void vvctre_gui_end_child_frame() {
+    ImGui::EndChildFrame();
+}
+
+void vvctre_gui_end_popup() {
+    ImGui::EndPopup();
+}
+
+void vvctre_gui_open_popup(const char* id, ImGuiPopupFlags flags) {
+    ImGui::OpenPopup(id, flags);
+}
+
+bool vvctre_gui_open_popup_context_item(const char* id, ImGuiPopupFlags flags) {
+    return ImGui::OpenPopupContextItem(id, flags);
+}
+
+void vvctre_gui_close_current_popup() {
+    ImGui::CloseCurrentPopup();
+}
+
+bool vvctre_gui_is_popup_open(const char* id, ImGuiPopupFlags flags) {
+    return ImGui::IsPopupOpen(id, flags);
 }
 
 bool vvctre_gui_begin_menu(const char* label) {
@@ -704,6 +1023,22 @@ bool vvctre_gui_begin_tab(const char* label) {
     return ImGui::BeginTabItem(label);
 }
 
+bool vvctre_gui_begin_tab_ex(const char* label, bool* open, ImGuiTabItemFlags flags) {
+    return ImGui::BeginTabItem(label, open, flags);
+}
+
+bool vvctre_gui_begin_tab_bar(const char* id, ImGuiTabBarFlags flags) {
+    return ImGui::BeginTabBar(id, flags);
+}
+
+void vvctre_gui_end_tab_bar() {
+    ImGui::EndTabBar();
+}
+
+void vvctre_gui_set_tab_closed(const char* name) {
+    ImGui::SetTabItemClosed(name);
+}
+
 void vvctre_gui_end_tab() {
     ImGui::EndTabItem();
 }
@@ -714,6 +1049,37 @@ bool vvctre_gui_menu_item(const char* label) {
 
 bool vvctre_gui_menu_item_with_check_mark(const char* label, bool* checked) {
     return ImGui::MenuItem(label, nullptr, checked);
+}
+
+void vvctre_gui_plot_lines(const char* label, const float* values, int values_count,
+                           int values_offset, const char* overlay_text, float scale_min,
+                           float scale_max, float graph_width, float graph_height, int stride) {
+    ImGui::PlotLines(label, values, values_count, values_offset, overlay_text, scale_min, scale_max,
+                     ImVec2(graph_width, graph_height), stride);
+}
+
+void vvctre_gui_plot_lines_getter(const char* label, float (*values_getter)(void* data, int idx),
+                                  void* data, int values_count, int values_offset,
+                                  const char* overlay_text, float scale_min, float scale_max,
+                                  float graph_width, float graph_height) {
+    ImGui::PlotLines(label, values_getter, data, values_count, values_offset, overlay_text,
+                     scale_min, scale_max, ImVec2(graph_width, graph_height));
+}
+
+void vvctre_gui_plot_histogram(const char* label, const float* values, int values_count,
+                               int values_offset, const char* overlay_text, float scale_min,
+                               float scale_max, float graph_width, float graph_height, int stride) {
+    ImGui::PlotHistogram(label, values, values_count, values_offset, overlay_text, scale_min,
+                         scale_max, ImVec2(graph_width, graph_height), stride);
+}
+
+void vvctre_gui_plot_histogram_getter(const char* label,
+                                      float (*values_getter)(void* data, int idx), void* data,
+                                      int values_count, int values_offset, const char* overlay_text,
+                                      float scale_min, float scale_max, float graph_width,
+                                      float graph_height) {
+    ImGui::PlotHistogram(label, values_getter, data, values_count, values_offset, overlay_text,
+                         scale_min, scale_max, ImVec2(graph_width, graph_height));
 }
 
 bool vvctre_gui_begin_listbox(const char* label) {
@@ -757,52 +1123,175 @@ bool vvctre_gui_u8_input(const char* label, u8* value) {
     return ImGui::InputScalar(label, ImGuiDataType_U8, value);
 }
 
+bool vvctre_gui_u8_input_ex(const char* label, u8* value, const u8* step, const u8* step_fast,
+                            const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalar(label, ImGuiDataType_U8, value, step, step_fast, format, flags);
+}
+
+bool vvctre_gui_u8_inputs(const char* label, u8* values, int components, const u8* step,
+                          const u8* step_fast, const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalarN(label, ImGuiDataType_U8, values, components, step, step_fast, format,
+                               flags);
+}
+
 bool vvctre_gui_u16_input(const char* label, u16* value) {
     return ImGui::InputScalar(label, ImGuiDataType_U16, value);
+}
+
+bool vvctre_gui_u16_input_ex(const char* label, u16* value, const u16* step, const u16* step_fast,
+                             const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalar(label, ImGuiDataType_U16, value, step, step_fast, format, flags);
+}
+
+bool vvctre_gui_u16_inputs(const char* label, u16* values, int components, const u16* step,
+                           const u16* step_fast, const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalarN(label, ImGuiDataType_U16, values, components, step, step_fast,
+                               format, flags);
 }
 
 bool vvctre_gui_u32_input(const char* label, u32* value) {
     return ImGui::InputScalar(label, ImGuiDataType_U32, value);
 }
 
+bool vvctre_gui_u32_input_ex(const char* label, u32* value, const u32* step, const u32* step_fast,
+                             const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalar(label, ImGuiDataType_U32, value, step, step_fast, format, flags);
+}
+
+bool vvctre_gui_u32_inputs(const char* label, u32* values, int components, const u32* step,
+                           const u32* step_fast, const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalarN(label, ImGuiDataType_U32, values, components, step, step_fast,
+                               format, flags);
+}
+
 bool vvctre_gui_u64_input(const char* label, u64* value) {
     return ImGui::InputScalar(label, ImGuiDataType_U64, value);
+}
+
+bool vvctre_gui_u64_input_ex(const char* label, u64* value, const u64* step, const u64* step_fast,
+                             const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalar(label, ImGuiDataType_U64, value, step, step_fast, format, flags);
+}
+
+bool vvctre_gui_u64_inputs(const char* label, u64* values, int components, const u64* step,
+                           const u64* step_fast, const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalarN(label, ImGuiDataType_U64, values, components, step, step_fast,
+                               format, flags);
 }
 
 bool vvctre_gui_s8_input(const char* label, s8* value) {
     return ImGui::InputScalar(label, ImGuiDataType_S8, value);
 }
 
+bool vvctre_gui_s8_input_ex(const char* label, s8* value, const s8* step, const s8* step_fast,
+                            const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalar(label, ImGuiDataType_S8, value, step, step_fast, format, flags);
+}
+
+bool vvctre_gui_s8_inputs(const char* label, s8* values, int components, const s8* step,
+                          const s8* step_fast, const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalarN(label, ImGuiDataType_S8, values, components, step, step_fast, format,
+                               flags);
+}
+
 bool vvctre_gui_s16_input(const char* label, s16* value) {
     return ImGui::InputScalar(label, ImGuiDataType_S16, value);
+}
+
+bool vvctre_gui_s16_input_ex(const char* label, s16* value, const s16* step, const s16* step_fast,
+                             const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalar(label, ImGuiDataType_S16, value, step, step_fast, format, flags);
+}
+
+bool vvctre_gui_s16_inputs(const char* label, s16* values, int components, const s16* step,
+                           const s16* step_fast, const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalarN(label, ImGuiDataType_S16, values, components, step, step_fast,
+                               format, flags);
 }
 
 bool vvctre_gui_int_input(const char* label, int* value, int step, int step_fast) {
     return ImGui::InputInt(label, value, step, step_fast);
 }
 
+bool vvctre_gui_int_input_ex(const char* label, int* value, const int* step, const int* step_fast,
+                             const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalar(label, ImGuiDataType_S32, value, step, step_fast, format, flags);
+}
+
+bool vvctre_gui_int_inputs(const char* label, int* values, int components, const int* step,
+                           const int* step_fast, const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalarN(label, ImGuiDataType_S32, values, components, step, step_fast,
+                               format, flags);
+}
+
 bool vvctre_gui_s64_input(const char* label, s64* value) {
     return ImGui::InputScalar(label, ImGuiDataType_S64, value);
+}
+
+bool vvctre_gui_s64_input_ex(const char* label, s64* value, const s64* step, const s64* step_fast,
+                             const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalar(label, ImGuiDataType_S32, value, step, step_fast, format, flags);
+}
+
+bool vvctre_gui_s64_inputs(const char* label, s64* values, int components, const s64* step,
+                           const s64* step_fast, const char* format, ImGuiInputTextFlags flags) {
+    return ImGui::InputScalarN(label, ImGuiDataType_S64, values, components, step, step_fast,
+                               format, flags);
 }
 
 bool vvctre_gui_float_input(const char* label, float* value, float step, float step_fast) {
     return ImGui::InputFloat(label, value, step, step_fast);
 }
 
+bool vvctre_gui_float_input_ex(const char* label, float* value, const float* step,
+                               const float* step_fast, const char* format,
+                               ImGuiInputTextFlags flags) {
+    return ImGui::InputScalar(label, ImGuiDataType_Float, value, step, step_fast, format, flags);
+}
+
+bool vvctre_gui_float_inputs(const char* label, float* values, int components, const float* step,
+                             const float* step_fast, const char* format,
+                             ImGuiInputTextFlags flags) {
+    return ImGui::InputScalarN(label, ImGuiDataType_Float, values, components, step, step_fast,
+                               format, flags);
+}
+
 bool vvctre_gui_double_input(const char* label, double* value, double step, double step_fast) {
     return ImGui::InputDouble(label, value, step, step_fast);
 }
 
-bool vvctre_gui_color_edit(const char* label, float* color, int flags) {
+bool vvctre_gui_double_input_ex(const char* label, double* value, const double* step,
+                                const double* step_fast, const char* format,
+                                ImGuiInputTextFlags flags) {
+    return ImGui::InputScalar(label, ImGuiDataType_Double, value, step, step_fast, format, flags);
+}
+
+bool vvctre_gui_double_inputs(const char* label, double* values, int components, const double* step,
+                              const double* step_fast, const char* format,
+                              ImGuiInputTextFlags flags) {
+    return ImGui::InputScalarN(label, ImGuiDataType_Double, values, components, step, step_fast,
+                               format, flags);
+}
+
+bool vvctre_gui_color_edit(const char* label, float* color, ImGuiColorEditFlags flags) {
     return ImGui::ColorEdit4(label, color, flags);
 }
 
-bool vvctre_gui_color_picker(const char* label, float* color, int flags) {
+bool vvctre_gui_color_picker(const char* label, float* color, ImGuiColorEditFlags flags) {
     return ImGui::ColorPicker4(label, color, flags);
+}
+
+bool vvctre_gui_color_picker_ex(const char* label, float* color, ImGuiColorEditFlags flags,
+                                const float* ref_col) {
+    return ImGui::ColorPicker4(label, color, flags, ref_col);
 }
 
 void vvctre_gui_progress_bar(float value, const char* overlay) {
     ImGui::ProgressBar(value, ImVec2(-1, 0), overlay);
+}
+
+void vvctre_gui_progress_bar_ex(float value, float width, float height, const char* overlay) {
+    ImGui::ProgressBar(value, ImVec2(width, height), overlay);
 }
 
 bool vvctre_gui_slider_u8(const char* label, u8* value, const u8 minimum, const u8 maximum,
@@ -810,9 +1299,31 @@ bool vvctre_gui_slider_u8(const char* label, u8* value, const u8 minimum, const 
     return ImGui::SliderScalar(label, ImGuiDataType_U8, value, &minimum, &maximum, format);
 }
 
+bool vvctre_gui_slider_u8_ex(const char* label, u8* value, const u8 minimum, const u8 maximum,
+                             const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalar(label, ImGuiDataType_U8, value, &minimum, &maximum, format, flags);
+}
+
+bool vvctre_gui_sliders_u8(const char* label, u8* values, int components, const u8 minimum,
+                           const u8 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalarN(label, ImGuiDataType_U8, values, components, &minimum, &maximum,
+                                format, flags);
+}
+
 bool vvctre_gui_slider_u16(const char* label, u16* value, const u16 minimum, const u16 maximum,
                            const char* format) {
     return ImGui::SliderScalar(label, ImGuiDataType_U16, value, &minimum, &maximum, format);
+}
+
+bool vvctre_gui_slider_u16_ex(const char* label, u16* value, const u16 minimum, const u16 maximum,
+                              const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalar(label, ImGuiDataType_U16, value, &minimum, &maximum, format, flags);
+}
+
+bool vvctre_gui_sliders_u16(const char* label, u16* values, int components, const u16 minimum,
+                            const u16 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalarN(label, ImGuiDataType_U16, values, components, &minimum, &maximum,
+                                format, flags);
 }
 
 bool vvctre_gui_slider_u32(const char* label, u32* value, const u32 minimum, const u32 maximum,
@@ -820,9 +1331,31 @@ bool vvctre_gui_slider_u32(const char* label, u32* value, const u32 minimum, con
     return ImGui::SliderScalar(label, ImGuiDataType_U32, value, &minimum, &maximum, format);
 }
 
+bool vvctre_gui_slider_u32_ex(const char* label, u32* value, const u32 minimum, const u32 maximum,
+                              const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalar(label, ImGuiDataType_U32, value, &minimum, &maximum, format, flags);
+}
+
+bool vvctre_gui_sliders_u32(const char* label, u32* values, int components, const u32 minimum,
+                            const u32 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalarN(label, ImGuiDataType_U32, values, components, &minimum, &maximum,
+                                format, flags);
+}
+
 bool vvctre_gui_slider_u64(const char* label, u64* value, const u64 minimum, const u64 maximum,
                            const char* format) {
     return ImGui::SliderScalar(label, ImGuiDataType_U64, value, &minimum, &maximum, format);
+}
+
+bool vvctre_gui_slider_u64_ex(const char* label, u64* value, const u64 minimum, const u64 maximum,
+                              const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalar(label, ImGuiDataType_U64, value, &minimum, &maximum, format, flags);
+}
+
+bool vvctre_gui_sliders_u64(const char* label, u64* values, int components, const u64 minimum,
+                            const u64 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalarN(label, ImGuiDataType_U64, values, components, &minimum, &maximum,
+                                format, flags);
 }
 
 bool vvctre_gui_slider_s8(const char* label, s8* value, const s8 minimum, const s8 maximum,
@@ -830,9 +1363,31 @@ bool vvctre_gui_slider_s8(const char* label, s8* value, const s8 minimum, const 
     return ImGui::SliderScalar(label, ImGuiDataType_S8, value, &minimum, &maximum, format);
 }
 
+bool vvctre_gui_slider_s8_ex(const char* label, s8* value, const s8 minimum, const s8 maximum,
+                             const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalar(label, ImGuiDataType_S8, value, &minimum, &maximum, format, flags);
+}
+
+bool vvctre_gui_sliders_s8(const char* label, s8* values, int components, const s8 minimum,
+                           const s8 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalarN(label, ImGuiDataType_S8, values, components, &minimum, &maximum,
+                                format, flags);
+}
+
 bool vvctre_gui_slider_s16(const char* label, s16* value, const s16 minimum, const s16 maximum,
                            const char* format) {
     return ImGui::SliderScalar(label, ImGuiDataType_S16, value, &minimum, &maximum, format);
+}
+
+bool vvctre_gui_slider_s16_ex(const char* label, s16* value, const s16 minimum, const s16 maximum,
+                              const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalar(label, ImGuiDataType_S16, value, &minimum, &maximum, format, flags);
+}
+
+bool vvctre_gui_sliders_s16(const char* label, s16* values, int components, const s16 minimum,
+                            const s16 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalarN(label, ImGuiDataType_S16, values, components, &minimum, &maximum,
+                                format, flags);
 }
 
 bool vvctre_gui_slider_s32(const char* label, s32* value, const s32 minimum, const s32 maximum,
@@ -840,9 +1395,31 @@ bool vvctre_gui_slider_s32(const char* label, s32* value, const s32 minimum, con
     return ImGui::SliderScalar(label, ImGuiDataType_S32, value, &minimum, &maximum, format);
 }
 
+bool vvctre_gui_slider_s32_ex(const char* label, s32* value, const s32 minimum, const s32 maximum,
+                              const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalar(label, ImGuiDataType_S32, value, &minimum, &maximum, format, flags);
+}
+
+bool vvctre_gui_sliders_s32(const char* label, s32* values, int components, const s32 minimum,
+                            const s32 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalarN(label, ImGuiDataType_S32, values, components, &minimum, &maximum,
+                                format, flags);
+}
+
 bool vvctre_gui_slider_s64(const char* label, s64* value, const s64 minimum, const s64 maximum,
                            const char* format) {
-    return ImGui::SliderScalar(label, ImGuiDataType_U64, value, &minimum, &maximum, format);
+    return ImGui::SliderScalar(label, ImGuiDataType_S64, value, &minimum, &maximum, format);
+}
+
+bool vvctre_gui_slider_s64_ex(const char* label, s64* value, const s64 minimum, const s64 maximum,
+                              const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalar(label, ImGuiDataType_S64, value, &minimum, &maximum, format, flags);
+}
+
+bool vvctre_gui_sliders_s64(const char* label, s64* values, int components, const s64 minimum,
+                            const s64 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalarN(label, ImGuiDataType_S64, values, components, &minimum, &maximum,
+                                format, flags);
 }
 
 bool vvctre_gui_slider_float(const char* label, float* value, const float minimum,
@@ -850,9 +1427,239 @@ bool vvctre_gui_slider_float(const char* label, float* value, const float minimu
     return ImGui::SliderScalar(label, ImGuiDataType_Float, value, &minimum, &maximum, format);
 }
 
+bool vvctre_gui_slider_float_ex(const char* label, float* value, const float minimum,
+                                const float maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalar(label, ImGuiDataType_Float, value, &minimum, &maximum, format,
+                               flags);
+}
+
+bool vvctre_gui_sliders_float(const char* label, float* values, int components, const float minimum,
+                              const float maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalarN(label, ImGuiDataType_Float, values, components, &minimum, &maximum,
+                                format, flags);
+}
+
 bool vvctre_gui_slider_double(const char* label, double* value, const double minimum,
                               const double maximum, const char* format) {
     return ImGui::SliderScalar(label, ImGuiDataType_Double, value, &minimum, &maximum, format);
+}
+
+bool vvctre_gui_slider_double_ex(const char* label, double* value, const double minimum,
+                                 const double maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderScalar(label, ImGuiDataType_Double, value, &minimum, &maximum, format,
+                               flags);
+}
+
+bool vvctre_gui_sliders_double(const char* label, double* values, int components,
+                               const double minimum, const double maximum, const char* format,
+                               ImGuiSliderFlags flags) {
+    return ImGui::SliderScalarN(label, ImGuiDataType_Double, values, components, &minimum, &maximum,
+                                format, flags);
+}
+
+bool vvctre_gui_slider_angle(const char* label, float* rad, float degrees_min, float degrees_max,
+                             const char* format, ImGuiSliderFlags flags) {
+    return ImGui::SliderAngle(label, rad, degrees_min, degrees_max, format, flags);
+}
+
+bool vvctre_gui_vertical_slider_u8(const char* label, float width, float height, u8* value,
+                                   const u8 minimum, const u8 maximum, const char* format,
+                                   ImGuiSliderFlags flags) {
+    return ImGui::VSliderScalar(label, ImVec2(width, height), ImGuiDataType_U8, value, &minimum,
+                                &maximum, format, flags);
+}
+
+bool vvctre_gui_vertical_slider_u16(const char* label, float width, float height, u16* value,
+                                    const u16 minimum, const u16 maximum, const char* format,
+                                    ImGuiSliderFlags flags) {
+    return ImGui::VSliderScalar(label, ImVec2(width, height), ImGuiDataType_U16, value, &minimum,
+                                &maximum, format, flags);
+}
+
+bool vvctre_gui_vertical_slider_u32(const char* label, float width, float height, u32* value,
+                                    const u32 minimum, const u32 maximum, const char* format,
+                                    ImGuiSliderFlags flags) {
+    return ImGui::VSliderScalar(label, ImVec2(width, height), ImGuiDataType_U32, value, &minimum,
+                                &maximum, format, flags);
+}
+
+bool vvctre_gui_vertical_slider_u64(const char* label, float width, float height, u64* value,
+                                    const u64 minimum, const u64 maximum, const char* format,
+                                    ImGuiSliderFlags flags) {
+    return ImGui::VSliderScalar(label, ImVec2(width, height), ImGuiDataType_U64, value, &minimum,
+                                &maximum, format, flags);
+}
+
+bool vvctre_gui_vertical_slider_s8(const char* label, float width, float height, s8* value,
+                                   const s8 minimum, const s8 maximum, const char* format,
+                                   ImGuiSliderFlags flags) {
+    return ImGui::VSliderScalar(label, ImVec2(width, height), ImGuiDataType_S8, value, &minimum,
+                                &maximum, format, flags);
+}
+
+bool vvctre_gui_vertical_slider_s16(const char* label, float width, float height, s16* value,
+                                    const s16 minimum, const s16 maximum, const char* format,
+                                    ImGuiSliderFlags flags) {
+    return ImGui::VSliderScalar(label, ImVec2(width, height), ImGuiDataType_S16, value, &minimum,
+                                &maximum, format, flags);
+}
+
+bool vvctre_gui_vertical_slider_s32(const char* label, float width, float height, s32* value,
+                                    const s32 minimum, const s32 maximum, const char* format,
+                                    ImGuiSliderFlags flags) {
+    return ImGui::VSliderScalar(label, ImVec2(width, height), ImGuiDataType_S32, value, &minimum,
+                                &maximum, format, flags);
+}
+
+bool vvctre_gui_vertical_slider_s64(const char* label, float width, float height, s64* value,
+                                    const s64 minimum, const s64 maximum, const char* format,
+                                    ImGuiSliderFlags flags) {
+    return ImGui::VSliderScalar(label, ImVec2(width, height), ImGuiDataType_S64, value, &minimum,
+                                &maximum, format, flags);
+}
+
+bool vvctre_gui_vertical_slider_float(const char* label, float width, float height, float* value,
+                                      const float minimum, const float maximum, const char* format,
+                                      ImGuiSliderFlags flags) {
+    return ImGui::VSliderScalar(label, ImVec2(width, height), ImGuiDataType_Float, value, &minimum,
+                                &maximum, format, flags);
+}
+
+bool vvctre_gui_vertical_slider_double(const char* label, float width, float height, double* value,
+                                       const double minimum, const double maximum,
+                                       const char* format, ImGuiSliderFlags flags) {
+    return ImGui::VSliderScalar(label, ImVec2(width, height), ImGuiDataType_Double, value, &minimum,
+                                &maximum, format, flags);
+}
+
+bool vvctre_gui_drag_u8(const char* label, u8* value, float speed, const u8 minimum,
+                        const u8 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::DragScalar(label, ImGuiDataType_U8, value, speed, &minimum, &maximum, format,
+                             flags);
+}
+
+bool vvctre_gui_drags_u8(const char* label, u8* values, int components, float speed,
+                         const u8 minimum, const u8 maximum, const char* format,
+                         ImGuiSliderFlags flags) {
+    return ImGui::DragScalarN(label, ImGuiDataType_U8, values, components, speed, &minimum,
+                              &maximum, format, flags);
+}
+
+bool vvctre_gui_drag_u16(const char* label, u16* value, float speed, const u16 minimum,
+                         const u16 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::DragScalar(label, ImGuiDataType_U16, value, speed, &minimum, &maximum, format,
+                             flags);
+}
+
+bool vvctre_gui_drags_u16(const char* label, u16* values, int components, float speed,
+                          const u16 minimum, const u16 maximum, const char* format,
+                          ImGuiSliderFlags flags) {
+    return ImGui::DragScalarN(label, ImGuiDataType_U16, values, components, speed, &minimum,
+                              &maximum, format, flags);
+}
+
+bool vvctre_gui_drag_u32(const char* label, u32* value, float speed, const u16 minimum,
+                         const u32 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::DragScalar(label, ImGuiDataType_U32, value, speed, &minimum, &maximum, format,
+                             flags);
+}
+
+bool vvctre_gui_drags_u32(const char* label, u32* values, int components, float speed,
+                          const u32 minimum, const u32 maximum, const char* format,
+                          ImGuiSliderFlags flags) {
+    return ImGui::DragScalarN(label, ImGuiDataType_U32, values, components, speed, &minimum,
+                              &maximum, format, flags);
+}
+
+bool vvctre_gui_drag_u64(const char* label, u64* value, float speed, const u64 minimum,
+                         const u64 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::DragScalar(label, ImGuiDataType_U64, value, speed, &minimum, &maximum, format,
+                             flags);
+}
+
+bool vvctre_gui_drags_u64(const char* label, u64* values, int components, float speed,
+                          const u64 minimum, const u64 maximum, const char* format,
+                          ImGuiSliderFlags flags) {
+    return ImGui::DragScalarN(label, ImGuiDataType_U64, values, components, speed, &minimum,
+                              &maximum, format, flags);
+}
+
+bool vvctre_gui_drag_s8(const char* label, s8* value, float speed, const s8 minimum,
+                        const s8 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::DragScalar(label, ImGuiDataType_S8, value, speed, &minimum, &maximum, format,
+                             flags);
+}
+
+bool vvctre_gui_drags_s8(const char* label, s8* values, int components, float speed,
+                         const s8 minimum, const s8 maximum, const char* format,
+                         ImGuiSliderFlags flags) {
+    return ImGui::DragScalarN(label, ImGuiDataType_S8, values, components, speed, &minimum,
+                              &maximum, format, flags);
+}
+
+bool vvctre_gui_drag_s16(const char* label, s16* value, float speed, const s16 minimum,
+                         const s16 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::DragScalar(label, ImGuiDataType_S16, value, speed, &minimum, &maximum, format,
+                             flags);
+}
+
+bool vvctre_gui_drags_s16(const char* label, s16* values, int components, float speed,
+                          const s16 minimum, const s16 maximum, const char* format,
+                          ImGuiSliderFlags flags) {
+    return ImGui::DragScalarN(label, ImGuiDataType_S16, values, components, speed, &minimum,
+                              &maximum, format, flags);
+}
+
+bool vvctre_gui_drag_s32(const char* label, s32* value, float speed, const s32 minimum,
+                         const s32 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::DragScalar(label, ImGuiDataType_S32, value, speed, &minimum, &maximum, format,
+                             flags);
+}
+
+bool vvctre_gui_drags_s32(const char* label, s32* values, int components, float speed,
+                          const s32 minimum, const s32 maximum, const char* format,
+                          ImGuiSliderFlags flags) {
+    return ImGui::DragScalarN(label, ImGuiDataType_S32, values, components, speed, &minimum,
+                              &maximum, format, flags);
+}
+
+bool vvctre_gui_drag_s64(const char* label, s64* value, float speed, const s64 minimum,
+                         const u64 maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::DragScalar(label, ImGuiDataType_S64, value, speed, &minimum, &maximum, format,
+                             flags);
+}
+
+bool vvctre_gui_drags_s64(const char* label, s64* values, int components, float speed,
+                          const s64 minimum, const s64 maximum, const char* format,
+                          ImGuiSliderFlags flags) {
+    return ImGui::DragScalarN(label, ImGuiDataType_S64, values, components, speed, &minimum,
+                              &maximum, format, flags);
+}
+
+bool vvctre_gui_drag_float(const char* label, float* value, float speed, const float minimum,
+                           const float maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::DragScalar(label, ImGuiDataType_Float, value, speed, &minimum, &maximum, format,
+                             flags);
+}
+
+bool vvctre_gui_drags_float(const char* label, float* values, int components, float speed,
+                            const float minimum, const float maximum, const char* format,
+                            ImGuiSliderFlags flags) {
+    return ImGui::DragScalarN(label, ImGuiDataType_Float, values, components, speed, &minimum,
+                              &maximum, format, flags);
+}
+
+bool vvctre_gui_drag_double(const char* label, double* value, float speed, const double minimum,
+                            const double maximum, const char* format, ImGuiSliderFlags flags) {
+    return ImGui::DragScalar(label, ImGuiDataType_Double, value, speed, &minimum, &maximum, format,
+                             flags);
+}
+
+bool vvctre_gui_drags_double(const char* label, double* values, int components, float speed,
+                             const double minimum, const double maximum, const char* format,
+                             ImGuiSliderFlags flags) {
+    return ImGui::DragScalarN(label, ImGuiDataType_Double, values, components, speed, &minimum,
+                              &maximum, format, flags);
 }
 
 void vvctre_gui_image(void* texture_id, float width, float height, float uv0[2], float uv1[2],
@@ -860,6 +1667,38 @@ void vvctre_gui_image(void* texture_id, float width, float height, float uv0[2],
     ImGui::Image(texture_id, ImVec2(width, height), ImVec2(uv0[0], uv0[1]), ImVec2(uv1[0], uv1[1]),
                  ImVec4(tint_color[0], tint_color[1], tint_color[2], tint_color[3]),
                  ImVec4(border_color[0], border_color[1], border_color[2], border_color[3]));
+}
+
+void vvctre_gui_columns(int count, const char* id, bool border) {
+    ImGui::Columns(count, id, border);
+}
+
+void vvctre_gui_next_column() {
+    ImGui::NextColumn();
+}
+
+int vvctre_gui_get_column_index() {
+    return ImGui::GetColumnIndex();
+}
+
+float vvctre_gui_get_column_width(int column_index) {
+    return ImGui::GetColumnWidth(column_index);
+}
+
+void vvctre_gui_set_column_width(int column_index, float width) {
+    ImGui::SetColumnWidth(column_index, width);
+}
+
+float vvctre_gui_get_column_offset(int column_index) {
+    return ImGui::GetColumnOffset(column_index);
+}
+
+void vvctre_gui_set_column_offset(int column_index, float offset_x) {
+    ImGui::SetColumnOffset(column_index, offset_x);
+}
+
+int vvctre_gui_get_columns_count() {
+    return ImGui::GetColumnsCount();
 }
 
 void vvctre_gui_set_color(int index, float r, float g, float b, float a) {
@@ -878,6 +1717,10 @@ void vvctre_gui_set_font(void* data, int data_size, float font_size) {
     ImGui::GetIO().Fonts->AddFontFromMemoryTTF(data, data_size, font_size);
 }
 
+void* vvctre_gui_set_font_and_get_pointer(void* data, int data_size, float font_size) {
+    return ImGui::GetIO().Fonts->AddFontFromMemoryTTF(data, data_size, font_size);
+}
+
 bool vvctre_gui_is_window_appearing() {
     return ImGui::IsWindowAppearing();
 }
@@ -886,11 +1729,11 @@ bool vvctre_gui_is_window_collapsed() {
     return ImGui::IsWindowCollapsed();
 }
 
-bool vvctre_gui_is_window_focused(int flags) {
+bool vvctre_gui_is_window_focused(ImGuiFocusedFlags flags) {
     return ImGui::IsWindowFocused(flags);
 }
 
-bool vvctre_gui_is_window_hovered(int flags) {
+bool vvctre_gui_is_window_hovered(ImGuiHoveredFlags flags) {
     return ImGui::IsWindowHovered(flags);
 }
 
@@ -928,6 +1771,356 @@ void vvctre_gui_set_next_window_collapsed(bool collapsed, int condition) {
 
 void vvctre_gui_set_next_window_focus() {
     ImGui::SetNextWindowFocus();
+}
+
+void vvctre_gui_set_next_window_bg_alpha(float alpha) {
+    ImGui::SetNextWindowBgAlpha(alpha);
+}
+
+void vvctre_gui_set_window_pos(float x, float y, ImGuiCond condition) {
+    ImGui::SetWindowPos(ImVec2(x, y), condition);
+}
+
+void vvctre_gui_set_window_size(float width, float height, ImGuiCond condition) {
+    ImGui::SetWindowSize(ImVec2(width, height), condition);
+}
+
+void vvctre_gui_set_window_collapsed(bool collapsed, ImGuiCond condition) {
+    ImGui::SetWindowCollapsed(collapsed, condition);
+}
+
+void vvctre_gui_set_window_focus() {
+    ImGui::SetWindowFocus();
+}
+
+void vvctre_gui_set_window_font_scale(float scale) {
+    ImGui::SetWindowFontScale(scale);
+}
+
+void vvctre_gui_set_window_pos_named(const char* name, float x, float y, ImGuiCond condition) {
+    ImGui::SetWindowPos(name, ImVec2(x, y), condition);
+}
+
+void vvctre_gui_set_window_size_named(const char* name, float width, float height,
+                                      ImGuiCond condition) {
+    ImGui::SetWindowSize(name, ImVec2(width, height), condition);
+}
+
+void vvctre_gui_set_window_collapsed_named(const char* name, bool collapsed, ImGuiCond condition) {
+    ImGui::SetWindowCollapsed(name, collapsed, condition);
+}
+
+void vvctre_gui_set_window_focus_named(const char* name) {
+    ImGui::SetWindowFocus(name);
+}
+
+bool vvctre_gui_is_key_down(int key) {
+    return ImGui::IsKeyDown(key);
+}
+
+bool vvctre_gui_is_key_pressed(int key, bool repeat) {
+    return ImGui::IsKeyPressed(key, repeat);
+}
+
+bool vvctre_gui_is_key_released(int key) {
+    return ImGui::IsKeyReleased(key);
+}
+
+int vvctre_gui_get_key_pressed_amount(int key, float repeat_delay, float rate) {
+    return ImGui::GetKeyPressedAmount(key, repeat_delay, rate);
+}
+
+void vvctre_gui_capture_keyboard_from_app(bool want_capture_keyboard_value) {
+    ImGui::CaptureKeyboardFromApp(want_capture_keyboard_value);
+}
+
+bool vvctre_gui_is_mouse_down(ImGuiMouseButton button) {
+    return ImGui::IsMouseDown(button);
+}
+
+bool vvctre_gui_is_mouse_clicked(ImGuiMouseButton button, bool repeat) {
+    return ImGui::IsMouseClicked(button, repeat);
+}
+
+bool vvctre_gui_is_mouse_released(ImGuiMouseButton button) {
+    return ImGui::IsMouseReleased(button);
+}
+
+bool vvctre_gui_is_mouse_double_clicked(ImGuiMouseButton button) {
+    return ImGui::IsMouseDoubleClicked(button);
+}
+
+bool vvctre_gui_is_mouse_hovering_rect(const float min[2], const float max[2], bool clip) {
+    return ImGui::IsMouseHoveringRect(ImVec2(min[0], min[1]), ImVec2(max[0], max[1]), clip);
+}
+
+bool vvctre_gui_is_mouse_pos_valid(const float pos[2]) {
+    if (pos == nullptr) {
+        return ImGui::IsMousePosValid();
+    } else {
+        const ImVec2 vec(pos[0], pos[1]);
+        return ImGui::IsMousePosValid(&vec);
+    }
+}
+
+bool vvctre_gui_is_any_mouse_down() {
+    return ImGui::IsAnyMouseDown();
+}
+
+void vvctre_gui_get_mouse_pos(float out[2]) {
+    const ImVec2 vec = ImGui::GetMousePos();
+    out[0] = vec.x;
+    out[1] = vec.y;
+}
+
+void vvctre_gui_get_mouse_pos_on_opening_current_popup(float out[2]) {
+    const ImVec2 vec = ImGui::GetMousePosOnOpeningCurrentPopup();
+    out[0] = vec.x;
+    out[1] = vec.y;
+}
+
+bool vvctre_gui_is_mouse_dragging(ImGuiMouseButton button, float lock_threshold) {
+    return ImGui::IsMouseDragging(button, lock_threshold);
+}
+
+void vvctre_gui_get_mouse_drag_delta(ImGuiMouseButton button, float lock_threshold, float out[2]) {
+    const ImVec2 vec = ImGui::GetMouseDragDelta(button, lock_threshold);
+    out[0] = vec.x;
+    out[1] = vec.y;
+}
+
+void vvctre_gui_reset_mouse_drag_delta(ImGuiMouseButton button) {
+    ImGui::ResetMouseDragDelta(button);
+}
+
+ImGuiMouseCursor vvctre_gui_get_mouse_cursor() {
+    return ImGui::GetMouseCursor();
+}
+
+void vvctre_gui_set_mouse_cursor(ImGuiMouseCursor cursor_type) {
+    ImGui::SetMouseCursor(cursor_type);
+}
+
+void vvctre_gui_capture_mouse_from_app(bool want_capture_mouse_value) {
+    ImGui::CaptureMouseFromApp(want_capture_mouse_value);
+}
+
+void vvctre_gui_style_set_alpha(float value) {
+    ImGui::GetStyle().Alpha = value;
+}
+
+void vvctre_gui_style_set_window_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowPadding.x = value[0];
+    style.WindowPadding.y = value[1];
+}
+
+void vvctre_gui_style_set_window_rounding(float value) {
+    ImGui::GetStyle().WindowRounding = value;
+}
+
+void vvctre_gui_style_set_window_border_size(float value) {
+    ImGui::GetStyle().WindowBorderSize = value;
+}
+
+void vvctre_gui_style_set_window_min_size(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowMinSize.x = value[0];
+    style.WindowMinSize.y = value[1];
+}
+
+void vvctre_gui_style_set_window_title_align(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowTitleAlign.x = value[0];
+    style.WindowTitleAlign.y = value[1];
+}
+
+void vvctre_gui_style_set_child_rounding(float value) {
+    ImGui::GetStyle().ChildRounding = value;
+}
+
+void vvctre_gui_style_set_child_border_size(float value) {
+    ImGui::GetStyle().ChildBorderSize = value;
+}
+
+void vvctre_gui_style_set_popup_rounding(float value) {
+    ImGui::GetStyle().PopupRounding = value;
+}
+
+void vvctre_gui_style_set_popup_border_size(float value) {
+    ImGui::GetStyle().PopupBorderSize = value;
+}
+
+void vvctre_gui_style_set_frame_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.FramePadding.x = value[0];
+    style.FramePadding.y = value[1];
+}
+
+void vvctre_gui_style_set_frame_rounding(float value) {
+    ImGui::GetStyle().FrameRounding = value;
+}
+
+void vvctre_gui_style_set_frame_border_size(float value) {
+    ImGui::GetStyle().FrameBorderSize = value;
+}
+
+void vvctre_gui_style_set_item_spacing(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ItemSpacing.x = value[0];
+    style.ItemSpacing.y = value[1];
+}
+
+void vvctre_gui_style_set_item_inner_spacing(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ItemInnerSpacing.x = value[0];
+    style.ItemInnerSpacing.y = value[1];
+}
+
+void vvctre_gui_style_set_indent_spacing(float value) {
+    ImGui::GetStyle().IndentSpacing = value;
+}
+
+void vvctre_gui_style_set_scrollbar_size(float value) {
+    ImGui::GetStyle().ScrollbarSize = value;
+}
+
+void vvctre_gui_style_set_scrollbar_rounding(float value) {
+    ImGui::GetStyle().ScrollbarRounding = value;
+}
+
+void vvctre_gui_style_set_grab_min_size(float value) {
+    ImGui::GetStyle().GrabMinSize = value;
+}
+
+void vvctre_gui_style_set_grab_rounding(float value) {
+    ImGui::GetStyle().GrabRounding = value;
+}
+
+void vvctre_gui_style_set_tab_rounding(float value) {
+    ImGui::GetStyle().TabRounding = value;
+}
+
+void vvctre_gui_style_set_button_text_align(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ButtonTextAlign.x = value[0];
+    style.ButtonTextAlign.y = value[1];
+}
+
+void vvctre_gui_style_set_selectable_text_align(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.SelectableTextAlign.x = value[0];
+    style.SelectableTextAlign.y = value[1];
+}
+
+// GET STYLE
+
+float vvctre_gui_style_get_alpha() {
+    return ImGui::GetStyle().Alpha;
+}
+
+void vvctre_gui_style_get_window_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.WindowPadding.x;
+    value[1] = style.WindowPadding.y;
+}
+
+float vvctre_gui_style_get_window_rounding() {
+    return ImGui::GetStyle().WindowRounding;
+}
+
+float vvctre_gui_style_get_window_border_size() {
+    return ImGui::GetStyle().WindowBorderSize;
+}
+
+void vvctre_gui_style_get_window_min_size(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.WindowMinSize.x;
+    value[1] = style.WindowMinSize.y;
+}
+
+void vvctre_gui_style_get_window_title_align(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.WindowTitleAlign.x;
+    value[1] = style.WindowTitleAlign.y;
+}
+
+float vvctre_gui_style_get_child_rounding() {
+    return ImGui::GetStyle().ChildRounding;
+}
+
+float vvctre_gui_style_get_child_border_size() {
+    return ImGui::GetStyle().ChildBorderSize;
+}
+
+float vvctre_gui_style_get_popup_rounding() {
+    return ImGui::GetStyle().PopupRounding;
+}
+
+float vvctre_gui_style_get_popup_border_size() {
+    return ImGui::GetStyle().PopupBorderSize;
+}
+
+void vvctre_gui_style_get_frame_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.FramePadding.x;
+    value[1] = style.FramePadding.y;
+}
+
+float vvctre_gui_style_get_frame_rounding() {
+    return ImGui::GetStyle().FrameRounding;
+}
+
+float vvctre_gui_style_get_frame_border_size() {
+    return ImGui::GetStyle().FrameBorderSize;
+}
+
+void vvctre_gui_style_get_item_spacing(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.ItemSpacing.x;
+    value[1] = style.ItemSpacing.y;
+}
+
+void vvctre_gui_style_get_item_inner_spacing(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.ItemInnerSpacing.x;
+    value[1] = style.ItemInnerSpacing.y;
+}
+
+float vvctre_gui_style_get_indent_spacing() {
+    return ImGui::GetStyle().IndentSpacing;
+}
+
+float vvctre_gui_style_get_scrollbar_size() {
+    return ImGui::GetStyle().ScrollbarSize;
+}
+
+float vvctre_gui_style_get_scrollbar_rounding() {
+    return ImGui::GetStyle().ScrollbarRounding;
+}
+
+float vvctre_gui_style_get_grab_min_size() {
+    return ImGui::GetStyle().GrabMinSize;
+}
+
+float vvctre_gui_style_get_grab_rounding() {
+    return ImGui::GetStyle().GrabRounding;
+}
+
+float vvctre_gui_style_get_tab_rounding() {
+    return ImGui::GetStyle().TabRounding;
+}
+
+void vvctre_gui_style_get_button_text_align(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.ButtonTextAlign.x;
+    value[0] = style.ButtonTextAlign.y;
+}
+
+void vvctre_gui_style_get_selectable_text_align(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.SelectableTextAlign.x;
+    value[1] = style.SelectableTextAlign.y;
 }
 
 u64 vvctre_get_dear_imgui_version() {
@@ -1451,6 +2644,14 @@ void vvctre_settings_set_enable_dsp_lle_multithread(bool value) {
 
 bool vvctre_settings_get_enable_dsp_lle_multithread() {
     return Settings::values.enable_dsp_lle_multithread;
+}
+
+void vvctre_settings_set_enable_audio_stretching(bool value) {
+    Settings::values.enable_audio_stretching = value;
+}
+
+bool vvctre_settings_get_enable_audio_stretching() {
+    return Settings::values.enable_audio_stretching;
 }
 
 void vvctre_settings_set_audio_volume(float value) {
@@ -2084,6 +3285,79 @@ void vvctre_multiplayer_create_room(const char* ip, u16 port, u32 member_slots) 
     new Network::Room(ip, port, member_slots);
 }
 
+// CoreTiming
+void* vvctre_coretiming_register_event(void* core, const char* name,
+                                       void (*callback)(std::uintptr_t user_data,
+                                                        int cycles_late)) {
+    return static_cast<Core::System*>(core)->CoreTiming().RegisterEvent(
+        std::string(name), [callback](std::uintptr_t user_data, int cycles_late) {
+            callback(user_data, cycles_late);
+        });
+}
+
+void vvctre_coretiming_remove_event(void* core, const void* event) {
+    static_cast<Core::System*>(core)->CoreTiming().RemoveEvent(
+        static_cast<const Core::TimingEventType*>(event));
+}
+
+void vvctre_coretiming_remove_normal_and_threadsafe_event(void* core, const void* event) {
+    static_cast<Core::System*>(core)->CoreTiming().RemoveNormalAndThreadsafeEvent(
+        static_cast<const Core::TimingEventType*>(event));
+}
+
+void vvctre_coretiming_schedule_event(void* core, s64 cycles_into_future, const void* event,
+                                      std::uintptr_t user_data) {
+    static_cast<Core::System*>(core)->CoreTiming().ScheduleEvent(
+        cycles_into_future, static_cast<const Core::TimingEventType*>(event), user_data);
+}
+
+void vvctre_coretiming_schedule_event_threadsafe(void* core, s64 cycles_into_future,
+                                                 const void* event, std::uintptr_t user_data) {
+    static_cast<Core::System*>(core)->CoreTiming().ScheduleEventThreadsafe(
+        cycles_into_future, static_cast<const Core::TimingEventType*>(event), user_data);
+}
+
+void vvctre_coretiming_unschedule(void* core, const void* event, std::uintptr_t user_data) {
+    static_cast<Core::System*>(core)->CoreTiming().UnscheduleEvent(
+        static_cast<const Core::TimingEventType*>(event), user_data);
+}
+
+u64 vvctre_coretiming_get_ticks(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetTicks();
+}
+
+u64 vvctre_coretiming_get_idle_ticks(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetIdleTicks();
+}
+
+void vvctre_coretiming_add_ticks(void* core, u64 ticks) {
+    static_cast<Core::System*>(core)->CoreTiming().AddTicks(ticks);
+}
+
+void vvctre_coretiming_advance(void* core) {
+    static_cast<Core::System*>(core)->CoreTiming().Advance();
+}
+
+void vvctre_coretiming_move_events(void* core) {
+    static_cast<Core::System*>(core)->CoreTiming().MoveEvents();
+}
+
+void vvctre_coretiming_idle(void* core) {
+    static_cast<Core::System*>(core)->CoreTiming().Idle();
+}
+
+void vvctre_coretiming_force_exception_check(void* core, s64 cycles) {
+    static_cast<Core::System*>(core)->CoreTiming().ForceExceptionCheck(cycles);
+}
+
+s64 vvctre_coretiming_get_global_time_us(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetGlobalTimeUs().count();
+}
+
+s64 vvctre_coretiming_get_downcount(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetDowncount();
+}
+
 // Other
 const char* vvctre_get_version() {
     return fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor, vvctre_version_patch)
@@ -2132,6 +3406,30 @@ void vvctre_swap_buffers() {
 
 void* vvctre_get_opengl_function(const char* name) {
     return SDL_GL_GetProcAddress(name);
+}
+
+float vvctre_get_fps() {
+    return ImGui::GetIO().Framerate;
+}
+
+float vvctre_get_frametime() {
+    return ImGui::GetIO().DeltaTime;
+}
+
+int vvctre_get_frame_count() {
+    return ImGui::GetFrameCount();
+}
+
+void vvctre_get_fatal_error(void* out) {
+    std::memcpy(out, &Service::ERR::errinfo, sizeof(Service::ERR::ErrInfo));
+}
+
+void vvctre_set_show_fatal_error_messages(void* plugin_manager, bool show) {
+    static_cast<PluginManager*>(plugin_manager)->show_fatal_error_messages = show;
+}
+
+bool vvctre_get_show_fatal_error_messages(void* plugin_manager) {
+    return static_cast<PluginManager*>(plugin_manager)->show_fatal_error_messages;
 }
 
 std::unordered_map<std::string, void*> PluginManager::function_map = {
@@ -2189,11 +3487,65 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     // GUI
     {"vvctre_gui_push_item_width", (void*)&vvctre_gui_push_item_width},
     {"vvctre_gui_pop_item_width", (void*)&vvctre_gui_pop_item_width},
+    {"vvctre_gui_get_content_region_max", (void*)&vvctre_gui_get_content_region_max},
+    {"vvctre_gui_get_content_region_avail", (void*)&vvctre_gui_get_content_region_avail},
+    {"vvctre_gui_get_window_content_region_min", (void*)&vvctre_gui_get_window_content_region_min},
+    {"vvctre_gui_get_window_content_region_max", (void*)&vvctre_gui_get_window_content_region_max},
+    {"vvctre_gui_get_window_content_region_width",
+     (void*)&vvctre_gui_get_window_content_region_width},
+    {"vvctre_gui_get_scroll_x", (void*)&vvctre_gui_get_scroll_x},
+    {"vvctre_gui_get_scroll_y", (void*)&vvctre_gui_get_scroll_y},
+    {"vvctre_gui_get_scroll_max_x", (void*)&vvctre_gui_get_scroll_max_x},
+    {"vvctre_gui_get_scroll_max_y", (void*)&vvctre_gui_get_scroll_max_y},
+    {"vvctre_gui_set_scroll_x", (void*)&vvctre_gui_set_scroll_x},
+    {"vvctre_gui_set_scroll_y", (void*)&vvctre_gui_set_scroll_y},
+    {"vvctre_gui_set_scroll_here_x", (void*)&vvctre_gui_set_scroll_here_x},
+    {"vvctre_gui_set_scroll_here_y", (void*)&vvctre_gui_set_scroll_here_y},
+    {"vvctre_gui_set_scroll_from_pos_x", (void*)&vvctre_gui_set_scroll_from_pos_x},
+    {"vvctre_gui_set_scroll_from_pos_y", (void*)&vvctre_gui_set_scroll_from_pos_y},
+    {"vvctre_gui_set_next_item_width", (void*)&vvctre_gui_set_next_item_width},
+    {"vvctre_gui_calc_item_width", (void*)&vvctre_gui_calc_item_width},
+    {"vvctre_gui_push_text_wrap_pos", (void*)&vvctre_gui_push_text_wrap_pos},
+    {"vvctre_gui_pop_text_wrap_pos", (void*)&vvctre_gui_pop_text_wrap_pos},
+    {"vvctre_gui_push_allow_keyboard_focus", (void*)&vvctre_gui_push_allow_keyboard_focus},
+    {"vvctre_gui_pop_allow_keyboard_focus", (void*)&vvctre_gui_pop_allow_keyboard_focus},
+    {"vvctre_gui_push_font", (void*)&vvctre_gui_push_font},
+    {"vvctre_gui_pop_font", (void*)&vvctre_gui_pop_font},
+    {"vvctre_gui_push_button_repeat", (void*)&vvctre_gui_push_button_repeat},
+    {"vvctre_gui_pop_button_repeat", (void*)&vvctre_gui_pop_button_repeat},
+    {"vvctre_gui_push_style_color", (void*)&vvctre_gui_push_style_color},
+    {"vvctre_gui_pop_style_color", (void*)&vvctre_gui_pop_style_color},
+    {"vvctre_gui_push_style_var_float", (void*)&vvctre_gui_push_style_var_float},
+    {"vvctre_gui_push_style_var_2floats", (void*)&vvctre_gui_push_style_var_2floats},
+    {"vvctre_gui_pop_style_var", (void*)&vvctre_gui_pop_style_var},
     {"vvctre_gui_same_line", (void*)&vvctre_gui_same_line},
     {"vvctre_gui_new_line", (void*)&vvctre_gui_new_line},
     {"vvctre_gui_bullet", (void*)&vvctre_gui_bullet},
     {"vvctre_gui_indent", (void*)&vvctre_gui_indent},
     {"vvctre_gui_unindent", (void*)&vvctre_gui_unindent},
+    {"vvctre_gui_begin_group", (void*)&vvctre_gui_begin_group},
+    {"vvctre_gui_end_group", (void*)&vvctre_gui_end_group},
+    {"vvctre_gui_get_cursor_pos", (void*)&vvctre_gui_get_cursor_pos},
+    {"vvctre_gui_get_cursor_pos_x", (void*)&vvctre_gui_get_cursor_pos_x},
+    {"vvctre_gui_get_cursor_pos_y", (void*)&vvctre_gui_get_cursor_pos_y},
+    {"vvctre_gui_set_cursor_pos", (void*)&vvctre_gui_set_cursor_pos},
+    {"vvctre_gui_set_cursor_pos_x", (void*)&vvctre_gui_set_cursor_pos_x},
+    {"vvctre_gui_set_cursor_pos_y", (void*)&vvctre_gui_set_cursor_pos_y},
+    {"vvctre_gui_get_cursor_start_pos", (void*)&vvctre_gui_get_cursor_start_pos},
+    {"vvctre_gui_get_cursor_screen_pos", (void*)&vvctre_gui_get_cursor_start_pos},
+    {"vvctre_gui_set_cursor_screen_pos", (void*)&vvctre_gui_set_cursor_screen_pos},
+    {"vvctre_gui_align_text_to_frame_padding", (void*)&vvctre_gui_align_text_to_frame_padding},
+    {"vvctre_gui_get_text_line_height", (void*)&vvctre_gui_get_text_line_height},
+    {"vvctre_gui_get_text_line_height_with_spacing",
+     (void*)&vvctre_gui_get_text_line_height_with_spacing},
+    {"vvctre_gui_get_frame_height", (void*)&vvctre_gui_get_frame_height},
+    {"vvctre_gui_get_frame_height_with_spacing", (void*)&vvctre_gui_get_frame_height_with_spacing},
+    {"vvctre_gui_push_id_string", (void*)&vvctre_gui_push_id_string},
+    {"vvctre_gui_push_id_string_with_begin_and_end",
+     (void*)&vvctre_gui_push_id_string_with_begin_and_end},
+    {"vvctre_gui_push_id_void", (void*)&vvctre_gui_push_id_void},
+    {"vvctre_gui_push_id_int", (void*)&vvctre_gui_push_id_int},
+    {"vvctre_gui_pop_id", (void*)&vvctre_gui_pop_id},
     {"vvctre_gui_spacing", (void*)&vvctre_gui_spacing},
     {"vvctre_gui_separator", (void*)&vvctre_gui_separator},
     {"vvctre_gui_dummy", (void*)&vvctre_gui_dummy},
@@ -2222,6 +3574,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_button", (void*)&vvctre_gui_button},
     {"vvctre_gui_small_button", (void*)&vvctre_gui_small_button},
     {"vvctre_gui_color_button", (void*)&vvctre_gui_color_button},
+    {"vvctre_gui_color_button_ex", (void*)&vvctre_gui_color_button_ex},
     {"vvctre_gui_invisible_button", (void*)&vvctre_gui_invisible_button},
     {"vvctre_gui_radio_button", (void*)&vvctre_gui_radio_button},
     {"vvctre_gui_image_button", (void*)&vvctre_gui_image_button},
@@ -2229,14 +3582,36 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_begin", (void*)&vvctre_gui_begin},
     {"vvctre_gui_begin_overlay", (void*)&vvctre_gui_begin_overlay},
     {"vvctre_gui_begin_auto_resize", (void*)&vvctre_gui_begin_auto_resize},
+    {"vvctre_gui_begin_child", (void*)&vvctre_gui_begin_child},
+    {"vvctre_gui_begin_child_frame", (void*)&vvctre_gui_begin_child_frame},
+    {"vvctre_gui_begin_popup", (void*)&vvctre_gui_begin_popup},
+    {"vvctre_gui_begin_popup_modal", (void*)&vvctre_gui_begin_popup_modal},
+    {"vvctre_gui_begin_popup_context_item", (void*)&vvctre_gui_begin_popup_context_item},
+    {"vvctre_gui_begin_popup_context_window", (void*)&vvctre_gui_begin_popup_context_window},
+    {"vvctre_gui_begin_popup_context_void", (void*)&vvctre_gui_begin_popup_context_void},
     {"vvctre_gui_begin_ex", (void*)&vvctre_gui_begin_ex},
     {"vvctre_gui_end", (void*)&vvctre_gui_end},
+    {"vvctre_gui_end_child", (void*)&vvctre_gui_end_child},
+    {"vvctre_gui_end_child_frame", (void*)&vvctre_gui_end_child_frame},
+    {"vvctre_gui_end_popup", (void*)&vvctre_gui_end_popup},
+    {"vvctre_gui_open_popup", (void*)&vvctre_gui_open_popup},
+    {"vvctre_gui_open_popup_context_item", (void*)&vvctre_gui_open_popup_context_item},
+    {"vvctre_gui_close_current_popup", (void*)&vvctre_gui_close_current_popup},
+    {"vvctre_gui_is_popup_open", (void*)&vvctre_gui_is_popup_open},
     {"vvctre_gui_begin_menu", (void*)&vvctre_gui_begin_menu},
     {"vvctre_gui_end_menu", (void*)&vvctre_gui_end_menu},
     {"vvctre_gui_begin_tab", (void*)&vvctre_gui_begin_tab},
+    {"vvctre_gui_begin_tab_ex", (void*)&vvctre_gui_begin_tab_ex},
+    {"vvctre_gui_begin_tab_bar", (void*)&vvctre_gui_begin_tab_bar},
+    {"vvctre_gui_end_tab_bar", (void*)&vvctre_gui_end_tab_bar},
+    {"vvctre_gui_set_tab_closed", (void*)&vvctre_gui_set_tab_closed},
     {"vvctre_gui_end_tab", (void*)&vvctre_gui_end_tab},
     {"vvctre_gui_menu_item", (void*)&vvctre_gui_menu_item},
     {"vvctre_gui_menu_item_with_check_mark", (void*)&vvctre_gui_menu_item_with_check_mark},
+    {"vvctre_gui_plot_lines", (void*)&vvctre_gui_plot_lines},
+    {"vvctre_gui_plot_lines_getter", (void*)&vvctre_gui_plot_lines_getter},
+    {"vvctre_gui_plot_histogram", (void*)&vvctre_gui_plot_histogram},
+    {"vvctre_gui_plot_histogram_getter", (void*)&vvctre_gui_plot_histogram_getter},
     {"vvctre_gui_begin_listbox", (void*)&vvctre_gui_begin_listbox},
     {"vvctre_gui_end_listbox", (void*)&vvctre_gui_end_listbox},
     {"vvctre_gui_begin_combo_box", (void*)&vvctre_gui_begin_combo_box},
@@ -2247,32 +3622,114 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_text_input_multiline", (void*)&vvctre_gui_text_input_multiline},
     {"vvctre_gui_text_input_with_hint", (void*)&vvctre_gui_text_input_with_hint},
     {"vvctre_gui_u8_input", (void*)&vvctre_gui_u8_input},
+    {"vvctre_gui_u8_input_ex", (void*)&vvctre_gui_u8_input_ex},
+    {"vvctre_gui_u8_inputs", (void*)&vvctre_gui_u8_inputs},
     {"vvctre_gui_u16_input", (void*)&vvctre_gui_u16_input},
+    {"vvctre_gui_u16_input_ex", (void*)&vvctre_gui_u16_input_ex},
+    {"vvctre_gui_u16_inputs", (void*)&vvctre_gui_u16_inputs},
     {"vvctre_gui_u32_input", (void*)&vvctre_gui_u32_input},
+    {"vvctre_gui_u32_input_ex", (void*)&vvctre_gui_u32_input_ex},
+    {"vvctre_gui_u32_inputs", (void*)&vvctre_gui_u32_inputs},
     {"vvctre_gui_u64_input", (void*)&vvctre_gui_u64_input},
+    {"vvctre_gui_u64_input_ex", (void*)&vvctre_gui_u64_input_ex},
+    {"vvctre_gui_u64_inputs", (void*)&vvctre_gui_u64_inputs},
     {"vvctre_gui_s8_input", (void*)&vvctre_gui_s8_input},
+    {"vvctre_gui_s8_input_ex", (void*)&vvctre_gui_s8_input_ex},
+    {"vvctre_gui_s8_inputs", (void*)&vvctre_gui_s8_inputs},
     {"vvctre_gui_s16_input", (void*)&vvctre_gui_s16_input},
+    {"vvctre_gui_s16_input_ex", (void*)&vvctre_gui_s16_input_ex},
+    {"vvctre_gui_s16_inputs", (void*)&vvctre_gui_s16_inputs},
     {"vvctre_gui_int_input", (void*)&vvctre_gui_int_input},
+    {"vvctre_gui_int_input_ex", (void*)&vvctre_gui_int_input_ex},
+    {"vvctre_gui_int_inputs", (void*)&vvctre_gui_int_inputs},
     {"vvctre_gui_s64_input", (void*)&vvctre_gui_s64_input},
+    {"vvctre_gui_s64_input_ex", (void*)&vvctre_gui_s64_input_ex},
+    {"vvctre_gui_s64_inputs", (void*)&vvctre_gui_s64_inputs},
     {"vvctre_gui_float_input", (void*)&vvctre_gui_float_input},
+    {"vvctre_gui_float_input_ex", (void*)&vvctre_gui_float_input_ex},
+    {"vvctre_gui_float_inputs", (void*)&vvctre_gui_float_inputs},
     {"vvctre_gui_double_input", (void*)&vvctre_gui_double_input},
+    {"vvctre_gui_double_input_ex", (void*)&vvctre_gui_double_input_ex},
+    {"vvctre_gui_double_inputs", (void*)&vvctre_gui_double_inputs},
     {"vvctre_gui_color_edit", (void*)&vvctre_gui_color_edit},
     {"vvctre_gui_color_picker", (void*)&vvctre_gui_color_picker},
+    {"vvctre_gui_color_picker_ex", (void*)&vvctre_gui_color_picker_ex},
     {"vvctre_gui_progress_bar", (void*)&vvctre_gui_progress_bar},
+    {"vvctre_gui_progress_bar_ex", (void*)&vvctre_gui_progress_bar_ex},
     {"vvctre_gui_slider_u8", (void*)&vvctre_gui_slider_u8},
+    {"vvctre_gui_slider_u8_ex", (void*)&vvctre_gui_slider_u8_ex},
+    {"vvctre_gui_sliders_u8", (void*)&vvctre_gui_sliders_u8},
     {"vvctre_gui_slider_u16", (void*)&vvctre_gui_slider_u16},
+    {"vvctre_gui_slider_u16_ex", (void*)&vvctre_gui_slider_u16_ex},
+    {"vvctre_gui_sliders_u16", (void*)&vvctre_gui_sliders_u16},
     {"vvctre_gui_slider_u32", (void*)&vvctre_gui_slider_u32},
+    {"vvctre_gui_slider_u32_ex", (void*)&vvctre_gui_slider_u32_ex},
+    {"vvctre_gui_sliders_u32", (void*)&vvctre_gui_sliders_u32},
     {"vvctre_gui_slider_u64", (void*)&vvctre_gui_slider_u64},
+    {"vvctre_gui_slider_u64_ex", (void*)&vvctre_gui_slider_u64_ex},
+    {"vvctre_gui_sliders_u64", (void*)&vvctre_gui_sliders_u64},
     {"vvctre_gui_slider_s8", (void*)&vvctre_gui_slider_s8},
+    {"vvctre_gui_slider_s8_ex", (void*)&vvctre_gui_slider_s8_ex},
+    {"vvctre_gui_sliders_s8", (void*)&vvctre_gui_sliders_s8},
     {"vvctre_gui_slider_s16", (void*)&vvctre_gui_slider_s16},
+    {"vvctre_gui_slider_s16_ex", (void*)&vvctre_gui_slider_s16_ex},
+    {"vvctre_gui_sliders_s16", (void*)&vvctre_gui_sliders_s16},
     {"vvctre_gui_slider_s32", (void*)&vvctre_gui_slider_s32},
+    {"vvctre_gui_slider_s32_ex", (void*)&vvctre_gui_slider_s32_ex},
+    {"vvctre_gui_sliders_s32", (void*)&vvctre_gui_sliders_s32},
     {"vvctre_gui_slider_s64", (void*)&vvctre_gui_slider_s64},
+    {"vvctre_gui_slider_s64_ex", (void*)&vvctre_gui_slider_s64_ex},
+    {"vvctre_gui_sliders_s64", (void*)&vvctre_gui_sliders_s64},
     {"vvctre_gui_slider_float", (void*)&vvctre_gui_slider_float},
+    {"vvctre_gui_slider_float_ex", (void*)&vvctre_gui_slider_float_ex},
+    {"vvctre_gui_sliders_float", (void*)&vvctre_gui_sliders_float},
     {"vvctre_gui_slider_double", (void*)&vvctre_gui_slider_double},
+    {"vvctre_gui_slider_double_ex", (void*)&vvctre_gui_slider_double_ex},
+    {"vvctre_gui_sliders_double", (void*)&vvctre_gui_sliders_double},
+    {"vvctre_gui_slider_angle", (void*)&vvctre_gui_slider_angle},
+    {"vvctre_gui_vertical_slider_u8", (void*)&vvctre_gui_vertical_slider_u8},
+    {"vvctre_gui_vertical_slider_u16", (void*)&vvctre_gui_vertical_slider_u16},
+    {"vvctre_gui_vertical_slider_u32", (void*)&vvctre_gui_vertical_slider_u32},
+    {"vvctre_gui_vertical_slider_u64", (void*)&vvctre_gui_vertical_slider_u64},
+    {"vvctre_gui_vertical_slider_s8", (void*)&vvctre_gui_vertical_slider_s8},
+    {"vvctre_gui_vertical_slider_s16", (void*)&vvctre_gui_vertical_slider_s16},
+    {"vvctre_gui_vertical_slider_s32", (void*)&vvctre_gui_vertical_slider_s32},
+    {"vvctre_gui_vertical_slider_s64", (void*)&vvctre_gui_vertical_slider_s64},
+    {"vvctre_gui_vertical_slider_float", (void*)&vvctre_gui_vertical_slider_float},
+    {"vvctre_gui_vertical_slider_double", (void*)&vvctre_gui_vertical_slider_double},
+    {"vvctre_gui_drag_u8", (void*)&vvctre_gui_drag_u8},
+    {"vvctre_gui_drags_u8", (void*)&vvctre_gui_drags_u8},
+    {"vvctre_gui_drag_u16", (void*)&vvctre_gui_drag_u16},
+    {"vvctre_gui_drags_u16", (void*)&vvctre_gui_drags_u16},
+    {"vvctre_gui_drag_u32", (void*)&vvctre_gui_drag_u32},
+    {"vvctre_gui_drags_u32", (void*)&vvctre_gui_drags_u32},
+    {"vvctre_gui_drag_u64", (void*)&vvctre_gui_drag_u64},
+    {"vvctre_gui_drags_u64", (void*)&vvctre_gui_drags_u64},
+    {"vvctre_gui_drag_s8", (void*)&vvctre_gui_drag_s8},
+    {"vvctre_gui_drags_s8", (void*)&vvctre_gui_drags_s8},
+    {"vvctre_gui_drag_s16", (void*)&vvctre_gui_drag_s16},
+    {"vvctre_gui_drags_s16", (void*)&vvctre_gui_drags_s16},
+    {"vvctre_gui_drag_s32", (void*)&vvctre_gui_drag_s32},
+    {"vvctre_gui_drags_s32", (void*)&vvctre_gui_drags_s32},
+    {"vvctre_gui_drag_s64", (void*)&vvctre_gui_drag_s64},
+    {"vvctre_gui_drags_s64", (void*)&vvctre_gui_drags_s64},
+    {"vvctre_gui_drag_float", (void*)&vvctre_gui_drag_float},
+    {"vvctre_gui_drags_float", (void*)&vvctre_gui_drags_float},
+    {"vvctre_gui_drag_double", (void*)&vvctre_gui_drag_double},
+    {"vvctre_gui_drags_double", (void*)&vvctre_gui_drags_double},
     {"vvctre_gui_image", (void*)&vvctre_gui_image},
+    {"vvctre_gui_columns", (void*)&vvctre_gui_columns},
+    {"vvctre_gui_next_column", (void*)&vvctre_gui_next_column},
+    {"vvctre_gui_get_column_index", (void*)&vvctre_gui_get_column_index},
+    {"vvctre_gui_get_column_width", (void*)&vvctre_gui_get_column_width},
+    {"vvctre_gui_set_column_width", (void*)&vvctre_gui_set_column_width},
+    {"vvctre_gui_get_column_offset", (void*)&vvctre_gui_get_column_offset},
+    {"vvctre_gui_set_column_offset", (void*)&vvctre_gui_set_column_offset},
+    {"vvctre_gui_get_columns_count", (void*)&vvctre_gui_get_columns_count},
     {"vvctre_gui_set_color", (void*)&vvctre_gui_set_color},
     {"vvctre_gui_get_color", (void*)&vvctre_gui_get_color},
     {"vvctre_gui_set_font", (void*)&vvctre_gui_set_font},
+    {"vvctre_gui_set_font_and_get_pointer", (void*)&vvctre_gui_set_font_and_get_pointer},
     {"vvctre_gui_is_window_appearing", (void*)&vvctre_gui_is_window_appearing},
     {"vvctre_gui_is_window_collapsed", (void*)&vvctre_gui_is_window_collapsed},
     {"vvctre_gui_is_window_focused", (void*)&vvctre_gui_is_window_focused},
@@ -2285,6 +3742,85 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
      (void*)&vvctre_gui_set_next_window_size_constraints},
     {"vvctre_gui_set_next_window_collapsed", (void*)&vvctre_gui_set_next_window_collapsed},
     {"vvctre_gui_set_next_window_focus", (void*)&vvctre_gui_set_next_window_focus},
+    {"vvctre_gui_set_next_window_bg_alpha", (void*)&vvctre_gui_set_next_window_bg_alpha},
+    {"vvctre_gui_set_window_pos", (void*)&vvctre_gui_set_window_pos},
+    {"vvctre_gui_set_window_size", (void*)&vvctre_gui_set_window_size},
+    {"vvctre_gui_set_window_collapsed", (void*)&vvctre_gui_set_window_collapsed},
+    {"vvctre_gui_set_window_focus", (void*)&vvctre_gui_set_window_focus},
+    {"vvctre_gui_set_window_font_scale", (void*)&vvctre_gui_set_window_font_scale},
+    {"vvctre_gui_set_window_pos_named", (void*)&vvctre_gui_set_window_pos_named},
+    {"vvctre_gui_set_window_size_named", (void*)&vvctre_gui_set_window_size_named},
+    {"vvctre_gui_set_window_collapsed_named", (void*)&vvctre_gui_set_window_collapsed_named},
+    {"vvctre_gui_set_window_focus_named", (void*)&vvctre_gui_set_window_focus_named},
+    {"vvctre_gui_is_key_down", (void*)&vvctre_gui_is_key_down},
+    {"vvctre_gui_is_key_pressed", (void*)&vvctre_gui_is_key_pressed},
+    {"vvctre_gui_is_key_released", (void*)&vvctre_gui_is_key_released},
+    {"vvctre_gui_get_key_pressed_amount", (void*)&vvctre_gui_get_key_pressed_amount},
+    {"vvctre_gui_capture_keyboard_from_app", (void*)&vvctre_gui_capture_keyboard_from_app},
+    {"vvctre_gui_is_mouse_down", (void*)&vvctre_gui_is_mouse_down},
+    {"vvctre_gui_is_mouse_clicked", (void*)&vvctre_gui_is_mouse_clicked},
+    {"vvctre_gui_is_mouse_released", (void*)&vvctre_gui_is_mouse_released},
+    {"vvctre_gui_is_mouse_double_clicked", (void*)&vvctre_gui_is_mouse_double_clicked},
+    {"vvctre_gui_is_mouse_hovering_rect", (void*)&vvctre_gui_is_mouse_hovering_rect},
+    {"vvctre_gui_is_mouse_pos_valid", (void*)&vvctre_gui_is_mouse_pos_valid},
+    {"vvctre_gui_is_any_mouse_down", (void*)&vvctre_gui_is_any_mouse_down},
+    {"vvctre_gui_get_mouse_pos", (void*)&vvctre_gui_get_mouse_pos},
+    {"vvctre_gui_get_mouse_pos_on_opening_current_popup",
+     (void*)&vvctre_gui_get_mouse_pos_on_opening_current_popup},
+    {"vvctre_gui_is_mouse_dragging", (void*)&vvctre_gui_is_mouse_dragging},
+    {"vvctre_gui_get_mouse_drag_delta", (void*)&vvctre_gui_get_mouse_drag_delta},
+    {"vvctre_gui_reset_mouse_drag_delta", (void*)&vvctre_gui_reset_mouse_drag_delta},
+    {"vvctre_gui_get_mouse_cursor", (void*)&vvctre_gui_get_mouse_cursor},
+    {"vvctre_gui_set_mouse_cursor", (void*)&vvctre_gui_set_mouse_cursor},
+    {"vvctre_gui_capture_mouse_from_app", (void*)&vvctre_gui_capture_mouse_from_app},
+    {"vvctre_gui_style_set_alpha", (void*)&vvctre_gui_style_set_alpha},
+    {"vvctre_gui_style_set_window_padding", (void*)&vvctre_gui_style_set_window_padding},
+    {"vvctre_gui_style_set_window_rounding", (void*)&vvctre_gui_style_set_window_rounding},
+    {"vvctre_gui_style_set_window_border_size", (void*)&vvctre_gui_style_set_window_border_size},
+    {"vvctre_gui_style_set_window_min_size", (void*)&vvctre_gui_style_set_window_min_size},
+    {"vvctre_gui_style_set_window_title_align", (void*)&vvctre_gui_style_set_window_title_align},
+    {"vvctre_gui_style_set_child_rounding", (void*)&vvctre_gui_style_set_child_rounding},
+    {"vvctre_gui_style_set_child_border_size", (void*)&vvctre_gui_style_set_child_border_size},
+    {"vvctre_gui_style_set_popup_rounding", (void*)&vvctre_gui_style_set_popup_rounding},
+    {"vvctre_gui_style_set_popup_border_size", (void*)&vvctre_gui_style_set_popup_border_size},
+    {"vvctre_gui_style_set_frame_padding", (void*)&vvctre_gui_style_set_frame_padding},
+    {"vvctre_gui_style_set_frame_rounding", (void*)&vvctre_gui_style_set_frame_rounding},
+    {"vvctre_gui_style_set_frame_border_size", (void*)&vvctre_gui_style_set_frame_border_size},
+    {"vvctre_gui_style_set_item_spacing", (void*)&vvctre_gui_style_set_item_spacing},
+    {"vvctre_gui_style_set_item_inner_spacing", (void*)&vvctre_gui_style_set_item_inner_spacing},
+    {"vvctre_gui_style_set_indent_spacing", (void*)&vvctre_gui_style_set_indent_spacing},
+    {"vvctre_gui_style_set_scrollbar_size", (void*)&vvctre_gui_style_set_scrollbar_size},
+    {"vvctre_gui_style_set_scrollbar_rounding", (void*)&vvctre_gui_style_set_scrollbar_rounding},
+    {"vvctre_gui_style_set_grab_min_size", (void*)&vvctre_gui_style_set_grab_min_size},
+    {"vvctre_gui_style_set_grab_rounding", (void*)&vvctre_gui_style_set_grab_rounding},
+    {"vvctre_gui_style_set_tab_rounding", (void*)&vvctre_gui_style_set_tab_rounding},
+    {"vvctre_gui_style_set_button_text_align", (void*)&vvctre_gui_style_set_button_text_align},
+    {"vvctre_gui_style_set_selectable_text_align",
+     (void*)&vvctre_gui_style_set_selectable_text_align},
+    {"vvctre_gui_style_get_alpha", (void*)&vvctre_gui_style_get_alpha},
+    {"vvctre_gui_style_get_window_padding", (void*)&vvctre_gui_style_get_window_padding},
+    {"vvctre_gui_style_get_window_rounding", (void*)&vvctre_gui_style_get_window_rounding},
+    {"vvctre_gui_style_get_window_border_size", (void*)&vvctre_gui_style_get_window_border_size},
+    {"vvctre_gui_style_get_window_min_size", (void*)&vvctre_gui_style_get_window_min_size},
+    {"vvctre_gui_style_get_window_title_align", (void*)&vvctre_gui_style_get_window_title_align},
+    {"vvctre_gui_style_get_child_rounding", (void*)&vvctre_gui_style_get_child_rounding},
+    {"vvctre_gui_style_get_child_border_size", (void*)&vvctre_gui_style_get_child_border_size},
+    {"vvctre_gui_style_get_popup_rounding", (void*)&vvctre_gui_style_get_popup_rounding},
+    {"vvctre_gui_style_get_popup_border_size", (void*)&vvctre_gui_style_get_popup_border_size},
+    {"vvctre_gui_style_get_frame_padding", (void*)&vvctre_gui_style_get_frame_padding},
+    {"vvctre_gui_style_get_frame_rounding", (void*)&vvctre_gui_style_get_frame_rounding},
+    {"vvctre_gui_style_get_frame_border_size", (void*)&vvctre_gui_style_get_frame_border_size},
+    {"vvctre_gui_style_get_item_spacing", (void*)&vvctre_gui_style_get_item_spacing},
+    {"vvctre_gui_style_get_item_inner_spacing", (void*)&vvctre_gui_style_get_item_inner_spacing},
+    {"vvctre_gui_style_get_indent_spacing", (void*)&vvctre_gui_style_get_indent_spacing},
+    {"vvctre_gui_style_get_scrollbar_size", (void*)&vvctre_gui_style_get_scrollbar_size},
+    {"vvctre_gui_style_get_scrollbar_rounding", (void*)&vvctre_gui_style_get_scrollbar_rounding},
+    {"vvctre_gui_style_get_grab_min_size", (void*)&vvctre_gui_style_get_grab_min_size},
+    {"vvctre_gui_style_get_grab_rounding", (void*)&vvctre_gui_style_get_grab_rounding},
+    {"vvctre_gui_style_get_tab_rounding", (void*)&vvctre_gui_style_get_tab_rounding},
+    {"vvctre_gui_style_get_button_text_align", (void*)&vvctre_gui_style_get_button_text_align},
+    {"vvctre_gui_style_get_selectable_text_align",
+     (void*)&vvctre_gui_style_get_selectable_text_align},
     {"vvctre_get_dear_imgui_version", (void*)&vvctre_get_dear_imgui_version},
     // OS window
     {"vvctre_set_os_window_size", (void*)&vvctre_set_os_window_size},
@@ -2376,6 +3912,10 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
      (void*)&vvctre_settings_set_enable_dsp_lle_multithread},
     {"vvctre_settings_get_enable_dsp_lle_multithread",
      (void*)&vvctre_settings_get_enable_dsp_lle_multithread},
+    {"vvctre_settings_set_enable_audio_stretching",
+     (void*)&vvctre_settings_set_enable_audio_stretching},
+    {"vvctre_settings_get_enable_audio_stretching",
+     (void*)&vvctre_settings_get_enable_audio_stretching},
     {"vvctre_settings_set_audio_volume", (void*)&vvctre_settings_set_audio_volume},
     {"vvctre_settings_get_audio_volume", (void*)&vvctre_settings_get_audio_volume},
     {"vvctre_settings_set_audio_sink_id", (void*)&vvctre_settings_set_audio_sink_id},
@@ -2565,6 +4105,24 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_multiplayer_on_information_change", (void*)&vvctre_multiplayer_on_information_change},
     {"vvctre_multiplayer_on_state_change", (void*)&vvctre_multiplayer_on_state_change},
     {"vvctre_multiplayer_create_room", (void*)&vvctre_multiplayer_create_room},
+    // CoreTiming
+    {"vvctre_coretiming_register_event", (void*)&vvctre_coretiming_register_event},
+    {"vvctre_coretiming_remove_event", (void*)&vvctre_coretiming_remove_event},
+    {"vvctre_coretiming_remove_normal_and_threadsafe_event",
+     (void*)&vvctre_coretiming_remove_normal_and_threadsafe_event},
+    {"vvctre_coretiming_schedule_event", (void*)&vvctre_coretiming_schedule_event},
+    {"vvctre_coretiming_schedule_event_threadsafe",
+     (void*)&vvctre_coretiming_schedule_event_threadsafe},
+    {"vvctre_coretiming_unschedule", (void*)&vvctre_coretiming_unschedule},
+    {"vvctre_coretiming_get_ticks", (void*)&vvctre_coretiming_get_ticks},
+    {"vvctre_coretiming_get_idle_ticks", (void*)&vvctre_coretiming_get_idle_ticks},
+    {"vvctre_coretiming_add_ticks", (void*)&vvctre_coretiming_add_ticks},
+    {"vvctre_coretiming_advance", (void*)&vvctre_coretiming_advance},
+    {"vvctre_coretiming_move_events", (void*)&vvctre_coretiming_move_events},
+    {"vvctre_coretiming_idle", (void*)&vvctre_coretiming_idle},
+    {"vvctre_coretiming_force_exception_check", (void*)&vvctre_coretiming_force_exception_check},
+    {"vvctre_coretiming_get_global_time_us", (void*)&vvctre_coretiming_get_global_time_us},
+    {"vvctre_coretiming_get_downcount", (void*)&vvctre_coretiming_get_downcount},
     // Other
     {"vvctre_get_version", (void*)&vvctre_get_version},
     {"vvctre_get_version_major", (void*)&vvctre_get_version_major},
@@ -2578,4 +4136,10 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_log_critical", (void*)&vvctre_log_critical},
     {"vvctre_swap_buffers", (void*)&vvctre_swap_buffers},
     {"vvctre_get_opengl_function", (void*)&vvctre_get_opengl_function},
+    {"vvctre_get_fps", (void*)&vvctre_get_fps},
+    {"vvctre_get_frametime", (void*)&vvctre_get_frametime},
+    {"vvctre_get_frame_count", (void*)&vvctre_get_frame_count},
+    {"vvctre_get_fatal_error", (void*)&vvctre_get_fatal_error},
+    {"vvctre_set_show_fatal_error_messages", (void*)&vvctre_set_show_fatal_error_messages},
+    {"vvctre_get_show_fatal_error_messages", (void*)&vvctre_get_show_fatal_error_messages},
 };

@@ -33,60 +33,6 @@ enum class ExceptionType : u32 {
     VectorFP = 3,
 };
 
-struct ExceptionInfo {
-    u8 exception_type;
-    INSERT_PADDING_BYTES(3);
-    u32 sr;
-    u32 ar;
-    u32 fpexc;
-    u32 fpinst;
-    u32 fpinst2;
-};
-static_assert(sizeof(ExceptionInfo) == 0x18, "ExceptionInfo struct has incorrect size");
-
-struct ExceptionContext final {
-    std::array<u32, 16> arm_regs;
-    u32 cpsr;
-};
-static_assert(sizeof(ExceptionContext) == 0x44, "ExceptionContext struct has incorrect size");
-
-struct ExceptionData {
-    ExceptionInfo exception_info;
-    ExceptionContext exception_context;
-    INSERT_PADDING_WORDS(1);
-};
-static_assert(sizeof(ExceptionData) == 0x60, "ExceptionData struct has incorrect size");
-
-struct ErrInfo {
-    struct ErrInfoCommon {
-        u8 specifier;          // 0x0
-        u8 rev_high;           // 0x1
-        u16 rev_low;           // 0x2
-        u32 result_code;       // 0x4
-        u32 pc_address;        // 0x8
-        u32 pid;               // 0xC
-        u32 title_id_low;      // 0x10
-        u32 title_id_high;     // 0x14
-        u32 app_title_id_low;  // 0x18
-        u32 app_title_id_high; // 0x1C
-    } errinfo_common;
-    static_assert(sizeof(ErrInfoCommon) == 0x20, "ErrInfoCommon struct has incorrect size");
-
-    union {
-        struct {
-            char data[0x60]; // 0x20
-        } generic;
-
-        struct {
-            ExceptionData exception_data; // 0x20
-        } exception;
-
-        struct {
-            char message[0x60]; // 0x20
-        } result_failure;
-    };
-};
-
 static std::string GetErrType(u8 type_code) {
     switch (static_cast<FatalErrType>(type_code)) {
     case FatalErrType::Generic:
@@ -130,17 +76,17 @@ static std::string GetCurrentSystemTime() {
     return time_stream.str();
 }
 
-static void LogGenericInfo(const ErrInfo::ErrInfoCommon& errinfo_common) {
-    LOG_CRITICAL(Service_ERR, "PID: 0x{:08X}", errinfo_common.pid);
-    LOG_CRITICAL(Service_ERR, "REV: 0x{:08X}_0x{:08X}", errinfo_common.rev_high,
-                 errinfo_common.rev_low);
-    LOG_CRITICAL(Service_ERR, "TID: 0x{:08X}_0x{:08X}", errinfo_common.title_id_high,
-                 errinfo_common.title_id_low);
-    LOG_CRITICAL(Service_ERR, "AID: 0x{:08X}_0x{:08X}", errinfo_common.app_title_id_high,
-                 errinfo_common.app_title_id_low);
-    LOG_CRITICAL(Service_ERR, "ADR: 0x{:08X}", errinfo_common.pc_address);
+static void LogGenericInfo(const ErrInfo& errinfo) {
+    LOG_CRITICAL(Service_ERR, "PID: 0x{:08X}", errinfo.common.pid);
+    LOG_CRITICAL(Service_ERR, "REV: 0x{:08X}_0x{:08X}", errinfo.common.rev_high,
+                 errinfo.common.rev_low);
+    LOG_CRITICAL(Service_ERR, "TID: 0x{:08X}_0x{:08X}", errinfo.common.title_id_high,
+                 errinfo.common.title_id_low);
+    LOG_CRITICAL(Service_ERR, "AID: 0x{:08X}_0x{:08X}", errinfo.common.app_title_id_high,
+                 errinfo.common.app_title_id_low);
+    LOG_CRITICAL(Service_ERR, "ADR: 0x{:08X}", errinfo.common.pc_address);
 
-    ResultCode result_code{errinfo_common.result_code};
+    ResultCode result_code{errinfo.common.result_code};
     LOG_CRITICAL(Service_ERR, "RSL: 0x{:08X}", result_code.raw);
     LOG_CRITICAL(Service_ERR, "  Level: {}", static_cast<u32>(result_code.level.Value()));
     LOG_CRITICAL(Service_ERR, "  Summary: {}", static_cast<u32>(result_code.summary.Value()));
@@ -148,18 +94,20 @@ static void LogGenericInfo(const ErrInfo::ErrInfoCommon& errinfo_common) {
     LOG_CRITICAL(Service_ERR, "  Desc: {}", static_cast<u32>(result_code.description.Value()));
 }
 
+ErrInfo errinfo{};
+
 void ERR_F::ThrowFatalError(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 1, 32, 0);
 
     LOG_CRITICAL(Service_ERR, "Fatal error");
-    const ErrInfo errinfo = rp.PopRaw<ErrInfo>();
-    LOG_CRITICAL(Service_ERR, "Fatal error type: {}", GetErrType(errinfo.errinfo_common.specifier));
+    errinfo = rp.PopRaw<ErrInfo>();
+    LOG_CRITICAL(Service_ERR, "Fatal error type: {}", GetErrType(errinfo.common.specifier));
     system.SetStatus(Core::System::ResultStatus::FatalError);
 
     // Generic Info
-    LogGenericInfo(errinfo.errinfo_common);
+    LogGenericInfo(errinfo);
 
-    switch (static_cast<FatalErrType>(errinfo.errinfo_common.specifier)) {
+    switch (static_cast<FatalErrType>(errinfo.common.specifier)) {
     case FatalErrType::Generic:
     case FatalErrType::Corrupted:
     case FatalErrType::CardRemoved:
@@ -168,47 +116,41 @@ void ERR_F::ThrowFatalError(Kernel::HLERequestContext& ctx) {
         break;
     }
     case FatalErrType::Exception: {
-        const auto& errtype = errinfo.exception;
-
         // Register Info
         LOG_CRITICAL(Service_ERR, "ARM Registers:");
-        for (u32 index = 0; index < errtype.exception_data.exception_context.arm_regs.size();
-             ++index) {
+        for (u32 index = 0; index < errinfo.exception.context.arm_regs.size(); ++index) {
             if (index < 13) {
                 LOG_DEBUG(Service_ERR, "r{}=0x{:08X}", index,
-                          errtype.exception_data.exception_context.arm_regs.at(index));
+                          errinfo.exception.context.arm_regs.at(index));
             } else if (index == 13) {
                 LOG_CRITICAL(Service_ERR, "SP=0x{:08X}",
-                             errtype.exception_data.exception_context.arm_regs.at(index));
+                             errinfo.exception.context.arm_regs.at(index));
             } else if (index == 14) {
                 LOG_CRITICAL(Service_ERR, "LR=0x{:08X}",
-                             errtype.exception_data.exception_context.arm_regs.at(index));
+                             errinfo.exception.context.arm_regs.at(index));
             } else if (index == 15) {
                 LOG_CRITICAL(Service_ERR, "PC=0x{:08X}",
-                             errtype.exception_data.exception_context.arm_regs.at(index));
+                             errinfo.exception.context.arm_regs.at(index));
             }
         }
-        LOG_CRITICAL(Service_ERR, "CPSR=0x{:08X}", errtype.exception_data.exception_context.cpsr);
+        LOG_CRITICAL(Service_ERR, "CPSR=0x{:08X}", errinfo.exception.context.cpsr);
 
         // Exception Info
         LOG_CRITICAL(Service_ERR, "EXCEPTION TYPE: {}",
-                     GetExceptionType(errtype.exception_data.exception_info.exception_type));
-        switch (static_cast<ExceptionType>(errtype.exception_data.exception_info.exception_type)) {
+                     GetExceptionType(errinfo.exception.info.type));
+        switch (static_cast<ExceptionType>(errinfo.exception.info.type)) {
         case ExceptionType::PrefetchAbort:
-            LOG_CRITICAL(Service_ERR, "IFSR: 0x{:08X}", errtype.exception_data.exception_info.sr);
-            LOG_CRITICAL(Service_ERR, "r15: 0x{:08X}", errtype.exception_data.exception_info.ar);
+            LOG_CRITICAL(Service_ERR, "IFSR: 0x{:08X}", errinfo.exception.info.sr);
+            LOG_CRITICAL(Service_ERR, "r15: 0x{:08X}", errinfo.exception.info.ar);
             break;
         case ExceptionType::DataAbort:
-            LOG_CRITICAL(Service_ERR, "DFSR: 0x{:08X}", errtype.exception_data.exception_info.sr);
-            LOG_CRITICAL(Service_ERR, "DFAR: 0x{:08X}", errtype.exception_data.exception_info.ar);
+            LOG_CRITICAL(Service_ERR, "DFSR: 0x{:08X}", errinfo.exception.info.sr);
+            LOG_CRITICAL(Service_ERR, "DFAR: 0x{:08X}", errinfo.exception.info.ar);
             break;
         case ExceptionType::VectorFP:
-            LOG_CRITICAL(Service_ERR, "FPEXC: 0x{:08X}",
-                         errtype.exception_data.exception_info.fpinst);
-            LOG_CRITICAL(Service_ERR, "FINST: 0x{:08X}",
-                         errtype.exception_data.exception_info.fpinst);
-            LOG_CRITICAL(Service_ERR, "FINST2: 0x{:08X}",
-                         errtype.exception_data.exception_info.fpinst2);
+            LOG_CRITICAL(Service_ERR, "FPEXC: 0x{:08X}", errinfo.exception.info.fpinst);
+            LOG_CRITICAL(Service_ERR, "FINST: 0x{:08X}", errinfo.exception.info.fpinst);
+            LOG_CRITICAL(Service_ERR, "FINST2: 0x{:08X}", errinfo.exception.info.fpinst2);
             break;
         case ExceptionType::Undefined:
             break; // Not logging exception_info for this case
@@ -218,10 +160,8 @@ void ERR_F::ThrowFatalError(Kernel::HLERequestContext& ctx) {
     }
 
     case FatalErrType::ResultFailure: {
-        const auto& errtype = errinfo.result_failure;
-
         // Failure Message
-        LOG_CRITICAL(Service_ERR, "Failure Message: {}", errtype.message);
+        LOG_CRITICAL(Service_ERR, "Failure Message: {}", errinfo.result_failure.message);
         LOG_CRITICAL(Service_ERR, "Datetime: {}", GetCurrentSystemTime());
         break;
     }

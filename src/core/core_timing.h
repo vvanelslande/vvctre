@@ -158,9 +158,7 @@ public:
                        std::uintptr_t user_data = 0);
 
     /**
-     * This is to be called when outside of hle threads, such as the graphics thread, wants to
-     * schedule things to be executed on the main thread.
-     * Not that this doesn't change slice_length and thus events scheduled by this might be called
+     * This doesn't change slice_length and thus events scheduled by this might be called
      * with a delay of up to MAX_SLICE_LENGTH
      */
     void ScheduleEventThreadsafe(s64 cycles_into_future, const TimingEventType* event_type,
@@ -224,7 +222,7 @@ private:
     // Are we in a function that has been called from Advance()
     // If events are sheduled from a function that gets called from Advance(),
     // don't change slice_length and downcount.
-    // The time between CoreTiming being intialized and the first call to Advance() is considered
+    // The time between CoreTiming being initialized and the first call to Advance() is considered
     // the slice boundary between slice -1 and slice 0. Dispatcher loops must call Advance() before
     // executing the first cycle of each slice to prepare the slice length and downcount for
     // that slice.
