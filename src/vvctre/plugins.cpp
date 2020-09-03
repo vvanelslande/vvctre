@@ -1558,7 +1558,7 @@ bool vvctre_gui_drags_u16(const char* label, u16* values, int components, float 
                               &maximum, format, flags);
 }
 
-bool vvctre_gui_drag_u32(const char* label, u32* value, float speed, const u16 minimum,
+bool vvctre_gui_drag_u32(const char* label, u32* value, float speed, const u32 minimum,
                          const u32 maximum, const char* format, ImGuiSliderFlags flags) {
     return ImGui::DragScalar(label, ImGuiDataType_U32, value, speed, &minimum, &maximum, format,
                              flags);
@@ -1624,7 +1624,7 @@ bool vvctre_gui_drags_s32(const char* label, s32* values, int components, float 
 }
 
 bool vvctre_gui_drag_s64(const char* label, s64* value, float speed, const s64 minimum,
-                         const u64 maximum, const char* format, ImGuiSliderFlags flags) {
+                         const s64 maximum, const char* format, ImGuiSliderFlags flags) {
     return ImGui::DragScalar(label, ImGuiDataType_S64, value, speed, &minimum, &maximum, format,
                              flags);
 }
