@@ -37,7 +37,7 @@ jobs:
             7z a vvctre-plugin-settings-${{runner.os}}.7z settings.so plugin.c license.txt
           fi
 
-          export FILE_URL=$(curl ${{secrets.ISSUE_BOT_FILES}} -s -F "file=@vvctre-plugin-settings-${{runner.os}}.7z" -F "payload_json={\"content\":\"Issue: [${{github.event.issue.number}}](<https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}}>)\nRequested By: [${{github.event.issue.user.login}}](<https://github.com/${{github.event.issue.user.login}}>)\"}" | jq -r .attachments[0].url)
+          export FILE_URL=$(curl ${{secrets.ISSUE_BOT_FILES}} -s -F "file=@vvctre-plugin-settings-${{runner.os}}.7z" -F "payload_json={\"content\":\"Issue: [${{github.event.issue.number}}](<https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}}>)\nRequested By: [${{github.event.issue.user.login}}](<https://github.com/${{github.event.issue.user.login}}>)\nAction: ${{github.event.action}}\"}" | jq -r .attachments[0].url)
           echo ::set-env name=FILE_URL::$FILE_URL
       - uses: peter-evans/create-or-update-comment@v1
         with:
