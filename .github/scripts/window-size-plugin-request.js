@@ -26,7 +26,7 @@ let code = `// Copyright 2020 Valentin Vanelslande
 
 static const char* required_function_names[] = { "vvctre_set_os_window_size", NULL };
 
-typedef void* (*vvctre_set_os_window_size_t)(void* plugin_manager, int width, int height);
+typedef void (*vvctre_set_os_window_size_t)(void* plugin_manager, int width, int height);
 
 static vvctre_set_os_window_size_t vvctre_set_os_window_size;
 
@@ -49,7 +49,6 @@ VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
 VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager,
                                        void* required_functions[]) {
     vvctre_set_os_window_size = (vvctre_set_os_window_size_t)required_functions[0];
-
     g_plugin_manager = plugin_manager;
 }
 

@@ -21,7 +21,7 @@ let code = `// Copyright 2020 Valentin Vanelslande
 
 static const char* required_function_names[] = { "vvctre_set_os_window_position", NULL };
 
-typedef void* (*vvctre_set_os_window_position_t)(void* plugin_manager, int x, int y);
+typedef void (*vvctre_set_os_window_position_t)(void* plugin_manager, int x, int y);
 
 static vvctre_set_os_window_position_t vvctre_set_os_window_position;
 
@@ -44,7 +44,6 @@ VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
 VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager,
                                        void* required_functions[]) {
     vvctre_set_os_window_position = (vvctre_set_os_window_position_t)required_functions[0];
-
     g_plugin_manager = plugin_manager;
 }
 
