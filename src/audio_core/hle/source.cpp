@@ -170,7 +170,7 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
         // This will be the starting sample for the first time the buffer is played.
     }
 
-    // TODO(xperia64): is this in the correct spot in terms of the bit handling order?
+    // TODO(xperia64): Is this in the correct spot in terms of the bit handling order?
     if (config.partial_embedded_buffer_dirty) {
         config.partial_embedded_buffer_dirty.Assign(0);
 
@@ -183,7 +183,10 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
         // whatever is in config, because that may be invalid.
         const u8* const memory =
             memory_system->GetPhysicalPointer(state.current_buffer_physical_address & 0xFFFFFFFC);
-        if (memory) {
+
+        // TODO(xperia64): This could potentially be optimized by only decoding the new data and
+        // appending that to the buffer.
+        if (memory != nullptr) {
             const unsigned num_channels = state.mono_or_stereo == MonoOrStereo::Stereo ? 2 : 1;
             bool valid = false;
             switch (state.format) {
@@ -370,7 +373,7 @@ bool Source::DequeueBuffer() {
     // This physical address masking occurs due to how the DSP DMA hardware is configured by the
     // firmware.
     const u8* const memory = memory_system->GetPhysicalPointer(buf.physical_address & 0xFFFFFFFC);
-    if (memory) {
+    if (memory != nullptr) {
         const unsigned num_channels = buf.mono_or_stereo == MonoOrStereo::Stereo ? 2 : 1;
         switch (buf.format) {
         case Format::PCM8:

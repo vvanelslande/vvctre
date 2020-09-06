@@ -120,7 +120,7 @@ void MemorySystem::MapPages(PageTable& page_table, u32 base, u32 size, u8* memor
         if (type == PageType::Memory && impl->cache_marker.IsCached(base * PAGE_SIZE)) {
             page_table.SetRasterizerCachedMemory(base);
             impl->fastmem_mapper.Unmap(page_table, base * PAGE_SIZE, PAGE_SIZE);
-        } else if (memory) {
+        } else if (memory != nullptr) {
             impl->fastmem_mapper.Map(page_table, base * PAGE_SIZE, memory, PAGE_SIZE);
         } else {
             impl->fastmem_mapper.Unmap(page_table, base * PAGE_SIZE, PAGE_SIZE);
