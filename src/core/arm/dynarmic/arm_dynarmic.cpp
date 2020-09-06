@@ -224,7 +224,7 @@ u32 ARM_Dynarmic::GetVFPSystemReg(VFPSystemRegister reg) const {
     case VFP_FPEXC:
         return fpexc;
     default:
-        UNREACHABLE_MSG("Unknown VFP system register: {}", static_cast<size_t>(reg));
+        UNREACHABLE_MSG("Unknown VFP system register: {}", static_cast<std::size_t>(reg));
     }
 }
 
@@ -237,7 +237,7 @@ void ARM_Dynarmic::SetVFPSystemReg(VFPSystemRegister reg, u32 value) {
         fpexc = value;
         return;
     default:
-        UNREACHABLE_MSG("Unknown VFP system register: {}", static_cast<size_t>(reg));
+        UNREACHABLE_MSG("Unknown VFP system register: {}", static_cast<std::size_t>(reg));
     }
 }
 
@@ -256,7 +256,7 @@ u32 ARM_Dynarmic::GetCP15Register(CP15Register reg) {
     case CP15_THREAD_URO:
         return cp15_state.cp15_thread_uro;
     default:
-        UNREACHABLE_MSG("Unknown CP15 register: {}", static_cast<size_t>(reg));
+        UNREACHABLE_MSG("Unknown CP15 register: {}", static_cast<std::size_t>(reg));
     }
 }
 
@@ -269,7 +269,7 @@ void ARM_Dynarmic::SetCP15Register(CP15Register reg, u32 value) {
         cp15_state.cp15_thread_uro = value;
         return;
     default:
-        UNREACHABLE_MSG("Unknown CP15 register: {}", static_cast<size_t>(reg));
+        UNREACHABLE_MSG("Unknown CP15 register: {}", static_cast<std::size_t>(reg));
     }
 }
 

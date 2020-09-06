@@ -490,7 +490,7 @@ ResultCode AppletManager::PrepareToDoApplicationJump(u64 title_id, FS::MediaType
     // launch the Home Menu and tell it to launch our desired application.
 
     // Save the title data to send it to the Home Menu when DoApplicationJump is called.
-    const auto& application_slot = applet_slots[static_cast<size_t>(AppletSlot::Application)];
+    const auto& application_slot = applet_slots[static_cast<std::size_t>(AppletSlot::Application)];
 
     ASSERT_MSG(flags != ApplicationJumpFlags::UseStoredParameters,
                "Unimplemented application jump flags 1");
@@ -514,7 +514,7 @@ ResultCode AppletManager::DoApplicationJump() {
     // we launch the new application directly. In the real APT service, the Home Menu must be
     // running to do this, otherwise error 0xC8A0CFF0 is returned.
 
-    auto& application_slot = applet_slots[static_cast<size_t>(AppletSlot::Application)];
+    auto& application_slot = applet_slots[static_cast<std::size_t>(AppletSlot::Application)];
     application_slot.Reset();
 
     // TODO(Subv): Set the delivery parameters.
@@ -535,7 +535,7 @@ ResultCode AppletManager::PrepareToStartApplication(u64 title_id, FS::MediaType 
 
     // TODO(Subv): This should return 0xc8a0cff0 if the applet preparation state is already set
 
-    const auto& application_slot = applet_slots[static_cast<size_t>(AppletSlot::Application)];
+    const auto& application_slot = applet_slots[static_cast<std::size_t>(AppletSlot::Application)];
 
     if (application_slot.registered) {
         // TODO(Subv): Return 0xc8a0cffc
