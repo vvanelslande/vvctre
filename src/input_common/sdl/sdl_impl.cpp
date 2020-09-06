@@ -7,7 +7,6 @@
 #include <cmath>
 #include <functional>
 #include <iterator>
-#include <map>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -608,7 +607,7 @@ public:
     }
 
 private:
-    std::map<int, int> axis_memory;
+    std::unordered_map<int, int> axis_memory;
 };
 
 class SDLAnalogPoller final : public SDLPoller {
