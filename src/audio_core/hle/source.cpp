@@ -221,7 +221,7 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
             }
         }
         LOG_TRACE(Audio_DSP, "partially updating embedded buffer addr={:#010x} len={} id={}",
-                  state.physical_address, config.length, config.buffer_id);
+                  state.current_buffer_physical_address, config.length, config.buffer_id);
     }
 
     if (config.embedded_buffer_dirty) {
