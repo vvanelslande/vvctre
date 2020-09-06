@@ -469,7 +469,6 @@ ResultVal<AppletManager::AppletInfo> AppletManager::GetAppletInfo(AppletId app_i
     }
 
     if (app_id == AppletId::Application) {
-        // TODO(Subv): Implement this once Application launching is implemented
         LOG_ERROR(Service_APT, "Unimplemented GetAppletInfo(Application)");
         return ResultCode(ErrorDescription::NotFound, ErrorModule::Applet, ErrorSummary::NotFound,
                           ErrorLevel::Status);
@@ -509,19 +508,11 @@ ResultCode AppletManager::PrepareToDoApplicationJump(u64 title_id, FS::MediaType
 }
 
 ResultCode AppletManager::DoApplicationJump() {
-    // Note: The real console uses the Home Menu to perform the application jump, it goes
-    // OldApplication->Home Menu->NewApplication. We do not need to use the Home Menu to do this so
-    // we launch the new application directly. In the real APT service, the Home Menu must be
-    // running to do this, otherwise error 0xC8A0CFF0 is returned.
-
     auto& application_slot = applet_slots[static_cast<std::size_t>(AppletSlot::Application)];
     application_slot.Reset();
 
     // TODO(Subv): Set the delivery parameters.
 
-    // Note: The real console sends signal 17 (WakeupToLaunchApplication) to the Home Menu, this
-    // prompts it to call GetProgramIdOnApplicationJump and
-    // PrepareToStartApplication/StartApplication on the title to launch.
     system.SetResetFilePath(Service::AM::GetTitleContentPath(app_jump_parameters.next_media_type,
                                                              app_jump_parameters.next_title_id));
     system.RequestReset();
