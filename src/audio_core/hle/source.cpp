@@ -176,11 +176,11 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
 
         // As this bit is set by the game, three config options are also updated:
         // buffer_id (after a check comparing the buffer_id to something, probably to make sure it's
-        // the same buffer?), flags2_raw.is_looping, and length
+        // the same buffer?), flags2_raw.is_looping, and length.
 
         // A quick and dirty way of extending the current buffer is to just read the whole thing
-        // again with the new length Note that this uses the latched physical address instead of
-        // whatever is in config, because that may be invalid
+        // again with the new length. Note that this uses the latched physical address instead of
+        // whatever is in config, because that may be invalid.
         const u8* const memory =
             memory_system->GetPhysicalPointer(state.current_buffer_physical_address & 0xFFFFFFFC);
         if (memory) {
@@ -198,7 +198,7 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
                 valid = true;
                 break;
             case Format::ADPCM:
-                // TODO(xperia64): are partial embedded buffer updates even valid for ADPCM? What
+                // TODO(xperia64): Are partial embedded buffer updates even valid for ADPCM? What
                 // about the adpcm state?
                 UNIMPLEMENTED_MSG("{} not handled for partial buffer updates", "ADPCM");
                 /* state.current_buffer =
@@ -210,10 +210,10 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
                 break;
             }
 
-            // Again, because our interpolation consumes samples isntead of using an index, let's
-            // just re-consume the samples up to the current sample number There may be some
+            // Again, because our interpolation consumes samples instead of using an index, let's
+            // just re-consume the samples up to the current sample number. There may be some
             // imprecision here with the current sample number, as Detective Pikachu sounds a little
-            // rough at times
+            // rough at times.
             if (valid) {
                 state.current_buffer.erase(
                     state.current_buffer.begin(),
