@@ -49,6 +49,7 @@
 #include "input_common/main.h"
 #include "input_common/motion_emu.h"
 #include "input_common/sdl/sdl.h"
+#include "network/room_member.h"
 #include "video_core/renderer_base.h"
 #include "video_core/renderer_opengl/texture_filters/texture_filterer.h"
 #include "video_core/video_core.h"
@@ -163,50 +164,47 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
         }
     });
 
-    multiplayer_on_error = room_member.BindOnError([&](const Network::RoomMember::Error& error) {
+    room_member.BindOnError([&](const Network::RoomMember::Error& error) {
         pfd::message("vvctre", Network::GetErrorStr(error), pfd::choice::ok, pfd::icon::error);
     });
 
-    multiplayer_on_chat_message =
-        room_member.BindOnChatMessageReceived([&](const Network::ChatEntry& entry) {
-            if (multiplayer_blocked_nicknames.count(entry.nickname)) {
-                return;
-            }
+    room_member.BindOnChatMessageReceived([&](const Network::ChatEntry& entry) {
+        if (multiplayer_blocked_nicknames.count(entry.nickname)) {
+            return;
+        }
 
-            if (multiplayer_messages.size() == 100) {
-                multiplayer_messages.pop_front();
-            }
+        if (multiplayer_messages.size() == 100) {
+            multiplayer_messages.pop_front();
+        }
 
-            asl::Date date = asl::Date::now();
-            multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] <{}> {}", date.hours(),
-                                                       date.minutes(), entry.nickname,
-                                                       entry.message));
-        });
+        asl::Date date = asl::Date::now();
+        multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] <{}> {}", date.hours(),
+                                                   date.minutes(), entry.nickname, entry.message));
+    });
 
-    multiplayer_on_status_message =
-        room_member.BindOnStatusMessageReceived([&](const Network::StatusMessageEntry& entry) {
-            if (multiplayer_messages.size() == 100) {
-                multiplayer_messages.pop_front();
-            }
+    room_member.BindOnStatusMessageReceived([&](const Network::StatusMessageEntry& entry) {
+        if (multiplayer_messages.size() == 100) {
+            multiplayer_messages.pop_front();
+        }
 
-            switch (entry.type) {
-            case Network::StatusMessageTypes::IdMemberJoin:
-                multiplayer_messages.push_back(fmt::format("{} joined", entry.nickname));
-                break;
-            case Network::StatusMessageTypes::IdMemberLeave:
-                multiplayer_messages.push_back(fmt::format("{} left", entry.nickname));
-                break;
-            case Network::StatusMessageTypes::IdMemberKicked:
-                multiplayer_messages.push_back(fmt::format("{} was kicked", entry.nickname));
-                break;
-            case Network::StatusMessageTypes::IdMemberBanned:
-                multiplayer_messages.push_back(fmt::format("{} was banned", entry.nickname));
-                break;
-            case Network::StatusMessageTypes::IdAddressUnbanned:
-                multiplayer_messages.push_back("Someone was unbanned");
-                break;
-            }
-        });
+        switch (entry.type) {
+        case Network::StatusMessageTypes::IdMemberJoin:
+            multiplayer_messages.push_back(fmt::format("{} joined", entry.nickname));
+            break;
+        case Network::StatusMessageTypes::IdMemberLeave:
+            multiplayer_messages.push_back(fmt::format("{} left", entry.nickname));
+            break;
+        case Network::StatusMessageTypes::IdMemberKicked:
+            multiplayer_messages.push_back(fmt::format("{} was kicked", entry.nickname));
+            break;
+        case Network::StatusMessageTypes::IdMemberBanned:
+            multiplayer_messages.push_back(fmt::format("{} was banned", entry.nickname));
+            break;
+        case Network::StatusMessageTypes::IdAddressUnbanned:
+            multiplayer_messages.push_back("Someone was unbanned");
+            break;
+        }
+    });
 
     if (ok_multiplayer) {
         ConnectToCitraRoom();

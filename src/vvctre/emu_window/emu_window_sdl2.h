@@ -15,7 +15,6 @@
 #include "core/frontend/applets/swkbd.h"
 #include "core/frontend/emu_window.h"
 #include "core/hle/kernel/ipc_debugger/recorder.h"
-#include "network/room_member.h"
 #include "vvctre/common.h"
 
 class PluginManager;
@@ -130,9 +129,6 @@ private:
     std::string public_rooms_query;
     std::string multiplayer_message;
     std::deque<std::string> multiplayer_messages;
-    Network::RoomMember::CallbackHandle<Network::RoomMember::Error> multiplayer_on_error;
-    Network::RoomMember::CallbackHandle<Network::ChatEntry> multiplayer_on_chat_message;
-    Network::RoomMember::CallbackHandle<Network::StatusMessageEntry> multiplayer_on_status_message;
     std::unordered_set<std::string> multiplayer_blocked_nicknames;
 
     // Plugins
