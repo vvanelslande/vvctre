@@ -165,9 +165,6 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
 
     multiplayer_on_error = room_member.BindOnError([&](const Network::RoomMember::Error& error) {
         pfd::message("vvctre", Network::GetErrorStr(error), pfd::choice::ok, pfd::icon::error);
-
-        multiplayer_message.clear();
-        multiplayer_messages.clear();
     });
 
     multiplayer_on_chat_message =
@@ -3190,9 +3187,6 @@ void EmuWindow_SDL2::SwapBuffers() {
             ImGui::EndPopup();
         }
         if (!open) {
-            multiplayer_message.clear();
-            multiplayer_messages.clear();
-            multiplayer_blocked_nicknames.clear();
             room_member.Leave();
         }
     }
