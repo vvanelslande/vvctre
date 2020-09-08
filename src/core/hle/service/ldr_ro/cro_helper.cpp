@@ -22,20 +22,20 @@ static ResultCode CROFormatError(u32 description) {
 }
 
 const std::array<int, 17> CROHelper::ENTRY_SIZE{{
-    1, // code
-    1, // data
-    1, // module name
+    1, // Code
+    1, // Data
+    1, // Module name
     sizeof(SegmentEntry),
     sizeof(ExportNamedSymbolEntry),
     sizeof(ExportIndexedSymbolEntry),
-    1, // export strings
+    1, // Export strings
     sizeof(ExportTreeEntry),
     sizeof(ImportModuleEntry),
     sizeof(ExternalRelocationEntry),
     sizeof(ImportNamedSymbolEntry),
     sizeof(ImportIndexedSymbolEntry),
     sizeof(ImportAnonymousSymbolEntry),
-    1, // import strings
+    1, // Import strings
     sizeof(StaticAnonymousSymbolEntry),
     sizeof(InternalRelocationEntry),
     sizeof(StaticRelocationEntry),
