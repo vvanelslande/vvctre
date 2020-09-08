@@ -891,6 +891,10 @@ void vvctre_gui_text(const char* text) {
     ImGui::TextUnformatted(text);
 }
 
+void vvctre_gui_text_ex(const char* text, const char* end) {
+    ImGui::TextUnformatted(text, end);
+}
+
 void vvctre_gui_text_colored(float red, float green, float blue, float alpha, const char* text) {
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(red, green, blue, alpha));
     ImGui::TextUnformatted(text);
@@ -3620,6 +3624,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_set_item_allow_overlap", (void*)&vvctre_gui_set_item_allow_overlap},
     {"vvctre_gui_end_tooltip", (void*)&vvctre_gui_end_tooltip},
     {"vvctre_gui_text", (void*)&vvctre_gui_text},
+    {"vvctre_gui_text_ex", (void*)&vvctre_gui_text_ex},
     {"vvctre_gui_text_colored", (void*)&vvctre_gui_text_colored},
     {"vvctre_gui_button", (void*)&vvctre_gui_button},
     {"vvctre_gui_small_button", (void*)&vvctre_gui_small_button},
