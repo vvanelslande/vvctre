@@ -179,6 +179,10 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
     });
 
     room_member.BindOnStatusMessageReceived([&](const Network::StatusMessageEntry& entry) {
+        if (multiplayer_blocked_nicknames.count(entry.nickname)) {
+            return;
+        }
+
         asl::Date date = asl::Date::now();
 
         switch (entry.type) {
