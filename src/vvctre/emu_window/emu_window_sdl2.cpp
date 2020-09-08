@@ -2645,7 +2645,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                              {"VvCtre Movie", "*.vcm"})
                                                   .result();
                         if (!filename.empty()) {
-                            const auto movie_result = movie.ValidateMovie(filename[0]);
+                            const Core::Movie::ValidationResult movie_result =
+                                movie.ValidateMovie(filename[0]);
                             switch (movie_result) {
                             case Core::Movie::ValidationResult::OK:
                                 if (asl::File(filename[0].c_str()).name().contains("loop")) {
