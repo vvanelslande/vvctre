@@ -525,6 +525,14 @@ void vvctre_update_gateway_cheat(void* core, int index, const char* name, const 
                                                       std::string(comments)));
 }
 
+void vvctre_load_cheats_from_file(void* core) {
+    static_cast<Core::System*>(core)->CheatEngine().LoadCheatsFromFile();
+}
+
+void vvctre_save_cheats_to_file(void* core) {
+    static_cast<Core::System*>(core)->CheatEngine().SaveCheatsToFile();
+}
+
 // Camera
 void vvctre_reload_camera_images(void* core) {
     auto cam = Service::CAM::GetModule(*static_cast<Core::System*>(core));
@@ -3536,6 +3544,8 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_add_gateway_cheat", (void*)&vvctre_add_gateway_cheat},
     {"vvctre_remove_cheat", (void*)&vvctre_remove_cheat},
     {"vvctre_update_gateway_cheat", (void*)&vvctre_update_gateway_cheat},
+    {"vvctre_load_cheats_from_file", (void*)&vvctre_load_cheats_from_file},
+    {"vvctre_save_cheats_to_file", (void*)&vvctre_save_cheats_to_file},
     // Camera
     {"vvctre_reload_camera_images", (void*)&vvctre_reload_camera_images},
     // GUI
