@@ -151,8 +151,9 @@ bool Delete(const std::string& filename) {
 bool CreateDir(const std::string& path) {
     LOG_TRACE(Common_Filesystem, "directory {}", path);
 #ifdef _WIN32
-    if (::CreateDirectoryW(Common::UTF8ToUTF16W(path).c_str(), nullptr))
+    if (::CreateDirectoryW(Common::UTF8ToUTF16W(path).c_str(), nullptr)) {
         return true;
+    }
     DWORD error = GetLastError();
     if (error == ERROR_ALREADY_EXISTS) {
         LOG_DEBUG(Common_Filesystem, "CreateDirectory failed on {}: already exists", path);
@@ -216,18 +217,20 @@ bool CreateFullPath(const std::string& full_path) {
 bool DeleteDir(const std::string& filename) {
     LOG_TRACE(Common_Filesystem, "directory {}", filename);
 
-    // check if a directory
+    // Check if a directory
     if (!FileUtil::IsDirectory(filename)) {
         LOG_ERROR(Common_Filesystem, "Not a directory {}", filename);
         return false;
     }
 
 #ifdef _WIN32
-    if (::RemoveDirectoryW(Common::UTF8ToUTF16W(filename).c_str()))
+    if (::RemoveDirectoryW(Common::UTF8ToUTF16W(filename).c_str())) {
         return true;
+    }
 #else
-    if (rmdir(filename.c_str()) == 0)
+    if (rmdir(filename.c_str()) == 0) {
         return true;
+    }
 #endif
     LOG_ERROR(Common_Filesystem, "failed {}: {}", filename, GetLastErrorMsg());
 
@@ -238,11 +241,13 @@ bool Rename(const std::string& srcFilename, const std::string& destFilename) {
     LOG_TRACE(Common_Filesystem, "{} --> {}", srcFilename, destFilename);
 #ifdef _WIN32
     if (_wrename(Common::UTF8ToUTF16W(srcFilename).c_str(),
-                 Common::UTF8ToUTF16W(destFilename).c_str()) == 0)
+                 Common::UTF8ToUTF16W(destFilename).c_str()) == 0) {
         return true;
+    }
 #else
-    if (rename(srcFilename.c_str(), destFilename.c_str()) == 0)
+    if (rename(srcFilename.c_str(), destFilename.c_str()) == 0) {
         return true;
+    }
 #endif
     LOG_ERROR(Common_Filesystem, "failed {} --> {}: {}", srcFilename, destFilename,
               GetLastErrorMsg());
@@ -253,8 +258,9 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
     LOG_TRACE(Common_Filesystem, "{} --> {}", srcFilename, destFilename);
 #ifdef _WIN32
     if (CopyFileW(Common::UTF8ToUTF16W(srcFilename).c_str(),
-                  Common::UTF8ToUTF16W(destFilename).c_str(), FALSE))
+                  Common::UTF8ToUTF16W(destFilename).c_str(), FALSE)) {
         return true;
+    }
 
     LOG_ERROR(Common_Filesystem, "failed {} --> {}: {}", srcFilename, destFilename,
               GetLastErrorMsg());
@@ -270,7 +276,7 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
         return false;
     }
 
-    // open output file
+    // Open output file
     CFilePointer output{fopen(destFilename.c_str(), "wb"), std::fclose};
     if (!output) {
         LOG_ERROR(Common_Filesystem, "opening output failed {} --> {}: {}", srcFilename,
@@ -278,10 +284,10 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
         return false;
     }
 
-    // copy loop
+    // Copy loop
     std::array<char, 1024> buffer;
     while (!feof(input.get())) {
-        // read input
+        // Read input
         std::size_t rnum = fread(buffer.data(), sizeof(char), buffer.size(), input.get());
         if (rnum != buffer.size()) {
             if (ferror(input.get()) != 0) {
@@ -291,7 +297,7 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
             }
         }
 
-        // write output
+        // Write output
         std::size_t wnum = fwrite(buffer.data(), sizeof(char), rnum, output.get());
         if (wnum != rnum) {
             LOG_ERROR(Common_Filesystem, "failed writing to output, {} --> {}: {}", srcFilename,
@@ -384,21 +390,23 @@ bool ForeachDirectoryEntry(u64* num_entries_out, const std::string& directory,
         FindClose(handle_find);
         return false;
     }
-    // windows loop
+    // Windows loop
     do {
         const std::string virtual_name(Common::UTF16ToUTF8(ffd.cFileName));
 #else
     DIR* dirp = opendir(directory.c_str());
-    if (!dirp)
+    if (!dirp) {
         return false;
+    }
 
-    // non windows loop
+    // Non Windows loop
     while (struct dirent* result = readdir(dirp)) {
         const std::string virtual_name(result->d_name);
 #endif
 
-        if (virtual_name == "." || virtual_name == "..")
+        if (virtual_name == "." || virtual_name == "..") {
             continue;
+        }
 
         u64 ret_entries = 0;
         if (!callback(&ret_entries, directory, virtual_name)) {
@@ -415,8 +423,9 @@ bool ForeachDirectoryEntry(u64* num_entries_out, const std::string& directory,
     closedir(dirp);
 #endif
 
-    if (callback_error)
+    if (callback_error) {
         return false;
+    }
 
     // num_entries_out is allowed to be specified nullptr, in which case we shouldn't try to set it
     if (num_entries_out != nullptr)
@@ -474,15 +483,17 @@ bool DeleteDirRecursively(const std::string& directory, unsigned int recursion) 
         std::string new_path = directory + '/' + virtual_name;
 
         if (IsDirectory(new_path)) {
-            if (recursion == 0)
+            if (recursion == 0) {
                 return false;
+            }
             return DeleteDirRecursively(new_path, recursion - 1);
         }
         return Delete(new_path);
     };
 
-    if (!ForeachDirectoryEntry(nullptr, directory, callback))
+    if (!ForeachDirectoryEntry(nullptr, directory, callback)) {
         return false;
+    }
 
     // Delete the outermost directory
     FileUtil::DeleteDir(directory);
@@ -491,12 +502,15 @@ bool DeleteDirRecursively(const std::string& directory, unsigned int recursion) 
 
 void CopyDir(const std::string& source_path, const std::string& dest_path) {
 #ifndef _WIN32
-    if (source_path == dest_path)
+    if (source_path == dest_path) {
         return;
-    if (!FileUtil::Exists(source_path))
+    }
+    if (!FileUtil::Exists(source_path)) {
         return;
-    if (!FileUtil::Exists(dest_path))
+    }
+    if (!FileUtil::Exists(dest_path)) {
         FileUtil::CreateFullPath(dest_path);
+    }
 
     DIR* dirp = opendir(source_path.c_str());
     if (!dirp)
@@ -504,10 +518,11 @@ void CopyDir(const std::string& source_path, const std::string& dest_path) {
 
     while (struct dirent* result = readdir(dirp)) {
         const std::string virtualName(result->d_name);
-        // check for "." and ".."
+        // Check for "." and ".."
         if (((virtualName[0] == '.') && (virtualName[1] == '\0')) ||
-            ((virtualName[0] == '.') && (virtualName[1] == '.') && (virtualName[2] == '\0')))
+            ((virtualName[0] == '.') && (virtualName[1] == '.') && (virtualName[2] == '\0'))) {
             continue;
+        }
 
         std::string source, dest;
         source = source_path + virtualName;
@@ -515,11 +530,13 @@ void CopyDir(const std::string& source_path, const std::string& dest_path) {
         if (IsDirectory(source)) {
             source += '/';
             dest += '/';
-            if (!FileUtil::Exists(dest))
+            if (!FileUtil::Exists(dest)) {
                 FileUtil::CreateFullPath(dest);
+            }
             CopyDir(source, dest);
-        } else if (!FileUtil::Exists(dest))
+        } else if (!FileUtil::Exists(dest)) {
             FileUtil::Copy(source, dest);
+        }
     }
     closedir(dirp);
 #endif
@@ -559,8 +576,9 @@ std::size_t WriteStringToFile(bool text_file, const std::string& filename, std::
 std::size_t ReadFileToString(bool text_file, const std::string& filename, std::string& str) {
     IOFile file(filename, text_file ? "r" : "rb");
 
-    if (!file.IsOpen())
+    if (!file.IsOpen()) {
         return 0;
+    }
 
     str.resize(static_cast<u32>(file.GetSize()));
     return file.ReadArray(&str[0], str.size());
@@ -575,14 +593,16 @@ void SplitFilename83(const std::string& filename, std::array<char, 9>& short_nam
     extension = {{' ', ' ', ' ', '\0'}};
 
     std::string::size_type point = filename.rfind('.');
-    if (point == filename.size() - 1)
+    if (point == filename.size() - 1) {
         point = filename.rfind('.', point);
+    }
 
     // Get short name.
     int j = 0;
     for (char letter : filename.substr(0, point)) {
-        if (forbidden_characters.find(letter, 0) != std::string::npos)
+        if (forbidden_characters.find(letter, 0) != std::string::npos) {
             continue;
+        }
         if (j == 8) {
             // TODO(Link Mauve): also do that for filenames containing a space.
             // TODO(Link Mauve): handle multiple files having the same short name.
@@ -596,8 +616,9 @@ void SplitFilename83(const std::string& filename, std::array<char, 9>& short_nam
     // Get extension.
     if (point != std::string::npos) {
         j = 0;
-        for (char letter : filename.substr(point + 1, 3))
+        for (char letter : filename.substr(point + 1, 3)) {
             extension[j++] = toupper(letter);
+        }
     }
 }
 
@@ -630,9 +651,10 @@ std::string SanitizePath(std::string_view path_, DirectorySeparator directory_se
 
     auto start = path.begin();
 #ifdef _WIN32
-    // allow network paths which start with a double backslash (e.g. \\server\share)
-    if (start != path.end())
+    // Allow network paths which start with a double backslash (e.g. \\server\share)
+    if (start != path.end()) {
         ++start;
+    }
 #endif
     path.erase(std::unique(start, path.end(),
                            [type2](char c1, char c2) { return c1 == type2 && c2 == type2; }),
@@ -693,8 +715,9 @@ u64 IOFile::GetSize() const {
 }
 
 bool IOFile::Seek(s64 off, int origin) {
-    if (!IsOpen() || 0 != fseeko(m_file, off, origin))
+    if (!IsOpen() || 0 != fseeko(m_file, off, origin)) {
         m_good = false;
+    }
 
     return m_good;
 }
@@ -707,8 +730,9 @@ u64 IOFile::Tell() const {
 }
 
 bool IOFile::Flush() {
-    if (!IsOpen() || 0 != std::fflush(m_file))
+    if (!IsOpen() || 0 != std::fflush(m_file)) {
         m_good = false;
+    }
 
     return m_good;
 }
