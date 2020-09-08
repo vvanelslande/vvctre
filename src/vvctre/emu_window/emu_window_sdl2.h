@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <deque>
 #include <functional>
 #include <memory>
 #include <unordered_set>
@@ -130,7 +129,7 @@ private:
     CitraRoomList public_rooms;
     std::string public_rooms_query;
     std::string multiplayer_message;
-    std::deque<std::string> multiplayer_messages;
+    std::vector<std::string> multiplayer_messages;
     std::unordered_set<std::string> multiplayer_blocked_nicknames;
 
     // Plugins

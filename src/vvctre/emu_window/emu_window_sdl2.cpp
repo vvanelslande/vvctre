@@ -3186,49 +3186,101 @@ void EmuWindow_SDL2::SwapBuffers() {
                                   true)) {
                 ImGui::Columns(2);
 
-                if (ImGui::ListBoxHeader("##members", ImVec2(-1.0f, -1.0f))) {
-                    for (const auto& member : members) {
-                        ImGui::PushTextWrapPos();
-                        if (member.game_info.name.empty()) {
-                            ImGui::TextUnformatted(member.nickname.c_str());
-                        } else {
-                            ImGui::Text("%s is playing %s", member.nickname.c_str(),
-                                        member.game_info.name.c_str());
-                        }
-                        ImGui::PopTextWrapPos();
-                        if (member.nickname != room_member.GetNickname()) {
-                            if (ImGui::BeginPopupContextItem(member.nickname.c_str(),
-                                                             ImGuiMouseButton_Right)) {
-                                if (multiplayer_blocked_nicknames.count(member.nickname)) {
-                                    if (ImGui::MenuItem("Unblock")) {
-                                        multiplayer_blocked_nicknames.erase(member.nickname);
+                if (ImGui::BeginChildFrame(ImGui::GetID("Members"), ImVec2(-1.0f, -1.0f),
+                                           ImGuiWindowFlags_HorizontalScrollbar)) {
+                    ImGuiListClipper clipper(members.size());
+
+                    while (clipper.Step()) {
+                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                            const Network::RoomMember::MemberInformation& member = members[i];
+
+                            if (member.game_info.name.empty()) {
+                                ImGui::TextUnformatted(member.nickname.c_str());
+                            } else {
+                                ImGui::Text("%s is playing %s", member.nickname.c_str(),
+                                            member.game_info.name.c_str());
+                            }
+                            if (member.nickname != room_member.GetNickname()) {
+                                if (ImGui::BeginPopupContextItem(member.nickname.c_str(),
+                                                                 ImGuiMouseButton_Right)) {
+                                    if (multiplayer_blocked_nicknames.count(member.nickname)) {
+                                        if (ImGui::MenuItem("Unblock")) {
+                                            multiplayer_blocked_nicknames.erase(member.nickname);
+                                        }
+                                    } else {
+                                        if (ImGui::MenuItem("Block")) {
+                                            multiplayer_blocked_nicknames.insert(member.nickname);
+                                        }
                                     }
-                                } else {
-                                    if (ImGui::MenuItem("Block")) {
-                                        multiplayer_blocked_nicknames.insert(member.nickname);
-                                    }
+
+                                    ImGui::EndPopup();
                                 }
+                            }
+                        }
+                    }
+                }
+                ImGui::EndChildFrame();
+
+                ImGui::NextColumn();
+
+                const ImVec2 spacing = style.ItemSpacing;
+
+                if (ImGui::BeginChildFrame(ImGui::GetID("Messages"), ImVec2(-1.0f, -1.0f),
+                                           ImGuiWindowFlags_HorizontalScrollbar)) {
+                    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+
+                    ImGuiListClipper clipper(multiplayer_messages.size());
+
+                    while (clipper.Step()) {
+                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                            ImGui::TextUnformatted(multiplayer_messages[i].c_str());
+
+                            if (ImGui::BeginPopupContextItem("Message Menu")) {
+                                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, spacing);
+
+                                if (ImGui::MenuItem("Delete")) {
+                                    multiplayer_messages.erase(multiplayer_messages.begin() + i);
+                                    clipper.ItemsCount = 0;
+                                    ImGui::EndPopup();
+                                    break;
+                                }
+
+                                if (ImGui::MenuItem("Clear")) {
+                                    multiplayer_messages.clear();
+                                    clipper.ItemsCount = 0;
+                                    ImGui::EndPopup();
+                                    break;
+                                }
+
+                                if (ImGui::MenuItem("Copy")) {
+                                    ImGui::SetClipboardText(multiplayer_messages[i].c_str());
+                                }
+
+                                if (ImGui::MenuItem("Copy All")) {
+                                    std::string all;
+                                    for (std::size_t j = 0; j < multiplayer_messages.size(); ++j) {
+                                        if (j > 0) {
+                                            all += '\n';
+                                        }
+                                        all += multiplayer_messages[j];
+                                    }
+                                    ImGui::SetClipboardText(all.c_str());
+                                }
+
+                                ImGui::PopStyleVar();
 
                                 ImGui::EndPopup();
                             }
                         }
                     }
-                    ImGui::ListBoxFooter();
-                }
 
-                ImGui::NextColumn();
+                    ImGui::PopStyleVar();
 
-                if (ImGui::ListBoxHeader("##messages", ImVec2(-1.0f, -1.0f))) {
-                    for (const std::string& message : multiplayer_messages) {
-                        ImGui::PushTextWrapPos();
-                        ImGui::TextUnformatted(message.c_str());
-                        ImGui::PopTextWrapPos();
-                    }
                     if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
                         ImGui::SetScrollHereY(1.0f);
                     }
-                    ImGui::ListBoxFooter();
                 }
+                ImGui::EndChildFrame();
 
                 ImGui::Columns();
 
