@@ -242,15 +242,41 @@ int main(int argc, char** argv) {
     if (!Settings::values.play_movie.empty()) {
         Core::Movie& movie = Core::Movie::GetInstance();
 
-        if (asl::File(Settings::values.play_movie.c_str()).name().contains("loop")) {
-            play_movie_loop_callback = [&movie] {
-                movie.StartPlayback(Settings::values.play_movie, play_movie_loop_callback);
-            };
-            play_movie_loop_callback();
-        } else {
-            movie.StartPlayback(Settings::values.play_movie, [&] {
-                pfd::message("vvctre", "Playback finished", pfd::choice::ok);
-            });
+        const Core::Movie::ValidationResult movie_result =
+            movie.ValidateMovie(Settings::values.play_movie);
+        switch (movie_result) {
+        case Core::Movie::ValidationResult::OK:
+            if (asl::File(Settings::values.play_movie.c_str()).name().contains("loop")) {
+                play_movie_loop_callback = [&movie] {
+                    movie.StartPlayback(Settings::values.play_movie, play_movie_loop_callback);
+                };
+
+                play_movie_loop_callback();
+            } else {
+                movie.StartPlayback(Settings::values.play_movie, [&] {
+                    pfd::message("vvctre", "Playback finished", pfd::choice::ok);
+                });
+            }
+            break;
+        case Core::Movie::ValidationResult::GameDismatch:
+            pfd::message("vvctre", "Movie was recorded using a ROM with a different program ID",
+                         pfd::choice::ok, pfd::icon::warning);
+            if (asl::File(Settings::values.play_movie.c_str()).name().contains("loop")) {
+                play_movie_loop_callback = [&movie] {
+                    movie.StartPlayback(Settings::values.play_movie, play_movie_loop_callback);
+                };
+
+                play_movie_loop_callback();
+            } else {
+                movie.StartPlayback(Settings::values.play_movie, [&] {
+                    pfd::message("vvctre", "Playback finished", pfd::choice::ok);
+                });
+            }
+            break;
+        case Core::Movie::ValidationResult::Invalid:
+            pfd::message("vvctre", "Movie file doesn't have a valid header", pfd::choice::ok,
+                         pfd::icon::info);
+            break;
         }
     }
 
