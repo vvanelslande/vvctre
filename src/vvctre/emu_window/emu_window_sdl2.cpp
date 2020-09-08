@@ -3113,10 +3113,18 @@ void EmuWindow_SDL2::SwapBuffers() {
 
             if (ImGui::BeginChildFrame(ImGui::GetID("Cheats"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
-                for (const auto& cheat : system.CheatEngine().GetCheats()) {
-                    bool enabled = cheat->IsEnabled();
-                    if (ImGui::Checkbox(cheat->GetName().c_str(), &enabled)) {
-                        cheat->SetEnabled(enabled);
+                const std::vector<std::shared_ptr<Cheats::CheatBase>> cheats =
+                    system.CheatEngine().GetCheats();
+
+                ImGuiListClipper clipper(cheats.size());
+
+                while (clipper.Step()) {
+                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                        const std::shared_ptr<Cheats::CheatBase>& cheat = cheats[i];
+                        bool enabled = cheat->IsEnabled();
+                        if (ImGui::Checkbox(cheat->GetName().c_str(), &enabled)) {
+                            cheat->SetEnabled(enabled);
+                        }
                     }
                 }
             }
