@@ -177,13 +177,14 @@ bool CreateDir(const std::string& path) {
 }
 
 bool CreateFullPath(const std::string& fullPath) {
-    int panicCounter = 100;
     LOG_TRACE(Common_Filesystem, "path {}", fullPath);
 
     if (FileUtil::Exists(fullPath)) {
         LOG_DEBUG(Common_Filesystem, "path exists {}", fullPath);
         return true;
     }
+
+    int panicCounter = 100;
 
     std::size_t position = 0;
     while (true) {
