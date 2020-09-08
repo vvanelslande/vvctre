@@ -3082,11 +3082,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                 system.CheatEngine().LoadCheatsFromFile();
 
                 if (show_cheats_text_editor) {
-                    const std::string filepath = fmt::format(
-                        "{}{:016X}.txt", FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
-                        system.Kernel().GetCurrentProcess()->codeset->program_id);
-
-                    FileUtil::ReadFileToString(true, filepath, cheats_text_editor_text);
+                    std::ostringstream oss;
+                    system.CheatEngine().SaveCheatsToStream(oss);
+                    cheats_text_editor_text = oss.str();
                 }
             }
 
