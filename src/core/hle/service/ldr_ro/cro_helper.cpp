@@ -84,7 +84,7 @@ ResultCode CROHelper::ApplyRelocation(VAddr target_address, RelocationType reloc
     case RelocationType::ArmBranch:
     case RelocationType::ModifyArmBranch:
     case RelocationType::AlignedRelativeAddress:
-        // TODO(wwylele): implement other types
+        // TODO(wwylele): Implement other types
         UNIMPLEMENTED();
         break;
     default:
@@ -107,7 +107,7 @@ ResultCode CROHelper::ClearRelocation(VAddr target_address, RelocationType reloc
     case RelocationType::ArmBranch:
     case RelocationType::ModifyArmBranch:
     case RelocationType::AlignedRelativeAddress:
-        // TODO(wwylele): implement other types
+        // TODO(wwylele): Implement other types
         UNIMPLEMENTED();
         break;
     default:
@@ -203,12 +203,12 @@ VAddr CROHelper::FindExportNamedSymbol(const std::string& name) const {
 ResultCode CROHelper::RebaseHeader(u32 cro_size) {
     ResultCode error = CROFormatError(0x11);
 
-    // verifies magic
+    // Verifies magic
     if (GetField(Magic) != MAGIC_CRO0) {
         return error;
     }
 
-    // verifies not registered
+    // Verifies not registered
     if (GetField(NextCRO) != 0 || GetField(PreviousCRO) != 0) {
         return error;
     }
@@ -218,7 +218,7 @@ ResultCode CROHelper::RebaseHeader(u32 cro_size) {
         return error;
     }
 
-    // verifies not fixed
+    // Verifies not fixed
     if (GetField(FixedSize) != 0) {
         return error;
     }
@@ -227,7 +227,7 @@ ResultCode CROHelper::RebaseHeader(u32 cro_size) {
         return error;
     }
 
-    // verifies that all offsets are in the correct order
+    // Verifies that all offsets are in the correct order
     constexpr std::array<HeaderField, 18> OFFSET_ORDER = {{
         CodeOffset,
         ModuleNameOffset,
@@ -259,7 +259,7 @@ ResultCode CROHelper::RebaseHeader(u32 cro_size) {
         prev_offset = cur_offset;
     }
 
-    // rebases offsets
+    // Rebases offsets
     u32 offset = GetField(NameOffset);
     if (offset != 0) {
         SetField(NameOffset, offset + module_address);
@@ -273,7 +273,7 @@ ResultCode CROHelper::RebaseHeader(u32 cro_size) {
         }
     }
 
-    // verifies everything is not beyond the buffer
+    // Verifies everything is not beyond the buffer
     u32 file_end = module_address + cro_size;
     for (int field = CodeOffset, i = 0; field < Fix0Barrier; field += 2, ++i) {
         HeaderField offset_field = static_cast<HeaderField>(field);
@@ -513,12 +513,12 @@ ResultCode CROHelper::ResetExternalRelocations() {
         }
 
         if (batch_begin) {
-            // resets to unresolved state
+            // Resets to unresolved state
             relocation.is_batch_resolved = 0;
             SetEntry(memory, i, relocation);
         }
 
-        // if current is an end, then the next is a beginning
+        // If current is an end, then the next is a beginning
         batch_begin = relocation.is_batch_end != 0;
     }
 
@@ -545,12 +545,12 @@ ResultCode CROHelper::ClearExternalRelocations() {
         }
 
         if (batch_begin) {
-            // resets to unresolved state
+            // Resets to unresolved state
             relocation.is_batch_resolved = 0;
             SetEntry(memory, i, relocation);
         }
 
-        // if current is an end, then the next is a beginning
+        // If current is an end, then the next is a beginning
         batch_begin = relocation.is_batch_end != 0;
     }
 
@@ -1274,7 +1274,7 @@ ResultCode CROHelper::Link(VAddr crs_address, bool link_on_load_bug_fix) {
     {
         VAddr data_segment_address = 0;
         if (link_on_load_bug_fix) {
-            // this is a bug fix introduced by 7.2.0-17's LoadCRO_New
+            // This is a bug fix introduced by 7.2.0-17's LoadCRO_New
             // The bug itself is:
             // If a relocation target is in .data segment, it will relocate to the
             // user-specified buffer. But if this is linking during loading,
@@ -1412,30 +1412,30 @@ void CROHelper::Register(VAddr crs_address, bool auto_link) {
     CROHelper head(auto_link ? crs.NextModule() : crs.PreviousModule(), process, memory, cpu);
 
     if (head.module_address) {
-        // there are already CROs registered
-        // register as the new tail
+        // There are already CROs registered
+        // Register as the new tail
         CROHelper tail(head.PreviousModule(), process, memory, cpu);
 
-        // link with the old tail
+        // Link with the old tail
         ASSERT(tail.NextModule() == 0);
         SetPreviousModule(tail.module_address);
         tail.SetNextModule(module_address);
 
-        // set previous of the head pointing to the new tail
+        // Set previous of the head pointing to the new tail
         head.SetPreviousModule(module_address);
     } else {
-        // register as the first CRO
-        // set previous to self as tail
+        // Register as the first CRO
+        // Set previous to self as tail
         SetPreviousModule(module_address);
 
-        // set self as head
+        // Set self as head
         if (auto_link)
             crs.SetNextModule(module_address);
         else
             crs.SetPreviousModule(module_address);
     }
 
-    // the new one is the tail
+    // The new one is the tail
     SetNextModule(0);
 }
 
@@ -1448,29 +1448,29 @@ void CROHelper::Unregister(VAddr crs_address) {
 
     if (module_address == next_head.module_address ||
         module_address == previous_head.module_address) {
-        // removing head
+        // Removing head
         if (next.module_address) {
-            // the next is new head
-            // let its previous point to the tail
+            // The next is new head
+            // Let its previous point to the tail
             next.SetPreviousModule(previous.module_address);
         }
 
-        // set new head
+        // Set new head
         if (module_address == previous_head.module_address) {
             crs.SetPreviousModule(next.module_address);
         } else {
             crs.SetNextModule(next.module_address);
         }
     } else if (next.module_address) {
-        // link previous and next
+        // Link previous and next
         previous.SetNextModule(next.module_address);
         next.SetPreviousModule(previous.module_address);
     } else {
-        // removing tail
-        // set previous as new tail
+        // Removing tail
+        // Set previous as new tail
         previous.SetNextModule(0);
 
-        // let head's previous point to the new tail
+        // Let head's previous point to the new tail
         if (next_head.module_address && next_head.PreviousModule() == module_address) {
             next_head.SetPreviousModule(previous.module_address);
         } else if (previous_head.module_address &&
@@ -1481,7 +1481,7 @@ void CROHelper::Unregister(VAddr crs_address) {
         }
     }
 
-    // unlink self
+    // Unlink self
     SetNextModule(0);
     SetPreviousModule(0);
 }
@@ -1531,7 +1531,7 @@ bool CROHelper::IsLoaded() const {
         return false;
     }
 
-    // TODO(wwylele): verify memory state here after memory aliasing is implemented
+    // TODO(wwylele): Verify memory state here after memory aliasing is implemented
 
     return true;
 }
