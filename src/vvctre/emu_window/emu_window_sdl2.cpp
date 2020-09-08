@@ -2668,10 +2668,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                                     "Movie was recorded using a ROM with a different program ID",
                                     pfd::choice::ok, pfd::icon::warning);
                                 if (asl::File(filename[0].c_str()).name().contains("loop")) {
-                                    std::function<void()> f = [&movie, f, filename = filename[0]] {
-                                        movie.StartPlayback(filename, f);
+                                    play_movie_loop_callback = [this, &movie,
+                                                                filename = filename[0]] {
+                                        movie.StartPlayback(filename, play_movie_loop_callback);
                                     };
-                                    f();
+
+                                    play_movie_loop_callback();
                                 } else {
                                     movie.StartPlayback(filename[0], [&] {
                                         pfd::message("vvctre", "Playback finished",
