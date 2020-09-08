@@ -4127,15 +4127,15 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
      (void*)&vvctre_settings_get_custom_layout_bottom_bottom},
     {"vvctre_settings_get_layout_width", (void*)&vvctre_settings_get_layout_width},
     {"vvctre_settings_get_layout_height", (void*)&vvctre_settings_get_layout_height},
-    // Modules
-    {"vvctre_settings_set_use_lle_module", (void*)&vvctre_settings_set_use_lle_module},
-    {"vvctre_settings_get_use_lle_module", (void*)&vvctre_settings_get_use_lle_module},
-    {"vvctre_get_cfg_module", (void*)&vvctre_get_cfg_module},
     // Hacks Settings
     {"vvctre_settings_set_enable_priority_boost",
      (void*)&vvctre_settings_set_enable_priority_boost},
     {"vvctre_settings_get_enable_priority_boost",
      (void*)&vvctre_settings_get_enable_priority_boost},
+    // Modules
+    {"vvctre_settings_set_use_lle_module", (void*)&vvctre_settings_set_use_lle_module},
+    {"vvctre_settings_get_use_lle_module", (void*)&vvctre_settings_get_use_lle_module},
+    {"vvctre_get_cfg_module", (void*)&vvctre_get_cfg_module},
     // Multiplayer
     {"vvctre_settings_set_multiplayer_ip", (void*)&vvctre_settings_set_multiplayer_ip},
     {"vvctre_settings_get_multiplayer_ip", (void*)&vvctre_settings_get_multiplayer_ip},
