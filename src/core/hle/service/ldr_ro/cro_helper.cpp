@@ -51,14 +51,16 @@ const std::array<CROHelper::HeaderField, 4> CROHelper::FIX_BARRIERS{{
 VAddr CROHelper::SegmentTagToAddress(SegmentTag segment_tag) const {
     u32 segment_num = GetField(SegmentNum);
 
-    if (segment_tag.segment_index >= segment_num)
+    if (segment_tag.segment_index >= segment_num) {
         return 0;
+    }
 
     SegmentEntry entry;
     GetEntry(memory, segment_tag.segment_index, entry);
 
-    if (segment_tag.offset_into_segment >= entry.size)
+    if (segment_tag.offset_into_segment >= entry.size) {
         return 0;
+    }
 
     return entry.offset + segment_tag.offset_into_segment;
 }
@@ -135,8 +137,9 @@ ResultCode CROHelper::ApplyRelocationBatch(VAddr batch, u32 symbol_address, bool
             return result;
         }
 
-        if (relocation.is_batch_end)
+        if (relocation.is_batch_end) {
             break;
+        }
 
         relocation_address += sizeof(RelocationEntry);
     }
@@ -149,8 +152,9 @@ ResultCode CROHelper::ApplyRelocationBatch(VAddr batch, u32 symbol_address, bool
 }
 
 VAddr CROHelper::FindExportNamedSymbol(const std::string& name) const {
-    if (!GetField(ExportTreeNum))
+    if (!GetField(ExportTreeNum)) {
         return 0;
+    }
 
     std::size_t len = name.size();
     ExportTreeEntry entry;
@@ -181,15 +185,17 @@ VAddr CROHelper::FindExportNamedSymbol(const std::string& name) const {
 
     u32 export_named_symbol_num = GetField(ExportNamedSymbolNum);
 
-    if (found_id >= export_named_symbol_num)
+    if (found_id >= export_named_symbol_num) {
         return 0;
+    }
 
     u32 export_strings_size = GetField(ExportStringsSize);
     ExportNamedSymbolEntry symbol_entry;
     GetEntry(memory, found_id, symbol_entry);
 
-    if (memory.ReadCString(symbol_entry.name_offset, export_strings_size) != name)
+    if (memory.ReadCString(symbol_entry.name_offset, export_strings_size) != name) {
         return 0;
+    }
 
     return SegmentTagToAddress(symbol_entry.symbol_position);
 }
@@ -198,23 +204,28 @@ ResultCode CROHelper::RebaseHeader(u32 cro_size) {
     ResultCode error = CROFormatError(0x11);
 
     // verifies magic
-    if (GetField(Magic) != MAGIC_CRO0)
+    if (GetField(Magic) != MAGIC_CRO0) {
         return error;
+    }
 
     // verifies not registered
-    if (GetField(NextCRO) != 0 || GetField(PreviousCRO) != 0)
+    if (GetField(NextCRO) != 0 || GetField(PreviousCRO) != 0) {
         return error;
+    }
 
     // This seems to be a hard limit set by the RO module
-    if (GetField(FileSize) > 0x10000000 || GetField(BssSize) > 0x10000000)
+    if (GetField(FileSize) > 0x10000000 || GetField(BssSize) > 0x10000000) {
         return error;
+    }
 
     // verifies not fixed
-    if (GetField(FixedSize) != 0)
+    if (GetField(FixedSize) != 0) {
         return error;
+    }
 
-    if (GetField(CodeOffset) < CRO_HEADER_SIZE)
+    if (GetField(CodeOffset) < CRO_HEADER_SIZE) {
         return error;
+    }
 
     // verifies that all offsets are in the correct order
     constexpr std::array<HeaderField, 18> OFFSET_ORDER = {{
@@ -242,21 +253,24 @@ ResultCode CROHelper::RebaseHeader(u32 cro_size) {
     u32 cur_offset;
     for (std::size_t i = 1; i < OFFSET_ORDER.size(); ++i) {
         cur_offset = GetField(OFFSET_ORDER[i]);
-        if (cur_offset < prev_offset)
+        if (cur_offset < prev_offset) {
             return error;
+        }
         prev_offset = cur_offset;
     }
 
     // rebases offsets
     u32 offset = GetField(NameOffset);
-    if (offset != 0)
+    if (offset != 0) {
         SetField(NameOffset, offset + module_address);
+    }
 
     for (int field = CodeOffset; field < Fix0Barrier; field += 2) {
         HeaderField header_field = static_cast<HeaderField>(field);
         offset = GetField(header_field);
-        if (offset != 0)
+        if (offset != 0) {
             SetField(header_field, offset + module_address);
+        }
     }
 
     // verifies everything is not beyond the buffer
@@ -264,8 +278,9 @@ ResultCode CROHelper::RebaseHeader(u32 cro_size) {
     for (int field = CodeOffset, i = 0; field < Fix0Barrier; field += 2, ++i) {
         HeaderField offset_field = static_cast<HeaderField>(field);
         HeaderField size_field = static_cast<HeaderField>(field + 1);
-        if (GetField(offset_field) + GetField(size_field) * ENTRY_SIZE[i] > file_end)
+        if (GetField(offset_field) + GetField(size_field) * ENTRY_SIZE[i] > file_end) {
             return error;
+        }
     }
 
     return RESULT_SUCCESS;
@@ -735,14 +750,16 @@ void CROHelper::UnrebaseSegmentTable() {
 
 void CROHelper::UnrebaseHeader() {
     u32 offset = GetField(NameOffset);
-    if (offset != 0)
+    if (offset != 0) {
         SetField(NameOffset, offset - module_address);
+    }
 
     for (int field = CodeOffset; field < Fix0Barrier; field += 2) {
         HeaderField header_field = static_cast<HeaderField>(field);
         offset = GetField(header_field);
-        if (offset != 0)
+        if (offset != 0) {
             SetField(header_field, offset - module_address);
+        }
     }
 }
 
@@ -976,8 +993,9 @@ ResultCode CROHelper::ApplyModuleExport(CROHelper target) {
         ImportModuleEntry entry;
         target.GetEntry(memory, i, entry);
 
-        if (memory.ReadCString(entry.name_offset, target_import_string_size) != module_name)
+        if (memory.ReadCString(entry.name_offset, target_import_string_size) != module_name) {
             continue;
+        }
 
         LOG_INFO(Service_LDR, "CRO \"{}\" exports {} indexed symbols to \"{}\"", module_name,
                  entry.import_indexed_symbol_num, target.ModuleName());
@@ -1025,8 +1043,9 @@ ResultCode CROHelper::ResetModuleExport(CROHelper target) {
         ImportModuleEntry entry;
         target.GetEntry(memory, i, entry);
 
-        if (memory.ReadCString(entry.name_offset, target_import_string_size) != module_name)
+        if (memory.ReadCString(entry.name_offset, target_import_string_size) != module_name) {
             continue;
+        }
 
         LOG_DEBUG(Service_LDR, "CRO \"{}\" unexports indexed symbols to \"{}\"", module_name,
                   target.ModuleName());
@@ -1110,8 +1129,9 @@ ResultCode CROHelper::ApplyExitRelocations(VAddr crs_address) {
  */
 static ResultCode VerifyStringTableLength(Memory::MemorySystem& memory, VAddr address, u32 size) {
     if (size != 0) {
-        if (memory.Read8(address + size - 1) != 0)
+        if (memory.Read8(address + size - 1) != 0) {
             return CROFormatError(0x0B);
+        }
     }
     return RESULT_SUCCESS;
 }
@@ -1231,8 +1251,9 @@ void CROHelper::Unrebase(bool is_crs) {
     UnrebaseImportModuleTable();
     UnrebaseExportNamedSymbolTable();
 
-    if (!is_crs)
+    if (!is_crs) {
         UnrebaseSegmentTable();
+    }
 
     SetNextModule(0);
     SetPreviousModule(0);
@@ -1479,8 +1500,9 @@ u32 CROHelper::GetFixEnd(u32 fix_level) const {
         ++entry_size_i;
         field += 2;
 
-        if (field == FIX_BARRIERS[fix_level])
+        if (field == FIX_BARRIERS[fix_level]) {
             return end;
+        }
     }
 }
 
@@ -1505,8 +1527,9 @@ u32 CROHelper::Fix(u32 fix_level) {
 
 bool CROHelper::IsLoaded() const {
     u32 magic = GetField(Magic);
-    if (magic != MAGIC_CRO0 && magic != MAGIC_FIXD)
+    if (magic != MAGIC_CRO0 && magic != MAGIC_FIXD) {
         return false;
+    }
 
     // TODO(wwylele): verify memory state here after memory aliasing is implemented
 
