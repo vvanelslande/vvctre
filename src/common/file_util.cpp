@@ -188,7 +188,7 @@ bool CreateFullPath(const std::string& full_path) {
     int panic_counter = 100;
 
     std::size_t position = 0;
-    while (true) {
+    for (;;) {
         // Find next sub path
         position = full_path.find('/', position);
 
