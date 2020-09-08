@@ -173,20 +173,12 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
             return;
         }
 
-        if (multiplayer_messages.size() == 100) {
-            multiplayer_messages.pop_front();
-        }
-
         asl::Date date = asl::Date::now();
         multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] <{}> {}", date.hours(),
                                                    date.minutes(), entry.nickname, entry.message));
     });
 
     room_member.BindOnStatusMessageReceived([&](const Network::StatusMessageEntry& entry) {
-        if (multiplayer_messages.size() == 100) {
-            multiplayer_messages.pop_front();
-        }
-
         asl::Date date = asl::Date::now();
 
         switch (entry.type) {
