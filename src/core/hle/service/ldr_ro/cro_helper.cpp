@@ -117,8 +117,9 @@ ResultCode CROHelper::ClearRelocation(VAddr target_address, RelocationType reloc
 }
 
 ResultCode CROHelper::ApplyRelocationBatch(VAddr batch, u32 symbol_address, bool reset) {
-    if (symbol_address == 0 && !reset)
+    if (symbol_address == 0 && !reset) {
         return CROFormatError(0x10);
+    }
 
     VAddr relocation_address = batch;
     for (;;) {
@@ -1325,12 +1326,14 @@ ResultCode CROHelper::Link(VAddr crs_address, bool link_on_load_bug_fix) {
     result = ForEachAutoLinkCRO(process, memory, cpu, crs_address,
                                 [this](CROHelper target) -> ResultVal<bool> {
                                     ResultCode result = ApplyExportNamedSymbol(target);
-                                    if (result.IsError())
+                                    if (result.IsError()) {
                                         return result;
+                                    }
 
                                     result = ApplyModuleExport(target);
-                                    if (result.IsError())
+                                    if (result.IsError()) {
                                         return result;
+                                    }
 
                                     return MakeResult<bool>(true);
                                 });
@@ -1343,7 +1346,6 @@ ResultCode CROHelper::Link(VAddr crs_address, bool link_on_load_bug_fix) {
 }
 
 ResultCode CROHelper::Unlink(VAddr crs_address) {
-
     // Resets all imported named symbols
     ResultCode result = ResetImportNamedSymbol();
     if (result.IsError()) {
@@ -1370,12 +1372,14 @@ ResultCode CROHelper::Unlink(VAddr crs_address) {
     result = ForEachAutoLinkCRO(process, memory, cpu, crs_address,
                                 [this](CROHelper target) -> ResultVal<bool> {
                                     ResultCode result = ResetExportNamedSymbol(target);
-                                    if (result.IsError())
+                                    if (result.IsError()) {
                                         return result;
+                                    }
 
                                     result = ResetModuleExport(target);
-                                    if (result.IsError())
+                                    if (result.IsError()) {
                                         return result;
+                                    }
 
                                     return MakeResult<bool>(true);
                                 });
@@ -1429,10 +1433,11 @@ void CROHelper::Register(VAddr crs_address, bool auto_link) {
         SetPreviousModule(module_address);
 
         // Set self as head
-        if (auto_link)
+        if (auto_link) {
             crs.SetNextModule(module_address);
-        else
+        } else {
             crs.SetPreviousModule(module_address);
+        }
     }
 
     // The new one is the tail
