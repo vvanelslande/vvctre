@@ -5,6 +5,7 @@
 #pragma once
 
 #include <atomic>
+#include <istream>
 #include <memory>
 #include "core/cheats/cheat_base.h"
 
@@ -74,8 +75,8 @@ public:
     ///     12345678 90ABCDEF
     ///     (there might be multiple lines of those hex numbers)
     ///     Comment lines start with a '*'
-    /// This function will pares the file for such structures
-    static std::vector<std::unique_ptr<CheatBase>> LoadFile(const std::string& filepath);
+    /// This function will parse the stream for such structures
+    static std::vector<std::unique_ptr<CheatBase>> Load(std::istream& is);
 
 private:
     std::atomic<bool> enabled = false;

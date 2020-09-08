@@ -469,23 +469,17 @@ std::string GatewayCheat::ToString() const {
     return result;
 }
 
-std::vector<std::unique_ptr<CheatBase>> GatewayCheat::LoadFile(const std::string& filepath) {
+std::vector<std::unique_ptr<CheatBase>> GatewayCheat::Load(std::istream& is) {
     std::vector<std::unique_ptr<CheatBase>> cheats;
-
-    std::ifstream file;
-    OpenFStream(file, filepath, std::ios_base::in);
-    if (!file) {
-        return cheats;
-    }
 
     std::string comments;
     std::vector<CheatLine> cheat_lines;
     std::string name;
     bool enabled = false;
 
-    while (!file.eof()) {
+    while (!is.eof()) {
         std::string line;
-        std::getline(file, line);
+        std::getline(is, line);
         line.erase(std::remove(line.begin(), line.end(), '\0'), line.end());
         line = Common::StripSpaces(line); // remove spaces at front and end
         if (line.length() >= 2 && line.front() == '[') {

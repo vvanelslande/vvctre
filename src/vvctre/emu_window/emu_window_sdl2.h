@@ -118,7 +118,7 @@ private:
     // Cheats
     bool show_cheats_window = false;
     bool show_cheats_text_editor = false;
-    std::string cheats_file_content;
+    std::string cheats_text_editor_text;
 
     // Play coins
     u16 play_coins = 0;

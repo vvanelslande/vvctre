@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <memory>
 #include <shared_mutex>
 #include <vector>
@@ -31,8 +32,10 @@ public:
     void AddCheat(const std::shared_ptr<CheatBase>& cheat);
     void RemoveCheat(int index);
     void UpdateCheat(int index, const std::shared_ptr<CheatBase>& new_cheat);
-    void LoadCheatFile();
-    void SaveCheatFile() const;
+    void LoadCheatsFromFile();
+    void LoadCheatsFromStream(std::istream& stream);
+    void SaveCheatsToFile() const;
+    void SaveCheatsToStream(std::ostream& stream) const;
 
 private:
     void RunCallback(std::uintptr_t user_data, int cycles_late);

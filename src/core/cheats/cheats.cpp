@@ -20,7 +20,7 @@ namespace Cheats {
 constexpr u64 run_interval_ticks = 50'000'000;
 
 CheatEngine::CheatEngine(Core::System& system_) : system(system_) {
-    LoadCheatFile();
+    LoadCheatsFromFile();
     event = system.CoreTiming().RegisterEvent(
         "CheatCore::run_event",
         [this](u64 thread_id, s64 cycle_late) { RunCallback(thread_id, cycle_late); });
@@ -59,27 +59,7 @@ void CheatEngine::UpdateCheat(int index, const std::shared_ptr<CheatBase>& new_c
     cheats_list[index] = new_cheat;
 }
 
-void CheatEngine::SaveCheatFile() const {
-    const std::string cheat_dir = FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir);
-    const std::string filepath = fmt::format(
-        "{}{:016X}.txt", cheat_dir, system.Kernel().GetCurrentProcess()->codeset->program_id);
-
-    if (!FileUtil::IsDirectory(cheat_dir)) {
-        FileUtil::CreateDir(cheat_dir);
-    }
-
-    std::ofstream file;
-    OpenFStream(file, filepath, std::ios_base::out);
-
-    auto cheats = GetCheats();
-    for (const auto& cheat : cheats) {
-        file << cheat->ToString();
-    }
-
-    file.flush();
-}
-
-void CheatEngine::LoadCheatFile() {
+void CheatEngine::LoadCheatsFromFile() {
     const std::string cheat_dir = FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir);
     const std::string filepath = fmt::format(
         "{}{:016X}.txt", cheat_dir, system.Kernel().GetCurrentProcess()->codeset->program_id);
@@ -92,11 +72,48 @@ void CheatEngine::LoadCheatFile() {
         return;
     }
 
-    auto gateway_cheats = GatewayCheat::LoadFile(filepath);
+    std::ifstream gateway_cheats_file_stream;
+    OpenFStream(gateway_cheats_file_stream, filepath, std::ios_base::in);
+    if (!gateway_cheats_file_stream) {
+        return;
+    }
+
+    LoadCheatsFromStream(gateway_cheats_file_stream);
+}
+
+void CheatEngine::LoadCheatsFromStream(std::istream& stream) {
+    std::vector<std::unique_ptr<CheatBase>> gateway_cheats = GatewayCheat::Load(stream);
     {
         std::unique_lock<std::shared_mutex> lock(cheats_list_mutex);
         cheats_list.clear();
         std::move(gateway_cheats.begin(), gateway_cheats.end(), std::back_inserter(cheats_list));
+    }
+}
+
+void CheatEngine::SaveCheatsToFile() const {
+    const std::string cheat_dir = FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir);
+    const std::string filepath = fmt::format(
+        "{}{:016X}.txt", cheat_dir, system.Kernel().GetCurrentProcess()->codeset->program_id);
+
+    if (!FileUtil::IsDirectory(cheat_dir)) {
+        FileUtil::CreateDir(cheat_dir);
+    }
+
+    std::ofstream file;
+    OpenFStream(file, filepath, std::ios_base::out);
+
+    const std::vector<std::shared_ptr<CheatBase>> cheats = GetCheats();
+    for (const std::shared_ptr<CheatBase>& cheat : cheats) {
+        file << cheat->ToString();
+    }
+
+    file.flush();
+}
+
+void CheatEngine::SaveCheatsToStream(std::ostream& stream) const {
+    const std::vector<std::shared_ptr<CheatBase>> cheats = GetCheats();
+    for (const std::shared_ptr<CheatBase>& cheat : cheats) {
+        stream << cheat->ToString();
     }
 }
 

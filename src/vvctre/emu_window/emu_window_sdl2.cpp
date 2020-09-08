@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <csignal>
 #include <cstdlib>
+#include <sstream>
 #include <string>
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
@@ -3068,52 +3069,44 @@ void EmuWindow_SDL2::SwapBuffers() {
         ImGui::SetNextWindowSize(ImVec2(480.0f, 640.0f), ImGuiCond_Appearing);
 
         if (ImGui::Begin("Cheats", &show_cheats_window, ImGuiWindowFlags_NoSavedSettings)) {
-            if (ImGui::Button("Edit File")) {
-                const std::string filepath = fmt::format(
-                    "{}{:016X}.txt", FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
-                    system.Kernel().GetCurrentProcess()->codeset->program_id);
-
-                FileUtil::CreateFullPath(filepath);
-
-                if (!FileUtil::Exists(filepath)) {
-                    FileUtil::CreateEmptyFile(filepath);
-                }
-
-                FileUtil::ReadFileToString(true, filepath, cheats_file_content);
+            if (ImGui::Button("Edit")) {
+                std::ostringstream oss;
+                system.CheatEngine().SaveCheatsToStream(oss);
+                cheats_text_editor_text = oss.str();
                 show_cheats_text_editor = true;
             }
 
             ImGui::SameLine();
 
             if (ImGui::Button("Reload File")) {
-                system.CheatEngine().LoadCheatFile();
+                system.CheatEngine().LoadCheatsFromFile();
 
                 if (show_cheats_text_editor) {
                     const std::string filepath = fmt::format(
                         "{}{:016X}.txt", FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
                         system.Kernel().GetCurrentProcess()->codeset->program_id);
 
-                    FileUtil::ReadFileToString(true, filepath, cheats_file_content);
+                    FileUtil::ReadFileToString(true, filepath, cheats_text_editor_text);
                 }
             }
 
             ImGui::SameLine();
 
             if (ImGui::Button("Save File")) {
-                system.CheatEngine().SaveCheatFile();
+                system.CheatEngine().SaveCheatsToFile();
 
                 if (show_cheats_text_editor) {
                     const std::string filepath = fmt::format(
                         "{}{:016X}.txt", FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
                         system.Kernel().GetCurrentProcess()->codeset->program_id);
 
-                    FileUtil::ReadFileToString(true, filepath, cheats_file_content);
+                    FileUtil::ReadFileToString(true, filepath, cheats_text_editor_text);
                 }
             }
 
             if (ImGui::BeginChildFrame(ImGui::GetID("Cheats"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
-                const std::vector<std::shared_ptr<Cheats::CheatBase>> cheats =
+                const std::vector<std::shared_ptr<Cheats::CheatBase>>& cheats =
                     system.CheatEngine().GetCheats();
 
                 ImGuiListClipper clipper(cheats.size());
@@ -3133,7 +3126,7 @@ void EmuWindow_SDL2::SwapBuffers() {
 
         if (!show_cheats_window) {
             show_cheats_text_editor = false;
-            cheats_file_content.clear();
+            cheats_text_editor_text.clear();
         }
 
         ImGui::End();
@@ -3151,9 +3144,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
                                 system.Kernel().GetCurrentProcess()->codeset->program_id);
 
-                            FileUtil::WriteStringToFile(true, filepath, cheats_file_content);
+                            FileUtil::WriteStringToFile(true, filepath, cheats_text_editor_text);
 
-                            system.CheatEngine().LoadCheatFile();
+                            system.CheatEngine().LoadCheatsFromFile();
+                        }
+
+                        if (ImGui::MenuItem("Load Cheats From Text")) {
+                            std::istringstream iss(cheats_text_editor_text);
+                            system.CheatEngine().LoadCheatsFromStream(iss);
                         }
 
                         ImGui::EndMenu();
@@ -3162,12 +3160,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::EndMenuBar();
                 }
 
-                ImGui::InputTextMultiline("##cheats_file_content", &cheats_file_content,
+                ImGui::InputTextMultiline("##cheats_text_editor_text", &cheats_text_editor_text,
                                           ImVec2(-1.0f, -1.0f));
             }
 
             if (!show_cheats_text_editor) {
-                cheats_file_content.clear();
+                cheats_text_editor_text.clear();
             }
         }
     }
