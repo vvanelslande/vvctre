@@ -176,36 +176,36 @@ bool CreateDir(const std::string& path) {
 #endif
 }
 
-bool CreateFullPath(const std::string& fullPath) {
-    LOG_TRACE(Common_Filesystem, "path {}", fullPath);
+bool CreateFullPath(const std::string& full_path) {
+    LOG_TRACE(Common_Filesystem, "path {}", full_path);
 
-    if (FileUtil::Exists(fullPath)) {
-        LOG_DEBUG(Common_Filesystem, "path exists {}", fullPath);
+    if (FileUtil::Exists(full_path)) {
+        LOG_DEBUG(Common_Filesystem, "path exists {}", full_path);
         return true;
     }
 
-    int panicCounter = 100;
+    int panic_counter = 100;
 
     std::size_t position = 0;
     while (true) {
         // Find next sub path
-        position = fullPath.find('/', position);
+        position = full_path.find('/', position);
 
         // We're done, yay!
-        if (position == fullPath.npos) {
+        if (position == full_path.npos) {
             return true;
         }
 
         // Include the '/' so the first call is CreateDir("/") rather than CreateDir("")
-        std::string const subPath(fullPath.substr(0, position + 1));
-        if (!FileUtil::IsDirectory(subPath) && !FileUtil::CreateDir(subPath)) {
+        std::string const sub_path(full_path.substr(0, position + 1));
+        if (!FileUtil::IsDirectory(sub_path) && !FileUtil::CreateDir(sub_path)) {
             LOG_ERROR(Common, "CreateFullPath: directory creation failed");
             return false;
         }
 
         // A safety check
-        panicCounter--;
-        if (panicCounter <= 0) {
+        panic_counter--;
+        if (panic_counter <= 0) {
             LOG_ERROR(Common, "CreateFullPath: directory structure is too deep");
             return false;
         }
