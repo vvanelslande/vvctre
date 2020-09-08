@@ -154,7 +154,7 @@ bool CreateDir(const std::string& path) {
     if (::CreateDirectoryW(Common::UTF8ToUTF16W(path).c_str(), nullptr)) {
         return true;
     }
-    DWORD error = GetLastError();
+    const DWORD error = GetLastError();
     if (error == ERROR_ALREADY_EXISTS) {
         LOG_DEBUG(Common_Filesystem, "CreateDirectory failed on {}: already exists", path);
         return true;
