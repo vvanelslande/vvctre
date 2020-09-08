@@ -81,7 +81,7 @@ const RomFSFile GetFile(const u8* romfs, const std::vector<std::u16string>& path
     for (const std::u16string& dir_name : dir_names) {
         u32 child_dir_offset;
         child_dir_offset = dir.first_child_dir_offset;
-        while (true) {
+        for (;;) {
             if (child_dir_offset == INVALID_FIELD) {
                 return RomFSFile();
             }

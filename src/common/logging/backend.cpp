@@ -80,7 +80,7 @@ private:
                     backend->Write(e);
                 }
             };
-            while (true) {
+            for (;;) {
                 entry = message_queue.PopWait();
                 if (entry.final_entry) {
                     break;

@@ -849,7 +849,7 @@ private:
             } else {
                 labels.insert(subroutine.begin);
                 shader.AddLine("uint jmp_to = {}u;", subroutine.begin);
-                shader.AddLine("while (true) {{");
+                shader.AddLine("for (;;) {{");
                 ++shader.scope;
 
                 shader.AddLine("switch (jmp_to) {{");

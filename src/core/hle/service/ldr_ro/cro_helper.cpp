@@ -119,7 +119,7 @@ ResultCode CROHelper::ApplyRelocationBatch(VAddr batch, u32 symbol_address, bool
         return CROFormatError(0x10);
 
     VAddr relocation_address = batch;
-    while (true) {
+    for (;;) {
         RelocationEntry relocation;
         memory.ReadBlock(process, relocation_address, &relocation, sizeof(RelocationEntry));
 
@@ -159,7 +159,7 @@ VAddr CROHelper::FindExportNamedSymbol(const std::string& name) const {
     next.raw = entry.left.raw;
     u32 found_id;
 
-    while (true) {
+    for (;;) {
         GetEntry(memory, next.next_index, entry);
 
         if (next.is_end) {
@@ -1471,7 +1471,7 @@ u32 CROHelper::GetFixEnd(u32 fix_level) const {
 
     u32 entry_size_i = 2;
     int field = ModuleNameOffset;
-    while (true) {
+    for (;;) {
         end = std::max<u32>(end, GetField(static_cast<HeaderField>(field)) +
                                      GetField(static_cast<HeaderField>(field + 1)) *
                                          ENTRY_SIZE[entry_size_i]);

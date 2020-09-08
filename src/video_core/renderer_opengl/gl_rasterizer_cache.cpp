@@ -1602,7 +1602,7 @@ void RasterizerCacheOpenGL::ValidateSurface(const Surface& surface, PAddr addr, 
         validate_regions.erase(interval);
     };
 
-    while (true) {
+    for (;;) {
         const auto it = validate_regions.begin();
         if (it == validate_regions.end()) {
             break;

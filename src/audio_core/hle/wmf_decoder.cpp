@@ -142,7 +142,7 @@ MFOutputState WMFDecoder::Impl::DecodingLoop(ADTSData adts_header,
     std::optional<std::vector<f32>> output_buffer;
     unique_mfptr<IMFSample> output;
 
-    while (true) {
+    for (;;) {
         auto [output_status, output] = ReceiveSample(transform.get(), out_stream_id);
 
         // 0 -> okay; 3 -> okay but more data available (buffer too small)
@@ -238,7 +238,7 @@ std::optional<BinaryResponse> WMFDecoder::Impl::Decode(const BinaryRequest& requ
     sample = CreateSample((void*)data, request.size, 1, 0);
     sample->SetUINT32(MFSampleExtension_CleanPoint, 1);
 
-    while (true) {
+    for (;;) {
         input_status = SendSample(transform.get(), in_stream_id, sample.get());
         output_status = DecodingLoop(adts_meta->ADTSHeader, out_streams);
 
