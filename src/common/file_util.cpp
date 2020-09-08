@@ -237,50 +237,50 @@ bool DeleteDir(const std::string& filename) {
     return false;
 }
 
-bool Rename(const std::string& srcFilename, const std::string& destFilename) {
+bool Rename(const std::string& src_filename, const std::string& dest_filename) {
     LOG_TRACE(Common_Filesystem, "{} --> {}", srcFilename, destFilename);
 #ifdef _WIN32
-    if (_wrename(Common::UTF8ToUTF16W(srcFilename).c_str(),
-                 Common::UTF8ToUTF16W(destFilename).c_str()) == 0) {
+    if (_wrename(Common::UTF8ToUTF16W(src_filename).c_str(),
+                 Common::UTF8ToUTF16W(dest_filename).c_str()) == 0) {
         return true;
     }
 #else
-    if (rename(srcFilename.c_str(), destFilename.c_str()) == 0) {
+    if (rename(src_filename.c_str(), dest_filename.c_str()) == 0) {
         return true;
     }
 #endif
-    LOG_ERROR(Common_Filesystem, "failed {} --> {}: {}", srcFilename, destFilename,
+    LOG_ERROR(Common_Filesystem, "failed {} --> {}: {}", src_filename, dest_filename,
               GetLastErrorMsg());
     return false;
 }
 
-bool Copy(const std::string& srcFilename, const std::string& destFilename) {
-    LOG_TRACE(Common_Filesystem, "{} --> {}", srcFilename, destFilename);
+bool Copy(const std::string& src_filename, const std::string& dest_filename) {
+    LOG_TRACE(Common_Filesystem, "{} --> {}", srcFilename, dest_filename);
 #ifdef _WIN32
-    if (CopyFileW(Common::UTF8ToUTF16W(srcFilename).c_str(),
-                  Common::UTF8ToUTF16W(destFilename).c_str(), FALSE)) {
+    if (CopyFileW(Common::UTF8ToUTF16W(src_filename).c_str(),
+                  Common::UTF8ToUTF16W(dest_filename).c_str(), FALSE)) {
         return true;
     }
 
-    LOG_ERROR(Common_Filesystem, "failed {} --> {}: {}", srcFilename, destFilename,
+    LOG_ERROR(Common_Filesystem, "failed {} --> {}: {}", src_filename, dest_filename,
               GetLastErrorMsg());
     return false;
 #else
     using CFilePointer = std::unique_ptr<FILE, decltype(&std::fclose)>;
 
     // Open input file
-    CFilePointer input{fopen(srcFilename.c_str(), "rb"), std::fclose};
+    CFilePointer input{fopen(src_filename.c_str(), "rb"), std::fclose};
     if (!input) {
-        LOG_ERROR(Common_Filesystem, "opening input failed {} --> {}: {}", srcFilename,
-                  destFilename, GetLastErrorMsg());
+        LOG_ERROR(Common_Filesystem, "opening input failed {} --> {}: {}", src_filename,
+                  dest_filename, GetLastErrorMsg());
         return false;
     }
 
     // Open output file
-    CFilePointer output{fopen(destFilename.c_str(), "wb"), std::fclose};
+    CFilePointer output{fopen(dest_filename.c_str(), "wb"), std::fclose};
     if (!output) {
-        LOG_ERROR(Common_Filesystem, "opening output failed {} --> {}: {}", srcFilename,
-                  destFilename, GetLastErrorMsg());
+        LOG_ERROR(Common_Filesystem, "opening output failed {} --> {}: {}", src_filename,
+                  dest_filename, GetLastErrorMsg());
         return false;
     }
 
@@ -292,7 +292,7 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
         if (rnum != buffer.size()) {
             if (ferror(input.get()) != 0) {
                 LOG_ERROR(Common_Filesystem, "failed reading from source, {} --> {}: {}",
-                          srcFilename, destFilename, GetLastErrorMsg());
+                          src_filename, dest_filename, GetLastErrorMsg());
                 return false;
             }
         }
@@ -300,8 +300,8 @@ bool Copy(const std::string& srcFilename, const std::string& destFilename) {
         // Write output
         std::size_t wnum = fwrite(buffer.data(), sizeof(char), rnum, output.get());
         if (wnum != rnum) {
-            LOG_ERROR(Common_Filesystem, "failed writing to output, {} --> {}: {}", srcFilename,
-                      destFilename, GetLastErrorMsg());
+            LOG_ERROR(Common_Filesystem, "failed writing to output, {} --> {}: {}", src_filename,
+                      dest_filename, GetLastErrorMsg());
             return false;
         }
     }

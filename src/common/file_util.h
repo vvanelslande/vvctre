@@ -76,11 +76,11 @@ bool Delete(const std::string& filename);
 // Deletes a directory filename, returns true on success
 bool DeleteDir(const std::string& filename);
 
-// renames file srcFilename to destFilename, returns true on success
-bool Rename(const std::string& srcFilename, const std::string& destFilename);
+// renames file src_filename to dest_filename, returns true on success
+bool Rename(const std::string& src_filename, const std::string& dest_filename);
 
-// copies file srcFilename to destFilename, returns true on success
-bool Copy(const std::string& srcFilename, const std::string& destFilename);
+// copies file src_filename to dest_filename, returns true on success
+bool Copy(const std::string& src_filename, const std::string& dest_filename);
 
 // creates an empty file filename, returns true on success
 bool CreateEmptyFile(const std::string& filename);
