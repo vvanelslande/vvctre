@@ -2326,6 +2326,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             r.UnbindCallback(ipc_recorder_callback);
 
                             ipc_records.clear();
+                            ipc_records_filtered.clear();
                             ipc_recorder_filter.clear();
                             ipc_recorder_callback = nullptr;
                         }
@@ -2894,6 +2895,31 @@ void EmuWindow_SDL2::SwapBuffers() {
                             } else {
                                 ipc_records.emplace_back(record);
                             }
+                            if (!ipc_recorder_filter.empty()) {
+                                std::string service_name;
+                                std::string function_name = "Unknown";
+                                if (record.client_port.id != -1) {
+                                    service_name = system.ServiceManager().GetServiceNameByPortId(
+                                        static_cast<u32>(record.client_port.id));
+                                }
+                                if (service_name.empty()) {
+                                    service_name = record.server_session.name;
+                                    service_name = Common::ReplaceAll(service_name, "_Server", "");
+                                    service_name = Common::ReplaceAll(service_name, "_Client", "");
+                                }
+                                const std::string label = fmt::format(
+                                    "#{} - {} - {} (0x{:08X}) - {} - {}", record.id, service_name,
+                                    record.function_name.empty() ? "Unknown" : record.function_name,
+                                    record.untranslated_request_cmdbuf.empty()
+                                        ? 0xFFFFFFFF
+                                        : record.untranslated_request_cmdbuf[0],
+                                    record.is_hle ? "HLE" : "LLE",
+                                    IPC_Recorder_GetStatusString(record.status));
+
+                                if (label.find(ipc_recorder_filter) != std::string::npos) {
+                                    ipc_records_filtered.push_back(record);
+                                }
+                            }
                         });
                 } else {
                     r.UnbindCallback(ipc_recorder_callback);
@@ -2904,17 +2930,52 @@ void EmuWindow_SDL2::SwapBuffers() {
             if (ImGui::Button("Clear")) {
                 ipc_recorder_id_offset += ipc_records.size();
                 ipc_records.clear();
+                ipc_records_filtered.clear();
             }
             ImGui::SameLine();
-            ImGui::InputTextWithHint("##filter", "Filter", &ipc_recorder_filter);
+            if (ImGui::InputTextWithHint("##filter", "Filter", &ipc_recorder_filter_,
+                                         ImGuiInputTextFlags_EnterReturnsTrue)) {
+                ipc_recorder_filter = ipc_recorder_filter_;
+                ipc_records_filtered.clear();
+
+                if (!ipc_recorder_filter.empty()) {
+                    for (const IPCDebugger::RequestRecord& record : ipc_records) {
+                        std::string service_name;
+                        std::string function_name = "Unknown";
+                        if (record.client_port.id != -1) {
+                            service_name = system.ServiceManager().GetServiceNameByPortId(
+                                static_cast<u32>(record.client_port.id));
+                        }
+                        if (service_name.empty()) {
+                            service_name = record.server_session.name;
+                            service_name = Common::ReplaceAll(service_name, "_Server", "");
+                            service_name = Common::ReplaceAll(service_name, "_Client", "");
+                        }
+                        const std::string label = fmt::format(
+                            "#{} - {} - {} (0x{:08X}) - {} - {}", record.id, service_name,
+                            record.function_name.empty() ? "Unknown" : record.function_name,
+                            record.untranslated_request_cmdbuf.empty()
+                                ? 0xFFFFFFFF
+                                : record.untranslated_request_cmdbuf[0],
+                            record.is_hle ? "HLE" : "LLE",
+                            IPC_Recorder_GetStatusString(record.status));
+
+                        if (label.find(ipc_recorder_filter) != std::string::npos) {
+                            ipc_records_filtered.push_back(record);
+                        }
+                    }
+                }
+            }
             const float width = ImGui::GetWindowWidth();
             if (ImGui::BeginChildFrame(ImGui::GetID("Records"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
-                ImGuiListClipper clipper(ipc_records.size());
+                const std::vector<IPCDebugger::RequestRecord>& records =
+                    ipc_recorder_filter.empty() ? ipc_records : ipc_records_filtered;
+                ImGuiListClipper clipper(records.size());
 
                 while (clipper.Step()) {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
-                        const IPCDebugger::RequestRecord& record = ipc_records[i];
+                        const IPCDebugger::RequestRecord& record = records[i];
 
                         std::string service_name;
                         std::string function_name = "Unknown";
@@ -2935,52 +2996,48 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 : record.untranslated_request_cmdbuf[0],
                             record.is_hle ? "HLE" : "LLE",
                             IPC_Recorder_GetStatusString(record.status));
-                        if (label.find(ipc_recorder_filter) != std::string::npos) {
-                            ImGui::Selectable(label.c_str());
-                            if (ImGui::IsItemHovered()) {
-                                ImGui::BeginTooltip();
+                        ImGui::Selectable(label.c_str());
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::BeginTooltip();
 
-                                ImGui::PushTextWrapPos(width * 0.7f);
+                            ImGui::PushTextWrapPos(width * 0.7f);
 
-                                ImGui::TextUnformatted(
-                                    fmt::format(
-                                        "ID: {}\n"
-                                        "Status: {} ({})\n"
-                                        "HLE: {}\n"
-                                        "Function: {}\n"
-                                        "Client Process: {} ({})\n"
-                                        "Client Thread: {} ({})\n"
-                                        "Client Session: {} ({})\n"
-                                        "Client Port: {} ({})\n"
-                                        "Server Process: {} ({})\n"
-                                        "Server Thread: {} ({})\n"
-                                        "Server Session: {} ({})\n"
-                                        "Untranslated Request Command Buffer: 0x{:08X}\n"
-                                        "Translated Request Command Buffer: 0x{:08X}\n"
-                                        "Untranslated Reply Command Buffer: 0x{:08X}\n"
-                                        "Translated Reply Command Buffer: 0x{:08X}",
-                                        record.id, IPC_Recorder_GetStatusString(record.status),
-                                        static_cast<int>(record.status),
-                                        record.is_hle ? "Yes" : "No",
-                                        record.function_name.empty() ? "Unknown"
-                                                                     : record.function_name,
-                                        record.client_process.name, record.client_process.id,
-                                        record.client_thread.name, record.client_thread.id,
-                                        record.client_session.name, record.client_session.id,
-                                        record.client_port.name, record.client_port.id,
-                                        record.server_process.name, record.server_process.id,
-                                        record.server_thread.name, record.server_thread.id,
-                                        record.server_session.name, record.server_session.id,
-                                        fmt::join(record.untranslated_request_cmdbuf, ", 0x"),
-                                        fmt::join(record.translated_request_cmdbuf, ", 0x"),
-                                        fmt::join(record.untranslated_reply_cmdbuf, ", 0x"),
-                                        fmt::join(record.translated_reply_cmdbuf, ", 0x"))
-                                        .c_str());
+                            ImGui::TextUnformatted(
+                                fmt::format(
+                                    "ID: {}\n"
+                                    "Status: {} ({})\n"
+                                    "HLE: {}\n"
+                                    "Function: {}\n"
+                                    "Client Process: {} ({})\n"
+                                    "Client Thread: {} ({})\n"
+                                    "Client Session: {} ({})\n"
+                                    "Client Port: {} ({})\n"
+                                    "Server Process: {} ({})\n"
+                                    "Server Thread: {} ({})\n"
+                                    "Server Session: {} ({})\n"
+                                    "Untranslated Request Command Buffer: 0x{:08X}\n"
+                                    "Translated Request Command Buffer: 0x{:08X}\n"
+                                    "Untranslated Reply Command Buffer: 0x{:08X}\n"
+                                    "Translated Reply Command Buffer: 0x{:08X}",
+                                    record.id, IPC_Recorder_GetStatusString(record.status),
+                                    static_cast<int>(record.status), record.is_hle ? "Yes" : "No",
+                                    record.function_name.empty() ? "Unknown" : record.function_name,
+                                    record.client_process.name, record.client_process.id,
+                                    record.client_thread.name, record.client_thread.id,
+                                    record.client_session.name, record.client_session.id,
+                                    record.client_port.name, record.client_port.id,
+                                    record.server_process.name, record.server_process.id,
+                                    record.server_thread.name, record.server_thread.id,
+                                    record.server_session.name, record.server_session.id,
+                                    fmt::join(record.untranslated_request_cmdbuf, ", 0x"),
+                                    fmt::join(record.translated_request_cmdbuf, ", 0x"),
+                                    fmt::join(record.untranslated_reply_cmdbuf, ", 0x"),
+                                    fmt::join(record.translated_reply_cmdbuf, ", 0x"))
+                                    .c_str());
 
-                                ImGui::PopTextWrapPos();
+                            ImGui::PopTextWrapPos();
 
-                                ImGui::EndTooltip();
-                            }
+                            ImGui::EndTooltip();
                         }
                     }
                 }
@@ -2994,6 +3051,7 @@ void EmuWindow_SDL2::SwapBuffers() {
             r.UnbindCallback(ipc_recorder_callback);
 
             ipc_records.clear();
+            ipc_records_filtered.clear();
             ipc_recorder_filter.clear();
             ipc_recorder_callback = nullptr;
         }
