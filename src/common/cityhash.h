@@ -87,13 +87,6 @@ uint64_t CityHash64WithSeed(const char* buf, std::size_t len, uint64_t seed);
 // hashed into the result.
 uint64_t CityHash64WithSeeds(const char* buf, std::size_t len, uint64_t seed0, uint64_t seed1);
 
-// Hash function for a byte array.
-uint128 CityHash128(const char* s, std::size_t len);
-
-// Hash function for a byte array.  For convenience, a 128-bit seed is also
-// hashed into the result.
-uint128 CityHash128WithSeed(const char* s, std::size_t len, uint128 seed);
-
 // Hash 128 input bits down to 64 bits of output.
 // This is intended to be a reasonably good hash function.
 inline uint64_t Hash128to64(const uint128& x) {
