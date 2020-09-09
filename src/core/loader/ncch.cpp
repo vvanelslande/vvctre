@@ -135,7 +135,7 @@ ResultStatus AppLoader_NCCH::LoadExec(std::shared_ptr<Kernel::Process>& process)
         u32 stack_size = overlay_ncch->exheader_header.codeset_info.stack_size;
 
         // On real HW this is done with FS:Reg, but we can be lazy
-        auto fs_user =
+        std::shared_ptr<Service::FS::FS_USER> fs_user =
             Core::System::GetInstance().ServiceManager().GetService<Service::FS::FS_USER>(
                 "fs:USER");
         fs_user->Register(process->process_id, process->codeset->program_id, filepath);
@@ -150,7 +150,7 @@ void AppLoader_NCCH::ParseRegionLockoutInfo() {
     std::vector<u8> smdh_buffer;
     if (ReadIcon(smdh_buffer) == ResultStatus::Success && smdh_buffer.size() >= sizeof(SMDH)) {
         SMDH smdh;
-        memcpy(&smdh, smdh_buffer.data(), sizeof(SMDH));
+        std::memcpy(&smdh, smdh_buffer.data(), sizeof(SMDH));
         u32 region_lockout = smdh.region_lockout;
         constexpr u32 REGION_COUNT = 7;
         std::vector<u32> regions;
@@ -160,7 +160,8 @@ void AppLoader_NCCH::ParseRegionLockoutInfo() {
             }
             region_lockout >>= 1;
         }
-        auto cfg = Service::CFG::GetModule(Core::System::GetInstance());
+        std::shared_ptr<Service::CFG::Module> cfg =
+            Service::CFG::GetModule(Core::System::GetInstance());
         ASSERT_MSG(cfg, "CFG Module missing!");
         cfg->SetPreferredRegionCodes(regions);
     }
