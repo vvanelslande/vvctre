@@ -1,49 +1,64 @@
 [submodule "boost"]
-    path = externals/boost
-    url = https://github.com/vvanelslande/vvctre-boost.git
+path = externals/boost
+url = https://github.com/vvanelslande/vvctre-boost.git
+
 [submodule "nihstro"]
-    path = externals/nihstro
-    url = https://github.com/neobrain/nihstro.git
+path = externals/nihstro
+url = https://github.com/neobrain/nihstro.git
+
 [submodule "soundtouch"]
-    path = externals/soundtouch
-    url = https://github.com/vvanelslande/vvctre-soundtouch.git
+path = externals/soundtouch
+url = https://github.com/vvanelslande/vvctre-soundtouch.git
+
 [submodule "dynarmic"]
-    path = externals/dynarmic
-    url = https://github.com/MerryMage/dynarmic.git
+path = externals/dynarmic
+url = https://github.com/MerryMage/dynarmic.git
+
 [submodule "xbyak"]
-    path = externals/xbyak
-    url = https://github.com/herumi/xbyak.git
+path = externals/xbyak
+url = https://github.com/herumi/xbyak.git
+
 [submodule "cryptopp"]
-    path = externals/cryptopp/cryptopp
-    url = https://github.com/weidai11/cryptopp.git
+path = externals/cryptopp/cryptopp
+url = https://github.com/weidai11/cryptopp.git
+
 [submodule "fmt"]
-    path = externals/fmt
-    url = https://github.com/fmtlib/fmt.git
+path = externals/fmt
+url = https://github.com/fmtlib/fmt.git
+
 [submodule "cubeb"]
-    path = externals/cubeb
-    url = https://github.com/kinetiknz/cubeb.git
+path = externals/cubeb
+url = https://github.com/kinetiknz/cubeb.git
+
 [submodule "teakra"]
-    path = externals/teakra
-    url = https://github.com/wwylele/teakra.git
+path = externals/teakra
+url = https://github.com/wwylele/teakra.git
+
 [submodule "imgui"]
-    path = externals/imgui
-    url = https://github.com/ocornut/imgui.git
+path = externals/imgui
+url = https://github.com/ocornut/imgui.git
+
 [submodule "clip"]
-    path = externals/clip
-    url = https://github.com/dacap/clip.git
+path = externals/clip
+url = https://github.com/dacap/clip.git
+
 [submodule "portable-file-dialogs"]
-    path = externals/portable-file-dialogs
-    url = https://github.com/samhocevar/portable-file-dialogs.git
+path = externals/portable-file-dialogs
+url = https://github.com/samhocevar/portable-file-dialogs.git
+
 [submodule "stb"]
-    path = externals/stb
-    url = https://github.com/nothings/stb.git
+path = externals/stb
+url = https://github.com/nothings/stb.git
+
 [submodule "enet"]
-    path = externals/enet
-    url = https://github.com/lsalzman/enet.git
+path = externals/enet
+url = https://github.com/lsalzman/enet.git
+
 [submodule "asl"]
-    path = externals/asl
-    url = https://github.com/aslze/asl.git
+path = externals/asl
+url = https://github.com/aslze/asl.git
+
 [submodule "mbedtls"]
-    path = externals/mbedtls
-    url = https://github.com/ARMmbed/mbedtls.git
-    branch = mbedtls-2.16
+path = externals/mbedtls
+url = https://github.com/ARMmbed/mbedtls.git
+branch = mbedtls-2.16
