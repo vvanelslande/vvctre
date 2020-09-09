@@ -24,51 +24,51 @@ std::string ToLower(std::string str) {
     return str;
 }
 
-/// Make a string uppercase
-std::string ToUpper(std::string str) {
-    std::transform(str.begin(), str.end(), str.begin(),
-                   [](unsigned char c) { return std::toupper(c); });
-    return str;
-}
-
 // Turns "  hej " into "hej". Also handles tabs.
 std::string StripSpaces(const std::string& str) {
     const std::size_t s = str.find_first_not_of(" \t\r\n");
 
-    if (str.npos != s)
+    if (str.npos != s) {
         return str.substr(s, str.find_last_not_of(" \t\r\n") - s + 1);
-    else
+    } else {
         return "";
+    }
 }
 
-bool SplitPath(const std::string& full_path, std::string* _pPath, std::string* _pFilename,
-               std::string* _pExtension) {
-    if (full_path.empty())
+bool SplitPath(const std::string& full_path, std::string* path, std::string* filename,
+               std::string* extension) {
+    if (full_path.empty()) {
         return false;
+    }
 
     std::size_t dir_end = full_path.find_last_of("/"
-// windows needs the : included for something like just "C:" to be considered a directory
+// Windows needs the : included for something like just "C:" to be considered a directory
 #ifdef _WIN32
                                                  ":"
 #endif
     );
-    if (std::string::npos == dir_end)
+    if (std::string::npos == dir_end) {
         dir_end = 0;
-    else
+    } else {
         dir_end += 1;
+    }
 
-    std::size_t fname_end = full_path.rfind('.');
-    if (fname_end < dir_end || std::string::npos == fname_end)
-        fname_end = full_path.size();
+    std::size_t filename_end = full_path.rfind('.');
+    if (filename_end < dir_end || std::string::npos == filename_end) {
+        filename_end = full_path.size();
+    }
 
-    if (_pPath)
-        *_pPath = full_path.substr(0, dir_end);
+    if (path) {
+        *path = full_path.substr(0, dir_end);
+    }
 
-    if (_pFilename)
-        *_pFilename = full_path.substr(dir_end, fname_end - dir_end);
+    if (filename) {
+        *filename = full_path.substr(dir_end, filename_end - dir_end);
+    }
 
-    if (_pExtension)
-        *_pExtension = full_path.substr(fname_end);
+    if (extension) {
+        *extension = full_path.substr(filename_end);
+    }
 
     return true;
 }

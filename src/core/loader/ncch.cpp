@@ -66,8 +66,9 @@ std::pair<std::optional<u32>, ResultStatus> AppLoader_NCCH::LoadKernelSystemMode
 ResultStatus AppLoader_NCCH::LoadExec(std::shared_ptr<Kernel::Process>& process) {
     using Kernel::CodeSet;
 
-    if (!is_loaded)
+    if (!is_loaded) {
         return ResultStatus::ErrorNotLoaded;
+    }
 
     std::vector<u8> code;
     u64_le program_id;
@@ -104,8 +105,9 @@ ResultStatus AppLoader_NCCH::LoadExec(std::shared_ptr<Kernel::Process>& process)
 
         // Apply patches now that the entire codeset (including .bss) has been allocated
         const ResultStatus patch_result = overlay_ncch->ApplyCodePatch(code);
-        if (patch_result != ResultStatus::Success && patch_result != ResultStatus::ErrorNotUsed)
+        if (patch_result != ResultStatus::Success && patch_result != ResultStatus::ErrorNotUsed) {
             return patch_result;
+        }
 
         codeset->entrypoint = codeset->CodeSegment().addr;
         codeset->memory = std::move(code);
@@ -167,8 +169,9 @@ void AppLoader_NCCH::ParseRegionLockoutInfo() {
 ResultStatus AppLoader_NCCH::Load(std::shared_ptr<Kernel::Process>& process) {
     u64_le ncch_program_id;
 
-    if (is_loaded)
+    if (is_loaded) {
         return ResultStatus::ErrorAlreadyLoaded;
+    }
 
     ResultStatus result = base_ncch.Load();
     if (result != ResultStatus::Success) {
@@ -233,16 +236,18 @@ ResultStatus AppLoader_NCCH::ReadLogo(std::vector<u8>& buffer) {
 
 ResultStatus AppLoader_NCCH::ReadProgramId(u64& out_program_id) {
     ResultStatus result = base_ncch.ReadProgramId(out_program_id);
-    if (result != ResultStatus::Success)
+    if (result != ResultStatus::Success) {
         return result;
+    }
 
     return ResultStatus::Success;
 }
 
 ResultStatus AppLoader_NCCH::ReadExtdataId(u64& out_extdata_id) {
     ResultStatus result = base_ncch.ReadExtdataId(out_extdata_id);
-    if (result != ResultStatus::Success)
+    if (result != ResultStatus::Success) {
         return result;
+    }
 
     return ResultStatus::Success;
 }
@@ -258,8 +263,9 @@ ResultStatus AppLoader_NCCH::DumpRomFS(const std::string& target_path) {
 ResultStatus AppLoader_NCCH::ReadUpdateRomFS(std::shared_ptr<FileSys::RomFSReader>& romfs_file) {
     ResultStatus result = update_ncch.ReadRomFS(romfs_file);
 
-    if (result != ResultStatus::Success)
+    if (result != ResultStatus::Success) {
         return base_ncch.ReadRomFS(romfs_file);
+    }
 
     return ResultStatus::Success;
 }

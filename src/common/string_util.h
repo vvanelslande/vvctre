@@ -16,9 +16,6 @@ namespace Common {
 /// Make a string lowercase
 std::string ToLower(std::string str);
 
-/// Make a string uppercase
-std::string ToUpper(std::string str);
-
 std::string StripSpaces(const std::string& s);
 
 void SplitString(const std::string& str, char delim, std::vector<std::string>& output);

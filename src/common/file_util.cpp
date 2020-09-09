@@ -15,7 +15,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
-// windows.h needs to be included before other windows headers
+// windows.h needs to be included before other Windows headers
 #include <direct.h> // getcwd
 #include <io.h>
 #include <shellapi.h>

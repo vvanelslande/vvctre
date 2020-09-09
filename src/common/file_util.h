@@ -153,7 +153,7 @@ std::string_view RemoveTrailingSlash(std::string_view path);
 enum class DirectorySeparator { ForwardSlash, BackwardSlash, PlatformDefault };
 
 // Removes trailing slash, makes all '\\' into '/', and removes duplicate '/'. Makes '/' into '\\'
-// depending if directory_separator is BackwardSlash or PlatformDefault and running on windows
+// depending if directory_separator is BackwardSlash or PlatformDefault and running on Windows
 std::string SanitizePath(std::string_view path,
                          DirectorySeparator directory_separator = DirectorySeparator::ForwardSlash);
 
