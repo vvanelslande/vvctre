@@ -14,6 +14,7 @@
 #include "common/swap.h"
 #include "core/core.h"
 #include "core/hle/ipc_helpers.h"
+#include "core/hle/kernel/hle_ipc.h"
 #include "core/hle/kernel/shared_memory.h"
 #include "core/hle/result.h"
 #include "core/hle/service/soc_u.h"
@@ -191,18 +192,24 @@ struct CTRPollFD {
         /// specific
         static Events TranslateTo3DS(u32 input_event) {
             Events ev = {};
-            if (input_event & POLLIN)
+            if (input_event & POLLIN) {
                 ev.pollin.Assign(1);
-            if (input_event & POLLPRI)
+            }
+            if (input_event & POLLPRI) {
                 ev.pollpri.Assign(1);
-            if (input_event & POLLHUP)
+            }
+            if (input_event & POLLHUP) {
                 ev.pollhup.Assign(1);
-            if (input_event & POLLERR)
+            }
+            if (input_event & POLLERR) {
                 ev.pollerr.Assign(1);
-            if (input_event & POLLOUT)
+            }
+            if (input_event & POLLOUT) {
                 ev.pollout.Assign(1);
-            if (input_event & POLLNVAL)
+            }
+            if (input_event & POLLNVAL) {
                 ev.pollnval.Assign(1);
+            }
             return ev;
         }
 
@@ -210,18 +217,24 @@ struct CTRPollFD {
         /// specific
         static u32 TranslateToPlatform(Events input_event) {
             u32 ret = 0;
-            if (input_event.pollin)
+            if (input_event.pollin) {
                 ret |= POLLIN;
-            if (input_event.pollpri)
+            }
+            if (input_event.pollpri) {
                 ret |= POLLPRI;
-            if (input_event.pollhup)
+            }
+            if (input_event.pollhup) {
                 ret |= POLLHUP;
-            if (input_event.pollerr)
+            }
+            if (input_event.pollerr) {
                 ret |= POLLERR;
-            if (input_event.pollout)
+            }
+            if (input_event.pollout) {
                 ret |= POLLOUT;
-            if (input_event.pollnval)
+            }
+            if (input_event.pollnval) {
                 ret |= POLLNVAL;
+            }
             return ret;
         }
     };
@@ -270,7 +283,7 @@ union CTRSockAddr {
     static sockaddr ToPlatform(CTRSockAddr const& ctr_addr) {
         sockaddr result;
         result.sa_family = ctr_addr.raw.sa_family;
-        memset(result.sa_data, 0, sizeof(result.sa_data));
+        std::memset(result.sa_data, 0, sizeof(result.sa_data));
 
         // We can not guarantee ABI compatibility between platforms so we copy the fields manually
         switch (result.sa_family) {
@@ -278,7 +291,7 @@ union CTRSockAddr {
             sockaddr_in* result_in = reinterpret_cast<sockaddr_in*>(&result);
             result_in->sin_port = ctr_addr.in.sin_port;
             result_in->sin_addr.s_addr = ctr_addr.in.sin_addr;
-            memset(result_in->sin_zero, 0, sizeof(result_in->sin_zero));
+            std::memset(result_in->sin_zero, 0, sizeof(result_in->sin_zero));
             break;
         }
         default:
@@ -374,11 +387,13 @@ void SOC_U::Socket(Kernel::HLERequestContext& ctx) {
 
     u32 ret = static_cast<u32>(::socket(domain, type, protocol));
 
-    if ((s32)ret != SOCKET_ERROR_VALUE)
+    if ((s32)ret != SOCKET_ERROR_VALUE) {
         open_sockets[ret] = {ret, true};
+    }
 
-    if ((s32)ret == SOCKET_ERROR_VALUE)
+    if ((s32)ret == SOCKET_ERROR_VALUE) {
         ret = TranslateError(GET_ERRNO);
+    }
 
     rb.Push(RESULT_SUCCESS);
     rb.Push(ret);
@@ -398,8 +413,9 @@ void SOC_U::Bind(Kernel::HLERequestContext& ctx) {
 
     s32 ret = ::bind(socket_handle, &sock_addr, std::max<u32>(sizeof(sock_addr), len));
 
-    if (ret != 0)
+    if (ret != 0) {
         ret = TranslateError(GET_ERRNO);
+    }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     rb.Push(RESULT_SUCCESS);
@@ -424,8 +440,9 @@ void SOC_U::Fcntl(Kernel::HLERequestContext& ctx) {
 #ifdef _WIN32
         posix_ret = 0;
         auto iter = open_sockets.find(socket_handle);
-        if (iter != open_sockets.end() && iter->second.blocking == false)
+        if (iter != open_sockets.end() && iter->second.blocking == false) {
             posix_ret |= 4; // O_NONBLOCK
+        }
 #else
         int ret = ::fcntl(socket_handle, F_GETFL, 0);
         if (ret == SOCKET_ERROR_VALUE) {
@@ -433,8 +450,9 @@ void SOC_U::Fcntl(Kernel::HLERequestContext& ctx) {
             return;
         }
         posix_ret = 0;
-        if (ret & O_NONBLOCK)
+        if (ret & O_NONBLOCK) {
             posix_ret |= 4; // O_NONBLOCK
+        }
 #endif
     } else if (ctr_cmd == 4) { // F_SETFL
 #ifdef _WIN32
@@ -445,8 +463,9 @@ void SOC_U::Fcntl(Kernel::HLERequestContext& ctx) {
             return;
         }
         auto iter = open_sockets.find(socket_handle);
-        if (iter != open_sockets.end())
+        if (iter != open_sockets.end()) {
             iter->second.blocking = (tmp == 0);
+        }
 #else
         int flags = ::fcntl(socket_handle, F_GETFL, 0);
         if (flags == SOCKET_ERROR_VALUE) {
@@ -456,7 +475,9 @@ void SOC_U::Fcntl(Kernel::HLERequestContext& ctx) {
 
         flags &= ~O_NONBLOCK;
         if (ctr_arg & 4) // O_NONBLOCK
+        {
             flags |= O_NONBLOCK;
+        }
 
         int ret = ::fcntl(socket_handle, F_SETFL, flags);
         if (ret == SOCKET_ERROR_VALUE) {
@@ -478,8 +499,9 @@ void SOC_U::Listen(Kernel::HLERequestContext& ctx) {
     rp.PopPID();
 
     s32 ret = ::listen(socket_handle, backlog);
-    if (ret != 0)
+    if (ret != 0) {
         ret = TranslateError(GET_ERRNO);
+    }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     rb.Push(RESULT_SUCCESS);
@@ -544,8 +566,9 @@ void SOC_U::Close(Kernel::HLERequestContext& ctx) {
 
     ret = closesocket(socket_handle);
 
-    if (ret != 0)
+    if (ret != 0) {
         ret = TranslateError(GET_ERRNO);
+    }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     rb.Push(RESULT_SUCCESS);
@@ -559,8 +582,8 @@ void SOC_U::SendTo(Kernel::HLERequestContext& ctx) {
     u32 flags = rp.Pop<u32>();
     u32 addr_len = rp.Pop<u32>();
     rp.PopPID();
-    auto input_buff = rp.PopStaticBuffer();
-    auto dest_addr_buff = rp.PopStaticBuffer();
+    const std::vector<u8> input_buff = rp.PopStaticBuffer();
+    const std::vector<u8> dest_addr_buff = rp.PopStaticBuffer();
 
     s32 ret = -1;
     if (addr_len > 0) {
@@ -574,8 +597,9 @@ void SOC_U::SendTo(Kernel::HLERequestContext& ctx) {
                        nullptr, 0);
     }
 
-    if (ret == SOCKET_ERROR_VALUE)
+    if (ret == SOCKET_ERROR_VALUE) {
         ret = TranslateError(GET_ERRNO);
+    }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     rb.Push(RESULT_SUCCESS);
@@ -589,7 +613,7 @@ void SOC_U::RecvFromOther(Kernel::HLERequestContext& ctx) {
     u32 flags = rp.Pop<u32>();
     u32 addr_len = rp.Pop<u32>();
     rp.PopPID();
-    auto& buffer = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     CTRSockAddr ctr_src_addr;
     std::vector<u8> output_buff(len);
@@ -698,8 +722,9 @@ void SOC_U::Poll(Kernel::HLERequestContext& ctx) {
     std::vector<u8> output_fds(nfds * sizeof(CTRPollFD));
     std::memcpy(output_fds.data(), ctr_fds.data(), nfds * sizeof(CTRPollFD));
 
-    if (ret == SOCKET_ERROR_VALUE)
+    if (ret == SOCKET_ERROR_VALUE) {
         ret = TranslateError(GET_ERRNO);
+    }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);
@@ -721,8 +746,9 @@ void SOC_U::GetSockName(Kernel::HLERequestContext& ctx) {
     std::vector<u8> dest_addr_buff(sizeof(ctr_dest_addr));
     std::memcpy(dest_addr_buff.data(), &ctr_dest_addr, sizeof(ctr_dest_addr));
 
-    if (ret != 0)
+    if (ret != 0) {
         ret = TranslateError(GET_ERRNO);
+    }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);
@@ -737,8 +763,9 @@ void SOC_U::Shutdown(Kernel::HLERequestContext& ctx) {
     rp.PopPID();
 
     s32 ret = ::shutdown(socket_handle, how);
-    if (ret != 0)
+    if (ret != 0) {
         ret = TranslateError(GET_ERRNO);
+    }
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(ret);
@@ -784,8 +811,9 @@ void SOC_U::Connect(Kernel::HLERequestContext& ctx) {
 
     sockaddr input_addr = CTRSockAddr::ToPlatform(ctr_input_addr);
     s32 ret = ::connect(socket_handle, &input_addr, sizeof(input_addr));
-    if (ret != 0)
+    if (ret != 0) {
         ret = TranslateError(GET_ERRNO);
+    }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     rb.Push(RESULT_SUCCESS);
@@ -916,7 +944,7 @@ void SOC_U::GetAddrInfoImpl(Kernel::HLERequestContext& ctx) {
         addrinfo* cur = out;
         while (cur != nullptr) {
             if (pos <= out_size - sizeof(CTRAddrInfo)) {
-                // According to 3dbrew, this function fills whatever it can and does not error even
+                // According to 3DBrew, this function fills whatever it can and does not error even
                 // if the buffer is not big enough. However the count returned is always correct.
                 CTRAddrInfo ctr_addr = CTRAddrInfo::FromPlatform(*cur);
                 std::memcpy(out_buff.data() + pos, &ctr_addr, sizeof(ctr_addr));

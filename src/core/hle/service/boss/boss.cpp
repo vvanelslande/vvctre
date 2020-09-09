@@ -136,7 +136,7 @@ void Module::Interface::UnregisterTask(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x0C, 2, 2);
     const u32 size = rp.Pop<u32>();
     const u8 unk_param2 = rp.Pop<u8>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -149,7 +149,7 @@ void Module::Interface::ReconfigureTask(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x0D, 2, 2);
     const u32 size = rp.Pop<u32>();
     const u8 unk_param2 = rp.Pop<u8>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -203,7 +203,7 @@ void Module::Interface::GetNsDataIdList1(Kernel::HLERequestContext& ctx) {
     const u32 max_entries = rp.Pop<u32>(); /// buffer size in words
     const u16 word_index_start = rp.Pop<u16>();
     const u32 start_ns_data_id = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 2);
     rb.Push(RESULT_SUCCESS);
@@ -223,7 +223,7 @@ void Module::Interface::GetNsDataIdList2(Kernel::HLERequestContext& ctx) {
     const u32 max_entries = rp.Pop<u32>(); /// buffer size in words
     const u16 word_index_start = rp.Pop<u16>();
     const u32 start_ns_data_id = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 2);
     rb.Push(RESULT_SUCCESS);
@@ -243,7 +243,7 @@ void Module::Interface::GetNsDataIdList3(Kernel::HLERequestContext& ctx) {
     const u32 max_entries = rp.Pop<u32>(); /// buffer size in words
     const u16 word_index_start = rp.Pop<u16>();
     const u32 start_ns_data_id = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 2);
     rb.Push(RESULT_SUCCESS);
@@ -261,7 +261,7 @@ void Module::Interface::SendProperty(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x14, 2, 2);
     const u16 property_id = rp.Pop<u16>();
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -285,7 +285,7 @@ void Module::Interface::ReceiveProperty(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x16, 2, 2);
     const u16 property_id = rp.Pop<u16>();
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);
@@ -299,7 +299,7 @@ void Module::Interface::UpdateTaskInterval(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x17, 2, 2);
     const u32 size = rp.Pop<u32>();
     const u16 unk_param2 = rp.Pop<u16>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -312,7 +312,7 @@ void Module::Interface::UpdateTaskCount(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x18, 2, 2);
     const u32 size = rp.Pop<u32>();
     const u32 unk_param2 = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -324,7 +324,7 @@ void Module::Interface::UpdateTaskCount(Kernel::HLERequestContext& ctx) {
 void Module::Interface::GetTaskInterval(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x19, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);
@@ -337,7 +337,7 @@ void Module::Interface::GetTaskInterval(Kernel::HLERequestContext& ctx) {
 void Module::Interface::GetTaskCount(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x1A, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);
@@ -350,7 +350,7 @@ void Module::Interface::GetTaskCount(Kernel::HLERequestContext& ctx) {
 void Module::Interface::GetTaskServiceStatus(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x1B, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);
@@ -363,7 +363,7 @@ void Module::Interface::GetTaskServiceStatus(Kernel::HLERequestContext& ctx) {
 void Module::Interface::StartTask(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x1C, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -375,7 +375,7 @@ void Module::Interface::StartTask(Kernel::HLERequestContext& ctx) {
 void Module::Interface::StartTaskImmediate(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x1D, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -423,7 +423,7 @@ void Module::Interface::GetTaskState(Kernel::HLERequestContext& ctx) {
 void Module::Interface::GetTaskResult(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x21, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(4, 2);
     rb.Push(RESULT_SUCCESS);
@@ -438,7 +438,7 @@ void Module::Interface::GetTaskResult(Kernel::HLERequestContext& ctx) {
 void Module::Interface::GetTaskCommErrorCode(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x22, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(4, 2);
     rb.Push(RESULT_SUCCESS);
@@ -455,7 +455,7 @@ void Module::Interface::GetTaskStatus(Kernel::HLERequestContext& ctx) {
     const u32 size = rp.Pop<u32>();
     const u8 unk_param2 = rp.Pop<u8>();
     const u8 unk_param3 = rp.Pop<u8>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);
@@ -470,7 +470,7 @@ void Module::Interface::GetTaskError(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x24, 2, 2);
     const u32 size = rp.Pop<u32>();
     const u8 unk_param2 = rp.Pop<u8>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);
@@ -484,7 +484,7 @@ void Module::Interface::GetTaskInfo(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x25, 2, 2);
     const u32 size = rp.Pop<u32>();
     const u8 unk_param2 = rp.Pop<u8>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -508,7 +508,7 @@ void Module::Interface::GetNsDataHeaderInfo(Kernel::HLERequestContext& ctx) {
     const u32 ns_data_id = rp.Pop<u32>();
     const u8 type = rp.Pop<u8>();
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -523,7 +523,7 @@ void Module::Interface::ReadNsData(Kernel::HLERequestContext& ctx) {
     const u32 ns_data_id = rp.Pop<u32>();
     const u64 offset = rp.Pop<u64>();
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 2);
     rb.Push(RESULT_SUCCESS);
@@ -661,7 +661,7 @@ void Module::Interface::GetStorageOption(Kernel::HLERequestContext& ctx) {
 void Module::Interface::StartBgImmediate(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x33, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -673,7 +673,7 @@ void Module::Interface::StartBgImmediate(Kernel::HLERequestContext& ctx) {
 void Module::Interface::GetTaskProperty0(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x34, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);
@@ -688,7 +688,7 @@ void Module::Interface::RegisterImmediateTask(Kernel::HLERequestContext& ctx) {
     const u32 size = rp.Pop<u32>();
     const u8 unk_param2 = rp.Pop<u8>();
     const u8 unk_param3 = rp.Pop<u8>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -702,8 +702,8 @@ void Module::Interface::SetTaskQuery(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x36, 2, 4);
     const u32 buffer1_size = rp.Pop<u32>();
     const u32 buffer2_size = rp.Pop<u32>();
-    auto& buffer1 = rp.PopMappedBuffer();
-    auto& buffer2 = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer1 = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer2 = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 4);
     rb.Push(RESULT_SUCCESS);
@@ -718,8 +718,8 @@ void Module::Interface::GetTaskQuery(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x37, 2, 4);
     const u32 buffer1_size = rp.Pop<u32>();
     const u32 buffer2_size = rp.Pop<u32>();
-    auto& buffer1 = rp.PopMappedBuffer();
-    auto& buffer2 = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer1 = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer2 = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 4);
     rb.Push(RESULT_SUCCESS);
@@ -759,7 +759,7 @@ void Module::Interface::GetNsDataIdListPrivileged(Kernel::HLERequestContext& ctx
     const u32 max_entries = rp.Pop<u32>(); /// buffer size in words
     const u16 word_index_start = rp.Pop<u16>();
     const u32 start_ns_data_id = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 2);
     rb.Push(RESULT_SUCCESS);
@@ -780,7 +780,7 @@ void Module::Interface::GetNsDataIdListPrivileged1(Kernel::HLERequestContext& ct
     const u32 max_entries = rp.Pop<u32>(); /// buffer size in words
     const u16 word_index_start = rp.Pop<u16>();
     const u32 start_ns_data_id = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 2);
     rb.Push(RESULT_SUCCESS);
@@ -798,7 +798,7 @@ void Module::Interface::SendPropertyPrivileged(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x413, 2, 2);
     const u16 property_id = rp.Pop<u16>();
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -825,7 +825,7 @@ void Module::Interface::GetNsDataHeaderInfoPrivileged(Kernel::HLERequestContext&
     const u32 ns_data_id = rp.Pop<u32>();
     const u8 type = rp.Pop<u8>();
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -842,7 +842,7 @@ void Module::Interface::ReadNsDataPrivileged(Kernel::HLERequestContext& ctx) {
     const u32 ns_data_id = rp.Pop<u32>();
     const u64 offset = rp.Pop<u64>();
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 2);
     rb.Push(RESULT_SUCCESS);

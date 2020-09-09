@@ -665,7 +665,7 @@ void Module::Interface::GetCecInfoBuffer(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x0D, 2, 2);
     const u32 buffer_size = rp.Pop<u32>();
     const u32 possible_info_type = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);

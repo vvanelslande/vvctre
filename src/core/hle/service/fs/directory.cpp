@@ -26,7 +26,7 @@ Directory::~Directory() {}
 void Directory::Read(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x0801, 1, 2);
     u32 count = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
     std::vector<FileSys::Entry> entries(count);
     LOG_TRACE(Service_FS, "Read {}: count={}", GetName(), count);
     // Number of entries actually read

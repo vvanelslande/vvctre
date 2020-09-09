@@ -35,6 +35,7 @@
 #include "video_core/renderer_base.h"
 #include "video_core/renderer_opengl/gl_format_reinterpreter.h"
 #include "video_core/renderer_opengl/gl_rasterizer_cache.h"
+#include "video_core/renderer_opengl/gl_resource_manager.h"
 #include "video_core/renderer_opengl/gl_state.h"
 #include "video_core/renderer_opengl/texture_filters/texture_filterer.h"
 #include "video_core/utils.h"
@@ -849,7 +850,7 @@ void CachedSurface::DownloadGLTexture(const Common::Rectangle<u32>& rect, GLuint
                          type == SurfaceType::Texture;
     if (use_pbo && !pixel_buffers[0].handle) {
         const GLsizeiptr pbo_size = width * height * GetGLBytesPerPixel(pixel_format);
-        for (auto& buffer : pixel_buffers) {
+        for (OGLBuffer& buffer : pixel_buffers) {
             buffer.Create();
             glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer.handle);
             glBufferData(GL_PIXEL_PACK_BUFFER, pbo_size, nullptr, GL_STREAM_READ);
@@ -859,7 +860,7 @@ void CachedSurface::DownloadGLTexture(const Common::Rectangle<u32>& rect, GLuint
 
     // If not 1x scale, blit scaled texture to a new 1x texture and use that to flush
     if (res_scale != 1) {
-        auto scaled_rect = rect;
+        Common::Rectangle<u32> scaled_rect = rect;
         scaled_rect.left *= res_scale;
         scaled_rect.top *= res_scale;
         scaled_rect.right *= res_scale;

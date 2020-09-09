@@ -169,7 +169,7 @@ void DSP_DSP::LoadComponent(Kernel::HLERequestContext& ctx) {
     const u32 size = rp.Pop<u32>();
     const u32 prog_mask = rp.Pop<u32>();
     const u32 data_mask = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);

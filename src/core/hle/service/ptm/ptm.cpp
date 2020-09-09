@@ -73,13 +73,13 @@ void Module::Interface::GetPedometerState(Kernel::HLERequestContext& ctx) {
 void Module::Interface::GetStepHistory(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0xB, 3, 2);
 
-    u32 hours = rp.Pop<u32>();
-    u64 start_time = rp.Pop<u64>();
-    auto& buffer = rp.PopMappedBuffer();
+    const u32 hours = rp.Pop<u32>();
+    const u64 start_time = rp.Pop<u64>();
+    Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
     ASSERT_MSG(sizeof(u16) * hours == buffer.GetSize(),
                "Buffer for steps count has incorrect size");
 
-    // Stub: set zero steps count for every hour
+    // Stub: Set zero steps count for every hour
     for (u32 i = 0; i < hours; ++i) {
         const u16_le steps_per_hour = 0;
         buffer.Write(&steps_per_hour, i * sizeof(u16), sizeof(u16));

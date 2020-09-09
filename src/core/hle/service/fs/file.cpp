@@ -37,7 +37,7 @@ void File::Read(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x0802, 3, 2);
     u64 offset = rp.Pop<u64>();
     u32 length = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
     LOG_TRACE(Service_FS, "Read {}: offset=0x{:x} length=0x{:08X}", GetName(), offset, length);
 
     const FileSessionSlot* file = GetSessionData(ctx.Session());
@@ -84,7 +84,7 @@ void File::Write(Kernel::HLERequestContext& ctx) {
     u64 offset = rp.Pop<u64>();
     u32 length = rp.Pop<u32>();
     u32 flush = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
     LOG_TRACE(Service_FS, "Write {}: offset=0x{:x} length={}, flush=0x{:x}", GetName(), offset,
               length, flush);
 

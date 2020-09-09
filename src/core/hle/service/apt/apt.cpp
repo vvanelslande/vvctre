@@ -669,8 +669,8 @@ void Module::APTInterface::LoadSysMenuArg(Kernel::HLERequestContext& ctx) {
 
 void Module::APTInterface::StoreSysMenuArg(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x37, 1, 2); // 0x00370042
-    auto size = std::min<std::size_t>(rp.Pop<u32>(), SysMenuArgSize);
-    const auto& buffer = rp.PopStaticBuffer();
+    const std::size_t size = std::min<std::size_t>(rp.Pop<u32>(), SysMenuArgSize);
+    const std::vector<u8>& buffer = rp.PopStaticBuffer();
 
     ASSERT_MSG(buffer.size() >= size, "Buffer too small to hold requested data");
 

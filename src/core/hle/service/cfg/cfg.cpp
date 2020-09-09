@@ -281,7 +281,7 @@ void Module::Interface::GetConfigInfoBlk2(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x01, 2, 2);
     u32 size = rp.Pop<u32>();
     u32 block_id = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     std::vector<u8> data(size);
@@ -294,7 +294,7 @@ void Module::Interface::GetConfigInfoBlk8(Kernel::HLERequestContext& ctx, u16 id
     IPC::RequestParser rp(ctx, id, 2, 2);
     u32 size = rp.Pop<u32>();
     u32 block_id = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     std::vector<u8> data(size);
@@ -307,7 +307,7 @@ void Module::Interface::SetConfigInfoBlk4(Kernel::HLERequestContext& ctx, u16 id
     IPC::RequestParser rp(ctx, id, 2, 2);
     u32 block_id = rp.Pop<u32>();
     u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     std::vector<u8> data(size);
     buffer.Read(data.data(), 0, data.size());
