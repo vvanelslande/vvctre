@@ -270,7 +270,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::MenuItem("Load Installed")) {
-                    installed = GetInstalledList();
+                    all_installed = GetInstalledList();
                 }
 
                 if (ImGui::MenuItem("Install CIA")) {
@@ -3318,7 +3318,7 @@ void EmuWindow_SDL2::SwapBuffers() {
         }
     }
 
-    if (!installed.empty()) {
+    if (!all_installed.empty()) {
         ImGui::OpenPopup("Installed");
 
         ImGui::SetNextWindowPos(ImVec2());
@@ -3329,22 +3329,44 @@ void EmuWindow_SDL2::SwapBuffers() {
         if (ImGui::BeginPopupModal("Installed", &open,
                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
                                        ImGuiWindowFlags_NoResize)) {
-            ImGui::InputText("Search", &installed_search_text);
+            if (ImGui::InputTextWithHint("##search", "Search", &installed_search_text_,
+                                         ImGuiInputTextFlags_EnterReturnsTrue)) {
+                installed_search_text = installed_search_text_;
+                installed_search_results.clear();
+
+                if (!installed_search_text.empty()) {
+                    for (const auto& title : all_installed) {
+                        const auto [path, name] = title;
+
+                        if (asl::String(name.c_str())
+                                .toLowerCase()
+                                .contains(
+                                    asl::String(installed_search_text.c_str()).toLowerCase())) {
+                            installed_search_results.push_back(title);
+                        }
+                    }
+                }
+            }
 
             if (ImGui::BeginChildFrame(ImGui::GetID("Installed"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
-                for (const auto& title : installed) {
-                    const auto [path, name] = title;
+                const auto& v =
+                    installed_search_text.empty() ? all_installed : installed_search_results;
+                ImGuiListClipper clipper(v.size());
 
-                    if (asl::String(name.c_str())
-                            .toLowerCase()
-                            .contains(asl::String(installed_search_text.c_str()).toLowerCase()) &&
-                        ImGui::Selectable(name.c_str())) {
-                        system.SetResetFilePath(path);
-                        system.RequestReset();
-                        installed.clear();
-                        installed_search_text.clear();
-                        return;
+                while (clipper.Step()) {
+                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                        const auto [path, name] = v[i];
+
+                        if (ImGui::Selectable(name.c_str())) {
+                            system.SetResetFilePath(path);
+                            system.RequestReset();
+                            all_installed.clear();
+                            installed_search_results.clear();
+                            installed_search_text.clear();
+                            installed_search_text_.clear();
+                            break;
+                        }
                     }
                 }
             }
@@ -3352,8 +3374,10 @@ void EmuWindow_SDL2::SwapBuffers() {
             ImGui::EndPopup();
         }
         if (!open) {
-            installed.clear();
+            all_installed.clear();
+            installed_search_results.clear();
             installed_search_text.clear();
+            installed_search_text_.clear();
         }
     }
 

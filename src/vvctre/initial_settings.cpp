@@ -61,8 +61,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
     u16 play_coins = 0xDEAD;
     bool play_coins_changed = false;
     bool config_savegame_changed = false;
-    std::vector<std::tuple<std::string, std::string>> installed;
+    std::vector<std::tuple<std::string, std::string>> all_installed;
+    std::vector<std::tuple<std::string, std::string>> installed_search_results;
     std::string installed_search_text;
+    std::string installed_search_text_;
     std::string host_multiplayer_room_ip = "0.0.0.0";
     u16 host_multiplayer_room_port = Network::DEFAULT_PORT;
     u32 host_multiplayer_room_member_slots = Network::DEFAULT_MEMBER_SLOTS;
@@ -220,7 +222,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             continue;
                         }
                         if (ImGui::MenuItem("Installed")) {
-                            installed = GetInstalledList();
+                            all_installed = GetInstalledList();
                         }
                         if (ImGui::MenuItem("HOME Menu")) {
                             if (Settings::values.region_value ==
@@ -2167,7 +2169,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
             }
         }
 
-        if (!installed.empty()) {
+        if (!all_installed.empty()) {
             ImGui::OpenPopup("Installed");
 
             ImGui::SetNextWindowPos(ImVec2());
@@ -2177,31 +2179,55 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
             if (ImGui::BeginPopupModal("Installed", &open,
                                        ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
                                            ImGuiWindowFlags_NoResize)) {
-                ImGui::InputText("Search", &installed_search_text);
+                if (ImGui::InputTextWithHint("##search", "Search", &installed_search_text_,
+                                             ImGuiInputTextFlags_EnterReturnsTrue)) {
+                    installed_search_text = installed_search_text_;
+                    installed_search_results.clear();
 
-                if (ImGui::BeginChildFrame(ImGui::GetID("Installed"), ImVec2(-1.0f, -1.0f),
-                                           ImGuiWindowFlags_HorizontalScrollbar)) {
-                    for (const auto& title : installed) {
-                        const auto [path, name] = title;
+                    if (!installed_search_text.empty()) {
+                        for (const auto& title : all_installed) {
+                            const auto [path, name] = title;
 
-                        if (asl::String(name.c_str())
-                                .toLowerCase()
-                                .contains(
-                                    asl::String(installed_search_text.c_str()).toLowerCase()) &&
-                            ImGui::Selectable(name.c_str())) {
-                            Settings::values.file_path = path;
-                            installed.clear();
-                            installed_search_text.clear();
-                            break;
+                            if (asl::String(name.c_str())
+                                    .toLowerCase()
+                                    .contains(
+                                        asl::String(installed_search_text.c_str()).toLowerCase())) {
+                                installed_search_results.push_back(title);
+                            }
                         }
                     }
                 }
-                ImGui::EndChildFrame();
+
+                if (ImGui::BeginChildFrame(ImGui::GetID("Installed"), ImVec2(-1.0f, -1.0f),
+                                           ImGuiWindowFlags_HorizontalScrollbar)) {
+                    const auto& v =
+                        installed_search_text.empty() ? all_installed : installed_search_results;
+                    ImGuiListClipper clipper(v.size());
+
+                    while (clipper.Step()) {
+                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                            const auto [path, name] = v[i];
+
+                            if (ImGui::Selectable(name.c_str())) {
+                                Settings::values.file_path = path;
+                                all_installed.clear();
+                                installed_search_results.clear();
+                                installed_search_text.clear();
+                                installed_search_text_.clear();
+                                break;
+                            }
+                        }
+                    }
+                    ImGui::EndChildFrame();
+                }
+
                 ImGui::EndPopup();
             }
             if (!open) {
-                installed.clear();
+                all_installed.clear();
+                installed_search_results.clear();
                 installed_search_text.clear();
+                installed_search_text_.clear();
             }
         }
 

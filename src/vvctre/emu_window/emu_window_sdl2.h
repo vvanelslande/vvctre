@@ -112,8 +112,10 @@ private:
     bool show_ipc_recorder_window = false;
 
     // Installed
+    std::vector<std::tuple<std::string, std::string>> all_installed;
+    std::vector<std::tuple<std::string, std::string>> installed_search_results;
     std::string installed_search_text;
-    std::vector<std::tuple<std::string, std::string>> installed;
+    std::string installed_search_text_;
 
     // Cheats
     bool show_cheats_window = false;
