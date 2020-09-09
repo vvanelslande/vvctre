@@ -47,6 +47,8 @@ add_library(cryptopp STATIC
     cryptopp/integer.h
     cryptopp/algparam.cpp
     cryptopp/algparam.h
+    cryptopp/allocate.cpp
+    cryptopp/allocate.h
     cryptopp/asn.cpp
     cryptopp/asn.h
     cryptopp/authenc.cpp
@@ -57,7 +59,7 @@ add_library(cryptopp STATIC
     cryptopp/basecode.h
     cryptopp/ccm.cpp
     cryptopp/ccm.h
-    cryptopp/crc-simd.cpp
+    cryptopp/crc_simd.cpp
     cryptopp/des.cpp
     cryptopp/des.h
     cryptopp/dessp.cpp
@@ -71,9 +73,10 @@ add_library(cryptopp STATIC
     cryptopp/filters.h
     cryptopp/fips140.cpp
     cryptopp/fips140.h
-    cryptopp/gcm-simd.cpp
+    cryptopp/gcm_simd.cpp
     cryptopp/gf2n.cpp
     cryptopp/gf2n.h
+    cryptopp/gf2n_simd.cpp
     cryptopp/gfpcrypt.cpp
     cryptopp/gfpcrypt.h
     cryptopp/hex.cpp
@@ -93,7 +96,7 @@ add_library(cryptopp STATIC
     cryptopp/mqueue.h
     cryptopp/nbtheory.cpp
     cryptopp/nbtheory.h
-    cryptopp/neon-simd.cpp
+    cryptopp/neon_simd.cpp
     cryptopp/oaep.cpp
     cryptopp/oaep.h
     cryptopp/osrng.cpp
@@ -105,25 +108,21 @@ add_library(cryptopp STATIC
     cryptopp/randpool.cpp
     cryptopp/randpool.h
     cryptopp/rdtables.cpp
-    cryptopp/rijndael-simd.cpp
+    cryptopp/rijndael_simd.cpp
     cryptopp/rijndael.cpp
     cryptopp/rijndael.h
     cryptopp/rng.cpp
     cryptopp/rng.h
-    cryptopp/sha-simd.cpp
+    cryptopp/sha_simd.cpp
     cryptopp/sha.cpp
     cryptopp/sha.h
-    cryptopp/sse-simd.cpp
+    cryptopp/sse_simd.cpp
 )
-
-if (WIN32)
-    target_sources(cryptopp PRIVATE cryptopp/winpipes.cpp)
-endif ()
 
 if(MSVC)
     # Note that we removed rdrand.asm. This is a workaround for the issue that rdrand.asm cannnot compiled properly
     # on MSVC. Because there is also a rdrand.S file in the submodule, CMake will specify the target path for
-    # rdrand.asm as "/crytopp.dir/{Debug|Release}/cryptopp/rdrand.asm.obj". The additional target folder "cryptopp"
+    # rdrand.asm as "/cryptopp.dir/{Debug|Release}/cryptopp/rdrand.asm.obj". The additional target folder "cryptopp"
     # is specified because the file rdrand.asm is in the source folder "cryptopp". But MSVC assembler can't build
     # target file to an non-existing folder("cryptopp").
     target_sources(cryptopp PRIVATE cryptopp/x64dll.asm)
@@ -144,29 +143,30 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU
     check_cxx_compiler_flag(-march=armv8-a+crc CRYPTOPP_HAS_ARMV8_CRC32)
     check_cxx_compiler_flag(-march=armv8-a+crypto CRYPTOPP_HAS_ARMV8_CRYPTO)
     if (CRYPTOPP_HAS_MSSE2)
-        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/sse-simd.cpp PROPERTIES COMPILE_FLAGS "-msse2")
+        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/sse_simd.cpp PROPERTIES COMPILE_FLAGS "-msse2")
     endif()
     if (CRYPTOPP_HAS_MSSSE3 AND CRYPTOPP_HAS_MAES AND CRYPTOPP_HAS_PCLMUL)
-        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/gcm-simd.cpp
+        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/gcm_simd.cpp
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/gf2n_simd.cpp
                                     PROPERTIES COMPILE_FLAGS "-mssse3 -maes -mpclmul")
     endif()
     if (CRYPTOPP_HAS_MSSE41 AND CRYPTOPP_HAS_MAES)
-        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/rijndael-simd.cpp PROPERTIES COMPILE_FLAGS "-msse4.1 -maes")
+        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/rijndael_simd.cpp PROPERTIES COMPILE_FLAGS "-msse4.1 -maes")
     endif()
     if (CRYPTOPP_HAS_MSSE42)
-        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/crc-simd.cpp
+        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/crc_simd.cpp
                                     PROPERTIES COMPILE_FLAGS "-msse4.2")
     endif()
     if (CRYPTOPP_HAS_MSSE42 AND CRYPTOPP_HAS_MSHA)
-        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/sha-simd.cpp PROPERTIES COMPILE_FLAGS "-msse4.2 -msha")
+        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/sha_simd.cpp PROPERTIES COMPILE_FLAGS "-msse4.2 -msha")
     endif()
     if (CRYPTOPP_HAS_ARMV8_CRC32)
-        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/crc-simd.cpp
+        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/crc_simd.cpp
                                     PROPERTIES COMPILE_FLAGS "-march=armv8-a+crc")
     endif()
     if (CRYPTOPP_HAS_ARMV8_CRYPTO)
-        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/rijndael-simd.cpp
-                                    ${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/sha-simd.cpp
+        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/rijndael_simd.cpp
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/cryptopp/sha_simd.cpp
                                     PROPERTIES COMPILE_FLAGS "-march=armv8-a+crypto")
     endif()
 endif()
