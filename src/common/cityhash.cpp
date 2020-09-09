@@ -20,7 +20,7 @@
 //
 // CityHash, by Geoff Pike and Jyrki Alakuijala
 //
-// This file provides CityHash64 function.
+// This file provides the CityHash64 function.
 //
 // It's probably possible to create even faster hash functions by
 // writing a program that systematically explores some of the space of
