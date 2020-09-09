@@ -86,12 +86,13 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
         ImGuiIO& io = ImGui::GetIO();
+        ImGui::SetNextWindowPos(ImVec2());
+        ImGui::SetNextWindowSize(io.DisplaySize);
         if (ImGui::Begin("Initial Settings", nullptr,
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar |
                              ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
                              ImGuiWindowFlags_NoMove)) {
-            ImGui::SetWindowPos(ImVec2(), ImGuiCond_Once);
-            ImGui::SetWindowSize(io.DisplaySize);
+
             if (ImGui::BeginTabBar("Tab Bar", ImGuiTabBarFlags_TabListPopupButton |
                                                   ImGuiTabBarFlags_FittingPolicyScroll)) {
                 if (ImGui::BeginTabItem("Start")) {
