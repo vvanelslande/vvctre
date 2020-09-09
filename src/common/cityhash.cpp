@@ -93,11 +93,7 @@ static u64 ShiftMix(u64 val) {
     return val ^ (val >> 47);
 }
 
-static u64 HashLen16(u64 u, u64 v) {
-    return Hash128to64(u128(u, v));
-}
-
-static u64 HashLen16(u64 u, u64 v, u64 mul) {
+static u64 HashLen16(u64 u, u64 v, u64 mul = 0x9ddfea08eb382d69ULL) {
     // Murmur-inspired hashing.
     u64 a = (u ^ v) * mul;
     a ^= (a >> 47);
