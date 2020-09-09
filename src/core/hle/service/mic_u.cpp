@@ -100,8 +100,8 @@ struct MIC_U::Impl {
     explicit Impl(Core::System& system) : timing(system.CoreTiming()) {
         buffer_full_event =
             system.Kernel().CreateEvent(Kernel::ResetType::OneShot, "MIC_U::buffer_full_event");
-        buffer_write_event =
-            timing.RegisterEvent("MIC_U::UpdateBuffer", [this](std::uintptr_t user_data, s64 cycles_late) {
+        buffer_write_event = timing.RegisterEvent(
+            "MIC_U::UpdateBuffer", [this](std::uintptr_t user_data, s64 cycles_late) {
                 UpdateSharedMemBuffer(user_data, cycles_late);
             });
     }
@@ -124,8 +124,7 @@ struct MIC_U::Impl {
     }
 
     void UnmapSharedMem(Kernel::HLERequestContext& ctx) {
-        IPC::RequestParser rp{ctx, 0x02, 0, 0};
-        IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+        IPC::RequestBuilder rb(ctx, 0x02, 1, 0);
         shared_memory = nullptr;
         rb.Push(RESULT_SUCCESS);
         LOG_TRACE(Service_MIC, "called");
@@ -206,9 +205,7 @@ struct MIC_U::Impl {
     }
 
     void StopSampling(Kernel::HLERequestContext& ctx) {
-        IPC::RequestParser rp{ctx, 0x05, 0, 0};
-
-        IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+        IPC::RequestBuilder rb(ctx, 0x05, 1, 0);
         rb.Push(RESULT_SUCCESS);
         mic->StopSampling();
         timing.RemoveEvent(buffer_write_event);
@@ -216,9 +213,7 @@ struct MIC_U::Impl {
     }
 
     void IsSampling(Kernel::HLERequestContext& ctx) {
-        IPC::RequestParser rp{ctx, 0x06, 0, 0};
-
-        IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+        IPC::RequestBuilder rb(ctx, 0x06, 2, 0);
         rb.Push(RESULT_SUCCESS);
         bool is_sampling = mic->IsSampling();
         rb.Push<bool>(is_sampling);
@@ -226,9 +221,7 @@ struct MIC_U::Impl {
     }
 
     void GetBufferFullEvent(Kernel::HLERequestContext& ctx) {
-        IPC::RequestParser rp{ctx, 0x07, 0, 0};
-
-        IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
+        IPC::RequestBuilder rb(ctx, 0x07, 1, 2);
         rb.Push(RESULT_SUCCESS);
         rb.PushCopyObjects(buffer_full_event);
         LOG_WARNING(Service_MIC, "(STUBBED) called");
@@ -245,9 +238,7 @@ struct MIC_U::Impl {
     }
 
     void GetGain(Kernel::HLERequestContext& ctx) {
-        IPC::RequestParser rp{ctx, 0x09, 0, 0};
-
-        IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+        IPC::RequestBuilder rb(ctx, 0x09, 2, 0);
         rb.Push(RESULT_SUCCESS);
         u8 gain = mic->GetGain();
         rb.Push<u8>(gain);
@@ -265,9 +256,7 @@ struct MIC_U::Impl {
     }
 
     void GetPower(Kernel::HLERequestContext& ctx) {
-        IPC::RequestParser rp{ctx, 0x0B, 0, 0};
-
-        IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+        IPC::RequestBuilder rb(ctx, 0x0B, 2, 0);
         rb.Push(RESULT_SUCCESS);
         bool mic_power = mic->GetPower();
         rb.Push<u8>(mic_power);
@@ -296,9 +285,7 @@ struct MIC_U::Impl {
     }
 
     void GetClamp(Kernel::HLERequestContext& ctx) {
-        IPC::RequestParser rp{ctx, 0x0E, 0, 0};
-
-        IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+        IPC::RequestBuilder rb(ctx, 0x0E, 2, 0);
         rb.Push(RESULT_SUCCESS);
         rb.Push<bool>(clamp);
         LOG_WARNING(Service_MIC, "(STUBBED) called");

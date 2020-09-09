@@ -201,9 +201,6 @@ bool Module::LoadLegacySharedFont() {
 }
 
 void Module::APTInterface::GetSharedFont(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x44, 0, 0); // 0x00440000
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
-
     if (!apt->shared_font_loaded) {
         // On real 3DS, font loading happens on booting. However, we load it on demand to coordinate
         // with CFG region auto configuration, which happens later than APT initialization.
@@ -233,6 +230,7 @@ void Module::APTInterface::GetSharedFont(Kernel::HLERequestContext& ctx) {
         apt->shared_font_relocated = true;
     }
 
+    IPC::RequestBuilder rb(ctx, 0x44, 2, 2);
     rb.Push(RESULT_SUCCESS); // No error
     // Since the SharedMemory interface doesn't provide the address at which the memory was
     // allocated, the real APT service calculates this address by scanning the entire address space
@@ -460,13 +458,11 @@ void Module::APTInterface::DoApplicationJump(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::APTInterface::GetProgramIdOnApplicationJump(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x33, 0, 0); // 0x00330000
-
     LOG_DEBUG(Service_APT, "called");
 
     auto parameters = apt->applet_manager->GetApplicationJumpParameters();
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(7, 0);
+    IPC::RequestBuilder rb(ctx, 0x33, 7, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u64>(parameters.current_title_id);
     rb.Push(static_cast<u8>(parameters.current_media_type));
@@ -561,13 +557,11 @@ void Module::APTInterface::PrepareToStartLibraryApplet(Kernel::HLERequestContext
 }
 
 void Module::APTInterface::PrepareToStartNewestHomeMenu(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x1A, 0, 0); // 0x1A0000
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-
     // TODO(Subv): This command can only be called by a System Applet (return 0xC8A0CC04 otherwise).
 
     // This command must return an error when called, otherwise the Home Menu will try to reboot the
     // system.
+    IPC::RequestBuilder rb(ctx, 0x1A, 1, 0);
     rb.Push(ResultCode(ErrorDescription::AlreadyExists, ErrorModule::Applet,
                        ErrorSummary::InvalidState, ErrorLevel::Status));
 
@@ -733,9 +727,7 @@ void Module::APTInterface::SetScreenCapPostPermission(Kernel::HLERequestContext&
 }
 
 void Module::APTInterface::GetScreenCapPostPermission(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x56, 0, 0); // 0x00560000
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x56, 2, 0);
     rb.Push(RESULT_SUCCESS); // No error
     rb.Push(static_cast<u32>(apt->screen_capture_post_permission));
     LOG_WARNING(Service_APT, "(STUBBED) called, screen_capture_post_permission={}",
@@ -744,7 +736,7 @@ void Module::APTInterface::GetScreenCapPostPermission(Kernel::HLERequestContext&
 
 void Module::APTInterface::GetAppletInfo(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x6, 1, 0); // 0x60040
-    auto app_id = rp.PopEnum<AppletId>();
+    Service::APT::AppletId app_id = rp.PopEnum<AppletId>();
 
     LOG_DEBUG(Service_APT, "called, app_id={}", static_cast<u32>(app_id));
 
@@ -885,16 +877,13 @@ void Module::APTInterface::Unwrap(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::APTInterface::CheckNew3DSApp(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x101, 0, 0); // 0x01010000
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x101, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(false);
 }
 
 void Module::APTInterface::CheckNew3DS(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x102, 0, 0); // 0x01020000
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x102, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(false);
 }

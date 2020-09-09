@@ -18,6 +18,7 @@
 #include "core/hle/kernel/client_port.h"
 #include "core/hle/kernel/client_session.h"
 #include "core/hle/kernel/event.h"
+#include "core/hle/kernel/hle_ipc.h"
 #include "core/hle/kernel/process.h"
 #include "core/hle/kernel/server_session.h"
 #include "core/hle/result.h"
@@ -361,17 +362,15 @@ void FS_USER::CloseArchive(Kernel::HLERequestContext& ctx) {
 }
 
 void FS_USER::IsSdmcDetected(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x817, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x817, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(Settings::values.use_virtual_sd);
 }
 
 void FS_USER::IsSdmcWriteable(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x818, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x818, 2, 0);
     rb.Push(RESULT_SUCCESS);
-    // If the SD isn't enabled, it can't be writeable...else, stubbed true
+    // If the SD isn't enabled, it can't be writeable... else, stubbed true
     rb.Push(Settings::values.use_virtual_sd);
     LOG_DEBUG(Service_FS, " (STUBBED)");
 }
@@ -380,14 +379,14 @@ void FS_USER::FormatSaveData(Kernel::HLERequestContext& ctx) {
     LOG_WARNING(Service_FS, "(STUBBED)");
 
     IPC::RequestParser rp(ctx, 0x84C, 9, 2);
-    const auto archive_id = rp.PopEnum<ArchiveIdCode>();
-    const auto archivename_type = rp.PopEnum<FileSys::LowPathType>();
-    const auto archivename_size = rp.Pop<u32>();
-    const auto block_size = rp.Pop<u32>();
-    const auto number_directories = rp.Pop<u32>();
-    const auto number_files = rp.Pop<u32>();
-    [[maybe_unused]] const auto directory_buckets = rp.Pop<u32>();
-    [[maybe_unused]] const auto file_buckets = rp.Pop<u32>();
+    const ArchiveIdCode archive_id = rp.PopEnum<ArchiveIdCode>();
+    const FileSys::LowPathType archivename_type = rp.PopEnum<FileSys::LowPathType>();
+    const u32 archivename_size = rp.Pop<u32>();
+    const u32 block_size = rp.Pop<u32>();
+    const u32 number_directories = rp.Pop<u32>();
+    const u32 number_files = rp.Pop<u32>();
+    [[maybe_unused]] const u32 directory_buckets = rp.Pop<u32>();
+    [[maybe_unused]] const u32 file_buckets = rp.Pop<u32>();
     const bool duplicate_data = rp.Pop<bool>();
     std::vector<u8> archivename = rp.PopStaticBuffer();
     ASSERT(archivename.size() == archivename_size);
@@ -459,36 +458,32 @@ void FS_USER::GetFreeBytes(Kernel::HLERequestContext& ctx) {
 }
 
 void FS_USER::GetSdmcArchiveResource(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x814, 0, 0);
-
     LOG_WARNING(Service_FS, "(STUBBED) called");
 
     auto resource = archives.GetArchiveResource(MediaType::SDMC);
 
     if (resource.Failed()) {
-        IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+        IPC::RequestBuilder rb(ctx, 0x814, 1, 0);
         rb.Push(resource.Code());
         return;
     }
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(5, 0);
+    IPC::RequestBuilder rb(ctx, 0x814, 5, 0);
     rb.Push(RESULT_SUCCESS);
     rb.PushRaw(*resource);
 }
 
 void FS_USER::GetNandArchiveResource(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x815, 0, 0);
-
     LOG_WARNING(Service_FS, "(STUBBED) called");
 
     auto resource = archives.GetArchiveResource(MediaType::NAND);
     if (resource.Failed()) {
-        IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+        IPC::RequestBuilder rb(ctx, 0x815, 1, 0);
         rb.Push(resource.Code());
         return;
     }
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(5, 0);
+    IPC::RequestBuilder rb(ctx, 0x815, 5, 0);
     rb.Push(RESULT_SUCCESS);
     rb.PushRaw(*resource);
 }
@@ -504,7 +499,7 @@ void FS_USER::CreateExtSaveData(Kernel::HLERequestContext& ctx) {
     u32 files = rp.Pop<u32>();
     u64 size_limit = rp.Pop<u64>();
     u32 icon_size = rp.Pop<u32>();
-    auto icon_buffer = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& icon_buffer = rp.PopMappedBuffer();
 
     std::vector<u8> icon(icon_size);
     icon_buffer.Read(icon.data(), 0, icon_size);
@@ -543,8 +538,7 @@ void FS_USER::DeleteExtSaveData(Kernel::HLERequestContext& ctx) {
 }
 
 void FS_USER::CardSlotIsInserted(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x821, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x821, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(false);
     LOG_WARNING(Service_FS, "(STUBBED) called");
@@ -630,13 +624,11 @@ void FS_USER::SetPriority(Kernel::HLERequestContext& ctx) {
 }
 
 void FS_USER::GetPriority(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x863, 0, 0);
-
     if (priority == UINT32_MAX) {
         LOG_INFO(Service_FS, "priority was not set, priority=0x{:X}", priority);
     }
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x863, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(priority);
 
@@ -645,7 +637,7 @@ void FS_USER::GetPriority(Kernel::HLERequestContext& ctx) {
 
 void FS_USER::GetArchiveResource(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x849, 1, 0);
-    auto media_type = rp.PopEnum<MediaType>();
+    MediaType media_type = rp.PopEnum<MediaType>();
 
     LOG_WARNING(Service_FS, "(STUBBED) called Media type=0x{:08X}", static_cast<u32>(media_type));
 

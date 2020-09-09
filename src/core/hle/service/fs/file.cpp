@@ -118,11 +118,9 @@ void File::Write(Kernel::HLERequestContext& ctx) {
 }
 
 void File::GetSize(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0804, 0, 0);
-
     const FileSessionSlot* file = GetSessionData(ctx.Session());
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(3, 0);
+    IPC::RequestBuilder rb(ctx, 0x0804, 3, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u64>(file->size);
 }
@@ -147,23 +145,20 @@ void File::SetSize(Kernel::HLERequestContext& ctx) {
 }
 
 void File::Close(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0808, 0, 0);
-
     // TODO(Subv): Only close the backend if this client is the only one left.
-    if (connected_sessions.size() > 1)
+    if (connected_sessions.size() > 1) {
         LOG_WARNING(Service_FS, "Closing File backend but {} clients still connected",
                     connected_sessions.size());
+    }
 
     backend->Close();
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+
+    IPC::RequestBuilder rb(ctx, 0x0808, 1, 0);
     rb.Push(RESULT_SUCCESS);
 }
 
 void File::Flush(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0809, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-
+    IPC::RequestBuilder rb(ctx, 0x0809, 1, 0);
     const FileSessionSlot* file = GetSessionData(ctx.Session());
 
     // Subfiles can not be flushed.
@@ -187,10 +182,9 @@ void File::SetPriority(Kernel::HLERequestContext& ctx) {
 }
 
 void File::GetPriority(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x080B, 0, 0);
     const FileSessionSlot* file = GetSessionData(ctx.Session());
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x080B, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(file->priority);
 }
@@ -199,8 +193,6 @@ void File::OpenLinkFile(Kernel::HLERequestContext& ctx) {
     LOG_WARNING(Service_FS, "(STUBBED) File command OpenLinkFile {}", GetName());
     using Kernel::ClientSession;
     using Kernel::ServerSession;
-    IPC::RequestParser rp(ctx, 0x080C, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     auto [server, client] = system.Kernel().CreateSessionPair(GetName());
     ClientConnected(server);
 
@@ -212,6 +204,7 @@ void File::OpenLinkFile(Kernel::HLERequestContext& ctx) {
     slot->size = backend->GetSize();
     slot->subfile = false;
 
+    IPC::RequestBuilder rb(ctx, 0x080C, 1, 2);
     rb.Push(RESULT_SUCCESS);
     rb.PushMoveObjects(client);
 }

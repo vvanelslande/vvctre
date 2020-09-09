@@ -19,12 +19,10 @@
 namespace Service::AC {
 
 void Module::Interface::CreateDefaultConfig(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x1, 0, 0);
-
     std::vector<u8> buffer(sizeof(ACConfig));
     std::memcpy(buffer.data(), &ac->default_config, buffer.size());
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
+    IPC::RequestBuilder rb(ctx, 0x1, 1, 2);
     rb.Push(RESULT_SUCCESS);
     rb.PushStaticBuffer(std::move(buffer), 0);
 
@@ -89,9 +87,7 @@ void Module::Interface::GetCloseResult(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetWifiStatus(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0xD, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0xD, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u32>(1); // Connected
 

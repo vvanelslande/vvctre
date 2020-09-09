@@ -40,11 +40,10 @@ void Directory::Read(Kernel::HLERequestContext& ctx) {
 }
 
 void Directory::Close(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0802, 0, 0);
     LOG_TRACE(Service_FS, "Close {}", GetName());
     backend->Close();
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x0802, 1, 0);
     rb.Push(RESULT_SUCCESS);
 }
 

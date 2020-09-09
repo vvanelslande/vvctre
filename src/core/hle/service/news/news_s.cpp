@@ -8,11 +8,9 @@
 namespace Service::NEWS {
 
 void NEWS_S::GetTotalNotifications(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x5, 0, 0);
-
     LOG_WARNING(Service, "(STUBBED) called");
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x5, 2, 0);
 
     rb.Push(RESULT_SUCCESS);
     rb.Push<u32>(0);

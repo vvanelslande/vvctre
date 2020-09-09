@@ -16,7 +16,7 @@ enum class CommandId : u16 {
     SetEncoding = 0x002,
     SetSecondBlock = 0x003,
     SetLoopMode = 0x004,
-    // unknown = 0x005,
+    // Unknown = 0x005,
     SetLinearInterpolation = 0x006,
     SetPsgDuty = 0x007,
     SetSampleRate = 0x008,
@@ -29,7 +29,7 @@ enum class CommandId : u16 {
     ConfigurePsg = 0x00F,
     ConfigurePsgNoise = 0x010,
     // 0x10x commands are audio capture related
-    // unknown = 0x200
+    // Unknown = 0x200
     UpdateState = 0x300,
 };
 
@@ -102,7 +102,7 @@ struct Type0Command {
             s16_le predictor;
             u8 step_index;
             INSERT_PADDING_BYTES(0x11);
-        } set_adpcm_state; // for either first block or second block
+        } set_adpcm_state; // For either first block or second block
 
         struct {
             u32_le channel;
@@ -173,7 +173,7 @@ struct ChannelState {
     u8 adpcm_step_index;
     INSERT_PADDING_BYTES(0x1);
 
-    // 3dbrew says this is the current physical address. However the assembly of CSND module
+    // 3DBrew says this is the current physical address. However the assembly of CSND module
     // from 11.3 system shows this is simply assigned as 0, which is also documented on ctrulib.
     u32_le zero;
 };
@@ -215,14 +215,14 @@ void CSND_SND::Initialize(Kernel::HLERequestContext& ctx) {
 }
 
 void CSND_SND::Shutdown(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x02, 0, 0);
-
-    if (mutex)
+    if (mutex) {
         mutex = nullptr;
-    if (shared_memory)
+    }
+    if (shared_memory) {
         shared_memory = nullptr;
+    }
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x02, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_WARNING(Service_CSND, "(STUBBED) called");
@@ -250,10 +250,10 @@ void CSND_SND::ExecuteCommands(Kernel::HLERequestContext& ctx) {
 
         switch (command.command_id) {
         case CommandId::Start:
-            // TODO: start/stop the sound
+            // TODO: Start/stop the sound
             break;
         case CommandId::Pause:
-            // TODO: pause/resume the sound
+            // TODO: Pause/resume the sound
             break;
         case CommandId::SetEncoding:
             channels[command.set_encoding.channel].encoding = command.set_encoding.value;
@@ -319,7 +319,7 @@ void CSND_SND::ExecuteCommands(Kernel::HLERequestContext& ctx) {
             channel.block2_address = configure.block2_address;
             channel.block1_size = channel.block2_size = configure.size;
             if (configure.enable_playback) {
-                // TODO: startthe sound
+                // TODO: Start the sound
             }
             break;
         }
@@ -334,7 +334,7 @@ void CSND_SND::ExecuteCommands(Kernel::HLERequestContext& ctx) {
             channel.left_capture_volume = configure.left_capture_volume;
             channel.right_capture_volume = configure.right_capture_volume;
             if (configure.enable_playback) {
-                // TODO: startthe sound
+                // TODO: Start the sound
             }
             break;
         }
@@ -347,7 +347,7 @@ void CSND_SND::ExecuteCommands(Kernel::HLERequestContext& ctx) {
             channel.left_capture_volume = configure.left_capture_volume;
             channel.right_capture_volume = configure.right_capture_volume;
             if (configure.enable_playback) {
-                // TODO: startthe sound
+                // TODO: Start the sound
             }
             break;
         }
@@ -394,13 +394,11 @@ void CSND_SND::ExecuteCommands(Kernel::HLERequestContext& ctx) {
 }
 
 void CSND_SND::AcquireSoundChannels(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x05, 0, 0);
-
     // This is "almost" hardcoded, as in CSND initializes this with some code during sysmodule
     // startup, but it always compute to the same value.
     acquired_channel_mask = 0xFFFFFF00;
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x05, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(acquired_channel_mask);
 
@@ -408,20 +406,16 @@ void CSND_SND::AcquireSoundChannels(Kernel::HLERequestContext& ctx) {
 }
 
 void CSND_SND::ReleaseSoundChannels(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x06, 0, 0);
-
     acquired_channel_mask = 0;
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x06, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_WARNING(Service_CSND, "(STUBBED) called");
 }
 
 void CSND_SND::AcquireCapUnit(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x7, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x7, 2, 0);
     if (capture_units[0] && capture_units[1]) {
         LOG_WARNING(Service_CSND, "No more capture units available");
         rb.Push(ResultCode(ErrorDescription::InvalidResultValue, ErrorModule::CSND,
@@ -494,9 +488,7 @@ void CSND_SND::InvalidateDataCache(Kernel::HLERequestContext& ctx) {
 }
 
 void CSND_SND::Reset(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0xC, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0xC, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_WARNING(Service_CSND, "(STUBBED) called");

@@ -33,9 +33,7 @@ const GameCoin DefaultGameCoin() {
 }
 
 void Module::Interface::GetAdapterState(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x5, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x5, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(ptm->battery_is_charging);
 
@@ -43,17 +41,13 @@ void Module::Interface::GetAdapterState(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetShellState(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x6, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x6, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(ptm->shell_open);
 }
 
 void Module::Interface::GetBatteryLevel(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x7, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x7, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(static_cast<u32>(ChargeLevels::CompletelyFull)); // Set to a completely full battery
 
@@ -61,9 +55,7 @@ void Module::Interface::GetBatteryLevel(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetBatteryChargeState(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x8, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x8, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(ptm->battery_is_charging);
 
@@ -71,9 +63,7 @@ void Module::Interface::GetBatteryChargeState(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetPedometerState(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x9, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x9, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(ptm->pedometer_is_counting);
 
@@ -104,9 +94,7 @@ void Module::Interface::GetStepHistory(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetTotalStepCount(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0xC, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0xC, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u32>(0);
 
@@ -114,9 +102,7 @@ void Module::Interface::GetTotalStepCount(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetSoftwareClosedFlag(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x80F, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x80F, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(false);
 
@@ -124,9 +110,7 @@ void Module::Interface::GetSoftwareClosedFlag(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::CheckNew3DS(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x40A, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x40A, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(false);
 }

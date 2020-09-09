@@ -29,8 +29,7 @@ void NDM_U::LeaveExclusiveState(Kernel::HLERequestContext& ctx) {
 }
 
 void NDM_U::QueryExclusiveMode(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x03, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x03, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.PushEnum(exclusive_state);
     LOG_WARNING(Service_NDM, "(STUBBED)");
@@ -97,8 +96,7 @@ void NDM_U::SuspendScheduler(Kernel::HLERequestContext& ctx) {
 }
 
 void NDM_U::ResumeScheduler(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x09, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x09, 1, 0);
     rb.Push(RESULT_SUCCESS);
     LOG_WARNING(Service_NDM, "(STUBBED)");
 }
@@ -119,18 +117,16 @@ void NDM_U::GetDaemonDisableCount(Kernel::HLERequestContext& ctx) {
 
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 0);
     rb.Push(RESULT_SUCCESS);
-    rb.Push<u32>(0); // current process disable count
-    rb.Push<u32>(0); // total disable count
+    rb.Push<u32>(0); // Current process disable count
+    rb.Push<u32>(0); // Total disable count
     LOG_WARNING(Service_NDM, "(STUBBED) daemon=0x{:02X}", daemon);
 }
 
 void NDM_U::GetSchedulerDisableCount(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0F, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(3, 0);
+    IPC::RequestBuilder rb(ctx, 0x0F, 3, 0);
     rb.Push(RESULT_SUCCESS);
-    rb.Push<u32>(0); // current process disable count
-    rb.Push<u32>(0); // total disable count
+    rb.Push<u32>(0); // Current process disable count
+    rb.Push<u32>(0); // Total disable count
     LOG_WARNING(Service_NDM, "(STUBBED)");
 }
 
@@ -144,8 +140,7 @@ void NDM_U::SetScanInterval(Kernel::HLERequestContext& ctx) {
 }
 
 void NDM_U::GetScanInterval(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x11, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x11, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(scan_interval);
     LOG_WARNING(Service_NDM, "(STUBBED)");
@@ -161,8 +156,7 @@ void NDM_U::SetRetryInterval(Kernel::HLERequestContext& ctx) {
 }
 
 void NDM_U::GetRetryInterval(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x13, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x13, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(retry_interval);
     LOG_WARNING(Service_NDM, "(STUBBED)");
@@ -185,25 +179,22 @@ void NDM_U::OverrideDefaultDaemons(Kernel::HLERequestContext& ctx) {
 }
 
 void NDM_U::ResetDefaultDaemons(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x15, 0, 0);
     default_daemon_bit_mask = DaemonMask::Default;
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x15, 1, 0);
     rb.Push(RESULT_SUCCESS);
     LOG_WARNING(Service_NDM, "(STUBBED)");
 }
 
 void NDM_U::GetDefaultDaemons(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x16, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x16, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.PushEnum(default_daemon_bit_mask);
     LOG_WARNING(Service_NDM, "(STUBBED)");
 }
 
 void NDM_U::ClearHalfAwakeMacFilter(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x17, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x17, 1, 0);
     rb.Push(RESULT_SUCCESS);
     LOG_WARNING(Service_NDM, "(STUBBED)");
 }

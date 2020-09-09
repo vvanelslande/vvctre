@@ -878,7 +878,7 @@ void Module::Interface::GetLatestVsyncTiming(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetStereoCameraCalibrationData(Kernel::HLERequestContext& ctx) {
-    IPC::RequestBuilder rb = IPC::RequestParser(ctx, 0x2B, 0, 0).MakeBuilder(17, 0);
+    IPC::RequestBuilder rb(ctx, 0x2B, 17, 0);
 
     // Default values taken from yuriks' 3DS. Valid data is required here or games using the
     // calibration get stuck in an infinite CPU loop.
@@ -974,8 +974,7 @@ void Module::Interface::SetPackageParameterWithContextDetail(Kernel::HLERequestC
 }
 
 void Module::Interface::GetSuitableY2rStandardCoefficient(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x36, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x36, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u32>(0);
 
@@ -993,9 +992,6 @@ void Module::Interface::PlayShutterSound(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::DriverInitialize(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x39, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-
     for (int camera_id = 0; camera_id < NumCameras; ++camera_id) {
         CameraConfig& camera = cam->cameras[camera_id];
         camera.current_context = 0;
@@ -1015,15 +1011,13 @@ void Module::Interface::DriverInitialize(Kernel::HLERequestContext& ctx) {
         port.Clear();
     }
 
+    IPC::RequestBuilder rb(ctx, 0x39, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_DEBUG(Service_CAM, "called");
 }
 
 void Module::Interface::DriverFinalize(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x3A, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-
     cam->CancelReceiving(0);
     cam->CancelReceiving(1);
 
@@ -1031,6 +1025,7 @@ void Module::Interface::DriverFinalize(Kernel::HLERequestContext& ctx) {
         camera.impl = nullptr;
     }
 
+    IPC::RequestBuilder rb(ctx, 0x3A, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_DEBUG(Service_CAM, "called");
@@ -1047,8 +1042,9 @@ Module::Module(Core::System& system) : system(system) {
             system.Kernel().CreateEvent(ResetType::OneShot, "CAM::vsync_interrupt_event");
     }
     completion_event_callback = system.CoreTiming().RegisterEvent(
-        "CAM::CompletionEventCallBack",
-        [this](std::uintptr_t user_data, s64 cycles_late) { CompletionEventCallBack(user_data, cycles_late); });
+        "CAM::CompletionEventCallBack", [this](std::uintptr_t user_data, s64 cycles_late) {
+            CompletionEventCallBack(user_data, cycles_late);
+        });
     vsync_interrupt_event_callback = system.CoreTiming().RegisterEvent(
         "CAM::VsyncInterruptEventCallBack", [this](std::uintptr_t user_data, s64 cycles_late) {
             VsyncInterruptEventCallBack(user_data, cycles_late);

@@ -5,6 +5,7 @@
 #include "common/logging/log.h"
 #include "core/core.h"
 #include "core/hle/ipc_helpers.h"
+#include "core/hle/kernel/hle_ipc.h"
 #include "core/hle/result.h"
 #include "core/hle/service/boss/boss.h"
 #include "core/hle/service/boss/boss_p.h"
@@ -38,18 +39,14 @@ void Module::Interface::SetStorageInfo(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::UnregisterStorage(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x03, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x03, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_WARNING(Service_BOSS, "(STUBBED) called");
 }
 
 void Module::Interface::GetStorageInfo(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x04, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x04, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u32>(0);
 
@@ -59,7 +56,7 @@ void Module::Interface::GetStorageInfo(Kernel::HLERequestContext& ctx) {
 void Module::Interface::RegisterPrivateRootCa(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x05, 1, 2);
     [[maybe_unused]] const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -72,8 +69,8 @@ void Module::Interface::RegisterPrivateClientCert(Kernel::HLERequestContext& ctx
     IPC::RequestParser rp(ctx, 0x06, 2, 4);
     const u32 buffer1_size = rp.Pop<u32>();
     const u32 buffer2_size = rp.Pop<u32>();
-    auto& buffer1 = rp.PopMappedBuffer();
-    auto& buffer2 = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer1 = rp.PopMappedBuffer();
+    Kernel::MappedBuffer& buffer2 = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 4);
     rb.Push(RESULT_SUCCESS);
@@ -85,9 +82,7 @@ void Module::Interface::RegisterPrivateClientCert(Kernel::HLERequestContext& ctx
 }
 
 void Module::Interface::GetNewArrivalFlag(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x07, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x07, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u8>(new_arrival_flag);
 
@@ -115,9 +110,7 @@ void Module::Interface::SetOptoutFlag(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetOptoutFlag(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0A, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x0A, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u8>(output_flag);
 
@@ -129,7 +122,7 @@ void Module::Interface::RegisterTask(Kernel::HLERequestContext& ctx) {
     const u32 size = rp.Pop<u32>();
     const u8 unk_param2 = rp.Pop<u8>();
     const u8 unk_param3 = rp.Pop<u8>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -166,9 +159,7 @@ void Module::Interface::ReconfigureTask(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetTaskIdList(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0E, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x0E, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_WARNING(Service_BOSS, "(STUBBED) called");
@@ -177,7 +168,7 @@ void Module::Interface::GetTaskIdList(Kernel::HLERequestContext& ctx) {
 void Module::Interface::GetStepIdList(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x0F, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -192,7 +183,7 @@ void Module::Interface::GetNsDataIdList(Kernel::HLERequestContext& ctx) {
     const u32 max_entries = rp.Pop<u32>(); /// buffer size in words
     const u16 word_index_start = rp.Pop<u16>();
     const u32 start_ns_data_id = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 2);
     rb.Push(RESULT_SUCCESS);
@@ -396,7 +387,7 @@ void Module::Interface::StartTaskImmediate(Kernel::HLERequestContext& ctx) {
 void Module::Interface::CancelTask(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x1E, 1, 2);
     const u32 size = rp.Pop<u32>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -406,9 +397,7 @@ void Module::Interface::CancelTask(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetTaskFinishHandle(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x1F, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
+    IPC::RequestBuilder rb(ctx, 0x1F, 1, 2);
     rb.Push(RESULT_SUCCESS);
     rb.PushCopyObjects<Kernel::Event>(boss->task_finish_event);
 
@@ -419,7 +408,7 @@ void Module::Interface::GetTaskState(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x20, 2, 2);
     const u32 size = rp.Pop<u32>();
     const u8 state = rp.Pop<u8>();
-    auto& buffer = rp.PopMappedBuffer();
+    const Kernel::MappedBuffer& buffer = rp.PopMappedBuffer();
 
     IPC::RequestBuilder rb = rp.MakeBuilder(4, 2);
     rb.Push(RESULT_SUCCESS);
@@ -634,9 +623,7 @@ void Module::Interface::RegisterStorageEntry(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetStorageEntryInfo(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x30, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(3, 0);
+    IPC::RequestBuilder rb(ctx, 0x30, 3, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u32>(0); // stub 0 (32bit value)
     rb.Push<u16>(0); // stub 0 (16bit value)
@@ -661,9 +648,7 @@ void Module::Interface::SetStorageOption(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetStorageOption(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x32, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(5, 0);
+    IPC::RequestBuilder rb(ctx, 0x32, 5, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u32>(0); // stub 0 (32bit value)
     rb.Push<u8>(0);  // stub 0 (8bit value)

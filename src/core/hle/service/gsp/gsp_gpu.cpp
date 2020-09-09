@@ -381,13 +381,11 @@ void GSP_GPU::RegisterInterruptRelayQueue(Kernel::HLERequestContext& ctx) {
 }
 
 void GSP_GPU::UnregisterInterruptRelayQueue(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x14, 0, 0);
-
     SessionData* session_data = GetSessionData(ctx.Session());
     session_data->interrupt_event = nullptr;
     session_data->registered = false;
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x14, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_DEBUG(Service_GSP, "called");
@@ -605,8 +603,6 @@ void GSP_GPU::SetLcdForceBlack(Kernel::HLERequestContext& ctx) {
 }
 
 void GSP_GPU::TriggerCmdReqQueue(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0xC, 0, 0);
-
     CommandBuffer* command_buffer =
         (CommandBuffer*)GetCommandBuffer(shared_memory, active_thread_id);
 
@@ -619,13 +615,11 @@ void GSP_GPU::TriggerCmdReqQueue(Kernel::HLERequestContext& ctx) {
         command_buffer->number_commands.Assign(command_buffer->number_commands - 1);
     }
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0xC, 1, 0);
     rb.Push(RESULT_SUCCESS);
 }
 
 void GSP_GPU::ImportDisplayCaptureInfo(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x18, 0, 0);
-
     FrameBufferUpdate* top_screen = GetFrameBufferInfo(active_thread_id, 0);
     FrameBufferUpdate* bottom_screen = GetFrameBufferInfo(active_thread_id, 1);
 
@@ -649,7 +643,7 @@ void GSP_GPU::ImportDisplayCaptureInfo(Kernel::HLERequestContext& ctx) {
     bottom_entry.format = bottom_screen->framebuffer_info[bottom_screen->index].format;
     bottom_entry.stride = bottom_screen->framebuffer_info[bottom_screen->index].stride;
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(9, 0);
+    IPC::RequestBuilder rb(ctx, 0x18, 9, 0);
     rb.Push(RESULT_SUCCESS);
     rb.PushRaw(top_entry);
     rb.PushRaw(bottom_entry);
@@ -691,12 +685,10 @@ void GSP_GPU::ReleaseRight(const SessionData* session_data) {
 }
 
 void GSP_GPU::ReleaseRight(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x17, 0, 0);
-
     const SessionData* session_data = GetSessionData(ctx.Session());
     ReleaseRight(session_data);
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x17, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_WARNING(Service_GSP, "called");

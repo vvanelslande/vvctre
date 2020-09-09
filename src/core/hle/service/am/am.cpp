@@ -1091,10 +1091,8 @@ void Module::Interface::BeginImportProgram(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::BeginImportProgramTemporarily(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0403, 0, 0); // 0x04030000
-
     if (am->cia_installing) {
-        IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+        IPC::RequestBuilder rb(ctx, 0x0403, 1, 0);
         rb.Push(ResultCode(ErrCodes::CIACurrentlyInstalling, ErrorModule::AM,
                            ErrorSummary::InvalidState, ErrorLevel::Permanent));
         return;
@@ -1110,7 +1108,7 @@ void Module::Interface::BeginImportProgramTemporarily(Kernel::HLERequestContext&
 
     am->cia_installing = true;
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
+    IPC::RequestBuilder rb(ctx, 0x0403, 1, 2);
     rb.Push(RESULT_SUCCESS); // No error
     rb.PushCopyObjects(file->Connect());
 
@@ -1445,9 +1443,7 @@ void Module::Interface::DeleteProgram(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetSystemUpdaterMutex(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x412, 0, 0); // 0x04120000
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
+    IPC::RequestBuilder rb(ctx, 0x412, 1, 2);
     rb.Push(RESULT_SUCCESS);
     rb.PushCopyObjects(am->system_updater_mutex);
 }

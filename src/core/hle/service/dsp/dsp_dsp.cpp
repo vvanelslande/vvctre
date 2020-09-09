@@ -186,11 +186,9 @@ void DSP_DSP::LoadComponent(Kernel::HLERequestContext& ctx) {
 }
 
 void DSP_DSP::UnloadComponent(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x12, 0, 0);
-
     system.DSP().UnloadComponent();
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x12, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_INFO(Service_DSP, "(STUBBED)");
@@ -258,9 +256,7 @@ void DSP_DSP::RegisterInterruptEvents(Kernel::HLERequestContext& ctx) {
 }
 
 void DSP_DSP::GetSemaphoreEventHandle(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x16, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
+    IPC::RequestBuilder rb(ctx, 0x16, 1, 2);
     rb.Push(RESULT_SUCCESS);
     rb.PushCopyObjects(semaphore_event);
 
@@ -278,9 +274,7 @@ void DSP_DSP::SetSemaphoreMask(Kernel::HLERequestContext& ctx) {
 }
 
 void DSP_DSP::GetHeadphoneStatus(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x1F, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x1F, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(false); /// u8, 0 = not inserted, 1 = inserted
 

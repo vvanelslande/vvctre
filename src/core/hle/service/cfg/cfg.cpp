@@ -203,9 +203,7 @@ u32 Module::GetRegionValue() {
 }
 
 void Module::Interface::SecureInfoGetRegion(Kernel::HLERequestContext& ctx, u16 id) {
-    IPC::RequestParser rp(ctx, id, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, id, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u8>(static_cast<u8>(cfg->GetRegionValue()));
 }
@@ -237,8 +235,7 @@ void Module::Interface::GenHashConsoleUnique(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetRegionCanadaUSA(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x04, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x04, 2, 0);
 
     rb.Push(RESULT_SUCCESS);
 
@@ -262,8 +259,7 @@ SystemModel Module::GetSystemModel() {
 }
 
 void Module::Interface::GetSystemModel(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x05, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x05, 2, 0);
     u32 data;
 
     // TODO(Subv): Find out the correct error codes
@@ -272,8 +268,7 @@ void Module::Interface::GetSystemModel(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetModelNintendo2DS(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x06, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x06, 2, 0);
     u32 data;
 
     // TODO(Subv): Find out the correct error codes
@@ -323,14 +318,12 @@ void Module::Interface::SetConfigInfoBlk4(Kernel::HLERequestContext& ctx, u16 id
 }
 
 void Module::Interface::UpdateConfigNANDSavegame(Kernel::HLERequestContext& ctx, u16 id) {
-    IPC::RequestParser rp(ctx, id, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, id, 1, 0);
     rb.Push(cfg->UpdateConfigNANDSavegame());
 }
 
 void Module::Interface::FormatConfig(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0806, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x0806, 1, 0);
     rb.Push(cfg->FormatConfig());
 }
 

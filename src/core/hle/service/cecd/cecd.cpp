@@ -676,9 +676,7 @@ void Module::Interface::GetCecInfoBuffer(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetCecdState(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0E, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x0E, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.PushEnum(CecdState::NdmStatusIdle);
 
@@ -686,9 +684,7 @@ void Module::Interface::GetCecdState(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetCecInfoEventHandle(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x0F, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
+    IPC::RequestBuilder rb(ctx, 0x0F, 1, 2);
     rb.Push(RESULT_SUCCESS);
     rb.PushCopyObjects(cecd->cecinfo_event);
 
@@ -696,9 +692,7 @@ void Module::Interface::GetCecInfoEventHandle(Kernel::HLERequestContext& ctx) {
 }
 
 void Module::Interface::GetChangeStateEventHandle(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x10, 0, 0);
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
+    IPC::RequestBuilder rb(ctx, 0x10, 1, 2);
     rb.Push(RESULT_SUCCESS);
     rb.PushCopyObjects(cecd->change_state_event);
 

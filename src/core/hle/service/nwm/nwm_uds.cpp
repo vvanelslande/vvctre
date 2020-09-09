@@ -573,8 +573,6 @@ std::optional<Network::MacAddress> NWM_UDS::GetNodeMacAddress(u16 dest_node_id, 
 }
 
 void NWM_UDS::Shutdown(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x03, 0, 0);
-
     system.RoomMember().Unbind(wifi_packet_received);
 
     for (auto bind_node : channel_data) {
@@ -585,7 +583,7 @@ void NWM_UDS::Shutdown(Kernel::HLERequestContext& ctx) {
 
     recv_buffer_memory.reset();
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x03, 1, 0);
     rb.Push(RESULT_SUCCESS);
     LOG_DEBUG(Service_NWM, "called");
 }
@@ -716,8 +714,7 @@ void NWM_UDS::InitializeDeprecated(Kernel::HLERequestContext& ctx) {
 }
 
 void NWM_UDS::GetConnectionStatus(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0xB, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(13, 0);
+    IPC::RequestBuilder rb(ctx, 0xB, 13, 0);
 
     rb.Push(RESULT_SUCCESS);
     {
@@ -1014,15 +1011,13 @@ void NWM_UDS::UpdateNetworkAttribute(Kernel::HLERequestContext& ctx) {
 }
 
 void NWM_UDS::DestroyNetwork(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x08, 0, 0);
-
     // Unschedule the beacon broadcast event.
     system.CoreTiming().UnscheduleEvent(beacon_broadcast_event, 0);
 
     // Only a host can destroy
     std::lock_guard lock(connection_status_mutex);
     if (connection_status.status != NetworkStatus::ConnectedAsHost) {
-        IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+        IPC::RequestBuilder rb(ctx, 0x08, 1, 0);
         rb.Push(ResultCode(ErrCodes::WrongStatus, ErrorModule::UDS, ErrorSummary::InvalidState,
                            ErrorLevel::Status));
         LOG_WARNING(Service_NWM, "called with status {}",
@@ -1039,7 +1034,7 @@ void NWM_UDS::DestroyNetwork(Kernel::HLERequestContext& ctx) {
     node_map.clear();
     connection_status_event->Signal();
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x08, 1, 0);
 
     for (auto bind_node : channel_data) {
         bind_node.second.event->Signal();
@@ -1052,8 +1047,7 @@ void NWM_UDS::DestroyNetwork(Kernel::HLERequestContext& ctx) {
 }
 
 void NWM_UDS::DisconnectNetwork(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0xA, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0xA, 1, 0);
 
     using Network::WifiPacket;
     WifiPacket deauth;
@@ -1238,8 +1232,7 @@ void NWM_UDS::PullPacket(Kernel::HLERequestContext& ctx) {
 }
 
 void NWM_UDS::GetChannel(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x1A, 0, 0);
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x1A, 2, 0);
 
     std::lock_guard lock(connection_status_mutex);
     bool is_connected = connection_status.status != NetworkStatus::NotConnected;

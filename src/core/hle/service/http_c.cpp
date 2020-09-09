@@ -1068,11 +1068,9 @@ void HTTP_C::CloseClientCertContext(Kernel::HLERequestContext& ctx) {
 }
 
 void HTTP_C::Finalize(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp(ctx, 0x39, 0, 0);
-
     shared_memory = nullptr;
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x39, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_WARNING(Service_HTTP, "(STUBBED) called");

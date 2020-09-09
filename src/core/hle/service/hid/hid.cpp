@@ -276,16 +276,13 @@ void Module::UpdateGyroscopeCallback(std::uintptr_t user_data, s64 cycles_late) 
 }
 
 void Module::Interface::GetIPCHandles(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp{ctx, 0xA, 0, 0};
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 7);
+    IPC::RequestBuilder rb(ctx, 0xA, 1, 7);
     rb.Push(RESULT_SUCCESS);
     rb.PushCopyObjects(hid->shared_mem, hid->event_pad_or_touch_1, hid->event_pad_or_touch_2,
                        hid->event_accelerometer, hid->event_gyroscope, hid->event_debug_pad);
 }
 
 void Module::Interface::EnableAccelerometer(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp{ctx, 0x11, 0, 0};
-
     ++hid->enable_accelerometer_count;
 
     // Schedules the accelerometer update event if the accelerometer was just enabled
@@ -294,15 +291,13 @@ void Module::Interface::EnableAccelerometer(Kernel::HLERequestContext& ctx) {
                                                hid->accelerometer_update_event);
     }
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x11, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_DEBUG(Service_HID, "called");
 }
 
 void Module::Interface::DisableAccelerometer(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp{ctx, 0x12, 0, 0};
-
     --hid->enable_accelerometer_count;
 
     // Unschedules the accelerometer update event if the accelerometer was just disabled
@@ -310,15 +305,13 @@ void Module::Interface::DisableAccelerometer(Kernel::HLERequestContext& ctx) {
         hid->system.CoreTiming().UnscheduleEvent(hid->accelerometer_update_event, 0);
     }
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x12, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_DEBUG(Service_HID, "called");
 }
 
 void Module::Interface::EnableGyroscopeLow(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp{ctx, 0x13, 0, 0};
-
     ++hid->enable_gyroscope_count;
 
     // Schedules the gyroscope update event if the gyroscope was just enabled
@@ -326,15 +319,13 @@ void Module::Interface::EnableGyroscopeLow(Kernel::HLERequestContext& ctx) {
         hid->system.CoreTiming().ScheduleEvent(gyroscope_update_ticks, hid->gyroscope_update_event);
     }
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x13, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_DEBUG(Service_HID, "called");
 }
 
 void Module::Interface::DisableGyroscopeLow(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp{ctx, 0x14, 0, 0};
-
     --hid->enable_gyroscope_count;
 
     // Unschedules the gyroscope update event if the gyroscope was just disabled
@@ -342,27 +333,23 @@ void Module::Interface::DisableGyroscopeLow(Kernel::HLERequestContext& ctx) {
         hid->system.CoreTiming().UnscheduleEvent(hid->gyroscope_update_event, 0);
     }
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+    IPC::RequestBuilder rb(ctx, 0x14, 1, 0);
     rb.Push(RESULT_SUCCESS);
 
     LOG_DEBUG(Service_HID, "called");
 }
 
 void Module::Interface::GetGyroscopeLowRawToDpsCoefficient(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp{ctx, 0x15, 0, 0};
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x15, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(gyroscope_coef);
 }
 
 void Module::Interface::GetGyroscopeLowCalibrateParam(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp{ctx, 0x16, 0, 0};
-
-    IPC::RequestBuilder rb = rp.MakeBuilder(6, 0);
+    IPC::RequestBuilder rb(ctx, 0x16, 6, 0);
     rb.Push(RESULT_SUCCESS);
 
-    const s16 param_unit = 6700; // an approximate value taken from hw
+    const s16 param_unit = 6700; // An approximate value taken from hw
     GyroscopeCalibrateParam param = {
         {0, param_unit, -param_unit},
         {0, param_unit, -param_unit},
@@ -374,11 +361,9 @@ void Module::Interface::GetGyroscopeLowCalibrateParam(Kernel::HLERequestContext&
 }
 
 void Module::Interface::GetSoundVolume(Kernel::HLERequestContext& ctx) {
-    IPC::RequestParser rp{ctx, 0x17, 0, 0};
-
     const u8 volume = static_cast<u8>(0x3F * Settings::values.audio_volume);
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
+    IPC::RequestBuilder rb(ctx, 0x17, 2, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push(volume);
 }
