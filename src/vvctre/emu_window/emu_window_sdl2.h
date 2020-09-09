@@ -104,15 +104,15 @@ private:
 
     // IPC recorder
     IPCDebugger::CallbackHandle ipc_recorder_callback;
-    std::vector<IPCDebugger::RequestRecord> ipc_records;
-    std::vector<IPCDebugger::RequestRecord> ipc_records_filtered;
+    std::vector<IPCDebugger::RequestRecord> all_ipc_records;
+    std::vector<IPCDebugger::RequestRecord> ipc_recorder_search_results;
     int ipc_recorder_id_offset = 1;
-    std::string ipc_recorder_filter;
-    std::string ipc_recorder_filter_;
+    std::string ipc_recorder_search_text;
+    std::string ipc_recorder_search_text_;
     bool show_ipc_recorder_window = false;
 
     // Installed
-    std::string installed_query;
+    std::string installed_search_text;
     std::vector<std::tuple<std::string, std::string>> installed;
 
     // Cheats
@@ -127,7 +127,7 @@ private:
     // Multiplayer
     bool show_connect_to_citra_room = false;
     CitraRoomList public_rooms;
-    std::string public_rooms_query;
+    std::string public_rooms_search_text;
     std::string multiplayer_message;
     std::vector<std::string> multiplayer_messages;
     std::unordered_set<std::string> multiplayer_blocked_nicknames;

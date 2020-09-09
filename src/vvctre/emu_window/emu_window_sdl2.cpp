@@ -2345,9 +2345,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                             r.SetEnabled(false);
                             r.UnbindCallback(ipc_recorder_callback);
 
-                            ipc_records.clear();
-                            ipc_records_filtered.clear();
-                            ipc_recorder_filter.clear();
+                            all_ipc_records.clear();
+                            ipc_recorder_search_results.clear();
+                            ipc_recorder_search_text.clear();
                             ipc_recorder_callback = nullptr;
                         }
                     }
@@ -2913,12 +2913,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ipc_recorder_callback =
                         r.BindCallback([&](const IPCDebugger::RequestRecord& record) {
                             const int index = record.id - ipc_recorder_id_offset;
-                            if (ipc_records.size() > index) {
-                                ipc_records[index] = record;
+                            if (all_ipc_records.size() > index) {
+                                all_ipc_records[index] = record;
                             } else {
-                                ipc_records.emplace_back(record);
+                                all_ipc_records.emplace_back(record);
                             }
-                            if (!ipc_recorder_filter.empty()) {
+                            if (!ipc_recorder_search_text.empty()) {
                                 std::string service_name;
                                 std::string function_name = "Unknown";
                                 if (record.client_port.id != -1) {
@@ -2939,8 +2939,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                     record.is_hle ? "HLE" : "LLE",
                                     IPC_Recorder_GetStatusString(record.status));
 
-                                if (label.find(ipc_recorder_filter) != std::string::npos) {
-                                    ipc_records_filtered.push_back(record);
+                                if (label.find(ipc_recorder_search_text) != std::string::npos) {
+                                    ipc_recorder_search_results.push_back(record);
                                 }
                             }
                         });
@@ -2951,18 +2951,18 @@ void EmuWindow_SDL2::SwapBuffers() {
             }
             ImGui::SameLine();
             if (ImGui::Button("Clear")) {
-                ipc_recorder_id_offset += ipc_records.size();
-                ipc_records.clear();
-                ipc_records_filtered.clear();
+                ipc_recorder_id_offset += all_ipc_records.size();
+                all_ipc_records.clear();
+                ipc_recorder_search_results.clear();
             }
             ImGui::SameLine();
-            if (ImGui::InputTextWithHint("##filter", "Filter", &ipc_recorder_filter_,
+            if (ImGui::InputTextWithHint("##search", "Search", &ipc_recorder_search_text_,
                                          ImGuiInputTextFlags_EnterReturnsTrue)) {
-                ipc_recorder_filter = ipc_recorder_filter_;
-                ipc_records_filtered.clear();
+                ipc_recorder_search_text = ipc_recorder_search_text_;
+                ipc_recorder_search_results.clear();
 
-                if (!ipc_recorder_filter.empty()) {
-                    for (const IPCDebugger::RequestRecord& record : ipc_records) {
+                if (!ipc_recorder_search_text.empty()) {
+                    for (const IPCDebugger::RequestRecord& record : all_ipc_records) {
                         std::string service_name;
                         std::string function_name = "Unknown";
                         if (record.client_port.id != -1) {
@@ -2983,8 +2983,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                             record.is_hle ? "HLE" : "LLE",
                             IPC_Recorder_GetStatusString(record.status));
 
-                        if (label.find(ipc_recorder_filter) != std::string::npos) {
-                            ipc_records_filtered.push_back(record);
+                        if (label.find(ipc_recorder_search_text) != std::string::npos) {
+                            ipc_recorder_search_results.push_back(record);
                         }
                     }
                 }
@@ -2993,7 +2993,8 @@ void EmuWindow_SDL2::SwapBuffers() {
             if (ImGui::BeginChildFrame(ImGui::GetID("Records"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
                 const std::vector<IPCDebugger::RequestRecord>& records =
-                    ipc_recorder_filter.empty() ? ipc_records : ipc_records_filtered;
+                    ipc_recorder_search_text.empty() ? all_ipc_records
+                                                     : ipc_recorder_search_results;
                 ImGuiListClipper clipper(records.size());
 
                 while (clipper.Step()) {
@@ -3073,9 +3074,9 @@ void EmuWindow_SDL2::SwapBuffers() {
             r.SetEnabled(false);
             r.UnbindCallback(ipc_recorder_callback);
 
-            ipc_records.clear();
-            ipc_records_filtered.clear();
-            ipc_recorder_filter.clear();
+            all_ipc_records.clear();
+            ipc_recorder_search_results.clear();
+            ipc_recorder_search_text.clear();
             ipc_recorder_callback = nullptr;
         }
         ImGui::End();
@@ -3328,7 +3329,7 @@ void EmuWindow_SDL2::SwapBuffers() {
         if (ImGui::BeginPopupModal("Installed", &open,
                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
                                        ImGuiWindowFlags_NoResize)) {
-            ImGui::InputText("Search", &installed_query);
+            ImGui::InputText("Search", &installed_search_text);
 
             if (ImGui::BeginChildFrame(ImGui::GetID("Installed"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -3337,12 +3338,12 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                     if (asl::String(name.c_str())
                             .toLowerCase()
-                            .contains(asl::String(installed_query.c_str()).toLowerCase()) &&
+                            .contains(asl::String(installed_search_text.c_str()).toLowerCase()) &&
                         ImGui::Selectable(name.c_str())) {
                         system.SetResetFilePath(path);
                         system.RequestReset();
                         installed.clear();
-                        installed_query.clear();
+                        installed_search_text.clear();
                         return;
                     }
                 }
@@ -3352,7 +3353,7 @@ void EmuWindow_SDL2::SwapBuffers() {
         }
         if (!open) {
             installed.clear();
-            installed_query.clear();
+            installed_search_text.clear();
         }
     }
 
@@ -3377,7 +3378,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                 public_rooms = GetPublicCitraRooms();
             }
             ImGui::SameLine();
-            ImGui::InputText("Search", &public_rooms_query);
+            ImGui::InputText("Search", &public_rooms_search_text);
 
             if (ImGui::BeginChildFrame(ImGui::GetID("Public Room List"),
                                        ImVec2(-1.0f, ImGui::GetContentRegionAvail().y - 40.0f),
@@ -3405,7 +3406,8 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                     if (asl::String(room_string.c_str())
                             .toLowerCase()
-                            .contains(asl::String(public_rooms_query.c_str()).toLowerCase())) {
+                            .contains(
+                                asl::String(public_rooms_search_text.c_str()).toLowerCase())) {
                         if (ImGui::Selectable(room_string.c_str())) {
                             Settings::values.multiplayer_ip = room.ip;
                             Settings::values.multiplayer_port = room.port;
@@ -3422,14 +3424,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                 ConnectToCitraRoom();
                 show_connect_to_citra_room = false;
                 public_rooms.clear();
-                public_rooms_query.clear();
+                public_rooms_search_text.clear();
             }
 
             ImGui::EndPopup();
         }
         if (!show_connect_to_citra_room) {
             public_rooms.clear();
-            public_rooms_query.clear();
+            public_rooms_search_text.clear();
         }
     }
 

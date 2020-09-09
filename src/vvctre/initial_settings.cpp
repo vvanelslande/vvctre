@@ -57,12 +57,12 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
     SDL_Event event;
     CitraRoomList public_rooms;
     bool first_time_in_multiplayer = true;
-    std::string public_rooms_query;
+    std::string public_rooms_search_text;
     u16 play_coins = 0xDEAD;
     bool play_coins_changed = false;
     bool config_savegame_changed = false;
     std::vector<std::tuple<std::string, std::string>> installed;
-    std::string installed_query;
+    std::string installed_search_text;
     std::string host_multiplayer_room_ip = "0.0.0.0";
     u16 host_multiplayer_room_port = Network::DEFAULT_PORT;
     u32 host_multiplayer_room_member_slots = Network::DEFAULT_MEMBER_SLOTS;
@@ -2010,7 +2010,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         public_rooms = GetPublicCitraRooms();
                     }
                     ImGui::SameLine();
-                    ImGui::InputText("Search", &public_rooms_query);
+                    ImGui::InputText("Search", &public_rooms_search_text);
 
                     if (ImGui::BeginChildFrame(
                             ImGui::GetID("Public Room List"),
@@ -2041,8 +2041,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             if (asl::String(room_string.c_str())
                                     .toLowerCase()
-                                    .contains(
-                                        asl::String(public_rooms_query.c_str()).toLowerCase())) {
+                                    .contains(asl::String(public_rooms_search_text.c_str())
+                                                  .toLowerCase())) {
                                 if (ImGui::Selectable(room_string.c_str())) {
                                     Settings::values.multiplayer_ip = room.ip;
                                     Settings::values.multiplayer_port = room.port;
@@ -2177,7 +2177,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
             if (ImGui::BeginPopupModal("Installed", &open,
                                        ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
                                            ImGuiWindowFlags_NoResize)) {
-                ImGui::InputText("Search", &installed_query);
+                ImGui::InputText("Search", &installed_search_text);
 
                 if (ImGui::BeginChildFrame(ImGui::GetID("Installed"), ImVec2(-1.0f, -1.0f),
                                            ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -2186,11 +2186,12 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                         if (asl::String(name.c_str())
                                 .toLowerCase()
-                                .contains(asl::String(installed_query.c_str()).toLowerCase()) &&
+                                .contains(
+                                    asl::String(installed_search_text.c_str()).toLowerCase()) &&
                             ImGui::Selectable(name.c_str())) {
                             Settings::values.file_path = path;
                             installed.clear();
-                            installed_query.clear();
+                            installed_search_text.clear();
                             break;
                         }
                     }
@@ -2200,7 +2201,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
             }
             if (!open) {
                 installed.clear();
-                installed_query.clear();
+                installed_search_text.clear();
             }
         }
 
