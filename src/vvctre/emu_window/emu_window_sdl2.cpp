@@ -2215,7 +2215,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("GUI")) {
-                    ImGui::ColorEdit4("FPS Color", &fps_color.x, ImGuiColorEditFlags_NoInputs);
+                    ImGui::ColorEdit4("FPS Color", &fps_color.x,
+                                      ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar |
+                                          ImGuiColorEditFlags_AlphaPreview);
 
                     ImGui::EndMenu();
                 }
