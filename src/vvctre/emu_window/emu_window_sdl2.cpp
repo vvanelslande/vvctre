@@ -188,20 +188,20 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
 
         switch (entry.type) {
         case Network::StatusMessageTypes::IdMemberJoin:
-            multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] {} joined", entry.nickname,
-                                                       date.hours(), date.minutes()));
+            multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] {} joined", date.hours(),
+                                                       date.minutes(), entry.nickname));
             break;
         case Network::StatusMessageTypes::IdMemberLeave:
             multiplayer_messages.push_back(
-                fmt::format("[{:02}:{:02}] {} left", entry.nickname, date.hours(), date.minutes()));
+                fmt::format("[{:02}:{:02}] {} left", date.hours(), date.minutes(), entry.nickname));
             break;
         case Network::StatusMessageTypes::IdMemberKicked:
-            multiplayer_messages.push_back(fmt::format(
-                "[{:02}:{:02}] {} was kicked", entry.nickname, date.hours(), date.minutes()));
+            multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] {} was kicked", date.hours(),
+                                                       date.minutes(), entry.nickname));
             break;
         case Network::StatusMessageTypes::IdMemberBanned:
-            multiplayer_messages.push_back(fmt::format(
-                "[{:02}:{:02}] {} was banned", entry.nickname, date.hours(), date.minutes()));
+            multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] {} was banned", date.hours(),
+                                                       date.minutes(), entry.nickname));
             break;
         case Network::StatusMessageTypes::IdAddressUnbanned:
             multiplayer_messages.push_back(
