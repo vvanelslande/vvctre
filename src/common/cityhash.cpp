@@ -57,8 +57,8 @@ static u32 UNALIGNED_LOAD32(const char* p) {
 #define u32_in_expected_order(x) (swap32(x))
 #define u64_in_expected_order(x) (swap64(x))
 #else
-#define uint32_in_expected_order(x) (x)
-#define uint64_in_expected_order(x) (x)
+#define u32_in_expected_order(x) (x)
+#define u64_in_expected_order(x) (x)
 #endif
 
 #if !defined(LIKELY)
