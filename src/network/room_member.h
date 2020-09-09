@@ -123,7 +123,7 @@ public:
     /**
      * Returns information about the room we're currently connected to.
      */
-    RoomInformation GetRoomInformation() const;
+    const RoomInformation& GetRoomInformation() const;
 
     /**
      * Returns whether we're connected to a server or not.

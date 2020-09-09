@@ -475,7 +475,7 @@ const MacAddress& RoomMember::GetMacAddress() const {
     return room_member_impl->mac_address;
 }
 
-RoomInformation RoomMember::GetRoomInformation() const {
+const RoomInformation& RoomMember::GetRoomInformation() const {
     return room_member_impl->room_information;
 }
 

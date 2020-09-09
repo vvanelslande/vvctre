@@ -3189,7 +3189,7 @@ void EmuWindow_SDL2::SwapBuffers() {
         ImGui::SetNextWindowSize(ImVec2(640.f, 480.0f), ImGuiCond_Appearing);
 
         bool open = true;
-        const Network::RoomInformation room_information = room_member.GetRoomInformation();
+        const Network::RoomInformation& room_information = room_member.GetRoomInformation();
         const Network::RoomMember::MemberList& members = room_member.GetMemberInformation();
 
         if (ImGui::Begin(fmt::format("{} ({}/{})###Room", room_information.name, members.size(),
