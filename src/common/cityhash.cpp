@@ -32,7 +32,6 @@
 #include "cityhash.h"
 #include "common/swap.h"
 
-// #include "config.h"
 #ifdef __GNUC__
 #define HAVE_BUILTIN_EXPECT 1
 #endif
