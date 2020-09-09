@@ -2061,6 +2061,20 @@ void EmuWindow_SDL2::SwapBuffers() {
                         Settings::Apply();
                     }
 
+                    if (ImGui::Checkbox("Sharper Distant Objects",
+                                        &Settings::values.sharper_distant_objects)) {
+                        request_reset = true;
+                    }
+
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
+                        ImGui::TextUnformatted(
+                            "If you change this, emulation will restart when the menu is closed");
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
+
                     ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
                     ImGui::Checkbox("Use Custom Textures", &Settings::values.custom_textures);
                     ImGui::Checkbox("Preload Custom Textures", &Settings::values.preload_textures);
