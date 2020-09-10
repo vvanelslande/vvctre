@@ -294,6 +294,66 @@ bool vvctre_load_amiibo(void* core, const char* path) {
     return false;
 }
 
+void vvctre_load_amiibo_from_memory(void* core, const u8 data[540]) {
+    Service::NFC::AmiiboData data_{};
+    std::memcpy(&data_, data, sizeof(data_));
+
+    std::shared_ptr<Service::NFC::Module::Interface> nfc =
+        static_cast<Core::System*>(core)
+            ->ServiceManager()
+            .GetService<Service::NFC::Module::Interface>("nfc:u");
+    if (nfc != nullptr) {
+        nfc->LoadAmiibo(data_);
+    }
+}
+
+bool vvctre_load_amiibo_decrypted(void* core, const char* path) {
+    FileUtil::IOFile file(std::string(path), "rb");
+    std::array<u8, 540> array;
+
+    if (file.ReadBytes(array.data(), 540) == 540) {
+        Service::NFC::AmiiboData data{};
+        std::memcpy(&data.uuid, &array[0x1D4], data.uuid.size());
+        std::memcpy(&data.char_id, &array[0x1DC], 8);
+
+        std::shared_ptr<Service::NFC::Module::Interface> nfc =
+            static_cast<Core::System*>(core)
+                ->ServiceManager()
+                .GetService<Service::NFC::Module::Interface>("nfc:u");
+        if (nfc != nullptr) {
+            nfc->LoadAmiibo(data);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void vvctre_load_amiibo_from_memory_decrypted(void* core, const u8 data[540]) {
+    Service::NFC::AmiiboData data_{};
+    std::memcpy(&data_.uuid, &data[0x1D4], data_.uuid.size());
+    std::memcpy(&data_.char_id, &data[0x1DC], 8);
+
+    std::shared_ptr<Service::NFC::Module::Interface> nfc =
+        static_cast<Core::System*>(core)
+            ->ServiceManager()
+            .GetService<Service::NFC::Module::Interface>("nfc:u");
+    if (nfc != nullptr) {
+        nfc->LoadAmiibo(data_);
+    }
+}
+
+void vvctre_get_amiibo_data(void* core, u8 data[540]) {
+    std::shared_ptr<Service::NFC::Module::Interface> nfc =
+        static_cast<Core::System*>(core)
+            ->ServiceManager()
+            .GetService<Service::NFC::Module::Interface>("nfc:u");
+    if (nfc != nullptr) {
+        const Service::NFC::AmiiboData data_ = nfc->GetAmiiboData();
+        std::memcpy(data, &data_, sizeof(data_));
+    }
+}
+
 void vvctre_remove_amiibo(void* core) {
     std::shared_ptr<Service::NFC::Module::Interface> nfc =
         static_cast<Core::System*>(core)
@@ -3499,6 +3559,10 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_load_file", (void*)&vvctre_load_file},
     {"vvctre_install_cia", (void*)&vvctre_install_cia},
     {"vvctre_load_amiibo", (void*)&vvctre_load_amiibo},
+    {"vvctre_load_amiibo_from_memory", (void*)&vvctre_load_amiibo_from_memory},
+    {"vvctre_load_amiibo_decrypted", (void*)&vvctre_load_amiibo_decrypted},
+    {"vvctre_load_amiibo_from_memory_decrypted", (void*)&vvctre_load_amiibo_from_memory_decrypted},
+    {"vvctre_get_amiibo_data", (void*)&vvctre_get_amiibo_data},
     {"vvctre_remove_amiibo", (void*)&vvctre_remove_amiibo},
     {"vvctre_get_program_id", (void*)&vvctre_get_program_id},
     {"vvctre_get_process_name", (void*)&vvctre_get_process_name},
