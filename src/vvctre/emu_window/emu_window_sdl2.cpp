@@ -3259,6 +3259,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             if (ImGui::MenuItem("Delete")) {
                                 multiplayer_messages.erase(multiplayer_messages.begin() + i);
                                 clipper.ItemsCount = 0;
+                                ImGui::PopStyleVar();
                                 ImGui::EndPopup();
                                 break;
                             }
@@ -3266,6 +3267,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             if (ImGui::MenuItem("Clear")) {
                                 multiplayer_messages.clear();
                                 clipper.ItemsCount = 0;
+                                ImGui::PopStyleVar();
                                 ImGui::EndPopup();
                                 break;
                             }
