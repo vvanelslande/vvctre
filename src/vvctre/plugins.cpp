@@ -3816,6 +3816,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_set_next_window_size", (void*)&vvctre_gui_set_next_window_size},
     {"vvctre_gui_set_next_window_size_constraints",
      (void*)&vvctre_gui_set_next_window_size_constraints},
+    {"vvctre_gui_set_next_window_content_size", (void*)&vvctre_gui_set_next_window_content_size},
     {"vvctre_gui_set_next_window_collapsed", (void*)&vvctre_gui_set_next_window_collapsed},
     {"vvctre_gui_set_next_window_focus", (void*)&vvctre_gui_set_next_window_focus},
     {"vvctre_gui_set_next_window_bg_alpha", (void*)&vvctre_gui_set_next_window_bg_alpha},
