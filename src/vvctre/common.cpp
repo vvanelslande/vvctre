@@ -28,7 +28,7 @@
 #include "vvctre/plugins.h"
 
 const u8 vvctre_version_major = 36;
-const u8 vvctre_version_minor = 15;
+const u8 vvctre_version_minor = 16;
 const u8 vvctre_version_patch = 0;
 
 void vvctreShutdown(PluginManager* plugin_manager) {
