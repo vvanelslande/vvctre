@@ -128,8 +128,10 @@ private:
 
     // Multiplayer
     bool show_connect_to_citra_room = false;
-    CitraRoomList public_rooms;
+    CitraRoomList all_public_rooms;
+    CitraRoomList public_rooms_search_results;
     std::string public_rooms_search_text;
+    std::string public_rooms_search_text_;
     std::string multiplayer_message;
     std::vector<std::string> multiplayer_messages;
     std::unordered_set<std::string> multiplayer_blocked_nicknames;

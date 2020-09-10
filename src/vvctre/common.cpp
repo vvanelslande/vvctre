@@ -156,6 +156,27 @@ CitraRoomList GetPublicCitraRooms() {
     return rooms;
 }
 
+const std::string GetRoomPopupText(const CitraRoom& room) {
+    std::string text =
+        fmt::format("Has Password: {}\nMaximum Members: "
+                    "{}\nPreferred Game: {}\nOwner: {}",
+                    room.has_password ? "Yes" : "No", room.max_players, room.game, room.owner);
+    if (!room.description.empty()) {
+        text += fmt::format("\n\nDescription:\n{}", room.description);
+    }
+    if (!room.members.empty()) {
+        text += fmt::format("\n\nMembers ({}):", room.members.size());
+        for (const CitraRoom::Member& member : room.members) {
+            if (member.game.empty()) {
+                text += fmt::format("\n\t{}", member.nickname);
+            } else {
+                text += fmt::format("\n\t{} is playing {}", member.nickname, member.game);
+            }
+        }
+    }
+    return text;
+}
+
 bool GUI_CameraAddBrowse(const char* label, std::size_t index) {
     if (ImGui::Button(label)) {
         const std::vector<std::string> result =

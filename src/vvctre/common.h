@@ -44,6 +44,7 @@ void vvctreShutdown(PluginManager* plugin_manager);
 
 std::vector<std::tuple<std::string, std::string>> GetInstalledList();
 CitraRoomList GetPublicCitraRooms();
+const std::string GetRoomPopupText(const CitraRoom& room);
 
 bool GUI_CameraAddBrowse(const char* label, std::size_t index);
 void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager& plugin_manager,
