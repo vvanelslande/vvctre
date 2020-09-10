@@ -158,7 +158,7 @@ std::string SanitizePath(std::string_view path,
                          DirectorySeparator directory_separator = DirectorySeparator::ForwardSlash);
 
 // Simple wrapper for cstdlib file functions to
-// hopefully will make error checking easier
+// hopefully make error checking easier
 // and make forgetting an fclose() harder
 class IOFile : public NonCopyable {
 public:
