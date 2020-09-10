@@ -95,8 +95,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
         if (ImGui::Begin("Initial Settings", nullptr,
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar |
                              ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
-                             ImGuiWindowFlags_NoMove)) {
-
+                             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar)) {
             if (ImGui::BeginTabBar("Tab Bar", ImGuiTabBarFlags_TabListPopupButton |
                                                   ImGuiTabBarFlags_FittingPolicyScroll)) {
                 if (ImGui::BeginTabItem("Start")) {
@@ -387,7 +386,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     const u32 min = 5;
                     const u32 max = 400;
-                    ImGui::SliderScalar("CPU Clock\nPercentage", ImGuiDataType_U32,
+                    ImGui::SliderScalar("CPU Clock Percentage", ImGuiDataType_U32,
                                         &Settings::values.cpu_clock_percentage, &min, &max, "%d%%");
 
                     ImGui::EndTabItem();
@@ -1825,7 +1824,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                         &Settings::values.resolution, &min, &max,
                                         Settings::values.resolution == 0 ? "Window Size" : "%d");
 
-                    ImGui::InputText("Post Processing\nShader",
+                    ImGui::InputText("Post Processing Shader",
                                      &Settings::values.post_processing_shader);
                     if (ImGui::IsItemHovered()) {
                         ImGui::BeginTooltip();
@@ -2058,7 +2057,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     if (ImGui::BeginChildFrame(
                             ImGui::GetID("Public Room List"),
                             ImVec2(-1.0f, (!Settings::values.file_path.empty() || update_found)
-                                              ? -(ImGui::GetFrameHeightWithSpacing() * 2.0f)
+                                              ? -ImGui::GetFrameHeightWithSpacing() * 2.0f
                                               : -1.0f),
                             ImGuiWindowFlags_HorizontalScrollbar)) {
                         const CitraRoomList& rooms = public_rooms_search_text.empty()
@@ -2131,7 +2130,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     ImGui::NewLine();
 
-                    ImGui::PushTextWrapPos();
+                    ImGui::PushTextWrapPos(io.DisplaySize.x);
                     ImGui::TextUnformatted("No more settings will be added here, this doesn't "
                                            "have message length limit, and there's no "
                                            "nickname/console ID/MAC address checks.");
