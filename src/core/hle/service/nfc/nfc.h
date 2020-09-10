@@ -66,8 +66,8 @@ public:
         std::shared_ptr<Module> GetModule() const;
 
         void LoadAmiibo(const AmiiboData& amiibo_data);
-
         void RemoveAmiibo();
+        AmiiboData GetAmiiboData();
 
     protected:
         void Initialize(Kernel::HLERequestContext& ctx);

@@ -326,6 +326,11 @@ void Module::Interface::RemoveAmiibo() {
     nfc->SyncTagState();
 }
 
+AmiiboData Module::Interface::GetAmiiboData() {
+    std::lock_guard lock(HLE::g_hle_lock);
+    return nfc->amiibo_data;
+}
+
 void Module::SyncTagState() {
     if (amiibo_in_range &&
         (nfc_tag_state == TagState::TagOutOfRange || nfc_tag_state == TagState::Scanning)) {
