@@ -3328,6 +3328,68 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
                 }
 
+                if (Settings::values.initial_clock == Settings::InitialClock::UnixTimestamp) {
+                    if (ImGui::MenuItem("Restart Using System Time")) {
+                        Settings::values.initial_clock = Settings::InitialClock::System;
+                        request_reset = true;
+                    }
+                }
+
+                if (ImGui::MenuItem("Restart Using Unix Timestamp")) {
+                    SDL_Event event;
+                    u64 unix_timestamp = Settings::values.unix_timestamp;
+                    bool unix_timestamp_window_open = true;
+
+                    while (is_open) {
+                        while (SDL_PollEvent(&event)) {
+                            ImGui_ImplSDL2_ProcessEvent(&event);
+
+                            if (event.type == SDL_QUIT) {
+                                if (pfd::message("vvctre", "Would you like to exit now?",
+                                                 pfd::choice::yes_no, pfd::icon::question)
+                                        .result() == pfd::button::yes) {
+                                    vvctreShutdown(&plugin_manager);
+                                    std::exit(0);
+                                }
+                            }
+                        }
+
+                        ImGui_ImplOpenGL3_NewFrame();
+                        ImGui_ImplSDL2_NewFrame(window);
+                        ImGui::NewFrame();
+
+                        ImGui::OpenPopup("Unix Timestamp");
+                        ImGui::SetNextWindowPos(
+                            ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
+                            ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+                        if (ImGui::BeginPopupModal("Unix Timestamp", &unix_timestamp_window_open,
+                                                   ImGuiWindowFlags_NoSavedSettings |
+                                                       ImGuiWindowFlags_NoMove |
+                                                       ImGuiWindowFlags_AlwaysAutoResize)) {
+                            ImGui::InputScalar("##Unix Timestamp", ImGuiDataType_U64,
+                                               &unix_timestamp);
+                            if (ImGui::Button("OK")) {
+                                Settings::values.initial_clock =
+                                    Settings::InitialClock::UnixTimestamp;
+                                Settings::values.unix_timestamp = unix_timestamp;
+                                request_reset = true;
+                                return;
+                            }
+                            ImGui::EndPopup();
+                        }
+
+                        if (!unix_timestamp_window_open) {
+                            return;
+                        }
+
+                        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                        glClear(GL_COLOR_BUFFER_BIT);
+                        ImGui::Render();
+                        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+                        SDL_GL_SwapWindow(window);
+                    }
+                }
+
                 if (ImGui::BeginMenu("Restart With Different Region")) {
                     if (Settings::values.region_value != Settings::REGION_VALUE_AUTO_SELECT &&
                         ImGui::MenuItem("Auto-select")) {
@@ -3592,10 +3654,10 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 }
                                 break;
                             case Core::Movie::ValidationResult::GameDismatch:
-                                pfd::message(
-                                    "vvctre",
-                                    "Movie was recorded using a ROM with a different program ID",
-                                    pfd::choice::ok, pfd::icon::warning);
+                                pfd::message("vvctre",
+                                             "Movie was recorded using a ROM with a different "
+                                             "program ID",
+                                             pfd::choice::ok, pfd::icon::warning);
                                 if (asl::File(filename[0].c_str()).name().contains("loop")) {
                                     play_movie_loop_callback = [this, &movie,
                                                                 filename = filename[0]] {
