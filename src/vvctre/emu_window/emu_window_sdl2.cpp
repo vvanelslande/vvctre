@@ -1216,6 +1216,32 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                     }
 
+                    if (ImGui::MenuItem("Remove")) {
+                        std::shared_ptr<Service::NFC::Module::Interface> nfc =
+                            system.ServiceManager().GetService<Service::NFC::Module::Interface>(
+                                "nfc:u");
+                        if (nfc != nullptr) {
+                            nfc->RemoveAmiibo();
+                        }
+                    }
+
+                    if (ImGui::MenuItem("Save (Encrypted)")) {
+                        const std::string path = pfd::save_file("Save Amiibo", "amiibo.bin",
+                                                                {"Amiibo Files", "*.bin *.BIN"})
+                                                     .result();
+
+                        if (!path.empty()) {
+                            FileUtil::IOFile file(path, "wb");
+
+                            std::shared_ptr<Service::NFC::Module::Interface> nfc =
+                                system.ServiceManager().GetService<Service::NFC::Module::Interface>(
+                                    "nfc:u");
+                            if (nfc != nullptr) {
+                                file.WriteObject(nfc->GetAmiiboData());
+                            }
+                        }
+                    }
+
                     if (ImGui::BeginMenu("Generate & Load")) {
                         if (ImGui::InputTextWithHint("##custom_id", "Custom ID",
                                                      &amiibo_generate_and_load_custom_id,
@@ -1298,32 +1324,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
 
                         ImGui::EndMenu();
-                    }
-
-                    if (ImGui::MenuItem("Remove")) {
-                        std::shared_ptr<Service::NFC::Module::Interface> nfc =
-                            system.ServiceManager().GetService<Service::NFC::Module::Interface>(
-                                "nfc:u");
-                        if (nfc != nullptr) {
-                            nfc->RemoveAmiibo();
-                        }
-                    }
-
-                    if (ImGui::MenuItem("Save (Encrypted)")) {
-                        const std::string path = pfd::save_file("Save Amiibo", "amiibo.bin",
-                                                                {"Amiibo Files", "*.bin *.BIN"})
-                                                     .result();
-
-                        if (!path.empty()) {
-                            FileUtil::IOFile file(path, "wb");
-
-                            std::shared_ptr<Service::NFC::Module::Interface> nfc =
-                                system.ServiceManager().GetService<Service::NFC::Module::Interface>(
-                                    "nfc:u");
-                            if (nfc != nullptr) {
-                                file.WriteObject(nfc->GetAmiiboData());
-                            }
-                        }
                     }
 
                     ImGui::EndMenu();
