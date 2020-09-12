@@ -1261,6 +1261,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                         data.uuid.size());
                                     std::memcpy(&data.char_id, &id, sizeof(id));
                                     nfc->LoadAmiibo(data);
+                                    ImGui::CloseCurrentPopup();
                                 } catch (const std::invalid_argument&) {
                                 }
                             }
