@@ -223,13 +223,13 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^camera.inner_engine (blank|image)$/m,
-      call: (match) => {
+      regex: /^camera.inner_engine image/m,
+      call: () => {
         if (!names.includes("vvctre_settings_set_camera_engine")) {
           names.push("vvctre_settings_set_camera_engine");
           types.push(["void", "int index, const char* value"]);
         }
-        calls.push(`vvctre_settings_set_camera_engine(1, "${match[1]}");`);
+        calls.push(`vvctre_settings_set_camera_engine(1, "image");`);
       },
     },
     {
@@ -243,13 +243,13 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^camera.outer_left_engine (blank|image)$/m,
-      call: (match) => {
+      regex: /^camera.outer_left_engine image$/m,
+      call: () => {
         if (!names.includes("vvctre_settings_set_camera_engine")) {
           names.push("vvctre_settings_set_camera_engine");
           types.push(["void", "int index, const char* value"]);
         }
-        calls.push(`vvctre_settings_set_camera_engine(2, "${match[1]}");`);
+        calls.push(`vvctre_settings_set_camera_engine(2, "image");`);
       },
     },
     {
@@ -263,13 +263,13 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^camera.outer_right_parameter (blank|image)$/m,
-      call: (match) => {
+      regex: /^camera.outer_right_engine image$/m,
+      call: () => {
         if (!names.includes("vvctre_settings_set_camera_engine")) {
           names.push("vvctre_settings_set_camera_engine");
           types.push(["void", "int index, const char* value"]);
         }
-        calls.push(`vvctre_settings_set_camera_engine(0, "${match[1]}");`);
+        calls.push(`vvctre_settings_set_camera_engine(0, "image");`);
       },
     },
     {
