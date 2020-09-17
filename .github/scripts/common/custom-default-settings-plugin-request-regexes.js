@@ -203,13 +203,13 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^audio.microphone_input_type (Disabled|Real Device|Static Noise)$/m,
+      regex: /^audio.microphone_input_type (Real Device|Static Noise)$/m,
       call: (match) => {
         names.push("vvctre_settings_set_microphone_input_type");
         types.push(["void", "int value"]);
         calls.push(
           `vvctre_settings_set_microphone_input_type(${
-            { Disabled: 0, "Real Device": 1, "Static Noise": 2 }[match[1]]
+            { "Real Device": 1, "Static Noise": 2 }[match[1]]
           });`
         );
       },
