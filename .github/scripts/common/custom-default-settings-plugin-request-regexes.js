@@ -31,14 +31,13 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^start.region (Auto-select|Japan|USA|Europe|Australia|China|Korea|Taiwan)$/m,
+      regex: /^start.region (Japan|USA|Europe|Australia|China|Korea|Taiwan)$/m,
       call: (match) => {
         names.push("vvctre_settings_set_region_value");
         types.push(["void", "int value"]);
         calls.push(
           `vvctre_settings_set_region_value(${
             {
-              "Auto-select": -1,
               Japan: 0,
               USA: 1,
               Europe: 2,
@@ -60,18 +59,11 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^start.initial_time (System|Unix Timestamp)$/m,
-      call: (match) => {
+      regex: /^start.initial_time Unix Timestamp$/m,
+      call: () => {
         names.push("vvctre_settings_set_initial_clock");
         types.push(["void", "int value"]);
-        calls.push(
-          `vvctre_settings_set_initial_clock(${
-            {
-              System: 0,
-              "Unix Timestamp": 1,
-            }[match[1]]
-          });`
-        );
+        calls.push(`vvctre_settings_set_initial_clock(1);`);
       },
     },
     {
@@ -108,7 +100,7 @@ module.exports = function getRegexes(names, types, calls) {
     },
     {
       regex: /^general.cpu_jit disable$/m,
-      call: (match) => {
+      call: () => {
         names.push("vvctre_settings_set_use_cpu_jit");
         types.push(["void", "bool value"]);
         calls.push("vvctre_settings_set_use_cpu_jit(false);");
@@ -124,7 +116,7 @@ module.exports = function getRegexes(names, types, calls) {
     },
     {
       regex: /^general.enable_custom_cpu_ticks enable$/m,
-      call: (match) => {
+      call: () => {
         names.push("vvctre_settings_set_use_custom_cpu_ticks");
         types.push(["void", "bool value"]);
         calls.push("vvctre_settings_set_use_custom_cpu_ticks(true);");
@@ -156,7 +148,7 @@ module.exports = function getRegexes(names, types, calls) {
     },
     {
       regex: /^audio.dsp_lle enable$/m,
-      call: (match) => {
+      call: () => {
         names.push("vvctre_settings_set_enable_dsp_lle");
         types.push(["void", "bool value"]);
         calls.push("vvctre_settings_set_enable_dsp_lle(true);");
@@ -164,7 +156,7 @@ module.exports = function getRegexes(names, types, calls) {
     },
     {
       regex: /^audio.dsp_lle_multiple_threads enable$/m,
-      call: (match) => {
+      call: () => {
         names.push("vvctre_settings_set_enable_dsp_lle_multithread");
         types.push(["void", "bool value"]);
         calls.push("vvctre_settings_set_enable_dsp_lle_multithread(true);");
@@ -425,7 +417,7 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^graphics.texture_filter (none|Anime4K Ultrafast|Bicubic|ScaleForce|xBRZ freescale)$/m,
+      regex: /^graphics.texture_filter (Anime4K Ultrafast|Bicubic|ScaleForce|xBRZ freescale)$/m,
       call: (match) => {
         names.push("vvctre_settings_set_texture_filter");
         types.push(["void", "const char* value"]);
@@ -433,7 +425,7 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^graphics.3d_mode (Off|Side by Side|Anaglyph|Interlaced)$/m,
+      regex: /^graphics.3d_mode (Side by Side|Anaglyph|Interlaced)$/m,
       call: (match) => {
         names.push("vvctre_settings_set_render_3d");
         types.push(["void", "int value"]);
@@ -458,14 +450,13 @@ module.exports = function getRegexes(names, types, calls) {
       },
     },
     {
-      regex: /^layout.layout (Default|Single Screen|Large Screen|Side by Side|Medium Screen)$/m,
+      regex: /^layout.layout (Single Screen|Large Screen|Side by Side|Medium Screen)$/m,
       call: (match) => {
         names.push("vvctre_settings_set_layout");
         types.push(["void", "int value"]);
         calls.push(
           `vvctre_settings_set_layout(${
             {
-              Default: 0,
               "Single Screen": 1,
               "Large Screen": 2,
               "Side by Side": 3,
