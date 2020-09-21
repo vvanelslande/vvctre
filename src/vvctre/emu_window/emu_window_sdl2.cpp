@@ -2974,7 +2974,11 @@ void EmuWindow_SDL2::SwapBuffers() {
                     if (ImGui::Checkbox("Use Shader JIT", &Settings::values.use_shader_jit)) {
                         VideoCore::g_shader_jit_enabled = Settings::values.use_shader_jit;
                     }
-                    ImGui::Checkbox("Enable VSync", &Settings::values.enable_vsync);
+                    if (ImGui::Checkbox("Enable VSync", &Settings::values.enable_vsync)) {
+                        if (!paused) {
+                            SDL_GL_SetSwapInterval(Settings::values.enable_vsync ? 1 : 0);
+                        }
+                    }
 
                     if (ImGui::Checkbox("Enable Linear Filtering",
                                         &Settings::values.enable_linear_filtering)) {
