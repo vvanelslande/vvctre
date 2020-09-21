@@ -1079,8 +1079,8 @@ void vvctre_gui_open_popup(const char* id, ImGuiPopupFlags flags) {
     ImGui::OpenPopup(id, flags);
 }
 
-bool vvctre_gui_open_popup_context_item(const char* id, ImGuiPopupFlags flags) {
-    return ImGui::OpenPopupContextItem(id, flags);
+void vvctre_gui_open_popup_on_item_click(const char* id, ImGuiPopupFlags flags) {
+    ImGui::OpenPopupOnItemClick(id, flags);
 }
 
 void vvctre_gui_close_current_popup() {
@@ -3724,7 +3724,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_end_child_frame", (void*)&vvctre_gui_end_child_frame},
     {"vvctre_gui_end_popup", (void*)&vvctre_gui_end_popup},
     {"vvctre_gui_open_popup", (void*)&vvctre_gui_open_popup},
-    {"vvctre_gui_open_popup_context_item", (void*)&vvctre_gui_open_popup_context_item},
+    {"vvctre_gui_open_popup_on_item_click", (void*)&vvctre_gui_open_popup_on_item_click},
     {"vvctre_gui_close_current_popup", (void*)&vvctre_gui_close_current_popup},
     {"vvctre_gui_is_popup_open", (void*)&vvctre_gui_is_popup_open},
     {"vvctre_gui_begin_menu", (void*)&vvctre_gui_begin_menu},
