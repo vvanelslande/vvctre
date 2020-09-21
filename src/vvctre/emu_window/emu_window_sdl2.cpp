@@ -28,6 +28,7 @@
 #include "audio_core/cubeb_input.h"
 #endif
 #include <stb_image_write.h>
+#include "audio_core/dsp_interface.h"
 #include "audio_core/sink.h"
 #include "audio_core/sink_details.h"
 #include "common/file_util.h"
