@@ -46,6 +46,7 @@
 #include "core/hle/applets/mii_selector.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/cfg/cfg.h"
+#include "core/hle/service/mic_u.h"
 #include "core/hle/service/nfc/nfc.h"
 #include "core/hle/service/ptm/ptm.h"
 #include "core/movie.h"
@@ -1398,7 +1399,7 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                     if (ImGui::Checkbox("Enable Stretching##Output",
                                         &Settings::values.enable_audio_stretching)) {
-                        Settings::Apply();
+                        system.DSP().EnableStretching(Settings::values.enable_audio_stretching);
                     }
 
                     ImGui::SliderFloat("Volume##Output", &Settings::values.audio_volume, 0.0f,
@@ -1407,12 +1408,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                     if (ImGui::BeginCombo("Sink##Output", Settings::values.audio_sink_id.c_str())) {
                         if (ImGui::Selectable("auto")) {
                             Settings::values.audio_sink_id = "auto";
-                            Settings::Apply();
+                            system.DSP().SetSink(Settings::values.audio_sink_id,
+                                                 Settings::values.audio_device_id);
                         }
                         for (const auto& sink : AudioCore::GetSinkIDs()) {
                             if (ImGui::Selectable(sink)) {
                                 Settings::values.audio_sink_id = sink;
-                                Settings::Apply();
+                                system.DSP().SetSink(Settings::values.audio_sink_id,
+                                                     Settings::values.audio_device_id);
                             }
                         }
                         ImGui::EndCombo();
@@ -1422,14 +1425,16 @@ void EmuWindow_SDL2::SwapBuffers() {
                                           Settings::values.audio_device_id.c_str())) {
                         if (ImGui::Selectable("auto")) {
                             Settings::values.audio_device_id = "auto";
-                            Settings::Apply();
+                            system.DSP().SetSink(Settings::values.audio_sink_id,
+                                                 Settings::values.audio_device_id);
                         }
 
                         for (const auto& device :
                              AudioCore::GetDeviceListForSink(Settings::values.audio_sink_id)) {
                             if (ImGui::Selectable(device.c_str())) {
                                 Settings::values.audio_device_id = device;
-                                Settings::Apply();
+                                system.DSP().SetSink(Settings::values.audio_sink_id,
+                                                     Settings::values.audio_device_id);
                             }
                         }
 
@@ -1458,17 +1463,17 @@ void EmuWindow_SDL2::SwapBuffers() {
                         if (ImGui::Selectable("Disabled")) {
                             Settings::values.microphone_input_type =
                                 Settings::MicrophoneInputType::None;
-                            Settings::Apply();
+                            Service::MIC::ReloadMic(system);
                         }
                         if (ImGui::Selectable("Real Device")) {
                             Settings::values.microphone_input_type =
                                 Settings::MicrophoneInputType::Real;
-                            Settings::Apply();
+                            Service::MIC::ReloadMic(system);
                         }
                         if (ImGui::Selectable("Static Noise")) {
                             Settings::values.microphone_input_type =
                                 Settings::MicrophoneInputType::Static;
-                            Settings::Apply();
+                            Service::MIC::ReloadMic(system);
                         }
                         ImGui::EndCombo();
                     }
@@ -1479,13 +1484,13 @@ void EmuWindow_SDL2::SwapBuffers() {
                                               Settings::values.microphone_device.c_str())) {
                             if (ImGui::Selectable("auto")) {
                                 Settings::values.microphone_device = "auto";
-                                Settings::Apply();
+                                Service::MIC::ReloadMic(system);
                             }
 #ifdef HAVE_CUBEB
                             for (const auto& device : AudioCore::ListCubebInputDevices()) {
                                 if (ImGui::Selectable(device.c_str())) {
                                     Settings::values.microphone_device = device;
-                                    Settings::Apply();
+                                    Service::MIC::ReloadMic(system);
                                 }
                             }
 #endif
@@ -2936,7 +2941,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                 if (ImGui::BeginMenu("Graphics")) {
                     if (ImGui::Checkbox("Use Hardware Renderer",
                                         &Settings::values.use_hardware_renderer)) {
-                        Settings::Apply();
+                        VideoCore::g_hardware_renderer_enabled =
+                            Settings::values.use_hardware_renderer;
                     }
 
                     if (Settings::values.use_hardware_renderer) {
@@ -2944,7 +2950,8 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                         if (ImGui::Checkbox("Use Hardware Shader",
                                             &Settings::values.use_hardware_shader)) {
-                            Settings::Apply();
+                            VideoCore::g_hardware_shader_enabled =
+                                Settings::values.use_hardware_shader;
                         }
 
                         if (Settings::values.use_hardware_shader) {
@@ -2953,7 +2960,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                             if (ImGui::Checkbox(
                                     "Accurate Multiplication",
                                     &Settings::values.hardware_shader_accurate_multiplication)) {
-                                Settings::Apply();
+                                VideoCore::g_hardware_shader_accurate_multiplication =
+                                    Settings::values.hardware_shader_accurate_multiplication;
                             }
 
                             ImGui::Unindent();
@@ -2962,12 +2970,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::Unindent();
                     }
 
-                    ImGui::Checkbox("Use Shader JIT", &Settings::values.use_shader_jit);
+                    if (ImGui::Checkbox("Use Shader JIT", &Settings::values.use_shader_jit)) {
+                        VideoCore::g_shader_jit_enabled = Settings::values.use_shader_jit;
+                    }
                     ImGui::Checkbox("Enable VSync", &Settings::values.enable_vsync);
 
                     if (ImGui::Checkbox("Enable Linear Filtering",
                                         &Settings::values.enable_linear_filtering)) {
-                        Settings::Apply();
+                        VideoCore::g_renderer_sampler_update_requested = true;
                     }
 
                     if (ImGui::Checkbox("Sharper Distant Objects",
@@ -3018,7 +3028,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         for (const auto& filter : filters) {
                             if (ImGui::Selectable(std::string(filter).c_str())) {
                                 Settings::values.texture_filter = filter;
-                                Settings::Apply();
+                                VideoCore::g_texture_filter_update_requested = true;
                             }
                         }
 
@@ -3046,7 +3056,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                          Settings::StereoRenderOption::Off)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Off;
                             Settings::values.post_processing_shader = "none (builtin)";
-                            Settings::Apply();
+                            VideoCore::g_renderer_shader_update_requested = true;
                         }
 
                         if (ImGui::Selectable("Side by Side",
@@ -3054,7 +3064,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                   Settings::StereoRenderOption::SideBySide)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::SideBySide;
                             Settings::values.post_processing_shader = "none (builtin)";
-                            Settings::Apply();
+                            VideoCore::g_renderer_shader_update_requested = true;
                         }
 
                         if (ImGui::Selectable("Anaglyph",
@@ -3062,7 +3072,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                   Settings::StereoRenderOption::Anaglyph)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Anaglyph;
                             Settings::values.post_processing_shader = "dubois (builtin)";
-                            Settings::Apply();
+                            VideoCore::g_renderer_shader_update_requested = true;
                         }
 
                         if (ImGui::Selectable("Interlaced",
@@ -3070,7 +3080,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                   Settings::StereoRenderOption::Interlaced)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Interlaced;
                             Settings::values.post_processing_shader = "horizontal (builtin)";
-                            Settings::Apply();
+                            VideoCore::g_renderer_shader_update_requested = true;
                         }
 
                         ImGui::EndCombo();

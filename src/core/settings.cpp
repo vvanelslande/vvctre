@@ -44,7 +44,7 @@ void Apply() {
     if (system.IsPoweredOn()) {
         AudioCore::DspInterface& dsp = system.DSP();
         dsp.SetSink(values.audio_sink_id, values.audio_device_id);
-        dsp.EnableStretching(Settings::values.enable_audio_stretching);
+        dsp.EnableStretching(values.enable_audio_stretching);
 
         std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(system);
         if (hid != nullptr) {
