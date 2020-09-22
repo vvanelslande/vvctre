@@ -176,13 +176,13 @@ void RoomMember::RoomMemberImpl::MemberLoop() {
                     SetState(State::Idle);
                     SetError(Error::RoomIsFull);
                     break;
-                case IdNameCollision:
+                case IdNicknameCollisionOrNicknameInvalid:
                     SetState(State::Idle);
-                    SetError(Error::NameCollision);
+                    SetError(Error::NicknameCollisionOrNicknameInvalid);
                     break;
                 case IdMacCollision:
                     SetState(State::Idle);
-                    SetError(Error::MacCollision);
+                    SetError(Error::MacAddressCollision);
                     break;
                 case IdConsoleIdCollision:
                     SetState(State::Idle);

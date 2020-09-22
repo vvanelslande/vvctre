@@ -31,7 +31,7 @@ enum RoomMessageTypes : u8 {
     IdSetGameInfo,
     IdWifiPacket,
     IdChatMessage,
-    IdNameCollision,
+    IdNicknameCollisionOrNicknameInvalid,
     IdMacCollision,
     IdVersionMismatch,
     IdWrongPassword,

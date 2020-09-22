@@ -59,15 +59,15 @@ public:
         HostKicked,     ///< Kicked by the host
 
         // Reasons why connection was rejected
-        UnknownError,       ///< Some error [permissions to network device missing or something]
-        NameCollision,      ///< Somebody is already using this name
-        MacCollision,       ///< Somebody is already using that mac-address
-        ConsoleIdCollision, ///< Somebody in the room has the same Console ID
-        WrongVersion,       ///< The room version is not the same as for this RoomMember
-        WrongPassword,      ///< The password doesn't match the one from the Room
-        CouldNotConnect,    ///< The room is not responding to a connection attempt
-        RoomIsFull,         ///< Room is already at the maximum number of players
-        HostBanned,         ///< The user is banned by the host
+        UnknownError, ///< Some error [permissions to network device missing or something]
+        NicknameCollisionOrNicknameInvalid, ///< Somebody is already using this nickname
+        MacAddressCollision,                ///< Somebody is already using that MAC address
+        ConsoleIdCollision,                 ///< Somebody in the room has the same Console ID
+        WrongVersion,
+        WrongPassword,
+        CouldNotConnect, ///< The room is not responding to a connection attempt
+        RoomIsFull,      ///< Room is already at the maximum number of members
+        HostBanned,      ///< The user is banned by the host
     };
 
     struct MemberInformation {
@@ -238,46 +238,5 @@ private:
     class RoomMemberImpl;
     std::unique_ptr<RoomMemberImpl> room_member_impl;
 };
-
-inline const char* GetStateStr(const RoomMember::State& s) {
-    switch (s) {
-    case RoomMember::State::Idle:
-        return "Idle";
-    case RoomMember::State::Joining:
-        return "Joining";
-    case RoomMember::State::Joined:
-        return "Joined";
-    }
-    return "Unknown";
-}
-
-inline const char* GetErrorStr(const RoomMember::Error& e) {
-    switch (e) {
-    case RoomMember::Error::LostConnection:
-        return "LostConnection";
-    case RoomMember::Error::HostKicked:
-        return "HostKicked";
-    case RoomMember::Error::UnknownError:
-        return "UnknownError";
-    case RoomMember::Error::NameCollision:
-        return "NameCollision";
-    case RoomMember::Error::MacCollision:
-        return "MacCollision";
-    case RoomMember::Error::ConsoleIdCollision:
-        return "ConsoleIdCollision";
-    case RoomMember::Error::WrongVersion:
-        return "WrongVersion";
-    case RoomMember::Error::WrongPassword:
-        return "WrongPassword";
-    case RoomMember::Error::CouldNotConnect:
-        return "CouldNotConnect";
-    case RoomMember::Error::RoomIsFull:
-        return "RoomIsFull";
-    case RoomMember::Error::HostBanned:
-        return "HostBanned";
-    default:
-        return "Unknown";
-    }
-}
 
 } // namespace Network

@@ -949,7 +949,49 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
     });
 
     room_member.BindOnError([&](const Network::RoomMember::Error& error) {
-        pfd::message("vvctre", Network::GetErrorStr(error), pfd::choice::ok, pfd::icon::error);
+        switch (error) {
+        case Network::RoomMember::Error::LostConnection:
+            pfd::message("Error", "Connection to room lost.", pfd::choice::ok, pfd::icon::error);
+            break;
+        case Network::RoomMember::Error::HostKicked:
+            pfd::message("Error", "You have been kicked by the room host.", pfd::choice::ok,
+                         pfd::icon::error);
+            break;
+        case Network::RoomMember::Error::UnknownError:
+            pfd::message("Error", "room_member_impl->server is nullptr", pfd::choice::ok,
+                         pfd::icon::error);
+            break;
+        case Network::RoomMember::Error::NicknameCollisionOrNicknameInvalid:
+            pfd::message("Error", "Nickname is already in use or not valid.", pfd::choice::ok,
+                         pfd::icon::error);
+            break;
+        case Network::RoomMember::Error::MacAddressCollision:
+            pfd::message("Error", "MAC address is already in use. Try to reconnect.",
+                         pfd::choice::ok, pfd::icon::error);
+            break;
+        case Network::RoomMember::Error::ConsoleIdCollision:
+            pfd::message("Error", "Your console ID conflicted with someone else's in the room.",
+                         pfd::choice::ok, pfd::icon::error);
+            break;
+        case Network::RoomMember::Error::WrongVersion:
+            pfd::message("Error", "Wrong version", pfd::choice::ok, pfd::icon::error);
+            break;
+        case Network::RoomMember::Error::WrongPassword:
+            pfd::message("Error", "Wrong password", pfd::choice::ok, pfd::icon::error);
+            break;
+        case Network::RoomMember::Error::CouldNotConnect:
+            pfd::message("Error", "Could not connect", pfd::choice::ok, pfd::icon::error);
+            break;
+        case Network::RoomMember::Error::RoomIsFull:
+            pfd::message("Error", "Room is full", pfd::choice::ok, pfd::icon::error);
+            break;
+        case Network::RoomMember::Error::HostBanned:
+            pfd::message("Error", "The host of the room has banned you.", pfd::choice::ok,
+                         pfd::icon::error);
+            break;
+        default:
+            break;
+        }
     });
 
     room_member.BindOnChatMessageReceived([&](const Network::ChatEntry& entry) {
