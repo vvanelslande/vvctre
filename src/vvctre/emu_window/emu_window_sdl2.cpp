@@ -860,27 +860,6 @@ static std::string IPC_Recorder_GetStatusString(IPCDebugger::RequestStatus statu
     return "Invalid";
 }
 
-void EmuWindow_SDL2::OnMouseMotion(s32 x, s32 y) {
-    TouchMoved((unsigned)std::max(x, 0), (unsigned)std::max(y, 0));
-    InputCommon::GetMotionEmu()->Tilt(x, y);
-}
-
-void EmuWindow_SDL2::OnMouseButton(u32 button, u8 state, s32 x, s32 y) {
-    if (button == SDL_BUTTON_LEFT) {
-        if (state == SDL_PRESSED) {
-            TouchPressed((unsigned)std::max(x, 0), (unsigned)std::max(y, 0));
-        } else {
-            TouchReleased();
-        }
-    } else if (button == SDL_BUTTON_RIGHT) {
-        if (state == SDL_PRESSED) {
-            InputCommon::GetMotionEmu()->BeginTilt(x, y);
-        } else {
-            InputCommon::GetMotionEmu()->EndTilt();
-        }
-    }
-}
-
 std::pair<unsigned, unsigned> EmuWindow_SDL2::TouchToPixelPos(float touch_x, float touch_y) const {
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
@@ -890,32 +869,6 @@ std::pair<unsigned, unsigned> EmuWindow_SDL2::TouchToPixelPos(float touch_x, flo
 
     return {static_cast<unsigned>(std::max(std::round(touch_x), 0.0f)),
             static_cast<unsigned>(std::max(std::round(touch_y), 0.0f))};
-}
-
-void EmuWindow_SDL2::OnFingerDown(float x, float y) {
-    // TODO(NeatNit): keep track of multitouch using the fingerID and a dictionary of some kind
-    // This isn't critical because the best we can do when we have that is to average them, like the
-    // 3DS does
-
-    const auto [px, py] = TouchToPixelPos(x, y);
-    TouchPressed(px, py);
-}
-
-void EmuWindow_SDL2::OnFingerMotion(float x, float y) {
-    const auto [px, py] = TouchToPixelPos(x, y);
-    TouchMoved(px, py);
-}
-
-void EmuWindow_SDL2::OnFingerUp() {
-    TouchReleased();
-}
-
-void EmuWindow_SDL2::OnKeyEvent(int key, u8 state) {
-    if (state == SDL_PRESSED) {
-        InputCommon::GetKeyboard()->PressKey(key);
-    } else if (state == SDL_RELEASED) {
-        InputCommon::GetKeyboard()->ReleaseKey(key);
-    }
 }
 
 bool EmuWindow_SDL2::IsOpen() const {
@@ -3678,7 +3631,59 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
 
                     if (ImGui::MenuItem("Copy Screenshot")) {
-                        CopyScreenshot();
+                        const auto& layout = GetFramebufferLayout();
+                        u8* data = new u8[layout.width * layout.height * 4];
+
+                        if (VideoCore::RequestScreenshot(
+                                data,
+                                [=] {
+                                    std::vector<u8> v(layout.width * layout.height * 4);
+                                    std::memcpy(v.data(), data, v.size());
+                                    delete[] data;
+
+                                    const auto convert_bgra_to_rgba =
+                                        [](const std::vector<u8>& input,
+                                           const Layout::FramebufferLayout& layout) {
+                                            int offset = 0;
+                                            std::vector<u8> output(input.size());
+
+                                            for (u32 y = 0; y < layout.height; ++y) {
+                                                for (u32 x = 0; x < layout.width; ++x) {
+                                                    output[offset] = input[offset + 2];
+                                                    output[offset + 1] = input[offset + 1];
+                                                    output[offset + 2] = input[offset];
+                                                    output[offset + 3] = input[offset + 3];
+
+                                                    offset += 4;
+                                                }
+                                            }
+
+                                            return output;
+                                        };
+
+                                    v = convert_bgra_to_rgba(v, layout);
+                                    Common::FlipRGBA8Texture(v, static_cast<u64>(layout.width),
+                                                             static_cast<u64>(layout.height));
+
+                                    clip::image_spec spec;
+                                    spec.width = layout.width;
+                                    spec.height = layout.height;
+                                    spec.bits_per_pixel = 32;
+                                    spec.bytes_per_row = spec.width * 4;
+                                    spec.red_mask = 0xff;
+                                    spec.green_mask = 0xff00;
+                                    spec.blue_mask = 0xff0000;
+                                    spec.alpha_mask = 0xff000000;
+                                    spec.red_shift = 0;
+                                    spec.green_shift = 8;
+                                    spec.blue_shift = 16;
+                                    spec.alpha_shift = 24;
+
+                                    clip::set_image(clip::image(v.data(), spec));
+                                },
+                                layout)) {
+                            delete[] data;
+                        }
                     }
 
                     ImGui::EndMenu();
@@ -4571,47 +4576,71 @@ void EmuWindow_SDL2::PollEvents() {
             }
             break;
         case SDL_KEYDOWN:
+            if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
+                !ImGui::GetIO().WantCaptureKeyboard) {
+                InputCommon::GetKeyboard()->PressKey(static_cast<int>(event.key.keysym.scancode));
+            }
+
+            break;
         case SDL_KEYUP:
             if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
                 !ImGui::GetIO().WantCaptureKeyboard) {
-                OnKeyEvent(static_cast<int>(event.key.keysym.scancode), event.key.state);
+                InputCommon::GetKeyboard()->ReleaseKey(static_cast<int>(event.key.keysym.scancode));
             }
 
             break;
         case SDL_MOUSEMOTION:
             if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
                 !ImGui::GetIO().WantCaptureMouse && event.button.which != SDL_TOUCH_MOUSEID) {
-                OnMouseMotion(event.motion.x, event.motion.y);
+                TouchMoved((unsigned)std::max(event.motion.x, 0),
+                           (unsigned)std::max(event.motion.y, 0));
+                InputCommon::GetMotionEmu()->Tilt(event.motion.x, event.motion.y);
             }
 
             break;
         case SDL_MOUSEBUTTONDOWN:
+            if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
+                !ImGui::GetIO().WantCaptureMouse && event.button.which != SDL_TOUCH_MOUSEID) {
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    TouchPressed((unsigned)std::max(event.button.x, 0),
+                                 (unsigned)std::max(event.button.y, 0));
+                } else if (event.button.button == SDL_BUTTON_RIGHT) {
+                    InputCommon::GetMotionEmu()->BeginTilt(event.button.x, event.button.y);
+                }
+            }
+
+            break;
         case SDL_MOUSEBUTTONUP:
             if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
                 !ImGui::GetIO().WantCaptureMouse && event.button.which != SDL_TOUCH_MOUSEID) {
-                OnMouseButton(event.button.button, event.button.state, event.button.x,
-                              event.button.y);
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    TouchReleased();
+                } else if (event.button.button == SDL_BUTTON_RIGHT) {
+                    InputCommon::GetMotionEmu()->EndTilt();
+                }
             }
 
             break;
         case SDL_FINGERDOWN:
             if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
                 !ImGui::GetIO().WantCaptureMouse) {
-                OnFingerDown(event.tfinger.x, event.tfinger.y);
+                const auto [px, py] = TouchToPixelPos(event.tfinger.x, event.tfinger.y);
+                TouchPressed(px, py);
             }
 
             break;
         case SDL_FINGERMOTION:
             if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
                 !ImGui::GetIO().WantCaptureMouse) {
-                OnFingerMotion(event.tfinger.x, event.tfinger.y);
+                const auto [px, py] = TouchToPixelPos(event.tfinger.x, event.tfinger.y);
+                TouchMoved(px, py);
             }
 
             break;
         case SDL_FINGERUP:
             if (!ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId) &&
                 !ImGui::GetIO().WantCaptureMouse) {
-                OnFingerUp();
+                TouchReleased();
             }
 
             break;
@@ -4626,61 +4655,6 @@ void EmuWindow_SDL2::PollEvents() {
         default:
             break;
         }
-    }
-}
-
-void EmuWindow_SDL2::CopyScreenshot() {
-    const auto& layout = GetFramebufferLayout();
-    u8* data = new u8[layout.width * layout.height * 4];
-
-    if (VideoCore::RequestScreenshot(
-            data,
-            [=] {
-                std::vector<u8> v(layout.width * layout.height * 4);
-                std::memcpy(v.data(), data, v.size());
-                delete[] data;
-
-                const auto convert_bgra_to_rgba = [](const std::vector<u8>& input,
-                                                     const Layout::FramebufferLayout& layout) {
-                    int offset = 0;
-                    std::vector<u8> output(input.size());
-
-                    for (u32 y = 0; y < layout.height; ++y) {
-                        for (u32 x = 0; x < layout.width; ++x) {
-                            output[offset] = input[offset + 2];
-                            output[offset + 1] = input[offset + 1];
-                            output[offset + 2] = input[offset];
-                            output[offset + 3] = input[offset + 3];
-
-                            offset += 4;
-                        }
-                    }
-
-                    return output;
-                };
-
-                v = convert_bgra_to_rgba(v, layout);
-                Common::FlipRGBA8Texture(v, static_cast<u64>(layout.width),
-                                         static_cast<u64>(layout.height));
-
-                clip::image_spec spec;
-                spec.width = layout.width;
-                spec.height = layout.height;
-                spec.bits_per_pixel = 32;
-                spec.bytes_per_row = spec.width * 4;
-                spec.red_mask = 0xff;
-                spec.green_mask = 0xff00;
-                spec.blue_mask = 0xff0000;
-                spec.alpha_mask = 0xff000000;
-                spec.red_shift = 0;
-                spec.green_shift = 8;
-                spec.blue_shift = 16;
-                spec.alpha_shift = 24;
-
-                clip::set_image(clip::image(v.data(), spec));
-            },
-            layout)) {
-        delete[] data;
     }
 }
 
