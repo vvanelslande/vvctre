@@ -106,7 +106,6 @@ protected:
     void OutputSample(std::array<s16, 2> sample);
 
 private:
-    void FlushResidualStretcherAudio();
     void OutputCallback(s16* buffer, std::size_t num_frames);
 
     std::unique_ptr<Sink> sink;
