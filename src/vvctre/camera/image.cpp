@@ -3,6 +3,8 @@
 // Refer to the license.txt file included.
 
 #include <asl/Http.h>
+#include <curl/curl.h>
+#include <mbedtls/ssl.h>
 #include <stb_image.h>
 #include <stb_image_resize.h>
 #include "common/assert.h"
@@ -46,17 +48,94 @@ ImageCamera::ImageCamera(const std::string& file, const Service::CAM::Flip& flip
 
     while (unmodified_image.empty()) {
         if (asl::parseUrl(file.c_str()).protocol.startsWith("http")) {
-            asl::HttpResponse r = asl::Http::get(file.c_str());
+            CURL* curl = curl_easy_init();
+            if (curl == nullptr) {
+                continue;
+            }
 
-            if (r.ok()) {
-                unsigned char* uc = stbi_load_from_memory(r.body().ptr(), r.body().length(),
-                                                          &file_width, &file_height, nullptr, 3);
-                if (uc != nullptr) {
-                    unmodified_image.resize(file_width * file_height * 3);
-                    std::memcpy(unmodified_image.data(), uc, unmodified_image.size());
-                    resized_image = unmodified_image;
-                    std::free(uc);
-                }
+            CURLcode error = curl_easy_setopt(curl, CURLOPT_URL, file.c_str());
+            if (error != CURLE_OK) {
+                LOG_DEBUG(Service_CAM, "{}", curl_easy_strerror(error));
+                curl_easy_cleanup(curl);
+                continue;
+            }
+
+            error = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+            if (error != CURLE_OK) {
+                LOG_DEBUG(Service_CAM, "{}", curl_easy_strerror(error));
+                curl_easy_cleanup(curl);
+                continue;
+            }
+
+            std::string body;
+
+            error = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
+            if (error != CURLE_OK) {
+                LOG_DEBUG(Service_CAM, "{}", curl_easy_strerror(error));
+                curl_easy_cleanup(curl);
+                continue;
+            }
+
+            error = curl_easy_setopt(
+                curl, CURLOPT_WRITEFUNCTION,
+                static_cast<curl_write_callback>(
+                    [](char* ptr, std::size_t size, std::size_t nmemb, void* userdata) {
+                        const std::size_t realsize = size * nmemb;
+                        static_cast<std::string*>(userdata)->append(ptr, realsize);
+                        return realsize;
+                    }));
+            if (error != CURLE_OK) {
+                LOG_DEBUG(Service_CAM, "{}", curl_easy_strerror(error));
+                curl_easy_cleanup(curl);
+                continue;
+            }
+
+            error = curl_easy_setopt(
+                curl, CURLOPT_SSL_CTX_FUNCTION,
+                static_cast<CURLcode (*)(CURL * curl, void* ssl_ctx, void* userptr)>(
+                    [](CURL* curl, void* ssl_ctx, void* userptr) {
+                        void* chain = Common::CreateCertificateChainWithSystemCertificates();
+                        if (chain != nullptr) {
+                            mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx),
+                                                      static_cast<mbedtls_x509_crt*>(chain), NULL);
+                        }
+                        return CURLE_OK;
+                    }));
+            if (error != CURLE_OK) {
+                LOG_DEBUG(Service_CAM, "{}", curl_easy_strerror(error));
+                curl_easy_cleanup(curl);
+                continue;
+            }
+
+            error = curl_easy_perform(curl);
+            if (error != CURLE_OK) {
+                LOG_DEBUG(Service_CAM, "{}", curl_easy_strerror(error));
+                curl_easy_cleanup(curl);
+                continue;
+            }
+
+            long status_code;
+            error = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status_code);
+            if (error != CURLE_OK) {
+                LOG_DEBUG(Service_CAM, "{}", curl_easy_strerror(error));
+                curl_easy_cleanup(curl);
+                continue;
+            }
+
+            curl_easy_cleanup(curl);
+
+            if (status_code != 200) {
+                continue;
+            }
+
+            unsigned char* uc =
+                stbi_load_from_memory((stbi_uc const*)body.data(), static_cast<int>(body.size()),
+                                      &file_width, &file_height, nullptr, 3);
+            if (uc != nullptr) {
+                unmodified_image.resize(file_width * file_height * 3);
+                std::memcpy(unmodified_image.data(), uc, unmodified_image.size());
+                resized_image = unmodified_image;
+                std::free(uc);
             }
         } else {
             unsigned char* uc = stbi_load(file.c_str(), &file_width, &file_height, nullptr, 3);
@@ -66,10 +145,6 @@ ImageCamera::ImageCamera(const std::string& file, const Service::CAM::Flip& flip
                 resized_image = unmodified_image;
                 std::free(uc);
             }
-        }
-
-        if (unmodified_image.empty()) {
-            LOG_DEBUG(Service_CAM, "Failed to load image");
         }
     }
 }
