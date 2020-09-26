@@ -2,15 +2,17 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <asl/Http.h>
 #include <asl/JSON.h>
 #include <asl/Process.h>
+#include <curl/curl.h>
 #include <fmt/format.h>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 #include <imgui_stdlib.h>
+#include <mbedtls/ssl.h>
 #include <portable-file-dialogs.h>
+#include "common/common_funcs.h"
 #include "common/file_util.h"
 #include "common/logging/log.h"
 #include "core/core.h"
@@ -41,6 +43,7 @@ void vvctreShutdown(PluginManager* plugin_manager) {
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
     SDL_Quit();
+    curl_global_cleanup();
 }
 
 std::vector<std::tuple<std::string, std::string>> GetInstalledList() {
@@ -118,13 +121,82 @@ std::vector<std::tuple<std::string, std::string>> GetInstalledList() {
 }
 
 CitraRoomList GetPublicCitraRooms() {
-    asl::HttpResponse r = asl::Http::get("https://api.citra-emu.org/lobby");
-
-    if (!r.ok()) {
+    CURL* curl = curl_easy_init();
+    if (curl == nullptr) {
         return {};
     }
 
-    asl::Var json_rooms = r.json()("rooms");
+    CURLcode error = curl_easy_setopt(curl, CURLOPT_URL, "https://api.citra-emu.org/lobby");
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return {};
+    }
+
+    error = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return {};
+    }
+
+    std::string body;
+
+    error = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return {};
+    }
+
+    error =
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                         static_cast<curl_write_callback>(
+                             [](char* ptr, std::size_t size, std::size_t nmemb, void* userdata) {
+                                 const std::size_t realsize = size * nmemb;
+                                 static_cast<std::string*>(userdata)->append(ptr, realsize);
+                                 return realsize;
+                             }));
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return {};
+    }
+
+    error = curl_easy_setopt(
+        curl, CURLOPT_SSL_CTX_FUNCTION,
+        static_cast<CURLcode (*)(CURL * curl, void* ssl_ctx, void* userptr)>(
+            [](CURL* curl, void* ssl_ctx, void* userptr) {
+                void* chain = Common::CreateCertificateChainWithSystemCertificates();
+                if (chain != nullptr) {
+                    mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx),
+                                              static_cast<mbedtls_x509_crt*>(chain), NULL);
+                }
+                return CURLE_OK;
+            }));
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return {};
+    }
+
+    error = curl_easy_perform(curl);
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return {};
+    }
+
+    long status_code;
+    error = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status_code);
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return {};
+    }
+
+    curl_easy_cleanup(curl);
+
+    if (status_code != 200) {
+        return {};
+    }
+
+    asl::Var json = asl::Json::decode(body.c_str());
+
+    asl::Var json_rooms = json("rooms");
 
     CitraRoomList rooms;
 

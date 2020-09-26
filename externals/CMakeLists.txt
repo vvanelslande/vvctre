@@ -160,6 +160,37 @@ endif()
 add_library(system-archives INTERFACE)
 target_include_directories(system-archives INTERFACE ./system-archives)
 
+# curl
+add_library(mbedcrypto::mbedcrypto INTERFACE IMPORTED)
+set_target_properties(mbedcrypto::mbedcrypto PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/externals/mbedtls/include")
+target_link_libraries(mbedcrypto::mbedcrypto INTERFACE mbedcrypto)
+set(MBEDCRYPTO_LIBRARY mbedcrypto::mbedcrypto)
+
+add_library(mbedtls::mbedtls INTERFACE IMPORTED)
+set_target_properties(mbedtls::mbedtls PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/externals/mbedtls/include")
+target_link_libraries(mbedtls::mbedtls INTERFACE mbedtls)
+set(MBEDTLS_LIBRARY mbedtls::mbedtls)
+
+add_library(mbedx509::mbedx509 INTERFACE IMPORTED)
+set_target_properties(mbedx509::mbedx509 PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/externals/mbedtls/include")
+target_link_libraries(mbedx509::mbedx509 INTERFACE mbedtls)
+set(MBEDX509_LIBRARY mbedx509::mbedx509)
+
+set(MBEDTLS_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/externals/mbedtls/include")
+
+set(HTTP_ONLY ON CACHE BOOL "" FORCE)
+set(CMAKE_USE_SECTRANSP OFF CACHE BOOL "" FORCE)
+set(CMAKE_USE_SCHANNEL OFF CACHE BOOL "" FORCE)
+set(CMAKE_USE_MBEDTLS ON CACHE BOOL "" FORCE)
+set(CMAKE_USE_BEARSSL OFF CACHE BOOL "" FORCE)
+set(CMAKE_USE_NSS OFF CACHE BOOL "" FORCE)
+set(CMAKE_USE_WOLFSSL OFF CACHE BOOL "" FORCE)
+set(BUILD_CURL_EXE OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(curl EXCLUDE_FROM_ALL)
+
 add_subdirectory(cryptopp)
 add_subdirectory(teakra EXCLUDE_FROM_ALL)
 add_subdirectory(portable-file-dialogs EXCLUDE_FROM_ALL)

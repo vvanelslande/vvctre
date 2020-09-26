@@ -20,6 +20,7 @@
 #include <asl/File.h>
 #include <asl/Http.h>
 #include <asl/JSON.h>
+#include <curl/curl.h>
 #include <fmt/format.h>
 #include <glad/glad.h>
 #include <imgui.h>
@@ -127,6 +128,8 @@ int main(int argc, char** argv) {
     ImGui::GetStyle().ScrollbarRounding = 0.0f;
     ImGui_ImplSDL2_InitForOpenGL(window, context);
     ImGui_ImplOpenGL3_Init("#version 330 core");
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
 
     Core::System& system = Core::System::GetInstance();
     PluginManager plugin_manager(system, window);

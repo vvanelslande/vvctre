@@ -55,7 +55,12 @@ if(ARCHITECTURE_x86_64)
     )
 endif()
 
-target_link_libraries(common PUBLIC fmt ${PLATFORM_LIBRARIES} PRIVATE asl)
+target_link_libraries(common PUBLIC fmt ${PLATFORM_LIBRARIES} PRIVATE asl mbedtls libcurl)
+target_include_directories(common PRIVATE ${PROJECT_SOURCE_DIR}/externals/mbedtls/include)
+
+if (MSVC)
+    target_link_libraries(common PRIVATE Crypt32.lib)
+endif()
 
 if (ARCHITECTURE_x86_64)
     target_link_libraries(common PRIVATE xbyak)

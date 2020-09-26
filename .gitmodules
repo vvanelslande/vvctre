@@ -62,3 +62,7 @@ url = https://github.com/aslze/asl.git
 path = externals/mbedtls
 url = https://github.com/ARMmbed/mbedtls.git
 branch = mbedtls-2.16
+
+[submodule "curl"]
+path = externals/curl
+url = https://github.com/curl/curl.git

@@ -28,6 +28,7 @@ create_target_directory_groups(vvctre)
 
 target_link_libraries(vvctre PRIVATE common core input_common audio_core network)
 target_link_libraries(vvctre PRIVATE stb glad clip portable_file_dialogs imgui asl cryptopp ${PLATFORM_LIBRARIES} Threads::Threads)
+target_include_directories(vvctre PRIVATE ${PROJECT_SOURCE_DIR}/externals/mbedtls/include)
 
 if (MSVC)
     add_custom_command(TARGET vvctre POST_BUILD

@@ -58,3 +58,9 @@ __declspec(dllimport) void __stdcall DebugBreak(void);
 // This function might change the error code.
 // Defined in Misc.cpp.
 std::string GetLastErrorMsg();
+
+namespace Common {
+
+void* CreateCertificateChainWithSystemCertificates();
+
+} // namespace Common
