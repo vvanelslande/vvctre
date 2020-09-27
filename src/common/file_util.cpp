@@ -556,8 +556,6 @@ static void InitUserPaths() {
     user_path = user_path.substr(0, dirname_length);
     user_path += "/user/";
 
-    fmt::print("{}\n", user_path);
-
     g_paths[UserPath::SDMCDir] = user_path + "sdmc/";
     g_paths[UserPath::NANDDir] = user_path + "nand/";
     g_paths[UserPath::SysDataDir] = user_path + "sysdata/";
