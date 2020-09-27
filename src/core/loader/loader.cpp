@@ -44,7 +44,7 @@ static FileType IdentifyFile(const std::string& file_name) {
 }
 
 static FileType GuessFromExtension(const std::string& extension_) {
-    std::string extension = Common::ToLower(extension_);
+    const std::string extension = Common::ToLower(extension_);
 
     if (extension == ".elf" || extension == ".axf") {
         return FileType::ELF;
