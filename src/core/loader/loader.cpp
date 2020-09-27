@@ -4,8 +4,8 @@
 
 #include <memory>
 #include <string>
-#include <asl/File.h>
 #include "common/logging/log.h"
+#include "common/string_util.h"
 #include "core/hle/kernel/process.h"
 #include "core/loader/3dsx.h"
 #include "core/loader/elf.h"
@@ -44,25 +44,25 @@ static FileType IdentifyFile(const std::string& file_name) {
 }
 
 static FileType GuessFromExtension(const std::string& extension_) {
-    asl::String extension = asl::String(extension_.c_str()).toLowerCase();
+    std::string extension = Common::ToLower(extension_);
 
-    if (extension == "elf" || extension == "axf") {
+    if (extension == ".elf" || extension == ".axf") {
         return FileType::ELF;
     }
 
-    if (extension == "cci" || extension == "3ds") {
+    if (extension == ".cci" || extension == ".3ds") {
         return FileType::CCI;
     }
 
-    if (extension == "cxi" || extension == "app") {
+    if (extension == ".cxi" || extension == ".app") {
         return FileType::CXI;
     }
 
-    if (extension == "3dsx") {
+    if (extension == ".3dsx") {
         return FileType::THREEDSX;
     }
 
-    if (extension == "cia") {
+    if (extension == ".cia") {
         return FileType::CIA;
     }
 
@@ -122,9 +122,11 @@ std::unique_ptr<AppLoader> GetLoader(const std::string& filename) {
         return nullptr;
     }
 
-    asl::File asl_file(filename.c_str());
+    std::string filename_filename, filename_extension;
+    Common::SplitPath(filename, nullptr, &filename_filename, &filename_extension);
+
     FileType type = IdentifyFile(file);
-    FileType filename_type = GuessFromExtension(*asl_file.extension());
+    FileType filename_type = GuessFromExtension(filename_extension);
 
     if (type != filename_type) {
         LOG_WARNING(Loader, "File {} has a different type than its extension.", filename);
@@ -135,7 +137,7 @@ std::unique_ptr<AppLoader> GetLoader(const std::string& filename) {
 
     LOG_DEBUG(Loader, "Loading file {} as {}...", filename, GetFileTypeString(type));
 
-    return GetFileLoader(std::move(file), type, *asl_file.name(), filename);
+    return GetFileLoader(std::move(file), type, filename_filename, filename);
 }
 
 } // namespace Loader
