@@ -3,7 +3,7 @@
 // Refer to the license.txt file included.
 
 #include <cinttypes>
-#include <asl/Date.h>
+#include <ctime>
 #include "common/file_util.h"
 #include "common/logging/log.h"
 #include "core/core.h"
@@ -21,15 +21,16 @@
 namespace Service::PTM {
 
 const GameCoin DefaultGameCoin() {
-    const asl::Date now = asl::Date::now();
+    const time_t nowtt = std::time(NULL);
+    tm* now = std::gmtime(&nowtt);
     return GameCoin{0x4F00,
                     300,
                     0,
                     0,
                     0,
-                    static_cast<u16>(now.year()),
-                    static_cast<u8>(now.month()),
-                    static_cast<u8>(now.day())};
+                    static_cast<u16>(now->tm_year + 1900),
+                    static_cast<u8>(now->tm_mon + 1),
+                    static_cast<u8>(now->tm_mday)};
 }
 
 void Module::Interface::GetAdapterState(Kernel::HLERequestContext& ctx) {
