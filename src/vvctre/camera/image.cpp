@@ -2,7 +2,6 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <asl/Http.h>
 #include <curl/curl.h>
 #include <httpparser/urlparser.h>
 #include <mbedtls/ssl.h>
