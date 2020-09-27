@@ -66,3 +66,7 @@ branch = mbedtls-2.16
 [submodule "curl"]
 path = externals/curl
 url = https://github.com/curl/curl.git
+
+[submodule "httpparser"]
+path = externals/httpparser
+url = https://github.com/nekipelov/httpparser.git

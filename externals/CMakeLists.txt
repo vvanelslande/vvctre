@@ -191,6 +191,10 @@ set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(curl EXCLUDE_FROM_ALL)
 
+# httpparser
+add_library(httpparser INTERFACE)
+target_include_directories(httpparser INTERFACE httpparser/src)
+
 add_subdirectory(cryptopp)
 add_subdirectory(teakra EXCLUDE_FROM_ALL)
 add_subdirectory(portable-file-dialogs EXCLUDE_FROM_ALL)

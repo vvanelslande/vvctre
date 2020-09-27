@@ -123,17 +123,20 @@ std::vector<std::tuple<std::string, std::string>> GetInstalledList() {
 CitraRoomList GetPublicCitraRooms() {
     CURL* curl = curl_easy_init();
     if (curl == nullptr) {
+        LOG_ERROR(Frontend, "curl_easy_init failed");
         return {};
     }
 
     CURLcode error = curl_easy_setopt(curl, CURLOPT_URL, "https://api.citra-emu.org/lobby");
     if (error != CURLE_OK) {
+        LOG_ERROR(Frontend, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         return {};
     }
 
     error = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     if (error != CURLE_OK) {
+        LOG_ERROR(Frontend, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         return {};
     }
@@ -142,6 +145,7 @@ CitraRoomList GetPublicCitraRooms() {
 
     error = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
     if (error != CURLE_OK) {
+        LOG_ERROR(Frontend, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         return {};
     }
@@ -155,6 +159,7 @@ CitraRoomList GetPublicCitraRooms() {
                                  return realsize;
                              }));
     if (error != CURLE_OK) {
+        LOG_ERROR(Frontend, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         return {};
     }
@@ -171,12 +176,14 @@ CitraRoomList GetPublicCitraRooms() {
                 return CURLE_OK;
             }));
     if (error != CURLE_OK) {
+        LOG_ERROR(Frontend, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         return {};
     }
 
     error = curl_easy_perform(curl);
     if (error != CURLE_OK) {
+        LOG_ERROR(Frontend, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         return {};
     }
@@ -184,6 +191,7 @@ CitraRoomList GetPublicCitraRooms() {
     long status_code;
     error = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status_code);
     if (error != CURLE_OK) {
+        LOG_ERROR(Frontend, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         return {};
     }
@@ -191,6 +199,7 @@ CitraRoomList GetPublicCitraRooms() {
     curl_easy_cleanup(curl);
 
     if (status_code != 200) {
+        LOG_ERROR(Frontend, "status code: {}, body: {}", status_code, body);
         return {};
     }
 

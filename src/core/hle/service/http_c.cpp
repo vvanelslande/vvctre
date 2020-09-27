@@ -8,6 +8,7 @@
 #include <cryptopp/modes.h>
 #include <curl/curl.h>
 #include <fmt/format.h>
+#include <httpparser/httpresponseparser.h>
 #include <mbedtls/ssl.h>
 #include "common/assert.h"
 #include "core/core.h"
@@ -19,6 +20,8 @@
 #include "core/hle/service/fs/archive.h"
 #include "core/hle/service/http_c.h"
 #include "core/hw/aes/key.h"
+#include "httpparser/response.h"
+#include "iostream"
 
 namespace Service::HTTP {
 
@@ -81,12 +84,14 @@ void Context::MakeRequest() {
 
     curl = curl_easy_init();
     if (curl == nullptr) {
+        LOG_ERROR(Service_HTTP, "curl_easy_init failed");
         state = RequestState::ReadyToDownloadContent;
         return;
     }
 
     CURLcode error = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     if (error != CURLE_OK) {
+        LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         curl = nullptr;
         state = RequestState::ReadyToDownloadContent;
@@ -95,6 +100,7 @@ void Context::MakeRequest() {
 
     error = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     if (error != CURLE_OK) {
+        LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         curl = nullptr;
         state = RequestState::ReadyToDownloadContent;
@@ -103,6 +109,7 @@ void Context::MakeRequest() {
 
     error = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_body);
     if (error != CURLE_OK) {
+        LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         curl = nullptr;
         state = RequestState::ReadyToDownloadContent;
@@ -112,6 +119,7 @@ void Context::MakeRequest() {
     error =
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, request_method_strings.at(method).c_str());
     if (error != CURLE_OK) {
+        LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
         curl_easy_cleanup(curl);
         curl = nullptr;
         state = RequestState::ReadyToDownloadContent;
@@ -133,6 +141,7 @@ void Context::MakeRequest() {
 
         error = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, request_headers_slist);
         if (error != CURLE_OK) {
+            LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
             curl_slist_free_all(request_headers_slist);
             request_headers_slist = nullptr;
             curl_easy_cleanup(curl);
@@ -182,6 +191,7 @@ void Context::MakeRequest() {
 
         error = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, request_body.size());
         if (error != CURLE_OK) {
+            LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
             if (request_headers_slist != nullptr) {
                 curl_slist_free_all(request_headers_slist);
                 request_headers_slist = nullptr;
@@ -194,6 +204,7 @@ void Context::MakeRequest() {
 
         error = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request_body.data());
         if (error != CURLE_OK) {
+            LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
             if (request_headers_slist != nullptr) {
                 curl_slist_free_all(request_headers_slist);
                 request_headers_slist = nullptr;
@@ -214,6 +225,7 @@ void Context::MakeRequest() {
                                  return realsize;
                              }));
     if (error != CURLE_OK) {
+        LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
         if (request_headers_slist != nullptr) {
             curl_slist_free_all(request_headers_slist);
             request_headers_slist = nullptr;
@@ -236,6 +248,43 @@ void Context::MakeRequest() {
                 return CURLE_OK;
             }));
     if (error != CURLE_OK) {
+        LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
+        if (request_headers_slist != nullptr) {
+            curl_slist_free_all(request_headers_slist);
+            request_headers_slist = nullptr;
+        }
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+        state = RequestState::ReadyToDownloadContent;
+        return;
+    }
+
+    std::string response_headers_string;
+
+    error = curl_easy_setopt(curl, CURLOPT_HEADERDATA, &response_headers_string);
+    if (error != CURLE_OK) {
+        LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
+        if (request_headers_slist != nullptr) {
+            curl_slist_free_all(request_headers_slist);
+            request_headers_slist = nullptr;
+        }
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+        state = RequestState::ReadyToDownloadContent;
+        return;
+    }
+
+    error = curl_easy_setopt(
+        curl, CURLOPT_HEADERFUNCTION,
+        static_cast<std::size_t (*)(char* buffer, std::size_t size, std::size_t nitems,
+                                    void* userdata)>(
+            [](char* buffer, std::size_t size, std::size_t nitems, void* userdata) {
+                const std::size_t realsize = size * nitems;
+                static_cast<std::string*>(userdata)->append(buffer, realsize);
+                return realsize;
+            }));
+    if (error != CURLE_OK) {
+        LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
         if (request_headers_slist != nullptr) {
             curl_slist_free_all(request_headers_slist);
             request_headers_slist = nullptr;
@@ -248,6 +297,7 @@ void Context::MakeRequest() {
 
     error = curl_easy_perform(curl);
     if (error != CURLE_OK) {
+        LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
         if (request_headers_slist != nullptr) {
             curl_slist_free_all(request_headers_slist);
             request_headers_slist = nullptr;
@@ -256,6 +306,16 @@ void Context::MakeRequest() {
         curl = nullptr;
         state = RequestState::ReadyToDownloadContent;
         return;
+    }
+
+    httpparser::Response resp;
+    if (httpparser::HttpResponseParser().parse(resp, response_headers_string.c_str(),
+                                               response_headers_string.c_str() +
+                                                   response_headers_string.length()) !=
+        httpparser::HttpResponseParser::ParsingError) {
+        for (const auto& h : resp.headers) {
+            response_headers[h.name] = h.value;
+        }
     }
 
     state = RequestState::ReadyToDownloadContent;
