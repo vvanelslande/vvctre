@@ -74,3 +74,6 @@ url = https://github.com/nekipelov/httpparser.git
 [submodule "whereami"]
 path = externals/whereami
 url = https://github.com/gpakosz/whereami.git
+[submodule "externals/json"]
+	path = externals/json
+	url = https://github.com/nlohmann/json.git

@@ -2,7 +2,6 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <asl/JSON.h>
 #include <curl/curl.h>
 #include <fmt/format.h>
 #include <imgui.h>
@@ -10,6 +9,7 @@
 #include <imgui_impl_sdl.h>
 #include <imgui_stdlib.h>
 #include <mbedtls/ssl.h>
+#include <nlohmann/json.hpp>
 #include <portable-file-dialogs.h>
 #include <whereami.h>
 #include "common/common_funcs.h"
@@ -203,31 +203,29 @@ CitraRoomList GetPublicCitraRooms() {
         return {};
     }
 
-    asl::Var json = asl::Json::decode(body.c_str());
-
-    asl::Var json_rooms = json("rooms");
+    const nlohmann::json json_rooms = nlohmann::json::parse(body)["json_rooms"];
 
     CitraRoomList rooms;
 
-    for (int i = 0; i < json_rooms.length(); ++i) {
-        asl::Var json_room = json_rooms[i];
+    for (int i = 0; i < json_rooms.size(); ++i) {
+        const nlohmann::json& json_room = json_rooms[i];
 
         CitraRoom room;
-        room.name = *json_room("name");
-        if (json_room.has("description")) {
-            room.description = *json_room("description");
+        room.name = json_room["name"].get<std::string>();
+        if (json_room.count("description")) {
+            room.description = json_room["description"].get<std::string>();
         }
-        room.ip = *json_room("address");
-        room.port = static_cast<u16>(static_cast<int>(json_room("port")));
-        room.owner = *json_room("owner");
-        room.max_players = json_room("maxPlayers");
-        room.has_password = json_room("hasPassword");
-        room.game = *json_room("preferredGameName");
-        asl::Array<asl::Var> members = json_room("players").array();
-        foreach (asl::Var& json_member, members) {
+        room.ip = json_room["address"].get<std::string>();
+        room.port = json_room["port"].get<u16>();
+        room.owner = json_room["owner"].get<std::string>();
+        room.max_players = json_room["maxPlayers"].get<u32>();
+        room.has_password = json_room["hasPassword"].get<bool>();
+        room.game = json_room["preferredGameName"].get<std::string>();
+        const nlohmann::json& members = json_room["players"];
+        for (const nlohmann::json& json_member : members) {
             CitraRoom::Member member;
-            member.nickname = *json_member("nickname");
-            member.game = *json_member("gameName");
+            member.nickname = json_member["nickname"].get<std::string>();
+            member.game = json_member["gameName"].get<std::string>();
             room.members.push_back(member);
         }
         rooms.push_back(std::move(room));
@@ -409,38 +407,46 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         const std::vector<std::string> path =
             pfd::open_file("Load File", vvctre_folder, {"JSON Files", "*.json"}).result();
         if (!path.empty()) {
-            asl::Var json = asl::Json::read(path[0].c_str());
-            asl::Array buttons = json["buttons"].array();
-            asl::Array analogs = json["analogs"].array();
-            for (int i = 0; i < buttons.length(); ++i) {
-                Settings::values.buttons[static_cast<std::size_t>(i)] = *buttons[i];
-            }
-            for (int i = 0; i < analogs.length(); ++i) {
-                Settings::values.analogs[static_cast<std::size_t>(i)] = *analogs[i];
-            }
-            Settings::values.motion_device = *json["motion_device"];
-            Settings::values.touch_device = *json["touch_device"];
-            Settings::values.cemuhookudp_address = *json["cemuhookudp_address"];
-            Settings::values.cemuhookudp_port =
-                static_cast<u16>(static_cast<int>(json["cemuhookudp_port"]));
-            Settings::values.cemuhookudp_pad_index =
-                static_cast<u8>(static_cast<int>(json["cemuhookudp_pad_index"]));
+            std::string json_string;
+            FileUtil::ReadFileToString(true, path[0], json_string);
 
-            if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
-                    hid->ReloadInputDevices();
+            try {
+                const nlohmann::json json = nlohmann::json::parse(json_string);
+                const nlohmann::json buttons = json["buttons"];
+                const nlohmann::json analogs = json["analogs"];
+                for (int i = 0; i < buttons.size(); ++i) {
+                    Settings::values.buttons[static_cast<std::size_t>(i)] =
+                        buttons[i].get<std::string>();
+                }
+                for (int i = 0; i < analogs.size(); ++i) {
+                    Settings::values.analogs[static_cast<std::size_t>(i)] =
+                        analogs[i].get<std::string>();
+                }
+                Settings::values.motion_device = json["motion_device"].get<std::string>();
+                Settings::values.touch_device = json["touch_device"].get<std::string>();
+                Settings::values.cemuhookudp_address =
+                    json["cemuhookudp_address"].get<std::string>();
+                Settings::values.cemuhookudp_port = json["cemuhookudp_port"].get<u16>();
+                Settings::values.cemuhookudp_pad_index = json["cemuhookudp_pad_index"].get<u8>();
+
+                if (system != nullptr) {
+                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
+                    if (hid != nullptr) {
+                        hid->ReloadInputDevices();
+                    }
+
+                    Service::SM::ServiceManager& sm = system->ServiceManager();
+                    std::shared_ptr<Service::IR::IR_USER> ir_user =
+                        sm.GetService<Service::IR::IR_USER>("ir:USER");
+                    if (ir_user != nullptr) {
+                        ir_user->ReloadInputDevices();
+                    }
                 }
 
-                Service::SM::ServiceManager& sm = system->ServiceManager();
-                std::shared_ptr<Service::IR::IR_USER> ir_user =
-                    sm.GetService<Service::IR::IR_USER>("ir:USER");
-                if (ir_user != nullptr) {
-                    ir_user->ReloadInputDevices();
-                }
+                InputCommon::ReloadInputDevices();
+            } catch (const nlohmann::json::exception& e) {
+                LOG_ERROR(Frontend, "{}", e.what());
             }
-
-            InputCommon::ReloadInputDevices();
         }
     }
     ImGui::SameLine();
@@ -449,26 +455,17 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             pfd::save_file("Save File", "controls.json", {"JSON Files", "*.json"}).result();
 
         if (!path.empty()) {
-            asl::Array<asl::String> buttons;
-            asl::Array<asl::String> analogs;
-            for (const std::string& button : Settings::values.buttons) {
-                buttons << asl::String(button.c_str());
-            }
-            for (const std::string& analog : Settings::values.analogs) {
-                analogs << asl::String(analog.c_str());
-            }
+            const nlohmann::json json = {
+                {"buttons", Settings::values.buttons},
+                {"analogs", Settings::values.analogs},
+                {"motion_device", Settings::values.motion_device},
+                {"touch_device", Settings::values.touch_device},
+                {"cemuhookudp_address", Settings::values.cemuhookudp_address},
+                {"cemuhookudp_port", Settings::values.cemuhookudp_port},
+                {"cemuhookudp_pad_index", Settings::values.cemuhookudp_pad_index},
+            };
 
-            asl::Var json;
-            json["buttons"] = buttons;
-            json["analogs"] = analogs;
-            json["motion_device"] = Settings::values.motion_device.c_str();
-            json["touch_device"] = Settings::values.touch_device.c_str();
-            json["cemuhookudp_address"] = Settings::values.cemuhookudp_address.c_str();
-            json["cemuhookudp_port"] = static_cast<int>(Settings::values.cemuhookudp_port);
-            json["cemuhookudp_pad_index"] =
-                static_cast<int>(Settings::values.cemuhookudp_pad_index);
-
-            asl::Json::write(path.c_str(), json, false);
+            FileUtil::WriteStringToFile(true, path, json.dump());
         }
     }
     ImGui::SameLine();
