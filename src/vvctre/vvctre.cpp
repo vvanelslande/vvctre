@@ -17,8 +17,6 @@
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
-#include <asl/File.h>
-#include <asl/JSON.h>
 #include <curl/curl.h>
 #include <fmt/format.h>
 #include <glad/glad.h>
@@ -26,8 +24,10 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 #include <mbedtls/ssl.h>
+#include <nlohmann/json.hpp>
 #include <portable-file-dialogs.h>
 #include "common/common_funcs.h"
+#include "common/file_util.h"
 #include "common/logging/backend.h"
 #include "common/logging/filter.h"
 #include "common/logging/log.h"
@@ -267,13 +267,10 @@ int main(int argc, char** argv) {
                     return;
                 }
 
-                asl::Var json = asl::Json::decode(body.c_str());
-                if (json["assets"].length() == 2) {
-                    const std::string running_version =
-                        fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor,
-                                    vvctre_version_patch);
-                    const std::string latest_version = *json["tag_name"];
-                    if (running_version != latest_version) {
+                const nlohmann::json json = nlohmann::json::parse(body);
+                if (json["assets"].size() == 2) {
+                    if (fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor,
+                                    vvctre_version_patch) != json["tag_name"].get<std::string>()) {
                         update_found = true;
                     }
                 }
@@ -327,7 +324,8 @@ int main(int argc, char** argv) {
             movie.ValidateMovie(Settings::values.play_movie);
         switch (movie_result) {
         case Core::Movie::ValidationResult::OK:
-            if (asl::File(Settings::values.play_movie.c_str()).name().contains("loop")) {
+            if (FileUtil::GetFilename(Settings::values.play_movie).find("loop") !=
+                std::string::npos) {
                 play_movie_loop_callback = [&movie] {
                     movie.StartPlayback(Settings::values.play_movie, play_movie_loop_callback);
                 };
@@ -342,7 +340,8 @@ int main(int argc, char** argv) {
         case Core::Movie::ValidationResult::GameDismatch:
             pfd::message("vvctre", "Movie was recorded using a ROM with a different program ID",
                          pfd::choice::ok, pfd::icon::warning);
-            if (asl::File(Settings::values.play_movie.c_str()).name().contains("loop")) {
+            if (FileUtil::GetFilename(Settings::values.play_movie).find("loop") !=
+                std::string::npos) {
                 play_movie_loop_callback = [&movie] {
                     movie.StartPlayback(Settings::values.play_movie, play_movie_loop_callback);
                 };

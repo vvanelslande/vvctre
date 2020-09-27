@@ -13,7 +13,6 @@
 #include <unordered_map>
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
-#include <asl/File.h>
 #include <asl/String.h>
 #include <clip.h>
 #include <cryptopp/osrng.h>
@@ -3720,7 +3719,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 movie.ValidateMovie(filename[0]);
                             switch (movie_result) {
                             case Core::Movie::ValidationResult::OK:
-                                if (asl::File(filename[0].c_str()).name().contains("loop")) {
+                                if (FileUtil::GetFilename(filename[0]).find("loop") !=
+                                    std::string::npos) {
                                     play_movie_loop_callback = [this, &movie,
                                                                 filename = filename[0]] {
                                         movie.StartPlayback(filename, play_movie_loop_callback);
@@ -3739,7 +3739,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                              "Movie was recorded using a ROM with a different "
                                              "program ID",
                                              pfd::choice::ok, pfd::icon::warning);
-                                if (asl::File(filename[0].c_str()).name().contains("loop")) {
+                                if (FileUtil::GetFilename(filename[0]).find("loop") !=
+                                    std::string::npos) {
                                     play_movie_loop_callback = [this, &movie,
                                                                 filename = filename[0]] {
                                         movie.StartPlayback(filename, play_movie_loop_callback);
