@@ -4,6 +4,7 @@
 
 #include <asl/Http.h>
 #include <curl/curl.h>
+#include <httpparser/urlparser.h>
 #include <mbedtls/ssl.h>
 #include <stb_image.h>
 #include <stb_image_resize.h>
@@ -47,7 +48,7 @@ ImageCamera::ImageCamera(const std::string& file, const Service::CAM::Flip& flip
         (flip == Service::CAM::Flip::Vertical) || (flip == Service::CAM::Flip::Reverse);
 
     while (unmodified_image.empty()) {
-        if (asl::parseUrl(file.c_str()).protocol.startsWith("http")) {
+        if (httpparser::UrlParser().parse(file)) {
             CURL* curl = curl_easy_init();
             if (curl == nullptr) {
                 LOG_DEBUG(Service_CAM, "curl_easy_init failed");
