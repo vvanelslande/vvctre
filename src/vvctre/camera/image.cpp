@@ -50,6 +50,7 @@ ImageCamera::ImageCamera(const std::string& file, const Service::CAM::Flip& flip
         if (asl::parseUrl(file.c_str()).protocol.startsWith("http")) {
             CURL* curl = curl_easy_init();
             if (curl == nullptr) {
+                LOG_DEBUG(Service_CAM, "curl_easy_init failed");
                 continue;
             }
 
