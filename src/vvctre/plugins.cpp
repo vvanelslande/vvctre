@@ -8,9 +8,9 @@
 #include <SDL.h>
 #include <asl/Directory.h>
 #include <asl/JSON.h>
-#include <asl/Process.h>
 #include <fmt/format.h>
 #include <imgui.h>
+#include <whereami.h>
 #include "common/common_funcs.h"
 #include "common/file_util.h"
 #include "common/logging/backend.h"
@@ -45,6 +45,7 @@
 #include "vvctre/function_logger.h"
 #include "vvctre/plugins.h"
 
+
 #ifdef _WIN32
 #define VVCTRE_STRDUP _strdup
 #else
@@ -52,7 +53,11 @@
 #endif
 
 PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(window) {
-    asl::Array<asl::File> files = asl::Directory(asl::Process::myDir())
+    int length = wai_getExecutablePath(nullptr, 0, nullptr);
+    std::string vvctre_folder(length, '\0');
+    wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
+    asl::Array<asl::File> files = asl::Directory(vvctre_folder)
                                       .files(
 #ifdef _WIN32
                                           "*.dll"

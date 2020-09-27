@@ -195,6 +195,11 @@ add_subdirectory(curl EXCLUDE_FROM_ALL)
 add_library(httpparser INTERFACE)
 target_include_directories(httpparser INTERFACE httpparser/src)
 
+# whereami
+add_library(whereami STATIC whereami/src/whereami.c whereami/src/whereami.h)
+target_include_directories(whereami PRIVATE whereami/src)
+target_include_directories(whereami INTERFACE whereami/src)
+
 add_subdirectory(cryptopp)
 add_subdirectory(teakra EXCLUDE_FROM_ALL)
 add_subdirectory(portable-file-dialogs EXCLUDE_FROM_ALL)

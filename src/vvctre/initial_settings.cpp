@@ -9,17 +9,17 @@
 #include <string>
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
+#include <asl/JSON.h>
 #include <fmt/format.h>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 #include <imgui_stdlib.h>
 #include <portable-file-dialogs.h>
+#include <whereami.h>
 #ifdef HAVE_CUBEB
 #include "audio_core/cubeb_input.h"
 #endif
-#include <asl/JSON.h>
-#include <asl/Process.h>
 #include "audio_core/sink.h"
 #include "audio_core/sink_details.h"
 #include "common/file_util.h"
@@ -102,8 +102,12 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::Button("...##file");
                     if (ImGui::BeginPopupContextItem("File", ImGuiPopupFlags_MouseButtonLeft)) {
                         if (ImGui::MenuItem("Browse")) {
+                            int length = wai_getExecutablePath(nullptr, 0, nullptr);
+                            std::string vvctre_folder(length, '\0');
+                            wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
                             const std::vector<std::string> result =
-                                pfd::open_file("Browse", *asl::Process::myDir(),
+                                pfd::open_file("Browse", vvctre_folder,
                                                {"All supported files",
                                                 "*.cci *.CCI *.3ds *.3DS *.cxi *.CXI *.3dsx *.3DSX "
                                                 "*.app *.APP *.elf *.ELF *.axf *.AXF",
@@ -116,8 +120,12 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             }
                         }
                         if (ImGui::MenuItem("Install CIA")) {
+                            int length = wai_getExecutablePath(nullptr, 0, nullptr);
+                            std::string vvctre_folder(length, '\0');
+                            wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
                             const std::vector<std::string> files =
-                                pfd::open_file("Install CIA", *asl::Process::myDir(),
+                                pfd::open_file("Install CIA", vvctre_folder,
                                                {"CTR Importable Archive", "*.cia *.CIA"},
                                                pfd::opt::multiselect)
                                     .result();
@@ -251,8 +259,12 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     if (Settings::values.record_movie.empty()) {
                         if (ImGui::Button("...##playmovie")) {
+                            int length = wai_getExecutablePath(nullptr, 0, nullptr);
+                            std::string vvctre_folder(length, '\0');
+                            wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
                             const std::vector<std::string> result =
-                                pfd::open_file("Play Movie", *asl::Process::myDir(),
+                                pfd::open_file("Play Movie", vvctre_folder,
                                                {"VvCtre Movie", "*.vcm"})
                                     .result();
                             if (!result.empty()) {

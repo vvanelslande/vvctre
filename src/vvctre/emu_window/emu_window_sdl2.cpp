@@ -14,7 +14,6 @@
 #include <SDL.h>
 #include <asl/Date.h>
 #include <asl/File.h>
-#include <asl/Process.h>
 #include <asl/String.h>
 #include <clip.h>
 #include <cryptopp/osrng.h>
@@ -24,10 +23,11 @@
 #include <imgui_impl_sdl.h>
 #include <imgui_stdlib.h>
 #include <portable-file-dialogs.h>
+#include <stb_image_write.h>
+#include <whereami.h>
 #ifdef HAVE_CUBEB
 #include "audio_core/cubeb_input.h"
 #endif
-#include <stb_image_write.h>
 #include "audio_core/dsp_interface.h"
 #include "audio_core/sink.h"
 #include "audio_core/sink_details.h"
@@ -1031,8 +1031,12 @@ void EmuWindow_SDL2::SwapBuffers() {
 
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Load File")) {
+                    int length = wai_getExecutablePath(nullptr, 0, nullptr);
+                    std::string vvctre_folder(length, '\0');
+                    wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
                     const std::vector<std::string> result =
-                        pfd::open_file("Browse", *asl::Process::myDir(),
+                        pfd::open_file("Browse", vvctre_folder,
                                        {"All supported files",
                                         "*.cci *.CCI *.3ds *.3DS *.cxi *.CXI *.3dsx *.3DSX "
                                         "*.app *.APP *.elf *.ELF *.axf *.AXF",
@@ -1052,8 +1056,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::MenuItem("Install CIA")) {
+                    int length = wai_getExecutablePath(nullptr, 0, nullptr);
+                    std::string vvctre_folder(length, '\0');
+                    wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
                     const std::vector<std::string> files =
-                        pfd::open_file("Install CIA", *asl::Process::myDir(),
+                        pfd::open_file("Install CIA", vvctre_folder,
                                        {"CTR Importable Archive", "*.cia *.CIA"},
                                        pfd::opt::multiselect)
                             .result();
@@ -1165,8 +1173,12 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                 if (ImGui::BeginMenu("Amiibo")) {
                     if (ImGui::MenuItem("Load File (Encrypted)")) {
+                        int length = wai_getExecutablePath(nullptr, 0, nullptr);
+                        std::string vvctre_folder(length, '\0');
+                        wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
                         const std::vector<std::string> result =
-                            pfd::open_file("Load Amiibo", *asl::Process::myDir(),
+                            pfd::open_file("Load Amiibo", vvctre_folder,
                                            {"Amiibo Files", "*.bin *.BIN"})
                                 .result();
 
@@ -1188,8 +1200,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
 
                     if (ImGui::MenuItem("Load File (Decrypted)")) {
+                        int length = wai_getExecutablePath(nullptr, 0, nullptr);
+                        std::string vvctre_folder(length, '\0');
+                        wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
                         const std::vector<std::string> result =
-                            pfd::open_file("Load Amiibo", *asl::Process::myDir(),
+                            pfd::open_file("Load Amiibo", vvctre_folder,
                                            {"Amiibo Files", "*.bin *.BIN"})
                                 .result();
 
@@ -3694,9 +3710,13 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                     if (ImGui::MenuItem("Play", nullptr, nullptr,
                                         !movie.IsPlayingInput() && !movie.IsRecordingInput())) {
-                        const auto filename = pfd::open_file("Play Movie", *asl::Process::myDir(),
-                                                             {"VvCtre Movie", "*.vcm"})
-                                                  .result();
+                        int length = wai_getExecutablePath(nullptr, 0, nullptr);
+                        std::string vvctre_folder(length, '\0');
+                        wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
+                        const auto filename =
+                            pfd::open_file("Play Movie", vvctre_folder, {"VvCtre Movie", "*.vcm"})
+                                .result();
                         if (!filename.empty()) {
                             const Core::Movie::ValidationResult movie_result =
                                 movie.ValidateMovie(filename[0]);

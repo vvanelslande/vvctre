@@ -3,7 +3,6 @@
 // Refer to the license.txt file included.
 
 #include <asl/JSON.h>
-#include <asl/Process.h>
 #include <curl/curl.h>
 #include <fmt/format.h>
 #include <imgui.h>
@@ -12,6 +11,7 @@
 #include <imgui_stdlib.h>
 #include <mbedtls/ssl.h>
 #include <portable-file-dialogs.h>
+#include <whereami.h>
 #include "common/common_funcs.h"
 #include "common/file_util.h"
 #include "common/logging/log.h"
@@ -259,8 +259,12 @@ const std::string GetRoomPopupText(const CitraRoom& room) {
 
 bool GUI_CameraAddBrowse(const char* label, std::size_t index) {
     if (ImGui::Button(label)) {
+        int length = wai_getExecutablePath(nullptr, 0, nullptr);
+        std::string vvctre_folder(length, '\0');
+        wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
         const std::vector<std::string> result =
-            pfd::open_file("Browse", *asl::Process::myDir(),
+            pfd::open_file("Browse", vvctre_folder,
                            {"All supported files",
                             "*.jpg *.JPG *.jpeg *.JPEG *.jfif *.JFIF *.png *.PNG "
                             "*.bmp "
@@ -398,8 +402,12 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
     };
 
     if (ImGui::Button("Load File")) {
+        int length = wai_getExecutablePath(nullptr, 0, nullptr);
+        std::string vvctre_folder(length, '\0');
+        wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+
         const std::vector<std::string> path =
-            pfd::open_file("Load File", *asl::Process::myDir(), {"JSON Files", "*.json"}).result();
+            pfd::open_file("Load File", vvctre_folder, {"JSON Files", "*.json"}).result();
         if (!path.empty()) {
             asl::Var json = asl::Json::read(path[0].c_str());
             asl::Array buttons = json["buttons"].array();
