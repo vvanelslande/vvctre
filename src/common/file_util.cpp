@@ -629,6 +629,16 @@ void SplitFilename83(const std::string& filename, std::array<char, 9>& short_nam
     }
 }
 
+std::string_view GetExtensionFromFilename(std::string_view name) {
+    const std::size_t index = name.rfind('.');
+
+    if (index == std::string_view::npos) {
+        return {};
+    }
+
+    return name.substr(index + 1);
+}
+
 std::string_view RemoveTrailingSlash(std::string_view path) {
     if (path.empty()) {
         return path;

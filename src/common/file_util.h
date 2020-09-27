@@ -147,6 +147,9 @@ std::size_t ReadFileToString(bool text_file, const std::string& filename, std::s
 void SplitFilename83(const std::string& filename, std::array<char, 9>& short_name,
                      std::array<char, 4>& extension);
 
+// Gets the extension of the filename
+std::string_view GetExtensionFromFilename(std::string_view name);
+
 // Removes the final '/' or '\' if one exists
 std::string_view RemoveTrailingSlash(std::string_view path);
 

@@ -45,7 +45,6 @@
 #include "vvctre/function_logger.h"
 #include "vvctre/plugins.h"
 
-
 #ifdef _WIN32
 #define VVCTRE_STRDUP _strdup
 #else
@@ -57,79 +56,89 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
     std::string vvctre_folder(length, '\0');
     wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
 
-    asl::Array<asl::File> files = asl::Directory(vvctre_folder)
-                                      .files(
+    FileUtil::FSTEntry entries;
+    FileUtil::ScanDirectoryTree(vvctre_folder, entries);
+    for (const FileUtil::FSTEntry& entry : entries.children) {
+        if (entry.isDirectory) {
+            continue;
+        }
+
+        const std::string full_path =
+            FileUtil::SanitizePath(fmt::format("{}/{}", entry.physicalName, entry.virtualName),
+                                   FileUtil::DirectorySeparator::PlatformDefault);
+
 #ifdef _WIN32
-                                          "*.dll"
+        if (entry.virtualName == "SDL2.dll") {
+            continue;
+        }
+
+        if (FileUtil::GetExtensionFromFilename(full_path) != "dll") {
+            continue;
+        }
 #else
-                                          "*.so"
+        if (FileUtil::GetExtensionFromFilename(full_path) != "so") {
+            continue;
+        }
 #endif
-                                      );
-    foreach (asl::File& file, files) {
-        if (file.name() != "SDL2.dll") {
-            void* handle = SDL_LoadObject(*file.path());
-            if (handle == NULL) {
-                fmt::print("Plugin {} failed to load: {}\n", *file.name(), SDL_GetError());
+
+        void* handle = SDL_LoadObject(full_path.c_str());
+        if (handle == NULL) {
+            fmt::print("Plugin {} failed to load: {}\n", entry.virtualName, SDL_GetError());
+        } else {
+            void* get_required_function_count =
+                SDL_LoadFunction(handle, "GetRequiredFunctionCount");
+            void* get_required_function_names =
+                SDL_LoadFunction(handle, "GetRequiredFunctionNames");
+            void* plugin_loaded = SDL_LoadFunction(handle, "PluginLoaded");
+            if (get_required_function_count == nullptr || get_required_function_names == nullptr ||
+                plugin_loaded == nullptr) {
+                fmt::print("Plugin {} failed to load: {}\n", entry.virtualName, SDL_GetError());
+                SDL_UnloadObject(handle);
             } else {
-                void* get_required_function_count =
-                    SDL_LoadFunction(handle, "GetRequiredFunctionCount");
-                void* get_required_function_names =
-                    SDL_LoadFunction(handle, "GetRequiredFunctionNames");
-                void* plugin_loaded = SDL_LoadFunction(handle, "PluginLoaded");
-                if (get_required_function_count == nullptr ||
-                    get_required_function_names == nullptr || plugin_loaded == nullptr) {
-                    fmt::print("Plugin {} failed to load: {}\n", *file.name(), SDL_GetError());
-                    SDL_UnloadObject(handle);
-                } else {
-                    Plugin plugin;
-                    plugin.handle = handle;
-                    plugin.before_drawing_fps =
-                        (decltype(Plugin::before_drawing_fps))SDL_LoadFunction(handle,
-                                                                               "BeforeDrawingFPS");
-                    plugin.add_menu =
-                        (decltype(Plugin::add_menu))SDL_LoadFunction(handle, "AddMenu");
-                    plugin.add_tab = (decltype(Plugin::add_tab))SDL_LoadFunction(handle, "AddTab");
-                    plugin.after_swap_window =
-                        (decltype(Plugin::after_swap_window))SDL_LoadFunction(handle,
-                                                                              "AfterSwapWindow");
-                    plugin.screenshot_callback = (decltype(
-                        Plugin::screenshot_callback))SDL_LoadFunction(handle, "ScreenshotCallback");
-                    void* log = SDL_LoadFunction(handle, "Log");
-                    if (log != nullptr) {
-                        Log::AddBackend(std::make_unique<Log::FunctionLogger>(
-                            (decltype(Log::FunctionLogger::function))log,
-                            fmt::format("Plugin {}", *file.name())));
-                    }
-                    void* override_wlan_comm_id_check =
-                        SDL_LoadFunction(handle, "OverrideWlanCommIdCheck");
-                    if (override_wlan_comm_id_check != nullptr) {
-                        Service::NWM::OverrideWlanCommIdCheck =
-                            [f = (bool (*)(u32, u32))override_wlan_comm_id_check](
-                                u32 in_beacon, u32 requested) { return f(in_beacon, requested); };
-                    }
-                    void* override_on_load_failed_function =
-                        SDL_LoadFunction(handle, "OverrideOnLoadFailed");
-                    if (override_on_load_failed_function != nullptr) {
-                        core.SetOnLoadFailed([f = (void (*)(Core::System::ResultStatus))
-                                                  override_on_load_failed_function](
-                                                 Core::System::ResultStatus result) { f(result); });
-                    }
-
-                    int count = ((int (*)())get_required_function_count)();
-                    const char** required_function_names =
-                        ((const char** (*)())get_required_function_names)();
-                    std::vector<void*> required_functions(count);
-                    for (int i = 0; i < count; ++i) {
-                        required_functions[i] =
-                            function_map[std::string(required_function_names[i])];
-                    }
-                    ((void (*)(void* core, void* plugin_manager, void* functions[]))plugin_loaded)(
-                        static_cast<void*>(&core), static_cast<void*>(this),
-                        required_functions.data());
-
-                    plugins.push_back(std::move(plugin));
-                    fmt::print("Plugin {} loaded\n", *file.name());
+                Plugin plugin;
+                plugin.handle = handle;
+                plugin.before_drawing_fps = (decltype(Plugin::before_drawing_fps))SDL_LoadFunction(
+                    handle, "BeforeDrawingFPS");
+                plugin.add_menu = (decltype(Plugin::add_menu))SDL_LoadFunction(handle, "AddMenu");
+                plugin.add_tab = (decltype(Plugin::add_tab))SDL_LoadFunction(handle, "AddTab");
+                plugin.after_swap_window = (decltype(Plugin::after_swap_window))SDL_LoadFunction(
+                    handle, "AfterSwapWindow");
+                plugin.screenshot_callback =
+                    (decltype(Plugin::screenshot_callback))SDL_LoadFunction(handle,
+                                                                            "ScreenshotCallback");
+                void* log = SDL_LoadFunction(handle, "Log");
+                if (log != nullptr) {
+                    Log::AddBackend(std::make_unique<Log::FunctionLogger>(
+                        (decltype(Log::FunctionLogger::function))log,
+                        fmt::format("Plugin {}", entry.virtualName)));
                 }
+                void* override_wlan_comm_id_check =
+                    SDL_LoadFunction(handle, "OverrideWlanCommIdCheck");
+                if (override_wlan_comm_id_check != nullptr) {
+                    Service::NWM::OverrideWlanCommIdCheck =
+                        [f = (bool (*)(u32, u32))override_wlan_comm_id_check](
+                            u32 in_beacon, u32 requested) { return f(in_beacon, requested); };
+                }
+                void* override_on_load_failed_function =
+                    SDL_LoadFunction(handle, "OverrideOnLoadFailed");
+                if (override_on_load_failed_function != nullptr) {
+                    core.SetOnLoadFailed([f = (void (*)(Core::System::ResultStatus))
+                                              override_on_load_failed_function](
+                                             Core::System::ResultStatus result) { f(result); });
+                }
+
+                int count = ((int (*)())get_required_function_count)();
+                const char** required_function_names =
+                    ((const char** (*)())get_required_function_names)();
+                std::vector<void*> required_functions(count);
+                for (int i = 0; i < count; ++i) {
+                    required_functions[i] = function_map[std::string(required_function_names[i])];
+                }
+                ((void (*)(void* core, void* plugin_manager, void* functions[]))plugin_loaded)(
+                    static_cast<void*>(&core), static_cast<void*>(this), required_functions.data());
+
+                plugins.push_back(std::move(plugin));
+                fmt::print("Plugin {} loaded\n", entry.virtualName);
             }
         }
     }
