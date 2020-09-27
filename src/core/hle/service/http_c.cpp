@@ -11,6 +11,7 @@
 #include <httpparser/httpresponseparser.h>
 #include <mbedtls/ssl.h>
 #include "common/assert.h"
+#include "common/common_funcs.h"
 #include "core/core.h"
 #include "core/file_sys/archive_ncch.h"
 #include "core/file_sys/file_backend.h"
@@ -20,8 +21,6 @@
 #include "core/hle/service/fs/archive.h"
 #include "core/hle/service/http_c.h"
 #include "core/hw/aes/key.h"
-#include "httpparser/response.h"
-#include "iostream"
 
 namespace Service::HTTP {
 

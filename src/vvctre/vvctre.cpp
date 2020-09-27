@@ -18,7 +18,6 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <asl/File.h>
-#include <asl/Http.h>
 #include <asl/JSON.h>
 #include <curl/curl.h>
 #include <fmt/format.h>
@@ -26,7 +25,9 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
+#include <mbedtls/ssl.h>
 #include <portable-file-dialogs.h>
+#include "common/common_funcs.h"
 #include "common/logging/backend.h"
 #include "common/logging/filter.h"
 #include "common/logging/log.h"
@@ -181,22 +182,99 @@ int main(int argc, char** argv) {
 
         if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
             std::thread([&] {
-                const std::string user_agent =
-                    fmt::format("vvctre/{}.{}.{}", vvctre_version_major, vvctre_version_minor,
-                                vvctre_version_patch);
-                asl::HttpResponse r = asl::Http::get(
-                    "https://api.github.com/repos/vvanelslande/vvctre/releases/latest",
-                    asl::Dic<>("User-Agent", user_agent.c_str()));
-                if (r.ok()) {
-                    asl::Var json = r.json();
-                    if (json["assets"].length() == 2) {
-                        const std::string running_version =
-                            fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor,
-                                        vvctre_version_patch);
-                        const std::string latest_version = *json["tag_name"];
-                        if (running_version != latest_version) {
-                            update_found = true;
-                        }
+                CURL* curl = curl_easy_init();
+                if (curl == nullptr) {
+                    return;
+                }
+
+                CURLcode error = curl_easy_setopt(
+                    curl, CURLOPT_URL,
+                    "https://api.github.com/repos/vvanelslande/vvctre/releases/latest");
+                if (error != CURLE_OK) {
+                    curl_easy_cleanup(curl);
+                    return;
+                }
+
+                error = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+                if (error != CURLE_OK) {
+                    curl_easy_cleanup(curl);
+                    return;
+                }
+
+                error = curl_easy_setopt(curl, CURLOPT_USERAGENT,
+                                         fmt::format("vvctre/{}.{}.{}", vvctre_version_major,
+                                                     vvctre_version_minor, vvctre_version_patch)
+                                             .c_str());
+                if (error != CURLE_OK) {
+                    curl_easy_cleanup(curl);
+                    return;
+                }
+
+                std::string body;
+
+                error = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
+                if (error != CURLE_OK) {
+                    curl_easy_cleanup(curl);
+                    return;
+                }
+
+                error = curl_easy_setopt(
+                    curl, CURLOPT_WRITEFUNCTION,
+                    static_cast<curl_write_callback>(
+                        [](char* ptr, std::size_t size, std::size_t nmemb, void* userdata) {
+                            const std::size_t realsize = size * nmemb;
+                            static_cast<std::string*>(userdata)->append(ptr, realsize);
+                            return realsize;
+                        }));
+                if (error != CURLE_OK) {
+                    curl_easy_cleanup(curl);
+                    return;
+                }
+
+                error = curl_easy_setopt(
+                    curl, CURLOPT_SSL_CTX_FUNCTION,
+                    static_cast<CURLcode (*)(CURL * curl, void* ssl_ctx, void* userptr)>(
+                        [](CURL* curl, void* ssl_ctx, void* userptr) {
+                            void* chain = Common::CreateCertificateChainWithSystemCertificates();
+                            if (chain != nullptr) {
+                                mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx),
+                                                          static_cast<mbedtls_x509_crt*>(chain),
+                                                          NULL);
+                            }
+                            return CURLE_OK;
+                        }));
+                if (error != CURLE_OK) {
+                    curl_easy_cleanup(curl);
+                    return;
+                }
+
+                error = curl_easy_perform(curl);
+                if (error != CURLE_OK) {
+                    curl_easy_cleanup(curl);
+                    return;
+                }
+
+                long status_code;
+                error = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status_code);
+                if (error != CURLE_OK) {
+                    curl_easy_cleanup(curl);
+                    return;
+                }
+
+                curl_easy_cleanup(curl);
+
+                if (status_code != 200) {
+                    return;
+                }
+
+                asl::Var json = asl::Json::decode(body.c_str());
+                if (json["assets"].length() == 2) {
+                    const std::string running_version =
+                        fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor,
+                                    vvctre_version_patch);
+                    const std::string latest_version = *json["tag_name"];
+                    if (running_version != latest_version) {
+                        update_found = true;
                     }
                 }
             }).detach();
