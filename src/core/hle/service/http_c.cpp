@@ -9,6 +9,7 @@
 #include <curl/curl.h>
 #include <fmt/format.h>
 #include <httpparser/httpresponseparser.h>
+#include <mbedtls/pk.h>
 #include <mbedtls/ssl.h>
 #include "common/assert.h"
 #include "common/common_funcs.h"
@@ -235,19 +236,77 @@ void Context::MakeRequest() {
         return;
     }
 
+    error = curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, this);
+    if (error != CURLE_OK) {
+        LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
+        if (request_headers_slist != nullptr) {
+            curl_slist_free_all(request_headers_slist);
+            request_headers_slist = nullptr;
+        }
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+        state = RequestState::ReadyToDownloadContent;
+        return;
+    }
+
     error = curl_easy_setopt(
         curl, CURLOPT_SSL_CTX_FUNCTION,
-        static_cast<CURLcode (*)(CURL * curl, void* ssl_ctx, void* userptr)>(
-            [](CURL* curl, void* ssl_ctx, void* userptr) {
-                void* chain = Common::CreateCertificateChainWithSystemCertificates();
-                if (chain != nullptr) {
-                    mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx),
-                                              static_cast<mbedtls_x509_crt*>(chain), NULL);
-                } else {
-                    return curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+        static_cast<CURLcode (*)(CURL * curl, void* ssl_ctx, void* userptr)>([](CURL* curl,
+                                                                                void* ssl_ctx,
+                                                                                void* userptr) {
+            Context* c = static_cast<Context*>(userptr);
+            mbedtls_x509_crt* chain =
+                (mbedtls_x509_crt*)Common::CreateCertificateChainWithSystemCertificates();
+            if (chain != nullptr) {
+                if (std::shared_ptr<RootCertChain> rcc = c->ssl_config.root_ca_chain.lock()) {
+                    for (const auto& certificate : rcc->certificates) {
+                        mbedtls_x509_crt_parse_der(
+                            chain, (const unsigned char*)certificate.certificate.data(),
+                            certificate.certificate.size());
+                    }
                 }
-                return CURLE_OK;
-            }));
+                mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx), chain, NULL);
+            } else {
+                chain = (mbedtls_x509_crt*)calloc(1, sizeof(mbedtls_x509_crt));
+                if (chain != nullptr) {
+                    mbedtls_x509_crt_init(chain);
+                    if (std::shared_ptr<Service::HTTP::RootCertChain> rcc =
+                            c->ssl_config.root_ca_chain.lock()) {
+                        for (const auto& certificate : rcc->certificates) {
+                            mbedtls_x509_crt_parse_der(
+                                chain, (const unsigned char*)certificate.certificate.data(),
+                                certificate.certificate.size());
+                        }
+                    }
+                    mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx), chain,
+                                              NULL);
+                }
+            }
+            if (std::shared_ptr<ClientCertContext> client_cert_ctx =
+                    c->ssl_config.client_cert_ctx.lock()) {
+                mbedtls_x509_crt* client_cert =
+                    (mbedtls_x509_crt*)calloc(1, sizeof(mbedtls_x509_crt));
+                if (client_cert != nullptr) {
+                    mbedtls_x509_crt_init(client_cert);
+                    mbedtls_pk_context* pk_context =
+                        (mbedtls_pk_context*)calloc(1, sizeof(mbedtls_pk_context));
+                    if (pk_context != nullptr) {
+                        mbedtls_pk_init(pk_context);
+                        mbedtls_pk_parse_key(
+                            pk_context, (const unsigned char*)client_cert_ctx->private_key.data(),
+                            client_cert_ctx->private_key.size(), NULL, 0);
+                        mbedtls_x509_crt_parse_der(
+                            client_cert, (const unsigned char*)client_cert_ctx->certificate.data(),
+                            client_cert_ctx->certificate.size());
+                        mbedtls_ssl_conf_own_cert(static_cast<mbedtls_ssl_config*>(ssl_ctx),
+                                                  client_cert, pk_context);
+                    } else {
+                        mbedtls_x509_crt_free(client_cert);
+                    }
+                }
+            }
+            return CURLE_OK;
+        }));
     if (error != CURLE_OK) {
         LOG_ERROR(Service_HTTP, "{}", curl_easy_strerror(error));
         if (request_headers_slist != nullptr) {
