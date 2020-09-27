@@ -173,7 +173,7 @@ CitraRoomList GetPublicCitraRooms() {
                     mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx),
                                               static_cast<mbedtls_x509_crt*>(chain), NULL);
                 } else {
-                    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+                    return curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
                 }
                 return CURLE_OK;
             }));
