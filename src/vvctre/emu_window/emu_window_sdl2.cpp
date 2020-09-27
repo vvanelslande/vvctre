@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <csignal>
 #include <cstdlib>
+#include <ctime>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -12,11 +13,11 @@
 #include <unordered_map>
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
-#include <asl/Date.h>
 #include <asl/File.h>
 #include <asl/String.h>
 #include <clip.h>
 #include <cryptopp/osrng.h>
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
@@ -952,9 +953,8 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
             return;
         }
 
-        asl::Date date = asl::Date::now();
-        multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] <{}> {}", date.hours(),
-                                                   date.minutes(), entry.nickname, entry.message));
+        multiplayer_messages.push_back(fmt::format(
+            "[{:%H:%M}] <{}> {}", fmt::localtime(std::time(NULL)), entry.nickname, entry.message));
     });
 
     room_member.BindOnStatusMessageReceived([&](const Network::StatusMessageEntry& entry) {
@@ -962,28 +962,26 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
             return;
         }
 
-        asl::Date date = asl::Date::now();
-
         switch (entry.type) {
         case Network::StatusMessageTypes::IdMemberJoin:
-            multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] {} joined", date.hours(),
-                                                       date.minutes(), entry.nickname));
+            multiplayer_messages.push_back(fmt::format(
+                "[{:%H:%M}] {} joined", fmt::localtime(std::time(NULL)), entry.nickname));
             break;
         case Network::StatusMessageTypes::IdMemberLeave:
             multiplayer_messages.push_back(
-                fmt::format("[{:02}:{:02}] {} left", date.hours(), date.minutes(), entry.nickname));
+                fmt::format("[{:%H:%M}] {} left", fmt::localtime(std::time(NULL)), entry.nickname));
             break;
         case Network::StatusMessageTypes::IdMemberKicked:
-            multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] {} was kicked", date.hours(),
-                                                       date.minutes(), entry.nickname));
+            multiplayer_messages.push_back(fmt::format(
+                "[{:%H:%M}] {} was kicked", fmt::localtime(std::time(NULL)), entry.nickname));
             break;
         case Network::StatusMessageTypes::IdMemberBanned:
-            multiplayer_messages.push_back(fmt::format("[{:02}:{:02}] {} was banned", date.hours(),
-                                                       date.minutes(), entry.nickname));
+            multiplayer_messages.push_back(fmt::format(
+                "[{:%H:%M}] {} was banned", fmt::localtime(std::time(NULL)), entry.nickname));
             break;
         case Network::StatusMessageTypes::IdAddressUnbanned:
             multiplayer_messages.push_back(
-                fmt::format("[{:02}:{:02}] Someone was unbanned", date.hours(), date.minutes()));
+                fmt::format("[{:%H:%M}] Someone was unbanned", fmt::localtime(std::time(NULL))));
             break;
         }
     });
