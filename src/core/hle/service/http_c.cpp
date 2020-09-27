@@ -3,9 +3,12 @@
 // Refer to the license.txt file included.
 
 #include <algorithm>
+#include <string>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
+#include <curl/curl.h>
 #include <fmt/format.h>
+#include <mbedtls/ssl.h>
 #include "common/assert.h"
 #include "core/core.h"
 #include "core/file_sys/archive_ncch.h"
@@ -54,13 +57,14 @@ const ResultCode RESULT_DOWNLOADPENDING = // 0xD840A02B
     ResultCode(static_cast<ErrorDescription>(43), ErrorModule::HTTP, ErrorSummary::WouldBlock,
                ErrorLevel::Permanent);
 
-asl::Dic<> decodeUrlParams(const asl::String& querystring) {
-    asl::Dic<> query;
-    asl::Dic<> q = split(querystring.replace('+', ' '), '&', '=');
-    foreach2 (asl::String& k, const asl::String& v, q) {
-        query[asl::decodeUrl(k)] = asl::decodeUrl(v);
+Context::~Context() {
+    if (curl != nullptr) {
+        curl_easy_cleanup(curl);
     }
-    return query;
+
+    if (request_headers_slist != nullptr) {
+        curl_slist_free_all(request_headers_slist);
+    }
 }
 
 void Context::MakeRequest() {
@@ -75,50 +79,185 @@ void Context::MakeRequest() {
         {RequestMethod::PutEmpty, "PUT"},
     };
 
-    asl::HttpRequest request(request_method_strings.at(method).c_str(), url.c_str());
-    request.setFollowRedirects(false);
+    curl = curl_easy_init();
+    if (curl == nullptr) {
+        state = RequestState::ReadyToDownloadContent;
+        return;
+    }
 
-    if (method == RequestMethod::Post || method == RequestMethod::Put) {
-        const std::size_t pos = url.find('?');
-        if (pos != std::string::npos) {
-            asl::Dic<asl::String> params = decodeUrlParams(url.substr(pos + 1).c_str());
-            foreach2 (asl::String& k, const asl::String& v, params) {
-                post_data.emplace_back(std::string(*k), std::string(*v), PostData::Type::Ascii);
+    CURLcode error = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+        state = RequestState::ReadyToDownloadContent;
+        return;
+    }
+
+    error = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+        state = RequestState::ReadyToDownloadContent;
+        return;
+    }
+
+    error = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_body);
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+        state = RequestState::ReadyToDownloadContent;
+        return;
+    }
+
+    error =
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, request_method_strings.at(method).c_str());
+    if (error != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+        state = RequestState::ReadyToDownloadContent;
+        return;
+    }
+
+    if (!request_headers.empty()) {
+        for (const auto& header : request_headers) {
+            request_headers_slist = curl_slist_append(
+                request_headers_slist, fmt::format("{}: {}", header.name, header.value).c_str());
+        }
+
+        if (request_headers_slist == nullptr) {
+            curl_easy_cleanup(curl);
+            curl = nullptr;
+            state = RequestState::ReadyToDownloadContent;
+            return;
+        }
+
+        error = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, request_headers_slist);
+        if (error != CURLE_OK) {
+            curl_slist_free_all(request_headers_slist);
+            request_headers_slist = nullptr;
+            curl_easy_cleanup(curl);
+            curl = nullptr;
+            state = RequestState::ReadyToDownloadContent;
+            return;
+        }
+    }
+
+    if (!post_data.empty()) {
+        for (const auto& d : post_data) {
+            switch (d.type) {
+            case PostData::Type::Binary:
+            case PostData::Type::Ascii: {
+                char* n = curl_easy_escape(curl, d.name.c_str(), d.name.length());
+                if (n == nullptr) {
+                    curl_easy_cleanup(curl);
+                    curl = nullptr;
+                    return;
+                }
+                char* v = curl_easy_escape(curl, d.value.data(), d.value.size());
+                if (v == nullptr) {
+                    curl_easy_cleanup(curl);
+                    curl = nullptr;
+                    return;
+                }
+                request_body += fmt::format("{}={}&", n, v);
+                curl_free(n);
+                curl_free(v);
+                break;
+            }
+            case PostData::Type::Raw:
+                request_body = d.value;
+                break;
+            default:
+                break;
             }
         }
-    }
 
-    for (const auto& d : post_data) {
-        switch (d.type) {
-        case PostData::Type::Binary:
-        case PostData::Type::Ascii:
-            request.put(fmt::format("{}{}={}&", *request.text(), *asl::encodeUrl(d.name.c_str()),
-                                    *asl::encodeUrl(d.value.c_str()))
-                            .c_str());
-            break;
-        case PostData::Type::Raw:
-            request.put(d.value.c_str());
-            break;
-        default:
-            break;
+        if (std::any_of(post_data.cbegin(), post_data.cend(),
+                        [](const Service::HTTP::Context::PostData& d) {
+                            return d.type == Service::HTTP::Context::PostData::Type::Ascii ||
+                                   d.type == Service::HTTP::Context::PostData::Type::Binary;
+                        })) {
+            request_body.pop_back();
+        }
+
+        error = curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, request_body.size());
+        if (error != CURLE_OK) {
+            if (request_headers_slist != nullptr) {
+                curl_slist_free_all(request_headers_slist);
+                request_headers_slist = nullptr;
+            }
+            curl_easy_cleanup(curl);
+            curl = nullptr;
+            state = RequestState::ReadyToDownloadContent;
+            return;
+        }
+
+        error = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request_body.data());
+        if (error != CURLE_OK) {
+            if (request_headers_slist != nullptr) {
+                curl_slist_free_all(request_headers_slist);
+                request_headers_slist = nullptr;
+            }
+            curl_easy_cleanup(curl);
+            curl = nullptr;
+            state = RequestState::ReadyToDownloadContent;
+            return;
         }
     }
 
-    if (std::any_of(post_data.cbegin(), post_data.cend(),
-                    [](const Service::HTTP::Context::PostData& d) {
-                        return d.type == Service::HTTP::Context::PostData::Type::Ascii ||
-                               d.type == Service::HTTP::Context::PostData::Type::Binary;
-                    })) {
-        asl::Array<byte> body = request.body();
-        body.removeLast();
-        request.put(body);
+    error =
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                         static_cast<curl_write_callback>(
+                             [](char* ptr, std::size_t size, std::size_t nmemb, void* userdata) {
+                                 const std::size_t realsize = size * nmemb;
+                                 static_cast<std::string*>(userdata)->append(ptr, realsize);
+                                 return realsize;
+                             }));
+    if (error != CURLE_OK) {
+        if (request_headers_slist != nullptr) {
+            curl_slist_free_all(request_headers_slist);
+            request_headers_slist = nullptr;
+        }
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+        state = RequestState::ReadyToDownloadContent;
+        return;
     }
 
-    for (const auto& header : headers) {
-        request.setHeader(header.name.c_str(), header.value.c_str());
+    error = curl_easy_setopt(
+        curl, CURLOPT_SSL_CTX_FUNCTION,
+        static_cast<CURLcode (*)(CURL * curl, void* ssl_ctx, void* userptr)>(
+            [](CURL* curl, void* ssl_ctx, void* userptr) {
+                void* chain = Common::CreateCertificateChainWithSystemCertificates();
+                if (chain != nullptr) {
+                    mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx),
+                                              static_cast<mbedtls_x509_crt*>(chain), NULL);
+                }
+                return CURLE_OK;
+            }));
+    if (error != CURLE_OK) {
+        if (request_headers_slist != nullptr) {
+            curl_slist_free_all(request_headers_slist);
+            request_headers_slist = nullptr;
+        }
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+        state = RequestState::ReadyToDownloadContent;
+        return;
     }
 
-    response = asl::Http::request(request);
+    error = curl_easy_perform(curl);
+    if (error != CURLE_OK) {
+        if (request_headers_slist != nullptr) {
+            curl_slist_free_all(request_headers_slist);
+            request_headers_slist = nullptr;
+        }
+        curl_easy_cleanup(curl);
+        curl = nullptr;
+        state = RequestState::ReadyToDownloadContent;
+        return;
+    }
+
     state = RequestState::ReadyToDownloadContent;
 }
 
@@ -289,20 +428,24 @@ void HTTP_C::ReceiveData(Kernel::HLERequestContext& ctx) {
     ASSERT(itr != contexts.end());
 
     const u32 size = std::min<u32>(
-        buffer_size, (itr->second.response.hasHeader("Content-Length")
-                          ? static_cast<u32>(itr->second.response.header("Content-Length").toInt())
-                          : static_cast<u32>(itr->second.response.body().length())) -
-                         itr->second.current_offset);
-    buffer.Write(itr->second.response.body().slice(itr->second.current_offset).ptr(), 0, size);
+        buffer_size,
+        ((itr->second.response_headers.find("Content-Length") == itr->second.response_headers.end())
+             ? static_cast<u32>(itr->second.response_body.size())
+             : static_cast<u32>(std::stoul(itr->second.response_headers["Content-Length"]))) -
+            itr->second.current_offset);
+    buffer.Write(itr->second.response_body.substr(itr->second.current_offset, size).data(), 0,
+                 size);
     itr->second.current_offset += size;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(itr->second.current_offset <
-                    (itr->second.response.hasHeader("Content-Length")
-                         ? static_cast<u32>(itr->second.response.header("Content-Length").toInt())
-                         : static_cast<u32>(itr->second.response.body().length()))
-                ? RESULT_DOWNLOADPENDING
-                : RESULT_SUCCESS);
+    rb.Push(
+        itr->second.current_offset <
+                (itr->second.response_headers.find("Content-Length") ==
+                         itr->second.response_headers.end()
+                     ? static_cast<u32>(itr->second.response_body.size())
+                     : static_cast<u32>(std::stoul(itr->second.response_headers["Content-Length"])))
+            ? RESULT_DOWNLOADPENDING
+            : RESULT_SUCCESS);
     rb.PushMappedBuffer(buffer);
 }
 
@@ -320,20 +463,24 @@ void HTTP_C::ReceiveDataTimeout(Kernel::HLERequestContext& ctx) {
     ASSERT(itr != contexts.end());
 
     const u32 size = std::min<u32>(
-        buffer_size, (itr->second.response.hasHeader("Content-Length")
-                          ? static_cast<u32>(itr->second.response.header("Content-Length").toInt())
-                          : static_cast<u32>(0)) -
-                         itr->second.current_offset);
-    buffer.Write(itr->second.response.body().slice(itr->second.current_offset).ptr(), 0, size);
+        buffer_size,
+        ((itr->second.response_headers.find("Content-Length") == itr->second.response_headers.end())
+             ? static_cast<u32>(itr->second.response_body.size())
+             : static_cast<u32>(std::stoul(itr->second.response_headers["Content-Length"]))) -
+            itr->second.current_offset);
+    buffer.Write(itr->second.response_body.substr(itr->second.current_offset, size).data(), 0,
+                 size);
     itr->second.current_offset += size;
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
-    rb.Push(itr->second.current_offset <
-                    (itr->second.response.hasHeader("Content-Length")
-                         ? static_cast<u32>(itr->second.response.header("Content-Length").toInt())
-                         : static_cast<u32>(0))
-                ? RESULT_DOWNLOADPENDING
-                : RESULT_SUCCESS);
+    rb.Push(
+        itr->second.current_offset <
+                (itr->second.response_headers.find("Content-Length") ==
+                         itr->second.response_headers.end()
+                     ? static_cast<u32>(itr->second.response_body.size())
+                     : static_cast<u32>(std::stoul(itr->second.response_headers["Content-Length"])))
+            ? RESULT_DOWNLOADPENDING
+            : RESULT_SUCCESS);
     rb.PushMappedBuffer(buffer);
 }
 
@@ -477,9 +624,10 @@ void HTTP_C::GetDownloadSizeState(Kernel::HLERequestContext& ctx) {
     IPC::RequestBuilder rb = rp.MakeBuilder(3, 0);
     rb.Push(RESULT_SUCCESS);
     rb.Push<u32>(static_cast<u32>(itr->second.current_offset));
-    rb.Push<u32>(itr->second.response.hasHeader("Content-Length")
-                     ? static_cast<u32>(itr->second.response.header("Content-Length").toInt())
-                     : static_cast<u32>(itr->second.response.body().length()));
+    rb.Push<u32>(
+        itr->second.response_headers.find("Content-Length") == itr->second.response_headers.end()
+            ? static_cast<u32>(itr->second.response_body.size())
+            : static_cast<u32>(std::stoul(itr->second.response_headers["Content-Length"])));
 }
 
 void HTTP_C::AddRequestHeader(Kernel::HLERequestContext& ctx) {
@@ -546,12 +694,12 @@ void HTTP_C::AddRequestHeader(Kernel::HLERequestContext& ctx) {
         return;
     }
 
-    ASSERT(std::find_if(itr->second.headers.begin(), itr->second.headers.end(),
+    ASSERT(std::find_if(itr->second.request_headers.begin(), itr->second.request_headers.end(),
                         [&name](const Context::RequestHeader& m) -> bool {
                             return m.name == name;
-                        }) == itr->second.headers.end());
+                        }) == itr->second.request_headers.end());
 
-    itr->second.headers.emplace_back(name, value);
+    itr->second.request_headers.emplace_back(name, value);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
@@ -788,10 +936,9 @@ void HTTP_C::GetResponseHeader(Kernel::HLERequestContext& ctx) {
     ASSERT(itr != contexts.end());
 
     const std::string value =
-        itr->second.response.hasHeader(name.c_str())
-            ? std::string(*itr->second.response.header(name.c_str()).concat("\0", 1))
-            : "";
-
+        itr->second.response_headers.find(name) == itr->second.response_headers.end()
+            ? ""
+            : (itr->second.response_headers[name] + '\n');
     LOG_DEBUG(Service_HTTP, "context_handle = {}, name = {}, value = {}", context_handle, name,
               value);
 
@@ -811,12 +958,16 @@ void HTTP_C::GetResponseStatusCode(Kernel::HLERequestContext& ctx) {
     auto itr = contexts.find(context_handle);
     ASSERT(itr != contexts.end());
 
+    long status_code = 0;
+    if (itr->second.curl != nullptr) {
+        curl_easy_getinfo(itr->second.curl, CURLINFO_RESPONSE_CODE, &status_code);
+    }
+
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     rb.Push(RESULT_SUCCESS);
-    rb.Push<u32>(static_cast<u32>(itr->second.response.code()));
+    rb.Push<u32>(static_cast<u32>(status_code));
 
-    LOG_DEBUG(Service_HTTP, "context_handle = {}, status = {}", context_handle,
-              itr->second.response.code());
+    LOG_DEBUG(Service_HTTP, "context_handle = {}, status = {}", context_handle, status_code);
 }
 
 void HTTP_C::GetResponseStatusCodeTimeout(Kernel::HLERequestContext& ctx) {
@@ -827,12 +978,17 @@ void HTTP_C::GetResponseStatusCodeTimeout(Kernel::HLERequestContext& ctx) {
     auto itr = contexts.find(context_handle);
     ASSERT(itr != contexts.end());
 
+    long status_code = 0;
+    if (itr->second.curl != nullptr) {
+        curl_easy_getinfo(itr->second.curl, CURLINFO_RESPONSE_CODE, &status_code);
+    }
+
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     rb.Push(RESULT_SUCCESS);
-    rb.Push<u32>(static_cast<u32>(itr->second.response.code()));
+    rb.Push<u32>(static_cast<u32>(status_code));
 
     LOG_DEBUG(Service_HTTP, "context_handle = {}, status = {}, timeout = {}", context_handle,
-              itr->second.response.code(), timeout);
+              status_code, timeout);
 }
 
 void HTTP_C::SetClientCertContext(Kernel::HLERequestContext& ctx) {

@@ -9,7 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <asl/Http.h>
+#include <curl/curl.h>
 #include "core/hle/kernel/shared_memory.h"
 #include "core/hle/service/service.h"
 
@@ -78,6 +78,7 @@ public:
     Context() = default;
     Context(const Context&) = delete;
     Context& operator=(const Context&) = delete;
+    ~Context();
 
     void MakeRequest();
 
@@ -129,11 +130,14 @@ public:
     std::optional<BasicAuth> basic_auth;
     SSLConfig ssl_config{};
     u32 socket_buffer_size;
-    std::vector<RequestHeader> headers;
+    std::vector<RequestHeader> request_headers;
+    std::unordered_map<std::string, std::string> response_headers;
     std::vector<PostData> post_data;
-
     u32 current_offset = 0;
-    asl::HttpResponse response;
+    std::string request_body;
+    std::string response_body;
+    CURL* curl = nullptr;
+    curl_slist* request_headers_slist = nullptr;
 };
 
 struct SessionData : public Kernel::SessionRequestHandler::SessionDataBase {
