@@ -9,6 +9,7 @@
 #include <stb_image_resize.h>
 #include "common/assert.h"
 #include "common/file_util.h"
+#include "curl/easy.h"
 #include "vvctre/camera/image.h"
 #include "vvctre/camera/util.h"
 
@@ -99,6 +100,8 @@ ImageCamera::ImageCamera(const std::string& file, const Service::CAM::Flip& flip
                         if (chain != nullptr) {
                             mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx),
                                                       static_cast<mbedtls_x509_crt*>(chain), NULL);
+                        } else {
+                            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
                         }
                         return CURLE_OK;
                     }));
