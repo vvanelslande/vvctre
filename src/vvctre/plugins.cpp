@@ -6,7 +6,6 @@
 #include <utility>
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
-#include <asl/Directory.h>
 #include <asl/JSON.h>
 #include <fmt/format.h>
 #include <imgui.h>
