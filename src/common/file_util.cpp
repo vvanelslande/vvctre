@@ -439,21 +439,21 @@ u64 ScanDirectoryTree(const std::string& directory, FSTEntry& parent_entry,
                                                      const std::string& directory,
                                                      const std::string& virtual_name) -> bool {
         FSTEntry entry;
-        entry.virtualName = virtual_name;
-        entry.physicalName = directory + "/" + virtual_name;
+        entry.virtual_name = virtual_name;
+        entry.physical_name = directory + "/" + virtual_name;
 
-        if (IsDirectory(entry.physicalName)) {
-            entry.isDirectory = true;
-            // is a directory, lets go inside if we didn't recurse to often
+        if (IsDirectory(entry.physical_name)) {
+            entry.is_directory = true;
+            // Is a directory, lets go inside if we didn't recurse to often
             if (recursion > 0) {
-                entry.size = ScanDirectoryTree(entry.physicalName, entry, recursion - 1);
+                entry.size = ScanDirectoryTree(entry.physical_name, entry, recursion - 1);
                 *num_entries_out += entry.size;
             } else {
                 entry.size = 0;
             }
-        } else { // is a file
-            entry.isDirectory = false;
-            entry.size = GetSize(entry.physicalName);
+        } else { // Is a file
+            entry.is_directory = false;
+            entry.size = GetSize(entry.physical_name);
         }
         (*num_entries_out)++;
 
@@ -469,7 +469,7 @@ u64 ScanDirectoryTree(const std::string& directory, FSTEntry& parent_entry,
 void GetAllFilesFromNestedEntries(FSTEntry& directory, std::vector<FSTEntry>& output) {
     std::vector<FSTEntry> files;
     for (auto& entry : directory.children) {
-        if (entry.isDirectory) {
+        if (entry.is_directory) {
             GetAllFilesFromNestedEntries(entry, output);
         } else {
             output.push_back(entry);
@@ -517,16 +517,16 @@ void CopyDir(const std::string& source_path, const std::string& dest_path) {
         return;
 
     while (struct dirent* result = readdir(dirp)) {
-        const std::string virtualName(result->d_name);
+        const std::string virtual_name(result->d_name);
         // Check for "." and ".."
-        if (((virtualName[0] == '.') && (virtualName[1] == '\0')) ||
-            ((virtualName[0] == '.') && (virtualName[1] == '.') && (virtualName[2] == '\0'))) {
+        if (((virtual_name[0] == '.') && (virtual_name[1] == '\0')) ||
+            ((virtual_name[0] == '.') && (virtual_name[1] == '.') && (virtual_name[2] == '\0'))) {
             continue;
         }
 
         std::string source, dest;
-        source = source_path + virtualName;
-        dest = dest_path + virtualName;
+        source = source_path + virtual_name;
+        dest = dest_path + virtual_name;
         if (IsDirectory(source)) {
             source += '/';
             dest += '/';

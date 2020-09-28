@@ -59,7 +59,7 @@ std::vector<std::tuple<std::string, std::string>> GetInstalledList() {
         FileUtil::ScanDirectoryTree(Service::AM::GetMediaTitlePath(media_type), entries, 1);
         for (const FileUtil::FSTEntry& tid_high : entries.children) {
             for (const FileUtil::FSTEntry& tid_low : tid_high.children) {
-                std::string tid_string = tid_high.virtualName + tid_low.virtualName;
+                std::string tid_string = tid_high.virtual_name + tid_low.virtual_name;
 
                 if (tid_string.length() == Service::AM::TITLE_ID_VALID_LENGTH) {
                     const u64 tid = std::stoull(tid_string, nullptr, 16);
@@ -70,7 +70,7 @@ std::vector<std::tuple<std::string, std::string>> GetInstalledList() {
                         std::string title;
                         loader->ReadTitle(title);
 
-                        switch (std::stoull(tid_high.virtualName, nullptr, 16)) {
+                        switch (std::stoull(tid_high.virtual_name, nullptr, 16)) {
                         case 0x00040000: {
                             bootable.push_back(std::make_tuple(
                                 path, fmt::format("[Bootable] {} ({:016X})",

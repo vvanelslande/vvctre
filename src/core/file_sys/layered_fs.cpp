@@ -197,11 +197,11 @@ void LayeredFS::LoadExtRelocations() {
     FileUtil::ScanDirectoryTree(patch_ext_path, result, 256);
 
     for (const auto& entry : result.children) {
-        if (FileUtil::IsDirectory(entry.physicalName)) {
+        if (FileUtil::IsDirectory(entry.physical_name)) {
             continue;
         }
 
-        const auto path = entry.physicalName.substr(patch_ext_path.size());
+        const auto path = entry.physical_name.substr(patch_ext_path.size());
         if (path.size() >= 5 && path.substr(path.size() - 5) == ".stub") {
             // Remove the corresponding file if exists
             const auto file_path = path.substr(0, path.size() - 5);
@@ -226,16 +226,16 @@ void LayeredFS::LoadExtRelocations() {
                 continue;
             }
 
-            FileUtil::IOFile patch_file(entry.physicalName, "rb");
+            FileUtil::IOFile patch_file(entry.physical_name, "rb");
             if (!patch_file) {
-                LOG_ERROR(Service_FS, "LayeredFS Could not open file {}", entry.physicalName);
+                LOG_ERROR(Service_FS, "LayeredFS Could not open file {}", entry.physical_name);
                 continue;
             }
 
             const auto size = patch_file.GetSize();
             std::vector<u8> patch(size);
             if (patch_file.ReadBytes(patch.data(), size) != size) {
-                LOG_ERROR(Service_FS, "LayeredFS Could not read file {}", entry.physicalName);
+                LOG_ERROR(Service_FS, "LayeredFS Could not read file {}", entry.physical_name);
                 continue;
             }
 

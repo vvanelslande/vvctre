@@ -60,27 +60,27 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
     FileUtil::FSTEntry entries;
     FileUtil::ScanDirectoryTree(vvctre_folder, entries);
     for (const FileUtil::FSTEntry& entry : entries.children) {
-        if (entry.isDirectory) {
+        if (entry.is_directory) {
             continue;
         }
 
 #ifdef _WIN32
-        if (entry.virtualName == "SDL2.dll") {
+        if (entry.virtual_name == "SDL2.dll") {
             continue;
         }
 
-        if (FileUtil::GetExtensionFromFilename(entry.physicalName) != "dll") {
+        if (FileUtil::GetExtensionFromFilename(entry.physical_name) != "dll") {
             continue;
         }
 #else
-        if (FileUtil::GetExtensionFromFilename(entry.physicalName) != "so") {
+        if (FileUtil::GetExtensionFromFilename(entry.physical_name) != "so") {
             continue;
         }
 #endif
 
-        void* handle = SDL_LoadObject(entry.physicalName.c_str());
+        void* handle = SDL_LoadObject(entry.physical_name.c_str());
         if (handle == NULL) {
-            fmt::print("Plugin {} failed to load: {}\n", entry.virtualName, SDL_GetError());
+            fmt::print("Plugin {} failed to load: {}\n", entry.virtual_name, SDL_GetError());
         } else {
             void* get_required_function_count =
                 SDL_LoadFunction(handle, "GetRequiredFunctionCount");
@@ -89,7 +89,7 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
             void* plugin_loaded = SDL_LoadFunction(handle, "PluginLoaded");
             if (get_required_function_count == nullptr || get_required_function_names == nullptr ||
                 plugin_loaded == nullptr) {
-                fmt::print("Plugin {} failed to load: {}\n", entry.virtualName, SDL_GetError());
+                fmt::print("Plugin {} failed to load: {}\n", entry.virtual_name, SDL_GetError());
                 SDL_UnloadObject(handle);
             } else {
                 Plugin plugin;
@@ -107,7 +107,7 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
                 if (log != nullptr) {
                     Log::AddBackend(std::make_unique<Log::FunctionLogger>(
                         (decltype(Log::FunctionLogger::function))log,
-                        fmt::format("Plugin {}", entry.virtualName)));
+                        fmt::format("Plugin {}", entry.virtual_name)));
                 }
                 void* override_wlan_comm_id_check =
                     SDL_LoadFunction(handle, "OverrideWlanCommIdCheck");
@@ -135,7 +135,7 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
                     static_cast<void*>(&core), static_cast<void*>(this), required_functions.data());
 
                 plugins.push_back(std::move(plugin));
-                fmt::print("Plugin {} loaded\n", entry.virtualName);
+                fmt::print("Plugin {} loaded\n", entry.virtual_name);
             }
         }
     }

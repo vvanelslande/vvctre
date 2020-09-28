@@ -39,12 +39,12 @@ enum class UserPath {
     UserDir,
 };
 
-// FileSystem tree node/
+// FileSystem tree node
 struct FSTEntry {
-    bool isDirectory;
-    u64 size;                 // file length or number of entries from children
-    std::string physicalName; // name on disk
-    std::string virtualName;  // name in FST names table
+    bool is_directory;
+    u64 size;                  // File size or number of entries from children
+    std::string physical_name; // Name on disk
+    std::string virtual_name;  // Name in FST names table
     std::vector<FSTEntry> children;
 };
 

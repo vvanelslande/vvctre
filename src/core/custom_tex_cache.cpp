@@ -59,10 +59,10 @@ void CustomTexCache::FindCustomTextures() {
         FileUtil::GetAllFilesFromNestedEntries(texture_dir, textures);
 
         for (const auto& file : textures) {
-            if (file.isDirectory) {
+            if (file.is_directory) {
                 continue;
             }
-            if (file.virtualName.substr(0, 5) != "tex1_") {
+            if (file.virtual_name.substr(0, 5) != "tex1_") {
                 continue;
             }
 
@@ -72,9 +72,9 @@ void CustomTexCache::FindCustomTextures() {
             u32 format; // unused
 
             // TODO: more modern way of doing this
-            if (std::sscanf(file.virtualName.c_str(), "tex1_%ux%u_%llX_%u.%*s", &width, &height,
+            if (std::sscanf(file.virtual_name.c_str(), "tex1_%ux%u_%llX_%u.%*s", &width, &height,
                             &hash, &format) == 4) {
-                AddTexturePath(hash, file.physicalName);
+                AddTexturePath(hash, file.physical_name);
             }
         }
     }

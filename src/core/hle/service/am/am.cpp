@@ -430,7 +430,7 @@ std::string GetTitleMetadataPath(Service::FS::MediaType media_type, u64 tid, boo
     FileUtil::ScanDirectoryTree(content_path, entries);
     for (const FileUtil::FSTEntry& entry : entries.children) {
         std::string filename_filename, filename_extension;
-        Common::SplitPath(entry.virtualName, nullptr, &filename_filename, &filename_extension);
+        Common::SplitPath(entry.virtual_name, nullptr, &filename_filename, &filename_extension);
 
         if (filename_extension == ".tmd") {
             const u32 id = std::stoul(filename_filename, nullptr, 16);
@@ -541,7 +541,7 @@ void Module::ScanForTitles(Service::FS::MediaType media_type) {
     FileUtil::ScanDirectoryTree(title_path, entries, 1);
     for (const FileUtil::FSTEntry& tid_high : entries.children) {
         for (const FileUtil::FSTEntry& tid_low : tid_high.children) {
-            std::string tid_string = tid_high.virtualName + tid_low.virtualName;
+            std::string tid_string = tid_high.virtual_name + tid_low.virtual_name;
 
             if (tid_string.length() == TITLE_ID_VALID_LENGTH) {
                 const u64 tid = std::stoull(tid_string, nullptr, 16);

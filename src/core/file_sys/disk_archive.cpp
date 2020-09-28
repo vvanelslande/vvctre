@@ -56,7 +56,7 @@ bool DiskFile::Close() const {
 DiskDirectory::DiskDirectory(const std::string& path) {
     unsigned size = FileUtil::ScanDirectoryTree(path, directory);
     directory.size = size;
-    directory.isDirectory = true;
+    directory.is_directory = true;
     children_iterator = directory.children.begin();
 }
 
@@ -65,10 +65,10 @@ u32 DiskDirectory::Read(const u32 count, Entry* entries) {
 
     while (entries_read < count && children_iterator != directory.children.cend()) {
         const FileUtil::FSTEntry& file = *children_iterator;
-        const std::string& filename = file.virtualName;
+        const std::string& filename = file.virtual_name;
         Entry& entry = entries[entries_read];
 
-        LOG_TRACE(Service_FS, "File {}: size={} dir={}", filename, file.size, file.isDirectory);
+        LOG_TRACE(Service_FS, "File {}: size={} dir={}", filename, file.size, file.is_directory);
 
         // TODO(Link Mauve): use a proper conversion to UTF-16.
         for (std::size_t j = 0; j < FILENAME_LENGTH; ++j) {
@@ -79,7 +79,7 @@ u32 DiskDirectory::Read(const u32 count, Entry* entries) {
 
         FileUtil::SplitFilename83(filename, entry.short_name, entry.extension);
 
-        entry.is_directory = file.isDirectory;
+        entry.is_directory = file.is_directory;
         entry.is_hidden = (filename[0] == '.');
         entry.is_read_only = 0;
         entry.file_size = file.size;
@@ -88,7 +88,7 @@ u32 DiskDirectory::Read(const u32 count, Entry* entries) {
         // most user SD cards.
         // Some homebrews (blargSNES for instance) are known to mistakenly use the archive bit as a
         // file bit.
-        entry.is_archive = !file.isDirectory;
+        entry.is_archive = !file.is_directory;
 
         ++entries_read;
         ++children_iterator;
