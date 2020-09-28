@@ -191,10 +191,7 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
             bool valid = false;
             switch (state.format) {
             case Format::PCM8:
-                // TODO(xperia64): This may just work fine like PCM16, but I haven't tested and
-                // couldn't find any test case games
-                UNIMPLEMENTED_MSG("{} not handled for partial buffer updates", "PCM8");
-                // state.current_buffer = Codec::DecodePCM8(num_channels, memory, config.length);
+                state.current_buffer = Codec::DecodePCM8(num_channels, memory, config.length);
                 break;
             case Format::PCM16:
                 state.current_buffer = Codec::DecodePCM16(num_channels, memory, config.length);
@@ -213,7 +210,7 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
             // just re-consume the samples up to the current sample number. There may be some
             // imprecision here with the current sample number, as Detective Pikachu sounds a little
             // rough at times.
-            if (valid) {
+            if (valid && (state.current_buffer.size() >= state.current_sample_number)) {
                 state.current_buffer.erase(
                     state.current_buffer.begin(),
                     std::next(state.current_buffer.begin(), state.current_sample_number));
