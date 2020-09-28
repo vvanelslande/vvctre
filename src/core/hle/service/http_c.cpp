@@ -21,7 +21,6 @@
 #include "core/hle/service/fs/archive.h"
 #include "core/hle/service/http_c.h"
 #include "core/hw/aes/key.h"
-#include "externals/http-parser/http_parser.h"
 
 #include <curl/curl.h>
 
