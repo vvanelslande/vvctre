@@ -8,7 +8,6 @@
 #include <cryptopp/modes.h>
 #include <curl/curl.h>
 #include <fmt/format.h>
-#include <httpparser/httpresponseparser.h>
 #include <mbedtls/ssl.h>
 #include "common/assert.h"
 #include "common/common_funcs.h"
@@ -21,6 +20,13 @@
 #include "core/hle/service/fs/archive.h"
 #include "core/hle/service/http_c.h"
 #include "core/hw/aes/key.h"
+
+#ifdef _WIN32
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif
+
+#include <httpparser/httpresponseparser.h>
 
 namespace Service::HTTP {
 
