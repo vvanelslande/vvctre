@@ -201,12 +201,8 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
                 valid = true;
                 break;
             case Format::ADPCM:
-                // TODO(xperia64): Are partial embedded buffer updates even valid for ADPCM? What
-                // about the adpcm state?
-                UNIMPLEMENTED_MSG("{} not handled for partial buffer updates", "ADPCM");
-                /* state.current_buffer =
-                    Codec::DecodeADPCM(memory, config.length, state.adpcm_coeffs,
-                   state.adpcm_state); */
+                state.current_buffer = Codec::DecodeADPCM(memory, config.length, state.adpcm_coeffs,
+                                                          state.adpcm_state);
                 break;
             default:
                 UNIMPLEMENTED();
