@@ -205,7 +205,7 @@ CitraRoomList GetPublicCitraRooms() {
         return {};
     }
 
-    const nlohmann::json json_rooms = nlohmann::json::parse(body)["json_rooms"];
+    const nlohmann::json json_rooms = nlohmann::json::parse(body)["rooms"];
 
     CitraRoomList rooms;
 
