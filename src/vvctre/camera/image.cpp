@@ -3,14 +3,11 @@
 // Refer to the license.txt file included.
 
 #include <curl/curl.h>
-#include <http_parser.h>
 #include <mbedtls/ssl.h>
 #include <stb_image.h>
 #include <stb_image_resize.h>
 #include "common/assert.h"
 #include "common/file_util.h"
-#include "curl/easy.h"
-#include "externals/http-parser/http_parser.h"
 #include "vvctre/camera/image.h"
 #include "vvctre/camera/util.h"
 
