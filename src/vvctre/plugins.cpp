@@ -2099,6 +2099,10 @@ void vvctre_gui_style_set_window_title_align(float value[2]) {
     style.WindowTitleAlign.y = value[1];
 }
 
+void vvctre_gui_style_set_window_menu_button_position(ImGuiDir value) {
+    ImGui::GetStyle().WindowMenuButtonPosition = value;
+}
+
 void vvctre_gui_style_set_child_rounding(float value) {
     ImGui::GetStyle().ChildRounding = value;
 }
@@ -2141,8 +2145,18 @@ void vvctre_gui_style_set_item_inner_spacing(float value[2]) {
     style.ItemInnerSpacing.y = value[1];
 }
 
+void vvctre_gui_style_set_touch_extra_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.TouchExtraPadding.x = value[0];
+    style.TouchExtraPadding.y = value[1];
+}
+
 void vvctre_gui_style_set_indent_spacing(float value) {
     ImGui::GetStyle().IndentSpacing = value;
+}
+
+void vvctre_gui_style_set_columns_min_spacing(float value) {
+    ImGui::GetStyle().ColumnsMinSpacing = value;
 }
 
 void vvctre_gui_style_set_scrollbar_size(float value) {
@@ -2161,8 +2175,24 @@ void vvctre_gui_style_set_grab_rounding(float value) {
     ImGui::GetStyle().GrabRounding = value;
 }
 
+void vvctre_gui_style_set_log_slider_deadzone(float value) {
+    ImGui::GetStyle().LogSliderDeadzone = value;
+}
+
 void vvctre_gui_style_set_tab_rounding(float value) {
     ImGui::GetStyle().TabRounding = value;
+}
+
+void vvctre_gui_style_set_tab_border_size(float value) {
+    ImGui::GetStyle().TabBorderSize = value;
+}
+
+void vvctre_gui_style_set_tab_min_width_for_close_button(float value) {
+    ImGui::GetStyle().TabMinWidthForCloseButton = value;
+}
+
+void vvctre_gui_style_set_color_button_position(ImGuiDir value) {
+    ImGui::GetStyle().ColorButtonPosition = value;
 }
 
 void vvctre_gui_style_set_button_text_align(float value[2]) {
@@ -2175,6 +2205,42 @@ void vvctre_gui_style_set_selectable_text_align(float value[2]) {
     ImGuiStyle& style = ImGui::GetStyle();
     style.SelectableTextAlign.x = value[0];
     style.SelectableTextAlign.y = value[1];
+}
+
+void vvctre_gui_style_set_display_window_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.DisplayWindowPadding.x = value[0];
+    style.DisplayWindowPadding.y = value[1];
+}
+
+void vvctre_gui_style_set_display_safe_area_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.DisplaySafeAreaPadding.x = value[0];
+    style.DisplaySafeAreaPadding.y = value[1];
+}
+
+void vvctre_gui_style_set_mouse_cursor_scale(float value) {
+    ImGui::GetStyle().MouseCursorScale = value;
+}
+
+void vvctre_gui_style_set_anti_aliased_lines(bool value) {
+    ImGui::GetStyle().AntiAliasedLines = value;
+}
+
+void vvctre_gui_style_set_anti_aliased_lines_use_tex(bool value) {
+    ImGui::GetStyle().AntiAliasedLinesUseTex = value;
+}
+
+void vvctre_gui_style_set_anti_aliased_fill(bool value) {
+    ImGui::GetStyle().AntiAliasedFill = value;
+}
+
+void vvctre_gui_style_set_curve_tessellation_tol(float value) {
+    ImGui::GetStyle().CurveTessellationTol = value;
+}
+
+void vvctre_gui_style_set_circle_segment_max_error(float value) {
+    ImGui::GetStyle().CircleSegmentMaxError = value;
 }
 
 float vvctre_gui_style_get_alpha() {
@@ -2205,6 +2271,10 @@ void vvctre_gui_style_get_window_title_align(float value[2]) {
     ImGuiStyle& style = ImGui::GetStyle();
     value[0] = style.WindowTitleAlign.x;
     value[1] = style.WindowTitleAlign.y;
+}
+
+ImGuiDir vvctre_gui_style_get_window_menu_button_position() {
+    return ImGui::GetStyle().WindowMenuButtonPosition;
 }
 
 float vvctre_gui_style_get_child_rounding() {
@@ -2249,8 +2319,18 @@ void vvctre_gui_style_get_item_inner_spacing(float value[2]) {
     value[1] = style.ItemInnerSpacing.y;
 }
 
+void vvctre_gui_style_get_touch_extra_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.TouchExtraPadding.x;
+    value[1] = style.TouchExtraPadding.y;
+}
+
 float vvctre_gui_style_get_indent_spacing() {
     return ImGui::GetStyle().IndentSpacing;
+}
+
+float vvctre_gui_style_get_columns_min_spacing() {
+    return ImGui::GetStyle().ColumnsMinSpacing;
 }
 
 float vvctre_gui_style_get_scrollbar_size() {
@@ -2269,8 +2349,24 @@ float vvctre_gui_style_get_grab_rounding() {
     return ImGui::GetStyle().GrabRounding;
 }
 
+float vvctre_gui_style_get_log_slider_deadzone() {
+    return ImGui::GetStyle().LogSliderDeadzone;
+}
+
 float vvctre_gui_style_get_tab_rounding() {
     return ImGui::GetStyle().TabRounding;
+}
+
+float vvctre_gui_style_get_tab_border_size() {
+    return ImGui::GetStyle().TabBorderSize;
+}
+
+float vvctre_gui_style_get_tab_min_width_for_close_button() {
+    return ImGui::GetStyle().TabMinWidthForCloseButton;
+}
+
+ImGuiDir vvctre_gui_style_get_color_button_position() {
+    return ImGui::GetStyle().ColorButtonPosition;
 }
 
 void vvctre_gui_style_get_button_text_align(float value[2]) {
@@ -2283,6 +2379,42 @@ void vvctre_gui_style_get_selectable_text_align(float value[2]) {
     ImGuiStyle& style = ImGui::GetStyle();
     value[0] = style.SelectableTextAlign.x;
     value[1] = style.SelectableTextAlign.y;
+}
+
+void vvctre_gui_style_get_display_window_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.DisplayWindowPadding.x;
+    value[1] = style.DisplayWindowPadding.y;
+}
+
+void vvctre_gui_style_get_display_safe_area_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.DisplaySafeAreaPadding.x;
+    value[1] = style.DisplaySafeAreaPadding.y;
+}
+
+float vvctre_gui_style_get_mouse_cursor_scale() {
+    return ImGui::GetStyle().MouseCursorScale;
+}
+
+bool vvctre_gui_style_get_anti_aliased_lines() {
+    return ImGui::GetStyle().AntiAliasedLines;
+}
+
+bool vvctre_gui_style_get_anti_aliased_lines_use_tex() {
+    return ImGui::GetStyle().AntiAliasedLinesUseTex;
+}
+
+bool vvctre_gui_style_get_anti_aliased_fill() {
+    return ImGui::GetStyle().AntiAliasedFill;
+}
+
+float vvctre_gui_style_get_curve_tessellation_tol() {
+    return ImGui::GetStyle().CurveTessellationTol;
+}
+
+float vvctre_gui_style_get_circle_segment_max_error() {
+    return ImGui::GetStyle().CircleSegmentMaxError;
 }
 
 u64 vvctre_get_dear_imgui_version() {
@@ -3961,6 +4093,8 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_style_set_window_border_size", (void*)&vvctre_gui_style_set_window_border_size},
     {"vvctre_gui_style_set_window_min_size", (void*)&vvctre_gui_style_set_window_min_size},
     {"vvctre_gui_style_set_window_title_align", (void*)&vvctre_gui_style_set_window_title_align},
+    {"vvctre_gui_style_set_window_menu_button_position",
+     (void*)&vvctre_gui_style_set_window_menu_button_position},
     {"vvctre_gui_style_set_child_rounding", (void*)&vvctre_gui_style_set_child_rounding},
     {"vvctre_gui_style_set_child_border_size", (void*)&vvctre_gui_style_set_child_border_size},
     {"vvctre_gui_style_set_popup_rounding", (void*)&vvctre_gui_style_set_popup_rounding},
@@ -3970,21 +4104,43 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_style_set_frame_border_size", (void*)&vvctre_gui_style_set_frame_border_size},
     {"vvctre_gui_style_set_item_spacing", (void*)&vvctre_gui_style_set_item_spacing},
     {"vvctre_gui_style_set_item_inner_spacing", (void*)&vvctre_gui_style_set_item_inner_spacing},
+    {"vvctre_gui_style_set_touch_extra_padding", (void*)&vvctre_gui_style_set_touch_extra_padding},
     {"vvctre_gui_style_set_indent_spacing", (void*)&vvctre_gui_style_set_indent_spacing},
+    {"vvctre_gui_style_set_columns_min_spacing", (void*)&vvctre_gui_style_set_columns_min_spacing},
     {"vvctre_gui_style_set_scrollbar_size", (void*)&vvctre_gui_style_set_scrollbar_size},
     {"vvctre_gui_style_set_scrollbar_rounding", (void*)&vvctre_gui_style_set_scrollbar_rounding},
     {"vvctre_gui_style_set_grab_min_size", (void*)&vvctre_gui_style_set_grab_min_size},
     {"vvctre_gui_style_set_grab_rounding", (void*)&vvctre_gui_style_set_grab_rounding},
+    {"vvctre_gui_style_set_log_slider_deadzone", (void*)&vvctre_gui_style_set_log_slider_deadzone},
     {"vvctre_gui_style_set_tab_rounding", (void*)&vvctre_gui_style_set_tab_rounding},
+    {"vvctre_gui_style_set_tab_border_size", (void*)&vvctre_gui_style_set_tab_border_size},
+    {"vvctre_gui_style_set_tab_min_width_for_close_button",
+     (void*)&vvctre_gui_style_set_tab_min_width_for_close_button},
+    {"vvctre_gui_style_set_color_button_position",
+     (void*)&vvctre_gui_style_set_color_button_position},
     {"vvctre_gui_style_set_button_text_align", (void*)&vvctre_gui_style_set_button_text_align},
     {"vvctre_gui_style_set_selectable_text_align",
      (void*)&vvctre_gui_style_set_selectable_text_align},
-    {"vvctre_gui_style_get_alpha", (void*)&vvctre_gui_style_get_alpha},
+    {"vvctre_gui_style_set_display_window_padding",
+     (void*)&vvctre_gui_style_set_display_window_padding},
+    {"vvctre_gui_style_set_display_safe_area_padding",
+     (void*)&vvctre_gui_style_set_display_safe_area_padding},
+    {"vvctre_gui_style_set_mouse_cursor_scale", (void*)&vvctre_gui_style_set_mouse_cursor_scale},
+    {"vvctre_gui_style_set_anti_aliased_lines", (void*)&vvctre_gui_style_set_anti_aliased_lines},
+    {"vvctre_gui_style_set_anti_aliased_lines_use_tex",
+     (void*)&vvctre_gui_style_set_anti_aliased_lines_use_tex},
+    {"vvctre_gui_style_set_anti_aliased_fill", (void*)&vvctre_gui_style_set_anti_aliased_fill},
+    {"vvctre_gui_style_set_curve_tessellation_tol",
+     (void*)&vvctre_gui_style_set_curve_tessellation_tol},
+    {"vvctre_gui_style_set_circle_segment_max_error",
+     (void*)&vvctre_gui_style_set_circle_segment_max_error},
     {"vvctre_gui_style_get_window_padding", (void*)&vvctre_gui_style_get_window_padding},
     {"vvctre_gui_style_get_window_rounding", (void*)&vvctre_gui_style_get_window_rounding},
     {"vvctre_gui_style_get_window_border_size", (void*)&vvctre_gui_style_get_window_border_size},
     {"vvctre_gui_style_get_window_min_size", (void*)&vvctre_gui_style_get_window_min_size},
     {"vvctre_gui_style_get_window_title_align", (void*)&vvctre_gui_style_get_window_title_align},
+    {"vvctre_gui_style_get_window_menu_button_position",
+     (void*)&vvctre_gui_style_get_window_menu_button_position},
     {"vvctre_gui_style_get_child_rounding", (void*)&vvctre_gui_style_get_child_rounding},
     {"vvctre_gui_style_get_child_border_size", (void*)&vvctre_gui_style_get_child_border_size},
     {"vvctre_gui_style_get_popup_rounding", (void*)&vvctre_gui_style_get_popup_rounding},
@@ -3994,15 +4150,36 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_style_get_frame_border_size", (void*)&vvctre_gui_style_get_frame_border_size},
     {"vvctre_gui_style_get_item_spacing", (void*)&vvctre_gui_style_get_item_spacing},
     {"vvctre_gui_style_get_item_inner_spacing", (void*)&vvctre_gui_style_get_item_inner_spacing},
+    {"vvctre_gui_style_get_touch_extra_padding", (void*)&vvctre_gui_style_get_touch_extra_padding},
     {"vvctre_gui_style_get_indent_spacing", (void*)&vvctre_gui_style_get_indent_spacing},
+    {"vvctre_gui_style_get_columns_min_spacing", (void*)&vvctre_gui_style_get_columns_min_spacing},
     {"vvctre_gui_style_get_scrollbar_size", (void*)&vvctre_gui_style_get_scrollbar_size},
     {"vvctre_gui_style_get_scrollbar_rounding", (void*)&vvctre_gui_style_get_scrollbar_rounding},
     {"vvctre_gui_style_get_grab_min_size", (void*)&vvctre_gui_style_get_grab_min_size},
     {"vvctre_gui_style_get_grab_rounding", (void*)&vvctre_gui_style_get_grab_rounding},
+    {"vvctre_gui_style_get_log_slider_deadzone", (void*)&vvctre_gui_style_get_log_slider_deadzone},
     {"vvctre_gui_style_get_tab_rounding", (void*)&vvctre_gui_style_get_tab_rounding},
+    {"vvctre_gui_style_get_tab_border_size", (void*)&vvctre_gui_style_get_tab_border_size},
+    {"vvctre_gui_style_get_tab_min_width_for_close_button",
+     (void*)&vvctre_gui_style_get_tab_min_width_for_close_button},
+    {"vvctre_gui_style_get_color_button_position",
+     (void*)&vvctre_gui_style_get_color_button_position},
     {"vvctre_gui_style_get_button_text_align", (void*)&vvctre_gui_style_get_button_text_align},
     {"vvctre_gui_style_get_selectable_text_align",
      (void*)&vvctre_gui_style_get_selectable_text_align},
+    {"vvctre_gui_style_get_display_window_padding",
+     (void*)&vvctre_gui_style_get_display_window_padding},
+    {"vvctre_gui_style_get_display_safe_area_padding",
+     (void*)&vvctre_gui_style_get_display_safe_area_padding},
+    {"vvctre_gui_style_get_mouse_cursor_scale", (void*)&vvctre_gui_style_get_mouse_cursor_scale},
+    {"vvctre_gui_style_get_anti_aliased_lines", (void*)&vvctre_gui_style_get_anti_aliased_lines},
+    {"vvctre_gui_style_get_anti_aliased_lines_use_tex",
+     (void*)&vvctre_gui_style_get_anti_aliased_lines_use_tex},
+    {"vvctre_gui_style_get_anti_aliased_fill", (void*)&vvctre_gui_style_get_anti_aliased_fill},
+    {"vvctre_gui_style_get_curve_tessellation_tol",
+     (void*)&vvctre_gui_style_get_curve_tessellation_tol},
+    {"vvctre_gui_style_get_circle_segment_max_error",
+     (void*)&vvctre_gui_style_get_circle_segment_max_error},
     {"vvctre_get_dear_imgui_version", (void*)&vvctre_get_dear_imgui_version},
     // OS window
     {"vvctre_set_os_window_size", (void*)&vvctre_set_os_window_size},
