@@ -30,7 +30,7 @@
 
 const u8 vvctre_version_major = 38;
 const u8 vvctre_version_minor = 0;
-const u8 vvctre_version_patch = 0;
+const u8 vvctre_version_patch = 1;
 
 void vvctreShutdown(PluginManager* plugin_manager) {
     if (plugin_manager != nullptr) {
@@ -272,19 +272,22 @@ bool GUI_CameraAddBrowse(const char* label, std::size_t index) {
                             "*.bmp "
                             "*.BMP *.psd *.PSD *.tga *.TGA *.gif *.GIF "
                             "*.hdr *.HDR *.pic *.PIC *.ppm *.PPM *.pgm *.PGM",
-                            "JPEG", "*.jpg *.JPG *.jpeg *.JPEG *.jfif *.JFIF", "PNG", "*.png *.PNG",
+                            "JPEG",
+                            "*.jpg *.JPG *.jpeg *.JPEG *.jfif *.JFIF",
+                            "PNG",
+                            "*.png *.PNG",
                             "BMP",
-                            "*.bmp *.BMP"
+                            "*.bmp *.BMP",
                             "PSD",
-                            "*.psd *.PSD"
+                            "*.psd *.PSD",
                             "TGA",
-                            "*.tga *.TGA"
+                            "*.tga *.TGA",
                             "GIF",
-                            "*.gif *.GIF"
+                            "*.gif *.GIF",
                             "HDR",
-                            "*.hdr *.HDR"
+                            "*.hdr *.HDR",
                             "PIC",
-                            "*.pic *.PIC"
+                            "*.pic *.PIC",
                             "PNM",
                             "*.ppm *.PPM *.pgm *.PGM"})
                 .result();
