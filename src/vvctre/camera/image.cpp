@@ -3,13 +3,14 @@
 // Refer to the license.txt file included.
 
 #include <curl/curl.h>
-#include <httpparser/urlparser.h>
+#include <http_parser.h>
 #include <mbedtls/ssl.h>
 #include <stb_image.h>
 #include <stb_image_resize.h>
 #include "common/assert.h"
 #include "common/file_util.h"
 #include "curl/easy.h"
+#include "externals/http-parser/http_parser.h"
 #include "vvctre/camera/image.h"
 #include "vvctre/camera/util.h"
 
@@ -48,7 +49,8 @@ ImageCamera::ImageCamera(const std::string& file, const Service::CAM::Flip& flip
         (flip == Service::CAM::Flip::Vertical) || (flip == Service::CAM::Flip::Reverse);
 
     while (unmodified_image.empty()) {
-        if (httpparser::UrlParser().parse(file)) {
+        if (file.find("http://") != std::string::npos ||
+            file.find("https://") != std::string::npos) {
             CURL* curl = curl_easy_init();
             if (curl == nullptr) {
                 LOG_DEBUG(Service_CAM, "curl_easy_init failed");

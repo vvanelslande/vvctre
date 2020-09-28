@@ -429,7 +429,7 @@ add_library(core STATIC
 create_target_directory_groups(core)
 
 target_link_libraries(core PUBLIC common PRIVATE stb audio_core network video_core)
-target_link_libraries(core PUBLIC Boost::boost libcurl SDL2 PRIVATE cryptopp enet fmt system-archives mbedtls httpparser)
+target_link_libraries(core PUBLIC Boost::boost libcurl SDL2 PRIVATE cryptopp enet fmt system-archives mbedtls http-parser)
 target_include_directories(core PRIVATE ${PROJECT_SOURCE_DIR}/externals/mbedtls/include)
 
 if (ARCHITECTURE_x86_64)
