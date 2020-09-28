@@ -823,6 +823,7 @@ static const std::vector<std::tuple<u64, std::string>> amiibos = {
     {0x35c30000036e0a02, "King Knight"},
     {0x3600000002590002, "Cloud"},
     {0x3600010003620002, "Cloud - Player 2"},
+    {0x3640000003a20002, "Hero"},
     {0x06420000035f1102, "Pikmin"},
     {0x0015000003670102, "Goomba"},
     {0x0023000003680102, "Koopa Troopa"},
@@ -837,6 +838,7 @@ static const std::vector<std::tuple<u64, std::string>> amiibos = {
     {0x3804000103971702, "Yabe"},
     {0x3805000103981702, "Ganda"},
     {0x38c0000003911602, "Loot Goblin"},
+    {0x3a00000003a10002, "Joker"},
     {0x00c00000037b0002, "King K. Rool"},
     {0x00240000038d0002, "Piranha Plant"},
     {0x078f000003810002, "Ice Climbers"},
@@ -1308,11 +1310,11 @@ void EmuWindow_SDL2::SwapBuffers() {
                         while (clipper.Step()) {
                             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
                                 const auto [id, name] = v[i];
+                                const std::string menu_item_text =
+                                    fmt::format("{} - {} (0x{:016X})",
+                                                amiibo_series.at((id >> 8) & 0xFF), name, id);
 
-                                if (ImGui::MenuItem(fmt::format("{} - {} (0x{:016X})",
-                                                                amiibo_series.at((id >> 8) & 0xFF),
-                                                                name, id)
-                                                        .c_str())) {
+                                if (ImGui::MenuItem(menu_item_text.c_str())) {
                                     std::shared_ptr<Service::NFC::Module::Interface> nfc =
                                         system.ServiceManager()
                                             .GetService<Service::NFC::Module::Interface>("nfc:u");
@@ -1326,6 +1328,10 @@ void EmuWindow_SDL2::SwapBuffers() {
                                         std::memcpy(&data.char_id, &swapped_id, sizeof(swapped_id));
                                         nfc->LoadAmiibo(data);
                                     }
+                                }
+
+                                if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+                                    ImGui::SetClipboardText(menu_item_text.c_str());
                                 }
                             }
                         }
