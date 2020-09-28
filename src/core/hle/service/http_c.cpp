@@ -9,7 +9,6 @@
 #include <curl/curl.h>
 #include <fmt/format.h>
 #include <httpparser/httpresponseparser.h>
-#include <mbedtls/pk.h>
 #include <mbedtls/ssl.h>
 #include "common/assert.h"
 #include "common/common_funcs.h"
