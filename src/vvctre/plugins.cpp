@@ -64,25 +64,21 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
             continue;
         }
 
-        const std::string full_path =
-            FileUtil::SanitizePath(fmt::format("{}/{}", entry.physicalName, entry.virtualName),
-                                   FileUtil::DirectorySeparator::PlatformDefault);
-
 #ifdef _WIN32
         if (entry.virtualName == "SDL2.dll") {
             continue;
         }
 
-        if (FileUtil::GetExtensionFromFilename(full_path) != "dll") {
+        if (FileUtil::GetExtensionFromFilename(entry.physicalName) != "dll") {
             continue;
         }
 #else
-        if (FileUtil::GetExtensionFromFilename(full_path) != "so") {
+        if (FileUtil::GetExtensionFromFilename(entry.physicalName) != "so") {
             continue;
         }
 #endif
 
-        void* handle = SDL_LoadObject(full_path.c_str());
+        void* handle = SDL_LoadObject(entry.physicalName.c_str());
         if (handle == NULL) {
             fmt::print("Plugin {} failed to load: {}\n", entry.virtualName, SDL_GetError());
         } else {
