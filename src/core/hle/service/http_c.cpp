@@ -12,6 +12,7 @@
 #include "common/assert.h"
 #include "common/common_funcs.h"
 #include "common/logging/log.h"
+#include "common/string_util.h"
 #include "core/core.h"
 #include "core/file_sys/archive_ncch.h"
 #include "core/file_sys/file_backend.h"
@@ -381,7 +382,8 @@ void Context::MakeRequest() {
     http_parser_settings_init(&response_parser_settings);
     response_parser_settings.on_header_field = [](http_parser* parser, const char* at,
                                                   std::size_t length) {
-        ((response_parser_data_t*)parser->data)->header_name = std::string(at, length);
+        ((response_parser_data_t*)parser->data)->header_name =
+            Common::ToLower(std::string(at, length));
         return 0;
     };
     response_parser_settings.on_header_value = [](http_parser* parser, const char* at,
@@ -1065,7 +1067,8 @@ void HTTP_C::GetResponseHeader(Kernel::HLERequestContext& ctx) {
     const u32 value_size = rp.Pop<u32>();
     const std::vector<u8> name_buffer = rp.PopStaticBuffer();
     Kernel::MappedBuffer& value_buffer = rp.PopMappedBuffer();
-    const std::string name(name_buffer.begin(), name_buffer.end() - 1);
+    const std::string name =
+        Common::ToLower(std::string(name_buffer.begin(), name_buffer.end() - 1));
 
     auto itr = contexts.find(context_handle);
     ASSERT(itr != contexts.end());
@@ -1073,7 +1076,7 @@ void HTTP_C::GetResponseHeader(Kernel::HLERequestContext& ctx) {
     const std::string value =
         itr->second.response_headers.find(name) == itr->second.response_headers.end()
             ? ""
-            : (itr->second.response_headers[name] + '\n');
+            : (itr->second.response_headers[name] + '\0');
     LOG_DEBUG(Service_HTTP, "context_handle = {}, name = {}, value = {}", context_handle, name,
               value);
 
