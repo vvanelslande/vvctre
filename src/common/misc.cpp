@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <cstdlib>
 #ifdef _WIN32
-#include <wincrypt.h>
 #include <windows.h>
 #else
 #include <cerrno>
@@ -15,6 +14,10 @@
 #include <mbedtls/ssl.h>
 #include "common/common_funcs.h"
 #include "common/file_util.h"
+
+#ifdef _WIN32
+#include <wincrypt.h>
+#endif
 
 // Generic function to get last error message.
 // Call directly after the command or use the error num.
