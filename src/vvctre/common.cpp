@@ -261,7 +261,9 @@ bool GUI_CameraAddBrowse(const char* label, std::size_t index) {
     if (ImGui::Button(label)) {
         int length = wai_getExecutablePath(nullptr, 0, nullptr);
         std::string vvctre_folder(length, '\0');
-        wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+        int dirname_length = 0;
+        wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
+        vvctre_folder = vvctre_folder.substr(0, dirname_length);
 
         const std::vector<std::string> result =
             pfd::open_file("Browse", vvctre_folder,
@@ -404,7 +406,9 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
     if (ImGui::Button("Load File")) {
         int length = wai_getExecutablePath(nullptr, 0, nullptr);
         std::string vvctre_folder(length, '\0');
-        wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+        int dirname_length = 0;
+        wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
+        vvctre_folder = vvctre_folder.substr(0, dirname_length);
 
         const std::vector<std::string> path =
             pfd::open_file("Load File", vvctre_folder, {"JSON Files", "*.json"}).result();

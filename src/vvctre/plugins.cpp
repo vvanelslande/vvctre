@@ -53,7 +53,9 @@
 PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(window) {
     int length = wai_getExecutablePath(nullptr, 0, nullptr);
     std::string vvctre_folder(length, '\0');
-    wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+    int dirname_length = 0;
+    wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
+    vvctre_folder = vvctre_folder.substr(0, dirname_length);
 
     FileUtil::FSTEntry entries;
     FileUtil::ScanDirectoryTree(vvctre_folder, entries);

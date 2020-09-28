@@ -1031,7 +1031,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                 if (ImGui::MenuItem("Load File")) {
                     int length = wai_getExecutablePath(nullptr, 0, nullptr);
                     std::string vvctre_folder(length, '\0');
-                    wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+                    int dirname_length = 0;
+                    wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
+                    vvctre_folder = vvctre_folder.substr(0, dirname_length);
 
                     const std::vector<std::string> result =
                         pfd::open_file("Browse", vvctre_folder,
@@ -1056,7 +1058,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                 if (ImGui::MenuItem("Install CIA")) {
                     int length = wai_getExecutablePath(nullptr, 0, nullptr);
                     std::string vvctre_folder(length, '\0');
-                    wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+                    int dirname_length = 0;
+                    wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
+                    vvctre_folder = vvctre_folder.substr(0, dirname_length);
 
                     const std::vector<std::string> files =
                         pfd::open_file("Install CIA", vvctre_folder,
@@ -1173,7 +1177,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                     if (ImGui::MenuItem("Load File (Encrypted)")) {
                         int length = wai_getExecutablePath(nullptr, 0, nullptr);
                         std::string vvctre_folder(length, '\0');
-                        wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+                        int dirname_length = 0;
+                        wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
+                        vvctre_folder = vvctre_folder.substr(0, dirname_length);
 
                         const std::vector<std::string> result =
                             pfd::open_file("Load Amiibo", vvctre_folder,
@@ -1200,7 +1206,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                     if (ImGui::MenuItem("Load File (Decrypted)")) {
                         int length = wai_getExecutablePath(nullptr, 0, nullptr);
                         std::string vvctre_folder(length, '\0');
-                        wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+                        int dirname_length = 0;
+                        wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
+                        vvctre_folder = vvctre_folder.substr(0, dirname_length);
 
                         const std::vector<std::string> result =
                             pfd::open_file("Load Amiibo", vvctre_folder,
@@ -3711,7 +3719,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                                         !movie.IsPlayingInput() && !movie.IsRecordingInput())) {
                         int length = wai_getExecutablePath(nullptr, 0, nullptr);
                         std::string vvctre_folder(length, '\0');
-                        wai_getExecutablePath(&vvctre_folder[0], length, nullptr);
+                        int dirname_length = 0;
+                        wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
+                        vvctre_folder = vvctre_folder.substr(0, dirname_length);
 
                         const auto filename =
                             pfd::open_file("Play Movie", vvctre_folder, {"VvCtre Movie", "*.vcm"})
