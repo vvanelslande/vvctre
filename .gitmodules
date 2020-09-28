@@ -54,10 +54,6 @@ url = https://github.com/nothings/stb.git
 path = externals/enet
 url = https://github.com/lsalzman/enet.git
 
-[submodule "asl"]
-path = externals/asl
-url = https://github.com/aslze/asl.git
-
 [submodule "mbedtls"]
 path = externals/mbedtls
 url = https://github.com/ARMmbed/mbedtls.git
@@ -74,6 +70,7 @@ url = https://github.com/nekipelov/httpparser.git
 [submodule "whereami"]
 path = externals/whereami
 url = https://github.com/gpakosz/whereami.git
-[submodule "externals/json"]
-	path = externals/json
-	url = https://github.com/nlohmann/json.git
+
+[submodule "json"]
+path = externals/json
+url = https://github.com/nlohmann/json.git

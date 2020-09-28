@@ -13,7 +13,6 @@
 #include <unordered_map>
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
-#include <asl/String.h>
 #include <clip.h>
 #include <cryptopp/osrng.h>
 #include <fmt/chrono.h>
@@ -1284,19 +1283,16 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 amiibo_generate_and_load_search_text_;
                             amiibo_generate_and_load_search_results.clear();
 
-                            asl::String lower_case_text =
-                                asl::String(amiibo_generate_and_load_search_text.c_str())
-                                    .toLowerCase();
-
                             if (!amiibo_generate_and_load_search_text.empty()) {
                                 for (const auto& a : amiibos) {
                                     const auto [id, name] = a;
-                                    if (asl::String(fmt::format("{} - {} (0x{:016X})",
-                                                                amiibo_series.at((id >> 8) & 0xFF),
-                                                                name, id)
-                                                        .c_str())
-                                            .toLowerCase()
-                                            .contains(lower_case_text)) {
+                                    if (Common::ToLower(
+                                            fmt::format("{} - {} (0x{:016X})",
+                                                        amiibo_series.at((id >> 8) & 0xFF), name,
+                                                        id))
+                                            .find(Common::ToLower(
+                                                amiibo_generate_and_load_search_text)) !=
+                                        std::string::npos) {
                                         amiibo_generate_and_load_search_results.push_back(a);
                                     }
                                 }
@@ -4396,10 +4392,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                     for (const auto& title : all_installed) {
                         const auto [path, name] = title;
 
-                        if (asl::String(name.c_str())
-                                .toLowerCase()
-                                .contains(
-                                    asl::String(installed_search_text.c_str()).toLowerCase())) {
+                        if (Common::ToLower(name).find(Common::ToLower(installed_search_text)) !=
+                            std::string::npos) {
                             installed_search_results.push_back(title);
                         }
                     }
@@ -4462,17 +4456,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                 public_rooms_search_text = public_rooms_search_text_;
                 public_rooms_search_results.clear();
 
-                asl::String lower_case_text =
-                    asl::String(public_rooms_search_text.c_str()).toLowerCase();
+                const std::string lower_case_text = Common::ToLower(public_rooms_search_text);
 
                 if (!public_rooms_search_text.empty()) {
                     for (const CitraRoom& room : all_public_rooms) {
-                        if (asl::String(room.name.c_str())
-                                .toLowerCase()
-                                .contains(lower_case_text) ||
-                            asl::String(GetRoomPopupText(room).c_str())
-                                .toLowerCase()
-                                .contains(lower_case_text)) {
+                        if ((Common::ToLower(room.name).find(lower_case_text) !=
+                             std::string::npos) ||
+                            (Common::ToLower(GetRoomPopupText(room)).find(lower_case_text) !=
+                             std::string::npos)) {
                             public_rooms_search_results.push_back(room);
                         }
                     }
@@ -4484,17 +4475,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                 public_rooms_search_text = public_rooms_search_text_;
                 public_rooms_search_results.clear();
 
-                asl::String lower_case_text =
-                    asl::String(public_rooms_search_text.c_str()).toLowerCase();
+                const std::string lower_case_text = Common::ToLower(public_rooms_search_text);
 
                 if (!public_rooms_search_text.empty()) {
                     for (const CitraRoom& room : all_public_rooms) {
-                        if (asl::String(room.name.c_str())
-                                .toLowerCase()
-                                .contains(lower_case_text) ||
-                            asl::String(GetRoomPopupText(room).c_str())
-                                .toLowerCase()
-                                .contains(lower_case_text)) {
+                        if ((Common::ToLower(room.name).find(lower_case_text) !=
+                             std::string::npos) ||
+                            (Common::ToLower(GetRoomPopupText(room)).find(lower_case_text) !=
+                             std::string::npos)) {
                             public_rooms_search_results.push_back(room);
                         }
                     }

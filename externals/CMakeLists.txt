@@ -103,59 +103,6 @@ set(ENABLE_PROGRAMS OFF CACHE BOOL "" FORCE)
 set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)
 add_subdirectory(mbedtls EXCLUDE_FROM_ALL)
 
-# ASL
-add_library(asl STATIC
-    asl/src/String.cpp
-    asl/src/Socket.cpp
-    asl/src/MulticastSocket.cpp
-    asl/src/Http.cpp
-    asl/src/Xdl.cpp
-    asl/src/Var.cpp
-    asl/src/IniFile.cpp
-    asl/src/File.cpp
-    asl/src/TextFile.cpp
-    asl/src/Directory.cpp
-    asl/src/Path.cpp
-    asl/src/Date.cpp
-    asl/src/Process.cpp
-    asl/src/unicodedata.cpp
-    asl/src/util.cpp
-    asl/src/TlsSocket.cpp
-    asl/include/asl/defs.h
-    asl/include/asl/String.h
-    asl/include/asl/Array.h
-    asl/include/asl/Array_.h
-    asl/include/asl/Stack.h
-    asl/include/asl/Map.h
-    asl/include/asl/HashMap.h
-    asl/include/asl/Vec2.h
-    asl/include/asl/Vec3.h
-    asl/include/asl/Vec4.h
-    asl/include/asl/File.h
-    asl/include/asl/IniFile.h
-    asl/include/asl/Date.h
-    asl/include/asl/File.h
-    asl/include/asl/TextFile.h
-    asl/include/asl/Directory.h
-    asl/include/asl/Path.h
-    asl/include/asl/Mutex.h
-    asl/include/asl/Process.h
-    asl/include/asl/Var.h
-    asl/include/asl/Xdl.h
-    asl/include/asl/Socket.h
-    asl/include/asl/Http.h
-    asl/include/asl/Pointer.h
-    asl/include/asl/util.h
-    asl/include/asl/TlsSocket.h
-)
-target_compile_definitions(asl PUBLIC ASL_IPV6 ASL_TLS ASL_STATIC)
-target_include_directories(asl PRIVATE ./asl/include ./mbedtls/include)
-target_include_directories(asl INTERFACE ./asl/include)
-target_link_libraries(asl PRIVATE mbedcrypto mbedx509 mbedtls)
-if(WIN32)
-    target_link_libraries(asl PRIVATE ws2_32 shell32 advapi32)
-endif()
-
 # System Archives
 add_library(system-archives INTERFACE)
 target_include_directories(system-archives INTERFACE ./system-archives)
