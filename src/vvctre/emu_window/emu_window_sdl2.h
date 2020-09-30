@@ -39,6 +39,7 @@ public:
     bool IsOpen() const;
 
     void Close();
+    void BeforeLoadingAfterFirstTime();
 
     struct KeyboardData {
         const Frontend::KeyboardConfig& config;

@@ -134,8 +134,6 @@ int main(int argc, char** argv) {
 
     Core::System& system = Core::System::GetInstance();
     PluginManager plugin_manager(system, window);
-    system.SetBeforeLoadingAfterFirstTime(
-        [&plugin_manager] { plugin_manager.BeforeLoadingAfterFirstTime(); });
     system.SetEmulationStartingAfterFirstTime(
         [&plugin_manager] { plugin_manager.EmulationStartingAfterFirstTime(); });
     if (!system.IsOnLoadFailedSet()) {
@@ -305,6 +303,11 @@ int main(int argc, char** argv) {
 
     std::unique_ptr<EmuWindow_SDL2> emu_window =
         std::make_unique<EmuWindow_SDL2>(system, plugin_manager, window, ok_multiplayer);
+
+    system.SetBeforeLoadingAfterFirstTime([&plugin_manager, &emu_window] {
+        emu_window.BeforeLoadingAfterFirstTime();
+        plugin_manager.BeforeLoadingAfterFirstTime();
+    });
 
     system.RegisterSoftwareKeyboard(std::make_shared<Frontend::SDL2_SoftwareKeyboard>(*emu_window));
     system.RegisterMiiSelector(std::make_shared<Frontend::SDL2_MiiSelector>(*emu_window));

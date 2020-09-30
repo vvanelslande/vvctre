@@ -880,6 +880,14 @@ void EmuWindow_SDL2::Close() {
     is_open = false;
 }
 
+void EmuWindow_SDL2::BeforeLoadingAfterFirstTime() {
+    all_ipc_records.clear();
+    ipc_recorder_search_results.clear();
+    ipc_recorder_search_text.clear();
+    ipc_recorder_search_text_.clear();
+    ipc_recorder_callback = nullptr;
+}
+
 void EmuWindow_SDL2::OnResize() {
     int width, height;
     SDL_GetWindowSize(window, &width, &height);
@@ -3822,11 +3830,6 @@ void EmuWindow_SDL2::SwapBuffers() {
             }
             if (request_reset) {
                 system.RequestReset();
-                all_ipc_records.clear();
-                ipc_recorder_search_results.clear();
-                ipc_recorder_search_text.clear();
-                ipc_recorder_search_text_.clear();
-                ipc_recorder_callback = nullptr;
                 request_reset = false;
             }
             amiibo_generate_and_load_search_results.clear();
