@@ -3986,31 +3986,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                             } else {
                                 all_ipc_records.emplace_back(record);
                             }
-                            if (!ipc_recorder_search_text.empty()) {
-                                std::string service_name;
-                                std::string function_name = "Unknown";
-                                if (record.client_port.id != -1) {
-                                    service_name = system.ServiceManager().GetServiceNameByPortId(
-                                        static_cast<u32>(record.client_port.id));
-                                }
-                                if (service_name.empty()) {
-                                    service_name = record.server_session.name;
-                                    service_name = Common::ReplaceAll(service_name, "_Server", "");
-                                    service_name = Common::ReplaceAll(service_name, "_Client", "");
-                                }
-                                const std::string label = fmt::format(
-                                    "#{} - {} - {} (0x{:08X}) - {} - {}", record.id, service_name,
-                                    record.function_name.empty() ? "Unknown" : record.function_name,
-                                    record.untranslated_request_cmdbuf.empty()
-                                        ? 0xFFFFFFFF
-                                        : record.untranslated_request_cmdbuf[0],
-                                    record.is_hle ? "HLE" : "LLE",
-                                    IPC_Recorder_GetStatusString(record.status));
-
-                                if (label.find(ipc_recorder_search_text) != std::string::npos) {
-                                    ipc_recorder_search_results.push_back(record);
-                                }
-                            }
                         });
                 } else {
                     r.UnbindCallback(ipc_recorder_callback);
@@ -4022,6 +3997,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                 ipc_recorder_id_offset += all_ipc_records.size();
                 all_ipc_records.clear();
                 ipc_recorder_search_results.clear();
+                ipc_recorder_search_text.clear();
+                ipc_recorder_search_text_.clear();
             }
             ImGui::SameLine();
             if (ImGui::InputTextWithHint("##search", "Search", &ipc_recorder_search_text_,
