@@ -305,7 +305,7 @@ int main(int argc, char** argv) {
         std::make_unique<EmuWindow_SDL2>(system, plugin_manager, window, ok_multiplayer);
 
     system.SetBeforeLoadingAfterFirstTime([&plugin_manager, &emu_window] {
-        emu_window.BeforeLoadingAfterFirstTime();
+        emu_window->BeforeLoadingAfterFirstTime();
         plugin_manager.BeforeLoadingAfterFirstTime();
     });
 
