@@ -881,6 +881,8 @@ void EmuWindow_SDL2::Close() {
 }
 
 void EmuWindow_SDL2::BeforeLoadingAfterFirstTime() {
+    show_cheats_text_editor = false;
+    cheats_text_editor_text.clear();
     all_ipc_records.clear();
     ipc_recorder_search_results.clear();
     ipc_recorder_search_text.clear();
