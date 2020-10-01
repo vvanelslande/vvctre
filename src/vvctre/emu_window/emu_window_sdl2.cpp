@@ -1030,12 +1030,16 @@ void EmuWindow_SDL2::SwapBuffers() {
                          ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize |
                          ImGuiWindowFlags_NoFocusOnAppearing)) {
         ImGui::TextColored(fps_color, "%d FPS", static_cast<int>(io.Framerate));
-        if (ImGui::BeginPopupContextItem("Menu", ImGuiMouseButton_Right)) {
-            if (ImGui::IsWindowAppearing() && !ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
-                paused = true;
-            }
-
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+            ImGui::OpenPopup("Menu");
             menu_open = true;
+        }
+        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+            ImGui::OpenPopup("Menu");
+            paused = true;
+            menu_open = true;
+        }
+        if (ImGui::BeginPopup("Menu")) {
 
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Load File")) {
