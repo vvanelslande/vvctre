@@ -925,7 +925,7 @@ std::optional<std::string> DecompileProgram(const Pica::Shader::ProgramCode& pro
         return generator.MoveShaderCode();
     } catch (const DecompileFail& exception) {
         LOG_INFO(HW_GPU, "Shader decompilation failed: {}", exception.what());
-        return {};
+        return std::nullopt;
     }
 }
 

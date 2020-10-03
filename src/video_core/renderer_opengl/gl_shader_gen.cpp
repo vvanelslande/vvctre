@@ -1641,7 +1641,7 @@ std::optional<std::string> GenerateVertexShader(const Pica::Shader::ShaderSetup&
         get_output_reg, config.state.sanitize_mul);
 
     if (!program_source_opt) {
-        return {};
+        return std::nullopt;
     }
 
     out += R"(
