@@ -17,7 +17,7 @@ public:
     std::vector<u8> GetSignature(const std::vector<u8>& message) const;
 
     explicit operator bool() const {
-        // TODO(B3N30): Maybe check if exponent and modulus are vailid
+        // TODO(B3N30): Maybe check if exponent and modulus are valid
         return init;
     }
 

@@ -372,9 +372,10 @@ void RoomMember::RoomMemberImpl::Disconnect() {
     room_information.member_slots = 0;
     room_information.name.clear();
 
-    if (!server) {
+    if (server == nullptr) {
         return;
     }
+
     enet_peer_disconnect(server, 0);
 
     ENetEvent event;
@@ -491,7 +492,7 @@ void RoomMember::Join(const std::string& nick, const std::string& console_id_has
         room_member_impl->loop_thread.reset();
     }
 
-    if (!room_member_impl->client) {
+    if (room_member_impl->client == nullptr) {
         room_member_impl->client = enet_host_create(nullptr, 1, 1, 0, 0);
         ASSERT_MSG(room_member_impl->client != nullptr, "Could not create client");
     }
@@ -503,7 +504,7 @@ void RoomMember::Join(const std::string& nick, const std::string& console_id_has
     address.port = server_port;
     room_member_impl->server = enet_host_connect(room_member_impl->client, &address, 1, 0);
 
-    if (!room_member_impl->server) {
+    if (room_member_impl->server == nullptr) {
         room_member_impl->SetState(State::Idle);
         room_member_impl->SetError(Error::UnknownError);
         return;

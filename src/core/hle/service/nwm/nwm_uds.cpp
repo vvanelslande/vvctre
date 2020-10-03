@@ -978,12 +978,10 @@ void NWM_UDS::EjectClient(Kernel::HLERequestContext& ctx) {
     // This function always returns success if the status is valid.
     rb.Push(RESULT_SUCCESS);
 
-    using Network::WifiPacket;
     Network::MacAddress dest_address = Network::BROADCAST_MAC_ADDRESS;
 
     if (network_node_id != BroadcastNetworkNodeId) {
-        auto address = GetNodeMacAddress(network_node_id, 0);
-
+        std::optional<Network::MacAddress> address = GetNodeMacAddress(network_node_id, 0);
         if (!address) {
             // There is no error if the network node id was not found.
             return;
@@ -991,10 +989,10 @@ void NWM_UDS::EjectClient(Kernel::HLERequestContext& ctx) {
         dest_address = *address;
     }
 
-    WifiPacket deauth;
+    Network::WifiPacket deauth;
     deauth.channel = network_channel;
     deauth.destination_address = dest_address;
-    deauth.type = WifiPacket::PacketType::Deauthentication;
+    deauth.type = Network::WifiPacket::PacketType::Deauthentication;
     SendPacket(deauth);
     if (network_node_id == BroadcastNetworkNodeId) {
         SendPacket(deauth);
@@ -1127,7 +1125,7 @@ void NWM_UDS::SendTo(Kernel::HLERequestContext& ctx) {
         LOG_ERROR(Service_NWM, "Unexpected flags 0x{:02X}", flags);
     }
 
-    auto dest_address = GetNodeMacAddress(dest_node_id, flags);
+    std::optional<Network::MacAddress> dest_address = GetNodeMacAddress(dest_node_id, flags);
     if (!dest_address) {
         rb.Push(ResultCode(ErrorDescription::NotFound, ErrorModule::UDS,
                            ErrorSummary::WrongArgument, ErrorLevel::Status));

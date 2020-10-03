@@ -160,7 +160,7 @@ void LoadBootromKeys() {
 
     const std::string filepath =
         FileUtil::GetUserPath(FileUtil::UserPath::SysDataDir) + "boot9.bin";
-    auto file = FileUtil::IOFile(filepath, "rb");
+    FileUtil::IOFile file(filepath, "rb");
     if (!file) {
         return;
     }
@@ -223,7 +223,7 @@ void LoadNativeFirmKeys() {
         return;
     }
 
-    const auto rsa = RSA::GetSlot(0);
+    const RSA::RsaSlot rsa = RSA::GetSlot(0);
     if (!rsa) {
         LOG_ERROR(HW_AES, "RSA slot is missing");
         return;

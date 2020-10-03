@@ -481,8 +481,9 @@ private:
         while (current != 0) {
             CROHelper cro(current, process, memory, cpu);
             CASCADE_RESULT(bool next, func(cro));
-            if (!next)
+            if (!next) {
                 break;
+            }
             current = cro.NextModule();
         }
         return RESULT_SUCCESS;

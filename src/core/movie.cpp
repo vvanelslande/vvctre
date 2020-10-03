@@ -330,8 +330,8 @@ Movie::ValidationResult Movie::ValidateHeader(const VCMHeader& header, u64 progr
     }
 
     if (program_id != header.program_id) {
-        LOG_WARNING(Movie, "This movie was recorded using a ROM with a different program id");
-        return ValidationResult::GameDismatch;
+        LOG_WARNING(Movie, "This movie was recorded using a ROM with a different program ID");
+        return ValidationResult::DifferentProgramID;
     }
 
     return ValidationResult::OK;

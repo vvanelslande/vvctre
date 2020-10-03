@@ -858,8 +858,9 @@ void Module::SetEULAVersion(const EULAVersion& version) {
 }
 
 std::shared_ptr<Module> GetModule(Core::System& system) {
-    auto cfg = system.ServiceManager().GetService<Service::CFG::Module::Interface>("cfg:u");
-    if (!cfg) {
+    std::shared_ptr<Service::CFG::Module::Interface> cfg =
+        system.ServiceManager().GetService<Service::CFG::Module::Interface>("cfg:u");
+    if (cfg == nullptr) {
         return nullptr;
     }
     return cfg->GetModule();

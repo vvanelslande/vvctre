@@ -136,7 +136,7 @@ Thread* ThreadManager::PopNextReadyThread() {
         // We have to do better than the current thread.
         // This call returns null when that's not possible.
         next = ready_queue.pop_first_better(thread->current_priority);
-        if (!next) {
+        if (next == nullptr) {
             // Otherwise just keep going with the current thread
             next = thread;
         }
@@ -233,14 +233,14 @@ void Thread::ResumeFromWait() {
 
 void ThreadManager::DebugThreadQueue() {
     Thread* thread = GetCurrentThread();
-    if (!thread) {
+    if (thread == nullptr) {
         LOG_DEBUG(Kernel, "Current: NO CURRENT THREAD");
     } else {
         LOG_DEBUG(Kernel, "0x{:02X} {} (current)", thread->current_priority,
                   GetCurrentThread()->GetObjectId());
     }
 
-    for (auto& t : thread_list) {
+    for (std::shared_ptr<Kernel::Thread>& t : thread_list) {
         u32 priority = ready_queue.contains(t.get());
         if (priority != -1) {
             LOG_DEBUG(Kernel, "0x{:02X} {}", priority, t->GetObjectId());
@@ -343,7 +343,7 @@ ResultVal<std::shared_ptr<Thread>> KernelSystem::CreateThread(std::string name, 
         MemoryRegionInfo* memory_region = GetMemoryRegion(MemoryRegion::BASE);
 
         // Allocate some memory from the end of the linear heap for this region.
-        auto offset = memory_region->LinearAllocate(Memory::PAGE_SIZE);
+        std::optional<u32> offset = memory_region->LinearAllocate(Memory::PAGE_SIZE);
         if (!offset) {
             LOG_ERROR(Kernel_SVC,
                       "Not enough space in region to allocate a new TLS page for thread");

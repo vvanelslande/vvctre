@@ -470,8 +470,9 @@ const std::tuple<Common::Vec3<float>, Common::Vec3<float>> Module::GetMotionStat
 }
 
 std::shared_ptr<Module> GetModule(Core::System& system) {
-    auto hid = system.ServiceManager().GetService<Service::HID::Module::Interface>("hid:USER");
-    if (!hid) {
+    std::shared_ptr<Service::HID::Module::Interface> hid =
+        system.ServiceManager().GetService<Service::HID::Module::Interface>("hid:USER");
+    if (hid == nullptr) {
         return nullptr;
     }
     return hid->GetModule();

@@ -31,12 +31,10 @@ void OGLTexture::Release() {
 
 void OGLTexture::Allocate(GLenum target, GLsizei levels, GLenum internalformat, GLenum format,
                           GLenum type, GLsizei width, GLsizei height, GLsizei depth) {
-    const bool tex_storage = GLAD_GL_ARB_texture_storage;
-
     switch (target) {
     case GL_TEXTURE_1D:
     case GL_TEXTURE:
-        if (tex_storage) {
+        if (GLAD_GL_ARB_texture_storage) {
             glTexStorage1D(target, levels, internalformat, width);
         } else {
             for (GLsizei level{0}; level < levels; ++level) {
@@ -49,7 +47,7 @@ void OGLTexture::Allocate(GLenum target, GLsizei levels, GLenum internalformat, 
     case GL_TEXTURE_1D_ARRAY:
     case GL_TEXTURE_RECTANGLE:
     case GL_TEXTURE_CUBE_MAP:
-        if (tex_storage) {
+        if (GLAD_GL_ARB_texture_storage) {
             glTexStorage2D(target, levels, internalformat, width, height);
         } else {
             for (GLsizei level{0}; level < levels; ++level) {
@@ -64,7 +62,7 @@ void OGLTexture::Allocate(GLenum target, GLsizei levels, GLenum internalformat, 
     case GL_TEXTURE_3D:
     case GL_TEXTURE_2D_ARRAY:
     case GL_TEXTURE_CUBE_MAP_ARRAY:
-        if (tex_storage) {
+        if (GLAD_GL_ARB_texture_storage) {
             glTexStorage3D(target, levels, internalformat, width, height, depth);
         } else {
             for (GLsizei level{0}; level < levels; ++level) {
@@ -79,7 +77,7 @@ void OGLTexture::Allocate(GLenum target, GLsizei levels, GLenum internalformat, 
         break;
     }
 
-    if (!tex_storage) {
+    if (!GLAD_GL_ARB_texture_storage) {
         glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, levels - 1);
     }
 }

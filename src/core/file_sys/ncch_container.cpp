@@ -221,8 +221,8 @@ Loader::ResultStatus NCCHContainer::Load() {
                 if (!ncch_header.seed_crypto) {
                     key_y_secondary = key_y_primary;
                 } else {
-                    auto opt{FileSys::GetSeed(ncch_header.program_id)};
-                    if (!opt.has_value()) {
+                    std::optional<Seed::Data> opt = GetSeed(ncch_header.program_id);
+                    if (!opt) {
                         LOG_ERROR(Service_FS, "Seed for program {:016X} not found",
                                   ncch_header.program_id);
                         failed_to_decrypt = true;
@@ -545,8 +545,9 @@ Loader::ResultStatus NCCHContainer::LoadSectionExeFS(const char* name, std::vect
                     return Loader::ResultStatus::ErrorMemoryAllocationFailed;
                 }
 
-                if (exefs_file.ReadBytes(&temp_buffer[0], section.size) != section.size)
+                if (exefs_file.ReadBytes(&temp_buffer[0], section.size) != section.size) {
                     return Loader::ResultStatus::Error;
+                }
 
                 if (is_encrypted) {
                     dec.ProcessData(&temp_buffer[0], &temp_buffer[0], section.size);
@@ -555,13 +556,16 @@ Loader::ResultStatus NCCHContainer::LoadSectionExeFS(const char* name, std::vect
                 // Decompress .code section...
                 u32 decompressed_size = LZSS_GetDecompressedSize(&temp_buffer[0], section.size);
                 buffer.resize(decompressed_size);
-                if (!LZSS_Decompress(&temp_buffer[0], section.size, &buffer[0], decompressed_size))
+                if (!LZSS_Decompress(&temp_buffer[0], section.size, &buffer[0],
+                                     decompressed_size)) {
                     return Loader::ResultStatus::ErrorInvalidFormat;
+                }
             } else {
                 // Section is uncompressed...
                 buffer.resize(section.size);
-                if (exefs_file.ReadBytes(&buffer[0], section.size) != section.size)
+                if (exefs_file.ReadBytes(&buffer[0], section.size) != section.size) {
                     return Loader::ResultStatus::Error;
+                }
                 if (is_encrypted) {
                     dec.ProcessData(&buffer[0], &buffer[0], section.size);
                 }
@@ -677,13 +681,15 @@ Loader::ResultStatus NCCHContainer::ReadRomFS(std::shared_ptr<RomFSReader>& romf
     LOG_DEBUG(Service_FS, "RomFS offset:           0x{:08X}", romfs_offset);
     LOG_DEBUG(Service_FS, "RomFS size:             0x{:08X}", romfs_size);
 
-    if (file.GetSize() < romfs_offset + romfs_size)
+    if (file.GetSize() < romfs_offset + romfs_size) {
         return Loader::ResultStatus::Error;
+    }
 
     // We reopen the file, to allow its position to be independent from file's
     FileUtil::IOFile romfs_file_inner(filepath, "rb");
-    if (!romfs_file_inner.IsOpen())
+    if (!romfs_file_inner.IsOpen()) {
         return Loader::ResultStatus::Error;
+    }
 
     std::shared_ptr<RomFSReader> direct_romfs;
     if (is_encrypted) {
@@ -744,11 +750,13 @@ Loader::ResultStatus NCCHContainer::ReadOverrideRomFS(std::shared_ptr<RomFSReade
 
 Loader::ResultStatus NCCHContainer::ReadProgramId(u64_le& program_id) {
     Loader::ResultStatus result = Load();
-    if (result != Loader::ResultStatus::Success)
+    if (result != Loader::ResultStatus::Success) {
         return result;
+    }
 
-    if (!has_header)
+    if (!has_header) {
         return Loader::ResultStatus::ErrorNotUsed;
+    }
 
     program_id = ncch_header.program_id;
     return Loader::ResultStatus::Success;
@@ -756,11 +764,13 @@ Loader::ResultStatus NCCHContainer::ReadProgramId(u64_le& program_id) {
 
 Loader::ResultStatus NCCHContainer::ReadExtdataId(u64& extdata_id) {
     Loader::ResultStatus result = Load();
-    if (result != Loader::ResultStatus::Success)
+    if (result != Loader::ResultStatus::Success) {
         return result;
+    }
 
-    if (!has_exheader)
+    if (!has_exheader) {
         return Loader::ResultStatus::ErrorNotUsed;
+    }
 
     if (exheader_header.arm11_system_local_caps.storage_info.other_attributes >> 1) {
         // Using extended save data access

@@ -3761,7 +3761,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                     });
                                 }
                                 break;
-                            case Core::Movie::ValidationResult::GameDismatch:
+                            case Core::Movie::ValidationResult::DifferentProgramID:
                                 pfd::message("vvctre",
                                              "Movie was recorded using a ROM with a different "
                                              "program ID",

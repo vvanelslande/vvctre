@@ -60,7 +60,7 @@ System::ResultStatus System::Run() {
     bool step = false;
 
     status = ResultStatus::Success;
-    if (!cpu_core) {
+    if (cpu_core == nullptr) {
         return ResultStatus::ErrorNotInitialized;
     }
 
@@ -123,7 +123,7 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
     }
 
     app_loader = Loader::GetLoader(filepath);
-    if (!app_loader) {
+    if (app_loader == nullptr) {
         LOG_CRITICAL(Core, "Unsupported file format");
         if (on_load_failed) {
             on_load_failed(ResultStatus::ErrorLoader_ErrorUnsupportedFormat);

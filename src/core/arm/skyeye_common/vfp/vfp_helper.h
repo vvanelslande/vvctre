@@ -394,8 +394,9 @@ struct op {
 inline u32 fls(u32 x) {
     int r = 32;
 
-    if (!x)
+    if (!x) {
         return 0;
+    }
     if (!(x & 0xffff0000u)) {
         x <<= 16;
         r -= 16;

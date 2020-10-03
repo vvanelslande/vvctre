@@ -12,9 +12,9 @@ namespace Service::NS {
 
 std::shared_ptr<Kernel::Process> LaunchTitle(FS::MediaType media_type, u64 title_id) {
     std::string path = AM::GetTitleContentPath(media_type, title_id);
-    auto loader = Loader::GetLoader(path);
+    std::unique_ptr<Loader::AppLoader> loader = Loader::GetLoader(path);
 
-    if (!loader) {
+    if (loader == nullptr) {
         LOG_WARNING(Service_NS, "Could not find .app for title 0x{:016x}", title_id);
         return nullptr;
     }

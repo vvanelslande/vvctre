@@ -80,8 +80,9 @@ void SDL2Sink::SetCallback(std::function<void(s16*, std::size_t)> cb) {
 
 void SDL2Sink::Impl::Callback(void* impl_, u8* buffer, int buffer_size_in_bytes) {
     Impl* impl = reinterpret_cast<Impl*>(impl_);
-    if (!impl || !impl->cb)
+    if (impl == nullptr || !impl->cb) {
         return;
+    }
 
     const size_t num_frames = buffer_size_in_bytes / (2 * sizeof(s16));
 

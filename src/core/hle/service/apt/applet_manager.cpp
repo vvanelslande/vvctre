@@ -186,7 +186,8 @@ ResultCode AppletManager::SendParameter(const MessageParameter& parameter) {
                           ErrorSummary::InvalidState, ErrorLevel::Status);
     }
     CancelAndSendParameter(parameter);
-    if (auto dest_applet = HLE::Applets::Applet::Get(parameter.destination_id)) {
+    if (std::shared_ptr<HLE::Applets::Applet> dest_applet =
+            HLE::Applets::Applet::Get(parameter.destination_id)) {
         return dest_applet->ReceiveParameter(parameter);
     } else {
         return RESULT_SUCCESS;
@@ -412,14 +413,15 @@ ResultCode AppletManager::PrepareToCloseLibraryApplet(bool not_pause, bool exiti
                           ErrorSummary::InvalidState, ErrorLevel::Status);
     }
 
-    if (!not_pause)
+    if (!not_pause) {
         library_applet_closing_command = SignalType::WakeupByPause;
-    else if (jump_home)
+    } else if (jump_home) {
         library_applet_closing_command = SignalType::WakeupToJumpHome;
-    else if (exiting)
+    } else if (exiting) {
         library_applet_closing_command = SignalType::WakeupByCancel;
-    else
+    } else {
         library_applet_closing_command = SignalType::WakeupByExit;
+    }
 
     return RESULT_SUCCESS;
 }

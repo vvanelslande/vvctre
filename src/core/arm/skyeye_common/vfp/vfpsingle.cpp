@@ -1232,7 +1232,7 @@ u32 vfp_single_cpdo(ARMul_State* state, u32 inst, u32 fpscr) {
 
     LOG_TRACE(Core_ARM11, "vecstride={} veclen={}", vecstride, (veclen >> FPSCR_LENGTH_BIT) + 1);
 
-    if (!fop->fn) {
+    if (fop->fn == nullptr) {
         LOG_CRITICAL(Core_ARM11, "could not find single op {}, inst=0x{:x}@0x{:x}",
                      FEXT_TO_IDX(inst), inst, state->Reg[15]);
         Crash();

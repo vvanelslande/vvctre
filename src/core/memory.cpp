@@ -57,8 +57,9 @@ private:
 
 u8* PageTable::Get(VAddr vaddr) const {
     u8* page_ptr = pointers[vaddr >> PAGE_BITS];
-    if (!page_ptr)
+    if (page_ptr == nullptr) {
         return nullptr;
+    }
     return page_ptr + vaddr;
 }
 

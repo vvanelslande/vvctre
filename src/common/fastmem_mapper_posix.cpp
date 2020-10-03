@@ -89,7 +89,7 @@ FastmemMapper::~FastmemMapper() {
 }
 
 BackingMemory FastmemMapper::Allocate(std::size_t size) {
-    size_t current_offset = impl->alloc_offset;
+    std::size_t current_offset = impl->alloc_offset;
     impl->alloc_offset += size;
     ASSERT(impl->alloc_offset <= impl->max_alloc);
 
@@ -112,7 +112,7 @@ FastmemRegion FastmemMapper::AllocateFastmemRegion() {
 
 void FastmemMapper::Map(Memory::PageTable& page_table, VAddr vaddr, u8* backing_memory,
                         std::size_t size) {
-    if (!page_table.fastmem_base.Get()) {
+    if (page_table.fastmem_base.Get() == nullptr) {
         return;
     }
 
@@ -136,7 +136,7 @@ void FastmemMapper::Map(Memory::PageTable& page_table, VAddr vaddr, u8* backing_
 }
 
 void FastmemMapper::Unmap(Memory::PageTable& page_table, VAddr vaddr, std::size_t size) {
-    if (!page_table.fastmem_base.Get()) {
+    if (page_table.fastmem_base.Get() == nullptr) {
         return;
     }
 

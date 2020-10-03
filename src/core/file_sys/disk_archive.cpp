@@ -18,8 +18,9 @@ namespace FileSys {
 
 ResultVal<std::size_t> DiskFile::Read(const u64 offset, const std::size_t length,
                                       u8* buffer) const {
-    if (!mode.read_flag)
+    if (!mode.read_flag) {
         return FS_ERROR_INVALID_OPEN_FLAGS;
+    }
 
     file->Seek(offset, SEEK_SET);
     return MakeResult<std::size_t>(file->ReadBytes(buffer, length));
@@ -27,13 +28,15 @@ ResultVal<std::size_t> DiskFile::Read(const u64 offset, const std::size_t length
 
 ResultVal<std::size_t> DiskFile::Write(const u64 offset, const std::size_t length, const bool flush,
                                        const u8* buffer) {
-    if (!mode.write_flag)
+    if (!mode.write_flag) {
         return FS_ERROR_INVALID_OPEN_FLAGS;
+    }
 
     file->Seek(offset, SEEK_SET);
     std::size_t written = file->WriteBytes(buffer, length);
-    if (flush)
+    if (flush) {
         file->Flush();
+    }
     return MakeResult<std::size_t>(written);
 }
 
@@ -73,8 +76,9 @@ u32 DiskDirectory::Read(const u32 count, Entry* entries) {
         // TODO(Link Mauve): use a proper conversion to UTF-16.
         for (std::size_t j = 0; j < FILENAME_LENGTH; ++j) {
             entry.filename[j] = filename[j];
-            if (!filename[j])
+            if (!filename[j]) {
                 break;
+            }
         }
 
         FileUtil::SplitFilename83(filename, entry.short_name, entry.extension);

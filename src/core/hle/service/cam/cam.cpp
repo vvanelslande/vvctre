@@ -1071,9 +1071,11 @@ void Module::LoadCameraImplementation(CameraConfig& camera, int camera_id) {
 }
 
 std::shared_ptr<Module> GetModule(Core::System& system) {
-    auto cam = system.ServiceManager().GetService<Service::CAM::Module::Interface>("cam:u");
-    if (!cam)
+    std::shared_ptr<Service::CAM::Module::Interface> cam =
+        system.ServiceManager().GetService<Service::CAM::Module::Interface>("cam:u");
+    if (cam == nullptr) {
         return nullptr;
+    }
     return cam->GetModule();
 }
 

@@ -171,7 +171,7 @@ static Kernel::Thread* FindThreadById(int id) {
 }
 
 static u32 RegRead(std::size_t id, Kernel::Thread* thread = nullptr) {
-    if (!thread) {
+    if (thread == nullptr) {
         return 0;
     }
 
@@ -185,7 +185,7 @@ static u32 RegRead(std::size_t id, Kernel::Thread* thread = nullptr) {
 }
 
 static void RegWrite(std::size_t id, u32 val, Kernel::Thread* thread = nullptr) {
-    if (!thread) {
+    if (thread == nullptr) {
         return;
     }
 
@@ -197,7 +197,7 @@ static void RegWrite(std::size_t id, u32 val, Kernel::Thread* thread = nullptr) 
 }
 
 static u64 FpuRead(std::size_t id, Kernel::Thread* thread = nullptr) {
-    if (!thread) {
+    if (thread == nullptr) {
         return 0;
     }
 
@@ -213,7 +213,7 @@ static u64 FpuRead(std::size_t id, Kernel::Thread* thread = nullptr) {
 }
 
 static void FpuWrite(std::size_t id, u64 val, Kernel::Thread* thread = nullptr) {
-    if (!thread) {
+    if (thread == nullptr) {
         return;
     }
 
@@ -577,7 +577,7 @@ static void HandleSetThread() {
     if (thread_id >= 1) {
         current_thread = FindThreadById(thread_id);
     }
-    if (!current_thread) {
+    if (current_thread == nullptr) {
         thread_id = 1;
         current_thread = FindThreadById(thread_id);
     }
@@ -612,7 +612,7 @@ static void SendSignal(Kernel::Thread* thread, u32 signal, bool full = true) {
 
     latest_signal = signal;
 
-    if (!thread) {
+    if (thread == nullptr) {
         full = false;
     }
 

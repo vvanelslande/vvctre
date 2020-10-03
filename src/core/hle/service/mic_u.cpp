@@ -455,9 +455,11 @@ void MIC_U::ReloadMic() {
 }
 
 void ReloadMic(Core::System& system) {
-    auto micu = system.ServiceManager().GetService<Service::MIC::MIC_U>("mic:u");
-    if (!micu)
+    std::shared_ptr<Service::MIC::MIC_U> micu =
+        system.ServiceManager().GetService<Service::MIC::MIC_U>("mic:u");
+    if (micu == nullptr) {
         return;
+    }
     micu->ReloadMic();
 }
 

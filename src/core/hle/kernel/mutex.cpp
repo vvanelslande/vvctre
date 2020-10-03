@@ -105,13 +105,15 @@ void Mutex::RemoveWaitingThread(Thread* thread) {
 }
 
 void Mutex::UpdatePriority() {
-    if (!holding_thread)
+    if (holding_thread == nullptr) {
         return;
+    }
 
     u32 best_priority = ThreadPrioLowest;
-    for (auto& waiter : GetWaitingThreads()) {
-        if (waiter->current_priority < best_priority)
+    for (const std::shared_ptr<Kernel::Thread>& waiter : GetWaitingThreads()) {
+        if (waiter->current_priority < best_priority) {
             best_priority = waiter->current_priority;
+        }
     }
 
     if (best_priority != priority) {

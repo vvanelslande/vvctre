@@ -270,7 +270,7 @@ bool Copy(const std::string& src_filename, const std::string& dest_filename) {
 
     // Open input file
     CFilePointer input{fopen(src_filename.c_str(), "rb"), std::fclose};
-    if (!input) {
+    if (input == nullptr) {
         LOG_ERROR(Common_Filesystem, "opening input failed {} --> {}: {}", src_filename,
                   dest_filename, GetLastErrorMsg());
         return false;
@@ -278,7 +278,7 @@ bool Copy(const std::string& src_filename, const std::string& dest_filename) {
 
     // Open output file
     CFilePointer output{fopen(dest_filename.c_str(), "wb"), std::fclose};
-    if (!output) {
+    if (output == nullptr) {
         LOG_ERROR(Common_Filesystem, "opening output failed {} --> {}: {}", src_filename,
                   dest_filename, GetLastErrorMsg());
         return false;
@@ -395,7 +395,7 @@ bool ForeachDirectoryEntry(u64* num_entries_out, const std::string& directory,
         const std::string virtual_name(Common::UTF16ToUTF8(ffd.cFileName));
 #else
     DIR* dirp = opendir(directory.c_str());
-    if (!dirp) {
+    if (dirp == nullptr) {
         return false;
     }
 
@@ -513,8 +513,9 @@ void CopyDir(const std::string& source_path, const std::string& dest_path) {
     }
 
     DIR* dirp = opendir(source_path.c_str());
-    if (!dirp)
+    if (dirp == nullptr) {
         return;
+    }
 
     while (struct dirent* result = readdir(dirp)) {
         const std::string virtual_name(result->d_name);
@@ -725,22 +726,24 @@ bool IOFile::Open(const std::string& filename, const char openmode[]) {
 }
 
 bool IOFile::Close() {
-    if (!IsOpen() || 0 != std::fclose(m_file))
+    if (!IsOpen() || std::fclose(m_file) != 0) {
         m_good = false;
+    }
 
     m_file = nullptr;
     return m_good;
 }
 
 u64 IOFile::GetSize() const {
-    if (IsOpen())
+    if (IsOpen()) {
         return FileUtil::GetSize(m_file);
+    }
 
     return 0;
 }
 
 bool IOFile::Seek(s64 off, int origin) {
-    if (!IsOpen() || 0 != fseeko(m_file, off, origin)) {
+    if (!IsOpen() || fseeko(m_file, off, origin) != 0) {
         m_good = false;
     }
 
@@ -748,14 +751,15 @@ bool IOFile::Seek(s64 off, int origin) {
 }
 
 u64 IOFile::Tell() const {
-    if (IsOpen())
+    if (IsOpen()) {
         return ftello(m_file);
+    }
 
     return std::numeric_limits<u64>::max();
 }
 
 bool IOFile::Flush() {
-    if (!IsOpen() || 0 != std::fflush(m_file)) {
+    if (!IsOpen() || std::fflush(m_file) != 0) {
         m_good = false;
     }
 
@@ -793,16 +797,16 @@ std::size_t IOFile::WriteImpl(const void* data, std::size_t length, std::size_t 
 }
 
 bool IOFile::Resize(u64 size) {
-    if (!IsOpen() || 0 !=
+    if (!IsOpen() ||
 #ifdef _WIN32
-                         // ector: _chsize sucks, not 64-bit safe
-                         // F|RES: changed to _chsize_s. i think it is 64-bit safe
-                         _chsize_s(_fileno(m_file), size)
+        // ector: _chsize sucks, not 64-bit safe
+        // F|RES: changed to _chsize_s. i think it is 64-bit safe
+        _chsize_s(_fileno(m_file), size)
 #else
-                         // TODO: handle 64bit and growing
-                         ftruncate(fileno(m_file), size)
+        // TODO: handle 64bit and growing
+        ftruncate(fileno(m_file), size)
 #endif
-    )
+            != 0)
         m_good = false;
 
     return m_good;

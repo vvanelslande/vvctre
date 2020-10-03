@@ -79,8 +79,9 @@ public:
     Stream(T* ptr, std::size_t size) : m_ptr{ptr}, m_size{size} {}
 
     bool Read(void* buffer, std::size_t length) {
-        if (m_offset + length > m_size)
+        if (m_offset + length > m_size) {
             return false;
+        }
         std::memcpy(buffer, m_ptr + m_offset, length);
         m_offset += length;
         return true;
@@ -88,10 +89,12 @@ public:
 
     template <typename OtherType>
     bool CopyFrom(Stream<OtherType>& other, std::size_t length) {
-        if (m_offset + length > m_size)
+        if (m_offset + length > m_size) {
             return false;
-        if (!other.Read(m_ptr + m_offset, length))
+        }
+        if (!other.Read(m_ptr + m_offset, length)) {
             return false;
+        }
         m_offset += length;
         return true;
     }
@@ -100,8 +103,9 @@ public:
     std::optional<ValueType> Read() {
         static_assert(std::is_pod_v<ValueType>);
         ValueType val{};
-        if (!Read(&val, sizeof(val)))
+        if (!Read(&val, sizeof(val))) {
             return std::nullopt;
+        }
         return val;
     }
 
@@ -110,8 +114,9 @@ public:
         std::optional<u8> x;
         while ((x = Read<u8>())) {
             data += (*x & 0x7f) * shift;
-            if (*x & 0x80)
+            if (*x & 0x80) {
                 break;
+            }
             shift <<= 7;
             data += shift;
         }
@@ -131,8 +136,9 @@ public:
     }
 
     bool Seek(size_t offset) {
-        if (offset > m_size)
+        if (offset > m_size) {
             return false;
+        }
         m_offset = offset;
         return true;
     }
@@ -178,8 +184,9 @@ public:
         // Process all patch commands.
         std::memset(m_target.data(), 0, m_target.size());
         while (m_patch.Tell() < command_end_offset) {
-            if (!HandleCommand())
+            if (!HandleCommand()) {
                 return false;
+            }
         }
 
         if (crc32(m_target.data(), target_size) != target_crc32) {
@@ -211,8 +218,9 @@ private:
                 return false;
             }
         }();
-        if (!ok)
+        if (!ok) {
             LOG_ERROR(Service_FS, "Failed to process command {} at 0x{:x}", command, offset);
+        }
         return ok;
     }
 
@@ -227,8 +235,9 @@ private:
     bool SourceCopy(Number length) {
         const Number data = m_patch.ReadNumber();
         m_source_relative_offset += (data & 1 ? -1 : +1) * int(data >> 1);
-        if (!m_source.Seek(m_source_relative_offset) || !m_target.CopyFrom(m_source, length))
+        if (!m_source.Seek(m_source_relative_offset) || !m_target.CopyFrom(m_source, length)) {
             return false;
+        }
         m_source_relative_offset += length;
         return true;
     }

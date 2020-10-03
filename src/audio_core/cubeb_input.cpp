@@ -34,8 +34,9 @@ CubebInput::CubebInput(std::string device_id)
 }
 
 CubebInput::~CubebInput() {
-    if (!impl->ctx)
+    if (impl->ctx == nullptr) {
         return;
+    }
 
     if (impl->stream) {
         if (cubeb_stream_stop(impl->stream) != CUBEB_OK) {
@@ -134,7 +135,7 @@ Frontend::Mic::Samples CubebInput::Read() {
 long CubebInput::Impl::DataCallback(cubeb_stream* stream, void* user_data, const void* input_buffer,
                                     void* output_buffer, long num_frames) {
     Impl* impl = static_cast<Impl*>(user_data);
-    if (!impl) {
+    if (impl == nullptr) {
         return 0;
     }
 

@@ -629,8 +629,9 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                 using TextureType = Pica::TexturingRegs::TextureConfig::TextureType;
                 switch (texture.config.type.Value()) {
                 case TextureType::Shadow2D: {
-                    if (!allow_shadow)
+                    if (!allow_shadow) {
                         continue;
+                    }
 
                     Surface surface = res_cache.GetTextureSurface(texture);
                     if (surface != nullptr) {
@@ -641,8 +642,9 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                     continue;
                 }
                 case TextureType::ShadowCube: {
-                    if (!allow_shadow)
+                    if (!allow_shadow) {
                         continue;
+                    }
                     Pica::Texture::TextureInfo info = Pica::Texture::TextureInfo::FromPicaRegister(
                         texture.config, texture.format);
                     Surface surface;
@@ -731,7 +733,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                 CheckBarrier(state.texture_units[texture_index].texture_2d =
                                  surface->texture.handle);
             } else {
-                // Can occur when texture addr is null or its memory is unmapped/invalid
+                // Can occur when texture address is null or its memory is unmapped/invalid
                 // HACK: In this case, the correct behaviour for the PICA is to use the last
                 // rendered colour. But because this would be impractical to implement, the
                 // next best alternative is to use a clear texture, essentially skipping
@@ -2123,11 +2125,9 @@ void RasterizerOpenGL::UploadUniforms(bool accelerate_draw) {
     state.draw.uniform_buffer = uniform_buffer.GetHandle();
     state.Apply();
 
-    bool sync_vs = accelerate_draw;
-    bool sync_fs = uniform_block_data.dirty;
-
-    if (!sync_vs && !sync_fs)
+    if (!accelerate_draw && !uniform_block_data.dirty) {
         return;
+    }
 
     std::size_t uniform_size = uniform_size_aligned_vs + uniform_size_aligned_fs;
     std::size_t used_bytes = 0;
@@ -2137,7 +2137,7 @@ void RasterizerOpenGL::UploadUniforms(bool accelerate_draw) {
     std::tie(uniforms, offset, invalidate) =
         uniform_buffer.Map(uniform_size, uniform_buffer_alignment);
 
-    if (sync_vs) {
+    if (accelerate_draw) {
         VSUniformData vs_uniforms;
         vs_uniforms.uniforms.SetFromRegs(Pica::g_state.regs.vs, Pica::g_state.vs);
         std::memcpy(uniforms + used_bytes, &vs_uniforms, sizeof(vs_uniforms));
@@ -2146,7 +2146,7 @@ void RasterizerOpenGL::UploadUniforms(bool accelerate_draw) {
         used_bytes += uniform_size_aligned_vs;
     }
 
-    if (sync_fs || invalidate) {
+    if (uniform_block_data.dirty || invalidate) {
         std::memcpy(uniforms + used_bytes, &uniform_block_data.data, sizeof(UniformData));
         glBindBufferRange(GL_UNIFORM_BUFFER, static_cast<GLuint>(UniformBindings::Common),
                           uniform_buffer.GetHandle(), offset + used_bytes, sizeof(UniformData));

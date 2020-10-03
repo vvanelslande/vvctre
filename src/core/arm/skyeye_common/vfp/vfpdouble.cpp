@@ -1211,7 +1211,7 @@ u32 vfp_double_cpdo(ARMul_State* state, u32 inst, u32 fpscr) {
     LOG_TRACE(Core_ARM11, "VFP: vecstride={} veclen={}", vecstride,
               (veclen >> FPSCR_LENGTH_BIT) + 1);
 
-    if (!fop->fn) {
+    if (fop->fn == nullptr) {
         LOG_TRACE(Core_ARM11, "VFP: could not find double op {}", FEXT_TO_IDX(inst));
         goto invalid;
     }

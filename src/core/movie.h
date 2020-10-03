@@ -31,7 +31,7 @@ class Movie {
 public:
     enum class ValidationResult {
         OK,
-        GameDismatch,
+        DifferentProgramID,
         Invalid,
     };
 

@@ -67,23 +67,27 @@ Loader::ResultStatus CIAContainer::Load(const FileBackend& backend) {
 
 Loader::ResultStatus CIAContainer::Load(const std::string& filepath) {
     FileUtil::IOFile file(filepath, "rb");
-    if (!file.IsOpen())
+    if (!file.IsOpen()) {
         return Loader::ResultStatus::Error;
+    }
 
     // Load CIA Header
     std::vector<u8> header_data(sizeof(Header));
-    if (file.ReadBytes(header_data.data(), sizeof(Header)) != sizeof(Header))
+    if (file.ReadBytes(header_data.data(), sizeof(Header)) != sizeof(Header)) {
         return Loader::ResultStatus::Error;
+    }
 
     Loader::ResultStatus result = LoadHeader(header_data);
-    if (result != Loader::ResultStatus::Success)
+    if (result != Loader::ResultStatus::Success) {
         return result;
+    }
 
     // Load Ticket
     std::vector<u8> ticket_data(cia_header.tik_size);
     file.Seek(GetTicketOffset(), SEEK_SET);
-    if (file.ReadBytes(ticket_data.data(), cia_header.tik_size) != cia_header.tik_size)
+    if (file.ReadBytes(ticket_data.data(), cia_header.tik_size) != cia_header.tik_size) {
         return Loader::ResultStatus::Error;
+    }
 
     result = LoadTicket(ticket_data);
     if (result != Loader::ResultStatus::Success)
@@ -92,23 +96,27 @@ Loader::ResultStatus CIAContainer::Load(const std::string& filepath) {
     // Load Title Metadata
     std::vector<u8> tmd_data(cia_header.tmd_size);
     file.Seek(GetTitleMetadataOffset(), SEEK_SET);
-    if (file.ReadBytes(tmd_data.data(), cia_header.tmd_size) != cia_header.tmd_size)
+    if (file.ReadBytes(tmd_data.data(), cia_header.tmd_size) != cia_header.tmd_size) {
         return Loader::ResultStatus::Error;
+    }
 
     result = LoadTitleMetadata(tmd_data);
-    if (result != Loader::ResultStatus::Success)
+    if (result != Loader::ResultStatus::Success) {
         return result;
+    }
 
     // Load CIA Metadata
     if (cia_header.meta_size) {
         std::vector<u8> meta_data(sizeof(Metadata));
         file.Seek(GetMetadataOffset(), SEEK_SET);
-        if (file.ReadBytes(meta_data.data(), sizeof(Metadata)) != sizeof(Metadata))
+        if (file.ReadBytes(meta_data.data(), sizeof(Metadata)) != sizeof(Metadata)) {
             return Loader::ResultStatus::Error;
+        }
 
         result = LoadMetadata(meta_data);
-        if (result != Loader::ResultStatus::Success)
+        if (result != Loader::ResultStatus::Success) {
             return result;
+        }
     }
 
     return Loader::ResultStatus::Success;

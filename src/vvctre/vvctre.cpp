@@ -342,7 +342,7 @@ int main(int argc, char** argv) {
                 });
             }
             break;
-        case Core::Movie::ValidationResult::GameDismatch:
+        case Core::Movie::ValidationResult::DifferentProgramID:
             pfd::message("vvctre", "Movie was recorded using a ROM with a different program ID",
                          pfd::choice::ok, pfd::icon::warning);
             if (FileUtil::GetFilename(Settings::values.play_movie).find("loop") !=

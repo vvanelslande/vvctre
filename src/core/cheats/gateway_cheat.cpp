@@ -212,14 +212,14 @@ GatewayCheat::GatewayCheat(std::string name_, std::vector<CheatLine> cheat_lines
 
 GatewayCheat::GatewayCheat(std::string name_, std::string code, std::string comments_)
     : name(std::move(name_)), comments(std::move(comments_)) {
-
     std::vector<std::string> code_lines;
     Common::SplitString(code, '\n', code_lines);
 
     std::vector<CheatLine> temp_cheat_lines;
     for (std::size_t i = 0; i < code_lines.size(); ++i) {
-        if (!code_lines[i].empty())
+        if (!code_lines[i].empty()) {
             temp_cheat_lines.emplace_back(code_lines[i]);
+        }
     }
     cheat_lines = std::move(temp_cheat_lines);
 }

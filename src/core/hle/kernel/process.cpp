@@ -253,7 +253,7 @@ ResultVal<VAddr> Process::LinearAllocate(VAddr target, u32 size, VMAPermission p
     LOG_DEBUG(Kernel, "Allocate linear heap target={:08X}, size={:08X}", target, size);
     u32 physical_offset;
     if (target == 0) {
-        auto offset = memory_region->LinearAllocate(size);
+        std::optional<u32> offset = memory_region->LinearAllocate(size);
         if (!offset) {
             LOG_ERROR(Kernel, "Not enough space");
             return ERR_OUT_OF_HEAP_MEMORY;

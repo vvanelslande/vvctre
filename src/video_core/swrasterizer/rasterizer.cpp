@@ -618,8 +618,9 @@ static void ProcessTriangleInternal(const Vertex& v0, const Vertex& v1, const Ve
                     break;
                 }
 
-                if (!pass)
+                if (!pass) {
                     continue;
+                }
             }
 
             // Apply fog combiner

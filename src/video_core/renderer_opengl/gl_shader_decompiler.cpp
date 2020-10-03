@@ -127,8 +127,9 @@ private:
         auto [iter, inserted] =
             exit_method_map.emplace(std::make_pair(begin, end), ExitMethod::Undetermined);
         ExitMethod& exit_method = iter->second;
-        if (!inserted)
+        if (!inserted) {
             return exit_method;
+        }
 
         for (u32 offset = begin; offset != end && offset != PROGRAM_END; ++offset) {
             const Instruction instr = {program_code[offset]};

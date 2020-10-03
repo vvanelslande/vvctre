@@ -7,7 +7,7 @@
 
 namespace MFDecoder {
 
-// utility functions
+// Utility functions
 void ReportError(std::string msg, HRESULT hr) {
     if (SUCCEEDED(hr)) {
         return;
@@ -84,7 +84,7 @@ unique_mfptr<IMFSample> CreateSample(const void* data, DWORD len, DWORD alignmen
         ReportError("Unable to allocate a memory buffer for sample", hr);
         return nullptr;
     }
-    if (data) {
+    if (data != nullptr) {
         BYTE* buffer;
         // lock the MediaBuffer
         // this is actually not a thread-safe lock
@@ -361,15 +361,14 @@ struct LibraryDeleter {
     }
 };
 
-std::unique_ptr<HMODULE, LibraryDeleter> mf_dll{nullptr};
-std::unique_ptr<HMODULE, LibraryDeleter> mfplat_dll{nullptr};
+std::unique_ptr<HMODULE, LibraryDeleter> mf_dll = nullptr;
+std::unique_ptr<HMODULE, LibraryDeleter> mfplat_dll = nullptr;
 
 } // namespace
 
 bool InitMFDLL() {
-
     mf_dll.reset(LoadLibrary(TEXT("mf.dll")));
-    if (!mf_dll) {
+    if (mf_dll == nullptr) {
         DWORD error_message_id = GetLastError();
         LPSTR message_buffer = nullptr;
         size_t size =

@@ -20,10 +20,12 @@ void SourceFilters::Enable(bool simple, bool biquad) {
     simple_filter_enabled = simple;
     biquad_filter_enabled = biquad;
 
-    if (!simple)
+    if (!simple) {
         simple_filter.Reset();
-    if (!biquad)
+    }
+    if (!biquad) {
         biquad_filter.Reset();
+    }
 }
 
 void SourceFilters::Configure(SourceConfiguration::Configuration::SimpleFilter config) {
@@ -35,8 +37,9 @@ void SourceFilters::Configure(SourceConfiguration::Configuration::BiquadFilter c
 }
 
 void SourceFilters::ProcessFrame(StereoFrame16& frame) {
-    if (!simple_filter_enabled && !biquad_filter_enabled)
+    if (!simple_filter_enabled && !biquad_filter_enabled) {
         return;
+    }
 
     if (simple_filter_enabled) {
         FilterFrame(frame, simple_filter);

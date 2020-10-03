@@ -201,8 +201,9 @@ void GeometryPipeline::SetVertexHandler(Shader::VertexHandler vertex_handler) {
 }
 
 void GeometryPipeline::Setup(Shader::ShaderEngine* shader_engine) {
-    if (!backend)
+    if (backend == nullptr) {
         return;
+    }
 
     this->shader_engine = shader_engine;
     shader_engine->SetupBatch(state.gs, state.regs.gs.main_offset);
@@ -245,8 +246,9 @@ void GeometryPipeline::Reconfigure() {
 }
 
 bool GeometryPipeline::NeedIndexInput() const {
-    if (!backend)
+    if (backend == nullptr) {
         return false;
+    }
     return backend->NeedIndexInput();
 }
 
@@ -255,7 +257,7 @@ void GeometryPipeline::SubmitIndex(unsigned int val) {
 }
 
 void GeometryPipeline::SubmitVertex(const Shader::AttributeBuffer& input) {
-    if (!backend) {
+    if (backend == nullptr) {
         // No backend means the geometry shader is disabled, so we send the vertex shader output
         // directly to the primitive assembler.
         vertex_handler(input);

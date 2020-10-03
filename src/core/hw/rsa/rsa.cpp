@@ -37,8 +37,9 @@ std::vector<u8> RsaSlot::GetSignature(const std::vector<u8>& message) const {
 
 void InitSlots() {
     static bool initialized = false;
-    if (initialized)
+    if (initialized) {
         return;
+    }
     initialized = true;
 
     const std::string filepath =

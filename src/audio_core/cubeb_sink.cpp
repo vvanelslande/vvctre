@@ -92,7 +92,7 @@ CubebSink::CubebSink(std::string_view target_device_name) : impl(std::make_uniqu
 }
 
 CubebSink::~CubebSink() {
-    if (!impl->ctx) {
+    if (impl->ctx == nullptr) {
         return;
     }
 
@@ -105,8 +105,9 @@ CubebSink::~CubebSink() {
 }
 
 unsigned int CubebSink::GetNativeSampleRate() const {
-    if (!impl->ctx)
+    if (impl->ctx == nullptr) {
         return native_sample_rate;
+    }
 
     return impl->sample_rate;
 }
@@ -120,7 +121,7 @@ long CubebSink::Impl::DataCallback(cubeb_stream* stream, void* user_data, const 
     Impl* impl = static_cast<Impl*>(user_data);
     s16* buffer = reinterpret_cast<s16*>(output_buffer);
 
-    if (!impl || !impl->cb) {
+    if (impl == nullptr || !impl->cb) {
         LOG_DEBUG(Audio_Sink, "Emitting zeros");
         std::memset(output_buffer, 0, num_frames * 2 * sizeof(s16));
         return num_frames;

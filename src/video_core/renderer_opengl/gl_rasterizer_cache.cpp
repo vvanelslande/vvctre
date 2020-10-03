@@ -959,28 +959,32 @@ static Surface FindMatch(const SurfaceCache& surface_cache, const SurfaceParams&
             const bool res_scale_matched = match_scale_type == ScaleMatch::Exact
                                                ? (params.res_scale == surface->res_scale)
                                                : (params.res_scale <= surface->res_scale);
-            // validity will be checked in GetCopyableInterval
+            // Validity will be checked in GetCopyableInterval
             bool is_valid =
                 find_flags & MatchFlags::Copy
                     ? true
                     : surface->IsRegionValid(validate_interval.value_or(params.GetInterval()));
 
-            if (!(find_flags & MatchFlags::Invalid) && !is_valid)
+            if (!(find_flags & MatchFlags::Invalid) && !is_valid) {
                 continue;
+            }
 
             auto IsMatch_Helper = [&](auto check_type, auto match_fn) {
-                if (!(find_flags & check_type))
+                if (!(find_flags & check_type)) {
                     return;
+                }
 
                 bool matched;
                 SurfaceInterval surface_interval;
                 std::tie(matched, surface_interval) = match_fn();
-                if (!matched)
+                if (!matched) {
                     return;
+                }
 
                 if (!res_scale_matched && match_scale_type != ScaleMatch::Ignore &&
-                    surface->type != SurfaceType::Fill)
+                    surface->type != SurfaceType::Fill) {
                     return;
+                }
 
                 // Found a match, update only if this is better than the previous one
                 auto UpdateMatch = [&] {
@@ -1234,9 +1238,10 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
         return nullptr;
     }
 
-    auto surface = GetSurface(params, ScaleMatch::Ignore, true);
-    if (!surface)
+    Surface surface = GetSurface(params, ScaleMatch::Ignore, true);
+    if (surface == nullptr) {
         return nullptr;
+    }
 
     // Update mipmap if necessary
     if (max_level != 0) {
@@ -1288,9 +1293,9 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
                 surface_params.width * surface_params.height * surface_params.GetFormatBpp() / 8;
             surface_params.width /= 2;
             surface_params.height /= 2;
-            surface_params.stride = 0; // reset stride and let UpdateParams re-initialize it
+            surface_params.stride = 0; // Reset stride and let UpdateParams re-initialize it
             surface_params.UpdateParams();
-            auto& watcher = surface->level_watchers[level - 1];
+            std::shared_ptr<SurfaceWatcher>& watcher = surface->level_watchers[level - 1];
             if (!watcher || !watcher->Get()) {
                 auto level_surface = GetSurface(surface_params, ScaleMatch::Ignore, true);
                 if (level_surface) {
@@ -1301,7 +1306,7 @@ Surface RasterizerCacheOpenGL::GetTextureSurface(const Pica::Texture::TextureInf
             }
 
             if (watcher && !watcher->IsValid()) {
-                auto level_surface = watcher->Get();
+                Surface level_surface = watcher->Get();
                 if (!level_surface->invalid_regions.empty()) {
                     ValidateSurface(level_surface, level_surface->addr, level_surface->size);
                 }
@@ -1353,13 +1358,13 @@ const CachedTextureCube& RasterizerCacheOpenGL::GetTextureCube(const TextureCube
     }};
 
     for (const Face& face : faces) {
-        if (!face.watcher || !face.watcher->Get()) {
+        if (face.watcher == nullptr || face.watcher->Get() == nullptr) {
             Pica::Texture::TextureInfo info;
             info.physical_address = face.address;
             info.height = info.width = config.width;
             info.format = config.format;
             info.SetDefaultStride();
-            auto surface = GetTextureSurface(info);
+            Surface surface = GetTextureSurface(info);
             if (surface) {
                 face.watcher = surface->CreateWatcher();
             } else {

@@ -214,8 +214,9 @@ ArchiveFactory_ExtSaveData::ArchiveFactory_ExtSaveData(const std::string& mount_
 }
 
 Path ArchiveFactory_ExtSaveData::GetCorrectedPath(const Path& path) {
-    if (!shared)
+    if (!shared) {
         return path;
+    }
 
     static constexpr u32 SharedExtDataHigh = 0x48000;
 

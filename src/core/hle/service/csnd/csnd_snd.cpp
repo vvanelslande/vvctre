@@ -234,7 +234,7 @@ void CSND_SND::ExecuteCommands(Kernel::HLERequestContext& ctx) {
     LOG_WARNING(Service_CSND, "(STUBBED) called, addr=0x{:08X}", addr);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    if (!shared_memory) {
+    if (shared_memory == nullptr) {
         rb.Push(ResultCode(ErrorDescription::InvalidResultValue, ErrorModule::CSND,
                            ErrorSummary::InvalidState, ErrorLevel::Status));
         LOG_ERROR(Service_CSND, "called, shared memory not allocated");
@@ -371,8 +371,9 @@ void CSND_SND::ExecuteCommands(Kernel::HLERequestContext& ctx) {
             }
 
             for (u32 i = 0; i < MaxCaptureUnits; ++i) {
-                if (!capture_units[i])
+                if (!capture_units[i]) {
                     continue;
+                }
                 CaptureState state;
                 state.active = false;
                 state.zero = 0;
