@@ -29,19 +29,19 @@ private:
 };
 
 FDKDecoder::Impl::Impl(Memory::MemorySystem& memory) : memory(memory) {
-    // allocate an array of LIB_INFO structures
-    // if we don't pre-fill the whole segment with zeros, when we call `aacDecoder_GetLibInfo`
+    // Allocate an array of LIB_INFO structures
+    // If we don't pre-fill the whole segment with zeros, when we call `aacDecoder_GetLibInfo`
     // it will segfault, upon investigation, there is some code in fdk_aac depends on your initial
     // values in this array
     LIB_INFO decoder_info[FDK_MODULE_LAST] = {};
-    // get library information and fill the struct
+    // Get library information and fill the struct
     if (aacDecoder_GetLibInfo(decoder_info) != 0) {
         LOG_ERROR(Audio_DSP, "Failed to retrieve fdk_aac library information!");
         return;
     }
     // This segment: identify the broken fdk_aac implementation
     // and refuse to initialize if identified as broken (check for module IDs)
-    // although our AAC samples do not contain SBC feature, this is a way to detect
+    // although our AAC samples don't contain SBC feature, this is a way to detect
     // watered down version of fdk_aac implementations
     if (FDKlibInfo_getCapabilities(decoder_info, FDK_SBRDEC) == 0) {
         LOG_ERROR(Audio_DSP, "Bad fdk_aac library found! Initialization aborted!");
@@ -51,14 +51,14 @@ FDKDecoder::Impl::Impl(Memory::MemorySystem& memory) : memory(memory) {
     LOG_INFO(Audio_DSP, "Using fdk_aac version {} (build date: {})", decoder_info[0].versionStr,
              decoder_info[0].build_date);
 
-    // choose the input format when initializing: 1 layer of ADTS
+    // Choose the input format when initializing: 1 layer of ADTS
     decoder = aacDecoder_Open(TRANSPORT_TYPE::TT_MP4_ADTS, 1);
-    // set maximum output channel to two (stereo)
-    // if the input samples have more channels, fdk_aac will perform a downmix
+    // Set maximum output channel to two (stereo)
+    // If the input samples have more channels, fdk_aac will perform a downmix
     AAC_DECODER_ERROR ret = aacDecoder_SetParam(decoder, AAC_PCM_MAX_OUTPUT_CHANNELS, 2);
     if (ret != AAC_DEC_OK) {
-        // unable to set this parameter reflects the decoder implementation might be broken
-        // we'd better shuts down everything
+        // Unable to set this parameter reflects the decoder implementation might be broken
+        // We'd better shut down everything
         aacDecoder_Close(decoder);
         decoder = nullptr;
         LOG_ERROR(Audio_DSP, "Unable to set downmix parameter: {}", ret);
@@ -71,31 +71,33 @@ std::optional<BinaryResponse> FDKDecoder::Impl::Initalize(const BinaryRequest& r
     std::memcpy(&response, &request, sizeof(response));
     response.unknown1 = 0x0;
 
-    if (decoder) {
-        LOG_INFO(Audio_DSP, "FDK Decoder initialized");
+    if (decoder != nullptr) {
+        LOG_INFO(Audio_DSP, "FDK decoder initialized");
         Clear();
     } else {
-        LOG_ERROR(Audio_DSP, "Decoder not initialized");
+        LOG_ERROR(Audio_DSP, "FDK decoder not initialized");
     }
 
     return response;
 }
 
 FDKDecoder::Impl::~Impl() {
-    if (decoder)
+    if (decoder != nullptr) {
         aacDecoder_Close(decoder);
+    }
 }
 
 void FDKDecoder::Impl::Clear() {
     s16 decoder_output[8192];
-    // flush and re-sync the decoder, discarding the internal buffer
-    // we actually don't care if this succeeds or not
+    // Flush and re-sync the decoder, discarding the internal buffer
+    // We actually don't care if this succeeds or not
     // FLUSH - flush internal buffer
     // INTR - treat the current internal buffer as discontinuous
     // CONCEAL - try to interpolate and smooth out the samples
-    if (decoder)
+    if (decoder) {
         aacDecoder_DecodeFrame(decoder, decoder_output, 8192,
                                AACDEC_FLUSH & AACDEC_INTR & AACDEC_CONCEAL);
+    }
 }
 
 std::optional<BinaryResponse> FDKDecoder::Impl::ProcessRequest(const BinaryRequest& request) {
@@ -130,7 +132,7 @@ std::optional<BinaryResponse> FDKDecoder::Impl::Decode(const BinaryRequest& requ
     response.cmd = request.cmd;
     response.size = request.size;
 
-    if (!decoder) {
+    if (decoder == nullptr) {
         LOG_DEBUG(Audio_DSP, "Decoder not initalized");
         // This is a hack to continue games that are not compiled with the AAC codec
         response.num_channels = 2;
