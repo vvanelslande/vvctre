@@ -132,7 +132,7 @@ std::optional<BinaryResponse> FDKDecoder::Impl::Decode(const BinaryRequest& requ
 
     if (!decoder) {
         LOG_DEBUG(Audio_DSP, "Decoder not initalized");
-        // This is a hack to continue games that are not compiled with the aac codec
+        // This is a hack to continue games that are not compiled with the AAC codec
         response.num_channels = 2;
         response.num_samples = 1024;
         return response;
@@ -149,19 +149,19 @@ std::optional<BinaryResponse> FDKDecoder::Impl::Decode(const BinaryRequest& requ
 
     std::size_t data_size = request.size;
 
-    // decoding loops
+    // Decoding loops
     AAC_DECODER_ERROR result = AAC_DEC_OK;
     // 8192 units of s16 are enough to hold one frame of AAC-LC or AAC-HE/v2 data
     s16 decoder_output[8192];
-    // note that we don't free this pointer as it is automatically freed by fdk_aac
+    // Note that we don't free this pointer as it is automatically freed by fdk_aac
     CStreamInfo* stream_info;
-    // how many bytes to be queued into the decoder, decrementing from the buffer size
+    // How many bytes to be queued into the decoder, decrementing from the buffer size
     u32 buffer_remaining = data_size;
-    // alias the data_size as an u32
+    // Alias the data_size as an u32
     u32 input_size = data_size;
 
     while (buffer_remaining) {
-        // queue the input buffer, fdk_aac will automatically slice out the buffer it needs
+        // Queue the input buffer, fdk_aac will automatically slice out the buffer it needs
         // from the input buffer
         result = aacDecoder_Fill(decoder, &data, &input_size, &buffer_remaining);
         if (result != AAC_DEC_OK) {
@@ -169,24 +169,24 @@ std::optional<BinaryResponse> FDKDecoder::Impl::Decode(const BinaryRequest& requ
             LOG_ERROR(Audio_DSP, "Failed to enqueue the input samples");
             return std::nullopt;
         }
-        // get output from decoder
+        // Get output from decoder
         result = aacDecoder_DecodeFrame(decoder, decoder_output, 8192, 0);
         if (result == AAC_DEC_OK) {
-            // get the stream information
+            // Get the stream information
             stream_info = aacDecoder_GetStreamInfo(decoder);
-            // fill the stream information for binary response
+            // Fill the stream information for binary response
             response.sample_rate = GetSampleRateEnum(stream_info->sampleRate);
             response.num_channels = stream_info->aacNumChannels;
             response.num_samples = stream_info->frameSize;
-            // fill the output
-            // the sample size = frame_size * channel_counts
+            // Fill the output
+            // The sample size = frame_size * channel_count
             for (int sample = 0; sample < (stream_info->frameSize * 2); sample++) {
                 for (int ch = 0; ch < stream_info->aacNumChannels; ch++) {
                     out_streams[ch].push_back(decoder_output[(sample * 2) + 1]);
                 }
             }
         } else if (result == AAC_DEC_TRANSPORT_SYNC_ERROR) {
-            // decoder has some synchronization problems, try again with new samples,
+            // Decoder has some synchronization problems, try again with new samples,
             // using old samples might trigger this error again
             continue;
         } else {
@@ -194,7 +194,7 @@ std::optional<BinaryResponse> FDKDecoder::Impl::Decode(const BinaryRequest& requ
             return std::nullopt;
         }
     }
-    // transfer the decoded buffer from vector to the FCRAM
+    // Transfer the decoded buffer from vector to the FCRAM
     if (out_streams[0].size() != 0) {
         if (request.dst_addr_ch0 < Memory::FCRAM_PADDR ||
             request.dst_addr_ch0 + out_streams[0].size() >
