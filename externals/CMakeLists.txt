@@ -141,9 +141,10 @@ set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(curl EXCLUDE_FROM_ALL)
 
-# http-parser
-add_library(http-parser STATIC http-parser/http_parser.c http-parser/http_parser.h)
-target_include_directories(http-parser INTERFACE http-parser)
+# llhttp
+add_library(llhttp STATIC llhttp/src/api.c llhttp/src/http.c llhttp/src/llhttp.c llhttp/include/llhttp.h)
+target_include_directories(llhttp INTERFACE llhttp/include)
+target_include_directories(llhttp PRIVATE llhttp/include)
 
 # whereami
 add_library(whereami STATIC whereami/src/whereami.c whereami/src/whereami.h)

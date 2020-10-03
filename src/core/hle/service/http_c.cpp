@@ -7,7 +7,7 @@
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 #include <fmt/format.h>
-#include <http_parser.h>
+#include <llhttp.h>
 #include <mbedtls/ssl.h>
 #include "common/assert.h"
 #include "common/common_funcs.h"
@@ -375,25 +375,25 @@ void Context::MakeRequest() {
         Context* context;
     } response_parser_data{{}, this};
 
-    http_parser response_parser;
-    http_parser_init(&response_parser, HTTP_RESPONSE);
-    response_parser.data = &response_parser_data;
-    http_parser_settings response_parser_settings;
-    http_parser_settings_init(&response_parser_settings);
-    response_parser_settings.on_header_field = [](http_parser* parser, const char* at,
+    llhttp_settings_t response_parser_settings;
+    llhttp_settings_init(&response_parser_settings);
+    response_parser_settings.on_header_field = [](llhttp_t* parser, const char* at,
                                                   std::size_t length) {
         ((response_parser_data_t*)parser->data)->header_name =
             Common::ToLower(std::string(at, length));
         return 0;
     };
-    response_parser_settings.on_header_value = [](http_parser* parser, const char* at,
+    response_parser_settings.on_header_value = [](llhttp_t* parser, const char* at,
                                                   std::size_t length) {
         response_parser_data_t* data = (response_parser_data_t*)parser->data;
         data->context->response_headers[data->header_name] = std::string(at, length);
         return 0;
     };
-    http_parser_execute(&response_parser, &response_parser_settings,
-                        response_headers_string.c_str(), response_headers_string.length());
+    llhttp_t response_parser;
+    llhttp_init(&response_parser, HTTP_RESPONSE, &response_parser_settings);
+    response_parser.data = &response_parser_data;
+    llhttp_execute(&response_parser, response_headers_string.c_str(),
+                   response_headers_string.length());
 
     state = RequestState::ReadyToDownloadContent;
 }
