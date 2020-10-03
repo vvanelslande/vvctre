@@ -10,7 +10,6 @@
 #include <cerrno>
 #include <cstring>
 #endif
-#include <curl/curl.h>
 #include <mbedtls/ssl.h>
 #include "common/common_funcs.h"
 #include "common/file_util.h"
@@ -51,7 +50,7 @@ void* CreateCertificateChainWithSystemCertificates() {
 
     if (store == nullptr) {
         mbedtls_x509_crt_free(chain);
-        free(chain);
+        std::free(chain);
         return nullptr;
     }
 
@@ -78,7 +77,7 @@ void* CreateCertificateChainWithSystemCertificates() {
         mbedtls_x509_crt_parse_path(chain, "/etc/ssl/certs");
     } else {
         mbedtls_x509_crt_free(chain);
-        free(chain);
+        std::free(chain);
         return nullptr;
     }
 #endif
