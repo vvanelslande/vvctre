@@ -32,7 +32,7 @@ DecoderSampleRate GetSampleRateEnum(u32 sample_rate) {
     }
 }
 
-DecoderBase::~DecoderBase(){};
+DecoderBase::~DecoderBase() {}
 
 NullDecoder::NullDecoder() = default;
 
@@ -57,5 +57,6 @@ std::optional<BinaryResponse> NullDecoder::ProcessRequest(const BinaryRequest& r
         LOG_ERROR(Audio_DSP, "Got unknown binary request: {}", static_cast<u16>(request.cmd));
         return std::nullopt;
     }
-};
+}
+
 } // namespace AudioCore::HLE
