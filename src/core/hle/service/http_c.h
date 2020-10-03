@@ -95,7 +95,7 @@ public:
     };
 
     struct RequestHeader {
-        RequestHeader(std::string name, std::string value) : name(name), value(value){};
+        explicit RequestHeader(std::string name, std::string value) : name(name), value(value) {}
         std::string name;
         std::string value;
     };
