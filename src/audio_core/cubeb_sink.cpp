@@ -119,7 +119,7 @@ void CubebSink::SetCallback(std::function<void(s16*, std::size_t)> cb) {
 long CubebSink::Impl::DataCallback(cubeb_stream* stream, void* user_data, const void* input_buffer,
                                    void* output_buffer, long num_frames) {
     Impl* impl = static_cast<Impl*>(user_data);
-    s16* buffer = reinterpret_cast<s16*>(output_buffer);
+    s16* buffer = static_cast<s16*>(output_buffer);
 
     if (impl == nullptr || !impl->cb) {
         LOG_DEBUG(Audio_Sink, "Emitting zeros");
