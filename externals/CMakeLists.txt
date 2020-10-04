@@ -157,6 +157,7 @@ set(JSON_Install OFF CACHE BOOL "" FORCE)
 set(JSON_ImplicitConversions OFF CACHE BOOL "" FORCE)
 add_subdirectory(json EXCLUDE_FROM_ALL)
 
-add_subdirectory(cryptopp)
+add_subdirectory(cryptopp EXCLUDE_FROM_ALL)
 add_subdirectory(teakra EXCLUDE_FROM_ALL)
 add_subdirectory(portable-file-dialogs EXCLUDE_FROM_ALL)
+add_subdirectory(utfcpp EXCLUDE_FROM_ALL)

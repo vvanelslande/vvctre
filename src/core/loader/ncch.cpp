@@ -4,9 +4,7 @@
 
 #include <algorithm>
 #include <cinttypes>
-#include <codecvt>
 #include <cstring>
-#include <locale>
 #include <memory>
 #include <vector>
 #include <fmt/format.h>

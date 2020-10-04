@@ -55,7 +55,7 @@ if(ARCHITECTURE_x86_64)
     )
 endif()
 
-target_link_libraries(common PUBLIC fmt ${PLATFORM_LIBRARIES} PRIVATE mbedtls whereami)
+target_link_libraries(common PUBLIC fmt ${PLATFORM_LIBRARIES} PRIVATE mbedtls whereami utf8cpp)
 target_include_directories(common PRIVATE ${PROJECT_SOURCE_DIR}/externals/mbedtls/include)
 
 if (MSVC)

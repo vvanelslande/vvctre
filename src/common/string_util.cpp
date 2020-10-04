@@ -4,10 +4,9 @@
 
 #include <algorithm>
 #include <cctype>
-#include <codecvt>
 #include <cstdlib>
-#include <locale>
 #include <sstream>
+#include <utf8.h>
 #include "common/logging/log.h"
 #include "common/string_util.h"
 
@@ -99,27 +98,11 @@ std::string ReplaceAll(std::string result, const std::string& src, const std::st
 }
 
 std::string UTF16ToUTF8(const std::u16string& input) {
-#ifdef _MSC_VER
-    // Workaround for missing char16_t/char32_t instantiations in MSVC2017
-    std::wstring_convert<std::codecvt_utf8_utf16<__int16>, __int16> convert;
-    std::basic_string<__int16> tmp_buffer(input.cbegin(), input.cend());
-    return convert.to_bytes(tmp_buffer);
-#else
-    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-    return convert.to_bytes(input);
-#endif
+    return utf8::utf16to8(input);
 }
 
 std::u16string UTF8ToUTF16(const std::string& input) {
-#ifdef _MSC_VER
-    // Workaround for missing char16_t/char32_t instantiations in MSVC2017
-    std::wstring_convert<std::codecvt_utf8_utf16<__int16>, __int16> convert;
-    auto tmp_buffer = convert.from_bytes(input);
-    return std::u16string(tmp_buffer.cbegin(), tmp_buffer.cend());
-#else
-    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-    return convert.from_bytes(input);
-#endif
+    return utf8::utf8to16(input);
 }
 
 #ifdef _WIN32
