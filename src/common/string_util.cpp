@@ -167,8 +167,9 @@ std::wstring UTF8ToUTF16W(const std::string& input) {
 
 std::string StringFromFixedZeroTerminatedBuffer(const char* buffer, std::size_t max_len) {
     std::size_t len = 0;
-    while (len < max_len && buffer[len] != '\0')
+    while (len < max_len && buffer[len] != '\0') {
         ++len;
+    }
 
     return std::string(buffer, len);
 }
