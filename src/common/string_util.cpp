@@ -172,4 +172,5 @@ std::string StringFromFixedZeroTerminatedBuffer(const char* buffer, std::size_t 
 
     return std::string(buffer, len);
 }
+
 } // namespace Common
