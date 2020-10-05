@@ -22,7 +22,7 @@ jobs:
   make-plugin:
     if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
     runs-on: ${{matrix.os}}
-    needs: before-making
+    needs: before-making-plugin
     strategy:
       matrix:
         os: [windows-2019, ubuntu-18.04]
