@@ -10,7 +10,7 @@ const getRegexes = require('./.github/scripts/common/custom-default-settings-plu
 const server = http
   .createServer((req, res) => {
     if (req.method !== 'POST') {
-      res.writeHead(405)
+      res.writeHead(405, { 'Access-Control-Allow-Origin': '*' })
       res.end()
       return
     }
@@ -39,7 +39,10 @@ const server = http
           })
 
           if (matches === 0) {
-            res.writeHead(400, { 'Content-Type': 'text/plain' })
+            res.writeHead(400, {
+              'Content-Type': 'text/plain',
+              'Access-Control-Allow-Origin': '*'
+            })
             res.write('No matches')
             res.end()
             return
@@ -148,7 +151,10 @@ ${fs.readFileSync(path.resolve('license.txt'))}
 */
 `
 
-          res.writeHead(200, { 'Content-Type': 'text/x-c' })
+          res.writeHead(200, {
+            'Content-Type': 'text/x-c',
+            'Access-Control-Allow-Origin': '*'
+          })
           res.write(code)
           res.end()
 
@@ -232,11 +238,14 @@ ${fs.readFileSync(path.resolve('license.txt'))}
 */
 `
 
-            res.writeHead(200, { 'Content-Type': 'text/x-c' })
+            res.writeHead(200, {
+              'Content-Type': 'text/x-c',
+              'Access-Control-Allow-Origin': '*'
+            })
             res.write(code)
             res.end()
           } catch {
-            res.writeHead(400)
+            res.writeHead(400, { 'Access-Control-Allow-Origin': '*' })
             res.end()
             return
           }
@@ -296,11 +305,14 @@ ${fs.readFileSync(path.resolve('license.txt'))}
 */
 `
 
-            res.writeHead(200, { 'Content-Type': 'text/x-c' })
+            res.writeHead(200, {
+              'Content-Type': 'text/x-c',
+              'Access-Control-Allow-Origin': '*'
+            })
             res.write(code)
             res.end()
           } catch {
-            res.writeHead(400)
+            res.writeHead(400, { 'Access-Control-Allow-Origin': '*' })
             res.end()
             return
           }
@@ -360,11 +372,14 @@ ${fs.readFileSync(path.resolve('license.txt'))}
 */
 `
 
-            res.writeHead(200, { 'Content-Type': 'text/x-c' })
+            res.writeHead(200, {
+              'Content-Type': 'text/x-c',
+              'Access-Control-Allow-Origin': '*'
+            })
             res.write(code)
             res.end()
           } catch {
-            res.writeHead(400)
+            res.writeHead(400, { 'Access-Control-Allow-Origin': '*' })
             res.end()
             return
           }
@@ -372,7 +387,7 @@ ${fs.readFileSync(path.resolve('license.txt'))}
           break
 
         default:
-          res.writeHead(400)
+          res.writeHead(400, { 'Access-Control-Allow-Origin': '*' })
           res.end()
           break
       }
