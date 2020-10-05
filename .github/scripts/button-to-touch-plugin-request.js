@@ -23,7 +23,7 @@ const match = process.env.ISSUE_BODY.match(
   )
 )
 
-let code = `// Copyright 2020 Valentin Vanelslande
+const code = `// Copyright 2020 Valentin Vanelslande
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 

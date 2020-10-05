@@ -24,7 +24,11 @@ if (matches === 0) {
   process.exit(1)
 }
 
-let code = `// Copyright 2020 Valentin Vanelslande
+if (matches === 1) {
+  names.push(null)
+}
+
+const code = `// Copyright 2020 Valentin Vanelslande
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -82,11 +86,14 @@ typedef u32 PAddr; ///< Represents a pointer in the ARM11 physical address space
 #endif
 
 static const char *required_function_names[] = {
-${names.map(name => `    "${name}",\n`).join('')}${(() =>
-  names.length === 1 ? '\nNULL, \n' : '')()}
-};
+  ${names
+    .map(name => (name === null ? '    NULL,' : `    "${name}",`))
+    .join('\n')}
+  };
+
 
 ${names
+  .filter(Boolean)
   .map(
     (name, index) =>
       `typedef ${types[index][0]} (*${name}_t)(${types[index][1]});\nstatic ${name}_t ${name};`
@@ -103,11 +110,13 @@ VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
     
 VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager, void* required_functions[]) {
 ${names
+  .filter(Boolean)
   .map(
     (name, index) => `    ${name} = (${name}_t)required_functions[${index}];`
   )
   .join('\n')}
 }
+
 
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 ${calls.map(call => `    ${call}`).join('\n')}
