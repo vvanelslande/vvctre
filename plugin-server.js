@@ -4,6 +4,7 @@
 
 const http = require('http')
 const fs = require('fs')
+const path = require('path')
 const getRegexes = require('./.github/scripts/common/custom-default-settings-plugin-request-regexes')
 
 const server = http
@@ -143,7 +144,7 @@ ${calls.map(call => `    ${call}`).join('\n')}
 /*
 License:
 
-${fs.readFileSync('license.txt')}
+${fs.readFileSync(path.resolve('license.txt'))}
 */
 `
 
@@ -227,7 +228,7 @@ VVCTRE_PLUGIN_EXPORT void AfterSwapWindow() {
 /*
 License:
 
-${fs.readFileSync('license.txt')}
+${fs.readFileSync(path.resolve('license.txt'))}
 */
 `
 
@@ -291,7 +292,7 @@ VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
 /*
 License:
 
-${fs.readFileSync('license.txt')}
+${fs.readFileSync(path.resolve('license.txt'))}
 */
 `
 
@@ -355,7 +356,7 @@ VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
 /*
 License:
 
-${fs.readFileSync('license.txt')}
+${fs.readFileSync(path.resolve('license.txt'))}
 */
 `
 
