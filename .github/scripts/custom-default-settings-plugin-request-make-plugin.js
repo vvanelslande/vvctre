@@ -2,26 +2,26 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-const fs = require("fs");
-const getRegexes = require("./common/custom-default-settings-plugin-request-regexes");
+const fs = require('fs')
+const getRegexes = require('./common/custom-default-settings-plugin-request-regexes')
 
-let matches = 0;
-const names = [];
-const types = [];
-const calls = [];
+let matches = 0
+const names = []
+const types = []
+const calls = []
 
-getRegexes(names, types, calls).forEach((test) => {
+getRegexes(names, types, calls).forEach(test => {
   if (test.regex.test(process.env.ISSUE_BODY)) {
-    const match = process.env.ISSUE_BODY.match(test.regex);
-    test.call(match);
+    const match = process.env.ISSUE_BODY.match(test.regex)
+    test.call(match)
 
-    ++matches;
+    ++matches
   }
-});
+})
 
 if (matches === 0) {
-  console.log("no matches");
-  process.exit(1);
+  console.log('No matches')
+  process.exit(1)
 }
 
 let code = `// Copyright 2020 Valentin Vanelslande
@@ -82,8 +82,8 @@ typedef u32 PAddr; ///< Represents a pointer in the ARM11 physical address space
 #endif
 
 static const char *required_function_names[] = {
-${names.map((name) => `    "${name}",\n`).join("")}${(() =>
-  names.length === 1 ? "\nNULL, \n" : "")()}
+${names.map(name => `    "${name}",\n`).join('')}${(() =>
+  names.length === 1 ? '\nNULL, \n' : '')()}
 };
 
 ${names
@@ -91,7 +91,7 @@ ${names
     (name, index) =>
       `typedef ${types[index][0]} (*${name}_t)(${types[index][1]});\nstatic ${name}_t ${name};`
   )
-  .join("\n")}
+  .join('\n')}
 
 VVCTRE_PLUGIN_EXPORT int GetRequiredFunctionCount() {
     return ${names.length};
@@ -106,12 +106,12 @@ ${names
   .map(
     (name, index) => `    ${name} = (${name}_t)required_functions[${index}];`
   )
-  .join("\n")}
+  .join('\n')}
 }
 
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
-${calls.map((call) => `    ${call}`).join("\n")}
+${calls.map(call => `    ${call}`).join('\n')}
 }
-`;
+`
 
-fs.writeFileSync("plugin.c", code);
+fs.writeFileSync('plugin.c', code)

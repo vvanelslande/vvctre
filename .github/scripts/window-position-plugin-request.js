@@ -2,16 +2,14 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-if (process.env.ISSUE_BODY === "X Y\r\n") {
-  console.log("no changes");
-  process.exit(1);
+if (process.env.ISSUE_BODY === 'X Y\r\n') {
+  console.log('No changes')
+  process.exit(1)
 }
 
-const fs = require("fs");
+const fs = require('fs')
 
-const match = process.env.ISSUE_BODY.match(
-  /^(?<x>-?\d+) (?<y>-?\d+)(?:\r\n)?$/
-);
+const match = process.env.ISSUE_BODY.match(/^(?<x>-?\d+) (?<y>-?\d+)(?:\r\n)?$/)
 
 let code = `// Copyright 2020 Valentin Vanelslande
 // Licensed under GPLv2 or any later version
@@ -54,6 +52,6 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
   vvctre_set_os_window_position(g_plugin_manager, ${match.groups.x}, ${match.groups.y});
 }
-`;
+`
 
-fs.writeFileSync("plugin.c", code);
+fs.writeFileSync('plugin.c', code)

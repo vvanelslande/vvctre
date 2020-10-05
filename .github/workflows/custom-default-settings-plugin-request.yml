@@ -5,9 +5,24 @@ on:
     types: [labeled, edited]
 
 jobs:
-  build:
+  before-making-plugin:
+    if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.7.0'
+      - uses: actions/github-script@v2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const script = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/custom-default-settings-plugin-request-remove-useless-lines.js`)
+            script(github, context)
+  make-plugin:
     if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
     runs-on: ${{matrix.os}}
+    needs: before-making
     strategy:
       matrix:
         os: [windows-2019, ubuntu-18.04]
@@ -16,7 +31,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
         with:
-          node-version: ">=14.9.0"
+          node-version: '>=14.9.0'
       - name: Script
         shell: bash
         working-directory: ${{github.workspace}}
@@ -42,23 +57,9 @@ jobs:
       - uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{github.event.issue.number}}
-          body: "[vvctre-plugin-settings-${{runner.os}}.7z](${{env.FILE_URL}})"
+          body: '[vvctre-plugin-settings-${{runner.os}}.7z](${{env.FILE_URL}})'
       - if: failure()
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{github.event.issue.number}}
-          body: "Build Error: https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}"
-  remove-useless-lines:
-    if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
-        with:
-          node-version: "14.7.0"
-      - uses: actions/github-script@v2
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const script = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/custom-default-settings-plugin-request-remove-useless-lines.js`)
-            script(github, context)
+          body: 'Error: https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}'

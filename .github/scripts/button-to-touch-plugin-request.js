@@ -2,26 +2,26 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-const fs = require("fs");
+const fs = require('fs')
 
 const match = process.env.ISSUE_BODY.match(
   new RegExp(
     [
-      "^<!--\r\n",
-      "Default Key: C\r\n\r\n",
+      '^<!--\r\n',
+      'Default Key: C\r\n\r\n',
 
-      "X Range: 0-319\r\n",
-      "Y Range: 0-239\r\n\r\n",
+      'X Range: 0-319\r\n',
+      'Y Range: 0-239\r\n\r\n',
 
-      "Get X and Y with https://github.com/vvanelslande/vvctre-plugin-get-touch-screen-x-y/releases/tag/1.0.2\r\n",
-      "-->\r\n\r\n",
+      'Get X and Y with https://github.com/vvanelslande/vvctre-plugin-get-touch-screen-x-y/releases/tag/1.0.2\r\n',
+      '-->\r\n\r\n',
 
-      "X: (?<x>\\d+)\r\n",
-      "Y: (?<y>\\d+)\r\n",
-      "Params: `(?<params>.+)`(?:\r\n)?$",
-    ].join("")
+      'X: (?<x>\\d+)\r\n',
+      'Y: (?<y>\\d+)\r\n',
+      'Params: `(?<params>.+)`(?:\r\n)?$'
+    ].join('')
   )
-);
+)
 
 let code = `// Copyright 2020 Valentin Vanelslande
 // Licensed under GPLv2 or any later version
@@ -91,6 +91,6 @@ VVCTRE_PLUGIN_EXPORT void AfterSwapWindow() {
         was_pressed = true;
     }
 }
-`;
+`
 
-fs.writeFileSync("plugin.c", code);
+fs.writeFileSync('plugin.c', code)

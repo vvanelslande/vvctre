@@ -5,7 +5,7 @@ on:
     types: [labeled, edited]
 
 jobs:
-  build:
+  make-plugin:
     if: contains(github.event.issue.labels.*.name, 'Button To Touch Plugin Request')
     runs-on: ${{matrix.os}}
     strategy:
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
         with:
-          node-version: "14.5.0"
+          node-version: '14.5.0'
       - name: Script
         shell: bash
         working-directory: ${{github.workspace}}
@@ -42,9 +42,9 @@ jobs:
       - uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{github.event.issue.number}}
-          body: "[vvctre-plugin-button-to-touch-${{github.event.issue.number}}-${{runner.os}}.7z](${{env.FILE_URL}})"
+          body: '[vvctre-plugin-button-to-touch-${{github.event.issue.number}}-${{runner.os}}.7z](${{env.FILE_URL}})'
       - if: failure()
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{github.event.issue.number}}
-          body: "Error: https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}"
+          body: 'Error: https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}'
