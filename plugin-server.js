@@ -12,7 +12,8 @@ const server = http
     if (req.method !== 'POST') {
       res.writeHead(405, {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST'
+        'Access-Control-Allow-Methods': 'POST',
+        'Access-Control-Allow-Headers': '*'
       })
       res.end()
       return
@@ -45,7 +46,8 @@ const server = http
             res.writeHead(400, {
               'Content-Type': 'text/plain',
               'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'POST'
+              'Access-Control-Allow-Methods': 'POST',
+              'Access-Control-Allow-Headers': '*'
             })
             res.write('No matches')
             res.end()
@@ -158,7 +160,8 @@ ${fs.readFileSync(path.resolve('license.txt'))}
           res.writeHead(200, {
             'Content-Type': 'text/x-c',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST'
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': '*'
           })
           res.write(code)
           res.end()
@@ -246,14 +249,16 @@ ${fs.readFileSync(path.resolve('license.txt'))}
             res.writeHead(200, {
               'Content-Type': 'text/x-c',
               'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'POST'
+              'Access-Control-Allow-Methods': 'POST',
+              'Access-Control-Allow-Headers': '*'
             })
             res.write(code)
             res.end()
           } catch {
             res.writeHead(400, {
               'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'POST'
+              'Access-Control-Allow-Methods': 'POST',
+              'Access-Control-Allow-Headers': '*'
             })
             res.end()
             return
@@ -317,14 +322,16 @@ ${fs.readFileSync(path.resolve('license.txt'))}
             res.writeHead(200, {
               'Content-Type': 'text/x-c',
               'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'POST'
+              'Access-Control-Allow-Methods': 'POST',
+              'Access-Control-Allow-Headers': '*'
             })
             res.write(code)
             res.end()
           } catch {
             res.writeHead(400, {
               'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'POST'
+              'Access-Control-Allow-Methods': 'POST',
+              'Access-Control-Allow-Headers': '*'
             })
             res.end()
             return
@@ -388,14 +395,16 @@ ${fs.readFileSync(path.resolve('license.txt'))}
             res.writeHead(200, {
               'Content-Type': 'text/x-c',
               'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'POST'
+              'Access-Control-Allow-Methods': 'POST',
+              'Access-Control-Allow-Headers': '*'
             })
             res.write(code)
             res.end()
           } catch {
             res.writeHead(400, {
               'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'POST'
+              'Access-Control-Allow-Methods': 'POST',
+              'Access-Control-Allow-Headers': '*'
             })
             res.end()
             return
@@ -406,7 +415,8 @@ ${fs.readFileSync(path.resolve('license.txt'))}
         default:
           res.writeHead(400, {
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST'
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': '*'
           })
           res.end()
           break
