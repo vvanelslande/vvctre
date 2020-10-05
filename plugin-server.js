@@ -2,6 +2,30 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+/**
+ * Only POST is allowed
+ *
+ * /customdefaultsettings
+ *    Request body: lines from https://vvanelslande.github.io/vvctre/Custom-Default-Settings-Plugin-Request
+ *    Response body: code
+ *    https://hoppscotch.io/?method=POST&url=https%3A%2F%2Fvvctre-plugin-server.glitch.me&path=%2Fcustomdefaultsettings&contentType=text%2Fplain&rawParams=start.file%20file.3ds
+ *
+ * /buttontotouch
+ *    Request body: JSON with params, x, and y (example: { "params": "engine:null", "x": 100, "y": 100 })
+ *    Response body: code
+ *    https://hoppscotch.io/?method=POST&url=https%3A%2F%2Fvvctre-plugin-server.glitch.me&path=%2Fbuttontotouch&contentType=text%2Fplain&rawParams=%7B%0A%20%20%20%20%22params%22%3A%20%22engine%3Anull%22,%0A%20%20%20%20%22x%22%3A%206,%0A%20%20%20%20%22y%22%3A%206%0A%7D
+ *
+ * /windowposition
+ *    Request body: JSON with x and y (example: { "x": 100, "y": 100 })
+ *    Response body: code
+ *    https://hoppscotch.io/?method=POST&url=https%3A%2F%2Fvvctre-plugin-server.glitch.me&path=%2Fwindowposition&contentType=text%2Fplain&rawParams=%7B%0A%20%20%20%20%22x%22%3A%20100,%0A%20%20%20%20%22y%22%3A%20100%0A%7D
+ *
+ * /windowsize
+ *    Request body: JSON with width and height (example: { "width": 100, "height": 100 })
+ *    Response body: code
+ *    https://hoppscotch.io/?method=POST&url=https%3A%2F%2Fvvctre-plugin-server.glitch.me&path=%2Fwindowsize&contentType=text%2Fplain&rawParams=%7B%0A%20%20%20%20%22width%22%3A%20100,%0A%20%20%20%20%22height%22%3A%20100%0A%7D
+ */
+
 const http = require('http')
 const fs = require('fs')
 const path = require('path')
