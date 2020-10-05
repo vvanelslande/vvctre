@@ -105,7 +105,7 @@ typedef u32 PAddr; ///< Represents a pointer in the ARM11 physical address space
 #define VVCTRE_PLUGIN_EXPORT
 #endif
 
-static const char *required_function_names[] = {
+static const char* required_function_names[] = {
 ${names
   .map(name => (name === null ? '    NULL,' : `    "${name}",`))
   .join('\n')}
