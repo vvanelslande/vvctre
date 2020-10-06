@@ -38,7 +38,7 @@ jobs:
         env:
           ISSUE_BODY: ${{github.event.issue.body}}
         run: |
-          node .github/scripts/custom-default-settings-plugin-request.js
+          node .github/scripts/custom-default-settings-plugin-request-make-plugin.js
 
           if [ "$RUNNER_OS" == "Windows" ]; then
             cl.exe //LD //Fe:settings.dll plugin.c
