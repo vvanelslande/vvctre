@@ -172,9 +172,10 @@ Loader::ResultStatus NCCHContainer::LoadHeader() {
 }
 
 Loader::ResultStatus NCCHContainer::Load() {
-    LOG_INFO(Service_FS, "Loading NCCH from file {}", filepath);
     if (is_loaded)
         return Loader::ResultStatus::Success;
+
+    LOG_INFO(Service_FS, "Loading NCCH from file {}", filepath);
 
     if (file.IsOpen()) {
         // Reset read pointer in case this file has been read before.
