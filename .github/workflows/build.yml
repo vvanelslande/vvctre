@@ -3,10 +3,10 @@ name: Build
 on:
   push:
     tags:
-      - "*"
+      - '*'
   pull_request:
     branches:
-      - "*"
+      - '*'
 
 jobs:
   build:
@@ -45,7 +45,7 @@ jobs:
             rm ./build/bin/Release/*.pdb
           fi
           export VERSION=${GITHUB_REF:10}
-          echo ::set-env name=VERSION::$VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           7z a vvctre-$VERSION-${{runner.os}}.7z ./build/bin/Release/*
       - name: Prepare to upload artifact
         if: github.event_name == 'pull_request'
@@ -79,10 +79,10 @@ jobs:
       - name: Set version
         run: |
           export VERSION=${GITHUB_REF:10}
-          echo ::set-env name=VERSION::$VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Discord notification
         uses: Ilshidur/action-discord@0.2.0
         env:
           DISCORD_WEBHOOK: ${{secrets.VVCTRE_RELEASES_CHANNEL_WEBHOOK}}
         with:
-          args: "<https://github.com/vvanelslande/vvctre/releases/tag/${{env.VERSION}}>"
+          args: '<https://github.com/vvanelslande/vvctre/releases/tag/${{env.VERSION}}>'
