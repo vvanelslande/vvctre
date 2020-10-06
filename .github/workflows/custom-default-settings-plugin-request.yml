@@ -17,7 +17,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const script = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/custom-default-settings-plugin-request-remove-useless-lines.js`)
+            const script = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/custom-default-settings-plugin-request-before-making-plugin.js`)
             script(github, context)
   make-plugin:
     if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
