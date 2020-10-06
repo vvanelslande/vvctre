@@ -6,7 +6,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <sstream>
-#include <utf8.h>
+#include <utf8/cpp11.h>
 #include "common/logging/log.h"
 #include "common/string_util.h"
 
