@@ -56,28 +56,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(glad PRIVATE dl)
 endif()
 
-# Dear ImGui
-add_library(imgui
-    imgui/imconfig.h
-    imgui/imgui_draw.cpp
-    imgui/imgui_internal.h
-    imgui/imgui_widgets.cpp
-    imgui/imgui.cpp
-    imgui/imgui.h
-    imgui/imstb_rectpack.h
-    imgui/imstb_textedit.h
-    imgui/imstb_truetype.h
-    imgui/examples/imgui_impl_opengl3.cpp
-    imgui/examples/imgui_impl_opengl3.h
-    imgui/examples/imgui_impl_sdl.cpp
-    imgui/examples/imgui_impl_sdl.h
-    imgui/misc/cpp/imgui_stdlib.cpp
-    imgui/misc/cpp/imgui_stdlib.h)
-target_link_libraries(imgui PRIVATE glad SDL2)
-target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)
-target_include_directories(imgui INTERFACE ./imgui ./imgui/examples ./imgui/misc/cpp)
-target_include_directories(imgui PRIVATE ./imgui ./imgui/examples ./imgui/misc/cpp)
-
 # clip
 set(CLIP_EXAMPLES OFF CACHE BOOL "")
 set(CLIP_TESTS OFF CACHE BOOL "")
@@ -159,5 +137,6 @@ add_subdirectory(json EXCLUDE_FROM_ALL)
 
 add_subdirectory(cryptopp EXCLUDE_FROM_ALL)
 add_subdirectory(teakra EXCLUDE_FROM_ALL)
+add_subdirectory(imgui EXCLUDE_FROM_ALL)
 add_subdirectory(portable-file-dialogs EXCLUDE_FROM_ALL)
 add_subdirectory(utfcpp EXCLUDE_FROM_ALL)

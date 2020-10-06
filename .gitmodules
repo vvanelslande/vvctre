@@ -35,7 +35,7 @@ path = externals/teakra
 url = https://github.com/wwylele/teakra.git
 
 [submodule "imgui"]
-path = externals/imgui
+path = externals/imgui/imgui
 url = https://github.com/ocornut/imgui.git
 
 [submodule "clip"]
