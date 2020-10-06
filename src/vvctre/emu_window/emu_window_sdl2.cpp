@@ -1327,7 +1327,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                             ? amiibos
                                             : amiibo_generate_and_load_search_results;
 
-                        ImGuiListClipper clipper(v.size());
+                        ImGuiListClipper clipper;
+                        clipper.Begin(v.size());
 
                         while (clipper.Step()) {
                             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
@@ -4055,7 +4056,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                 const std::vector<IPCDebugger::RequestRecord>& records =
                     ipc_recorder_search_text.empty() ? all_ipc_records
                                                      : ipc_recorder_search_results;
-                ImGuiListClipper clipper(records.size());
+
+                ImGuiListClipper clipper;
+                clipper.Begin(records.size());
 
                 while (clipper.Step()) {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
@@ -4185,7 +4188,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                 const std::vector<std::shared_ptr<Cheats::CheatBase>>& cheats =
                     system.CheatEngine().GetCheats();
 
-                ImGuiListClipper clipper(cheats.size());
+                ImGuiListClipper clipper;
+                clipper.Begin(cheats.size());
 
                 while (clipper.Step()) {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
@@ -4266,7 +4270,8 @@ void EmuWindow_SDL2::SwapBuffers() {
 
             if (ImGui::BeginChildFrame(ImGui::GetID("Members"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
-                ImGuiListClipper clipper(members.size());
+                ImGuiListClipper clipper;
+                clipper.Begin(members.size());
 
                 while (clipper.Step()) {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
@@ -4308,7 +4313,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
 
-                ImGuiListClipper clipper(multiplayer_messages.size());
+                ImGuiListClipper clipper;
+                clipper.Begin(multiplayer_messages.size());
 
                 while (clipper.Step()) {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
@@ -4413,7 +4419,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
                 const auto& v =
                     installed_search_text.empty() ? all_installed : installed_search_results;
-                ImGuiListClipper clipper(v.size());
+
+                ImGuiListClipper clipper;
+                clipper.Begin(v.size());
 
                 while (clipper.Step()) {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
@@ -4505,7 +4513,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                  ? all_public_rooms
                                                  : public_rooms_search_results;
 
-                ImGuiListClipper clipper(rooms.size());
+                ImGuiListClipper clipper;
+                clipper.Begin(rooms.size());
 
                 while (clipper.Step()) {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {

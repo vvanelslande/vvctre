@@ -2077,7 +2077,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                                          ? all_public_rooms
                                                          : public_rooms_search_results;
 
-                        ImGuiListClipper clipper(rooms.size());
+                        ImGuiListClipper clipper;
+                        clipper.Begin(rooms.size());
 
                         while (clipper.Step()) {
                             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
@@ -2261,7 +2262,9 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                            ImGuiWindowFlags_HorizontalScrollbar)) {
                     const auto& v =
                         installed_search_text.empty() ? all_installed : installed_search_results;
-                    ImGuiListClipper clipper(v.size());
+
+                    ImGuiListClipper clipper;
+                    clipper.Begin(v.size());
 
                     while (clipper.Step()) {
                         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
