@@ -6,7 +6,7 @@
  * Only POST is allowed
  *
  * /customdefaultsettings
- *    Request body: lines from https://vvanelslande.github.io/vvctre/Custom-Default-Settings-Plugin-Request
+ *    Request body: See https://vvanelslande.github.io/vvctre/Custom-Default-Settings-Plugin-Request
  *    Response body: code
  *    https://hoppscotch.io/?method=POST&url=https%3A%2F%2Fvvctre-plugin-server.glitch.me&path=%2Fcustomdefaultsettings&contentType=text%2Fplain&rawParams=start.file%20file.3ds
  *
