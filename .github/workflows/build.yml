@@ -76,13 +76,10 @@ jobs:
     needs: build
     runs-on: ubuntu-18.04
     steps:
-      - name: Set version
+      - name: Discord Webhook
         run: |
-          export VERSION=${GITHUB_REF:10}
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-      - name: Discord notification
-        uses: Ilshidur/action-discord@0.2.0
-        env:
-          DISCORD_WEBHOOK: ${{secrets.VVCTRE_RELEASES_CHANNEL_WEBHOOK}}
-        with:
-          args: '<https://github.com/vvanelslande/vvctre/releases/tag/${{env.VERSION}}>'
+          VERSION=${GITHUB_REF:10}
+          curl \
+            -H "Content-Type: application/json" \
+            --data "{\"embeds\":[{\"title\":\"$VERSION\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/$VERSION)\n• [Download Windows Build](https://github.com/vvanelslande/vvctre/releases/download/$VERSION/vvctre-$VERSION-Windows.7z)\n• [Download Linux Build](https://github.com/vvanelslande/vvctre/releases/download/$VERSION/vvctre-$VERSION-Linux.7z)\"}]}" \
+            ${{secrets.VVCTRE_RELEASES_CHANNEL_WEBHOOK}}
