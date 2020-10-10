@@ -74,7 +74,7 @@ jobs:
           fi
       - uses: actions/upload-artifact@v2
         with:
-          name: vvctre-plugin-custom-default-settings-${{runner.os}}.zip
+          name: vvctre-plugin-custom-default-settings-${{runner.os}}
           path: zip
   success:
     runs-on: ubuntu-18.04
