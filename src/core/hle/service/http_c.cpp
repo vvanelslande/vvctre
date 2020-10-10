@@ -566,9 +566,9 @@ void HTTP_C::ReceiveData(Kernel::HLERequestContext& ctx) {
 
     const u32 size = std::min<u32>(
         buffer_size,
-        ((itr->second.response_headers.find("Content-Length") == itr->second.response_headers.end())
+        ((itr->second.response_headers.find("content-length") == itr->second.response_headers.end())
              ? static_cast<u32>(itr->second.response_body.size())
-             : static_cast<u32>(std::stoul(itr->second.response_headers["Content-Length"]))) -
+             : static_cast<u32>(std::stoul(itr->second.response_headers["content-length"]))) -
             itr->second.current_offset);
     buffer.Write(itr->second.response_body.substr(itr->second.current_offset, size).data(), 0,
                  size);
@@ -577,10 +577,10 @@ void HTTP_C::ReceiveData(Kernel::HLERequestContext& ctx) {
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(
         itr->second.current_offset <
-                (itr->second.response_headers.find("Content-Length") ==
+                (itr->second.response_headers.find("content-length") ==
                          itr->second.response_headers.end()
                      ? static_cast<u32>(itr->second.response_body.size())
-                     : static_cast<u32>(std::stoul(itr->second.response_headers["Content-Length"])))
+                     : static_cast<u32>(std::stoul(itr->second.response_headers["content-length"])))
             ? RESULT_DOWNLOADPENDING
             : RESULT_SUCCESS);
     rb.PushMappedBuffer(buffer);
@@ -601,9 +601,9 @@ void HTTP_C::ReceiveDataTimeout(Kernel::HLERequestContext& ctx) {
 
     const u32 size = std::min<u32>(
         buffer_size,
-        ((itr->second.response_headers.find("Content-Length") == itr->second.response_headers.end())
+        ((itr->second.response_headers.find("content-length") == itr->second.response_headers.end())
              ? static_cast<u32>(itr->second.response_body.size())
-             : static_cast<u32>(std::stoul(itr->second.response_headers["Content-Length"]))) -
+             : static_cast<u32>(std::stoul(itr->second.response_headers["content-length"]))) -
             itr->second.current_offset);
     buffer.Write(itr->second.response_body.substr(itr->second.current_offset, size).data(), 0,
                  size);
@@ -612,10 +612,10 @@ void HTTP_C::ReceiveDataTimeout(Kernel::HLERequestContext& ctx) {
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(
         itr->second.current_offset <
-                (itr->second.response_headers.find("Content-Length") ==
+                (itr->second.response_headers.find("content-length") ==
                          itr->second.response_headers.end()
                      ? static_cast<u32>(itr->second.response_body.size())
-                     : static_cast<u32>(std::stoul(itr->second.response_headers["Content-Length"])))
+                     : static_cast<u32>(std::stoul(itr->second.response_headers["content-length"])))
             ? RESULT_DOWNLOADPENDING
             : RESULT_SUCCESS);
     rb.PushMappedBuffer(buffer);
@@ -762,9 +762,9 @@ void HTTP_C::GetDownloadSizeState(Kernel::HLERequestContext& ctx) {
     rb.Push(RESULT_SUCCESS);
     rb.Push<u32>(static_cast<u32>(itr->second.current_offset));
     rb.Push<u32>(
-        itr->second.response_headers.find("Content-Length") == itr->second.response_headers.end()
+        itr->second.response_headers.find("content-length") == itr->second.response_headers.end()
             ? static_cast<u32>(itr->second.response_body.size())
-            : static_cast<u32>(std::stoul(itr->second.response_headers["Content-Length"])));
+            : static_cast<u32>(std::stoul(itr->second.response_headers["content-length"])));
 }
 
 void HTTP_C::AddRequestHeader(Kernel::HLERequestContext& ctx) {
