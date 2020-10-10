@@ -94,4 +94,6 @@ jobs:
       - uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{github.event.issue.number}}
-          body: Failed to make the plugin.
+          body: |
+            Failed to make the plugin.
+            You can see the logs from https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}.
