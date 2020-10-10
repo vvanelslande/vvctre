@@ -5,9 +5,28 @@ on:
     types: [labeled, edited]
 
 jobs:
+  discord-webhook:
+    runs-on: ubuntu-18.04
+    steps:
+      - if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
+        name: Discord Webhook
+        env:
+          ISSUE_BODY: '${{github.event.issue.body}}'
+        run: |
+          curl \
+            --fail \
+            -H "Content-Type: application/json" \
+            --data "{\"embeds\":[{\"author\":{\"name\":\"${{github.event.issue.user.login}}\",\"url\":\"${{github.event.issue.user.html_url}}\",\"icon_url\":\"${{github.event.issue.user.avatar_url}}\"},\"title\":\"${{github.event.issue.title}} (#${{github.event.issue.number}})\",\"description\":\"[Issue](https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}})\n\nAction: ${{github.event.action}}\n\nBody:\n\`\`\`\n$(printf "$ISSUE_BODY" | sed -z 's/\r\n/\\n/g')\`\`\`\"}]}" \
+            ${{secrets.CUSTOM_DEFAULT_SETTINGS_PLUGIN_REQUEST_LOGS}} \
+            || curl \
+              --fail \
+              -H "Content-Type: application/json" \
+              --data "{\"embeds\":[{\"author\":{\"name\":\"${{github.event.issue.user.login}}\",\"url\":\"${{github.event.issue.user.html_url}}\",\"icon_url\":\"${{github.event.issue.user.avatar_url}}\"},\"title\":\"${{github.event.issue.title}} (#${{github.event.issue.number}})\",\"description\":\"[Issue](https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}})\n\nAction: ${{github.event.action}}\nBody: See issue (length is ${#ISSUE_BODY})\"}]}" \
+              ${{secrets.CUSTOM_DEFAULT_SETTINGS_PLUGIN_REQUEST_LOGS}}
   before-making-plugin:
     if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
     runs-on: ubuntu-18.04
+    needs: discord-webhook
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
@@ -52,7 +71,7 @@ jobs:
             7z a vvctre-plugin-settings-${{runner.os}}.7z settings.so plugin.c license.txt
           fi
 
-          export FILE_URL=$(curl ${{secrets.ISSUE_BOT_FILES}} -s -F "file=@vvctre-plugin-settings-${{runner.os}}.7z" -F "payload_json={\"content\":\"Issue: [${{github.event.issue.number}}](<https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}}>)\nRequested By: [${{github.event.issue.user.login}}](<https://github.com/${{github.event.issue.user.login}}>)\nAction: ${{github.event.action}}\"}" | jq -r .attachments[0].url)
+          export FILE_URL=$(curl ${{secrets.ISSUE_BOT_FILES}} -s -F "file=@vvctre-plugin-settings-${{runner.os}}.7z" | jq -r .attachments[0].url)
           echo "FILE_URL=$FILE_URL" >> $GITHUB_ENV
       - uses: peter-evans/create-or-update-comment@v1
         with:
