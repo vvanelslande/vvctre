@@ -31,20 +31,35 @@ jobs:
             gcc plugin.c -shared -o window-position.so
           fi
 
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            7z a vvctre-plugin-window-position-${{runner.os}}.7z window-position.dll plugin.c license.txt
-          else
-            7z a vvctre-plugin-window-position-${{runner.os}}.7z window-position.so plugin.c license.txt
-          fi
+          mkdir zip
 
-          export FILE_URL=$(curl ${{secrets.ISSUE_BOT_FILES}} -s -F "file=@vvctre-plugin-window-position-${{runner.os}}.7z" -F "payload_json={\"content\":\"Issue: [${{github.event.issue.number}}](<https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}}>)\nRequested By: [${{github.event.issue.user.login}}](<https://github.com/${{github.event.issue.user.login}}>)\nAction: ${{github.event.action}}\"}" | jq -r .attachments[0].url)
-          echo "FILE_URL=$FILE_URL" >> $GITHUB_ENV
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            mv window-position.dll plugin.c license.txt zip/
+          else
+            mv window-position.so plugin.c license.txt zip/
+          fi
+      - uses: actions/upload-artifact@v2
+        with:
+          name: vvctre-plugin-window-position-${{runner.os}}
+          path: zip
+  success:
+    runs-on: ubuntu-18.04
+    needs: make-plugin
+    steps:
       - uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{github.event.issue.number}}
-          body: '[vvctre-plugin-window-position-${{runner.os}}.7z](${{env.FILE_URL}})'
-      - if: failure()
-        uses: peter-evans/create-or-update-comment@v1
+          body: |
+            You can download your plugin from Artifacts from https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}
+            The files are deleted after 30 days. You can rename the issue or edit it to rebuild the plugin.
+  failure:
+    if: failure()
+    runs-on: ubuntu-18.04
+    needs: make-plugin
+    steps:
+      - uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{github.event.issue.number}}
-          body: 'Error: https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}'
+          body: |
+            Failed to make the plugin.
+            You can see the logs from https://github.com/vvanelslande/vvctre/actions/runs/${{github.run_id}}.
