@@ -192,6 +192,7 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
             switch (state.format) {
             case Format::PCM8:
                 state.current_buffer = Codec::DecodePCM8(num_channels, memory, config.length);
+                valid = true;
                 break;
             case Format::PCM16:
                 state.current_buffer = Codec::DecodePCM16(num_channels, memory, config.length);
@@ -200,6 +201,7 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
             case Format::ADPCM:
                 state.current_buffer = Codec::DecodeADPCM(memory, config.length, state.adpcm_coeffs,
                                                           state.adpcm_state);
+                valid = true;
                 break;
             default:
                 UNIMPLEMENTED();
@@ -210,10 +212,17 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
             // just re-consume the samples up to the current sample number. There may be some
             // imprecision here with the current sample number, as Detective Pikachu sounds a little
             // rough at times.
-            if (valid && (state.current_buffer.size() >= state.current_sample_number)) {
-                state.current_buffer.erase(
-                    state.current_buffer.begin(),
-                    std::next(state.current_buffer.begin(), state.current_sample_number));
+            if (valid) {
+                // TODO(xperia64): Tomodachi Life apparently can decrease config.length when the
+                // user skips dialog. I don't know the correct behavior, but to avoid crashing, just
+                // reset the current sample number to 0 and don't try to truncate the buffer
+                if (state.current_buffer.size() < state.current_sample_number) {
+                    state.current_sample_number = 0;
+                } else {
+                    state.current_buffer.erase(
+                        state.current_buffer.begin(),
+                        std::next(state.current_buffer.begin(), state.current_sample_number));
+                }
             }
         }
         LOG_TRACE(Audio_DSP, "partially updating embedded buffer addr={:#010x} len={} id={}",
