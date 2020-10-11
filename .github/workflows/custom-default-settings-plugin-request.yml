@@ -5,39 +5,121 @@ on:
     types: [labeled, edited]
 
 jobs:
-  discord-webhook:
-    runs-on: ubuntu-18.04
-    steps:
-      - if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
-        name: Discord Webhook
-        env:
-          ISSUE_BODY: '${{github.event.issue.body}}'
-        run: |
-          curl \
-            --fail \
-            -H "Content-Type: application/json" \
-            --data "{\"embeds\":[{\"author\":{\"name\":\"${{github.event.issue.user.login}}\",\"url\":\"${{github.event.issue.user.html_url}}\",\"icon_url\":\"${{github.event.issue.user.avatar_url}}\"},\"title\":\"${{github.event.issue.title}} (#${{github.event.issue.number}})\",\"description\":\"[Issue](https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}})\n\nAction: ${{github.event.action}}\n\nBody:\n\`\`\`\n$(printf "$ISSUE_BODY" | sed -z 's/\r\n/\\n/g')\`\`\`\"}]}" \
-            ${{secrets.CUSTOM_DEFAULT_SETTINGS_PLUGIN_REQUEST_LOGS}} \
-            || curl \
-              --fail \
-              -H "Content-Type: application/json" \
-              --data "{\"embeds\":[{\"author\":{\"name\":\"${{github.event.issue.user.login}}\",\"url\":\"${{github.event.issue.user.html_url}}\",\"icon_url\":\"${{github.event.issue.user.avatar_url}}\"},\"title\":\"${{github.event.issue.title}} (#${{github.event.issue.number}})\",\"description\":\"[Issue](https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}})\n\nAction: ${{github.event.action}}\nBody: See issue (length is ${#ISSUE_BODY})\"}]}" \
-              ${{secrets.CUSTOM_DEFAULT_SETTINGS_PLUGIN_REQUEST_LOGS}}
   before-making-plugin:
     if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
     runs-on: ubuntu-18.04
-    needs: discord-webhook
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '14.13.1'
-      - uses: actions/github-script@v2
+      - name: Before making plugin script
+        uses: actions/github-script@v3
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const script = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/custom-default-settings-plugin-request-before-making-plugin.js`)
             script(github, context)
+      - name: Check if a file called invalid exists and check if a file called edited exists
+        id: exists
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const fs = require('fs').promises
+
+            await fs.stat('invalid')
+              .then(() => core.setOutput('invalid', true))
+              .catch(() => core.setOutput('invalid', false))
+
+            await fs.stat('edited')
+              .then(() => core.setOutput('edited', true))
+              .catch(() => core.setOutput('edited', false))
+      - name: Set ISSUE_BODY (edited)
+        if: steps.exists.outputs.edited == 'true'
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.exportVariable('ISSUE_BODY', (await github.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            })).data.body)
+      - name: Set ISSUE_BODY (not edited)
+        if: steps.exists.outputs.edited == 'false'
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.exportVariable('ISSUE_BODY', context.payload.issue.body)
+      - name: Create body.json and set body_in_message output
+        id: create_body_json_and_set_body_in_message
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const fs = require('fs').promises
+
+            await fs.writeFile('body.json', JSON.stringify({
+              embeds: [
+                {
+                  author: {
+                    name: '',
+                    url: '',
+                    icon_url: ''
+                  },
+                  title: '',
+                  description: ''
+                }
+              ]
+            }))
+
+            core.setOutput('body_in_message', process.env.ISSUE_BODY.length <= 1500)
+      - name: Variable substitution (with issue body)
+        if: steps.create_body_json_and_set_body_in_message.outputs.body_in_message == 'true'
+        uses: microsoft/variable-substitution@v1 
+        with:
+          files: body.json
+        env:
+          embeds.0.author.name: ${{github.event.issue.user.login}}
+          embeds.0.author.url: ${{github.event.issue.user.html_url}}
+          embeds.0.author.icon_url: ${{github.event.issue.user.avatar_url}}
+          embeds.0.title: ${{github.event.issue.title}} (#${{github.event.issue.number}})
+          embeds.0.description: |
+            [Issue](https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}})
+
+            Action: ${{github.event.action}}
+            
+            Body:
+            ```
+            ${{env.ISSUE_BODY}}
+            ```
+      - name: Variable substitution (without issue body)
+        if: steps.create_body_json_and_set_body_in_message.outputs.body_in_message == 'false'
+        uses: microsoft/variable-substitution@v1 
+        with:
+          files: body.json
+        env:
+          embeds.0.author.name: ${{github.event.issue.user.login}}
+          embeds.0.author.url: ${{github.event.issue.user.html_url}}
+          embeds.0.author.icon_url: ${{github.event.issue.user.avatar_url}}
+          embeds.0.title: ${{github.event.issue.title}} (#${{github.event.issue.number}})
+          embeds.0.description: |
+            [Issue](https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}})
+
+            Action: ${{github.event.action}}
+            
+            Body length > 1500
+      - name: Send message
+        continue-on-error: true
+        run: |
+          curl \
+            --fail \
+            -H "Content-Type: application/json" \
+            --data @body.json \
+            ${{secrets.CUSTOM_DEFAULT_SETTINGS_PLUGIN_REQUEST_LOGS}}
+      - name: Stop if a file called invalid exists
+        if: steps.exists.outputs.invalid == 'true'
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Invalid')
   make-plugin:
     if: contains(github.event.issue.labels.*.name, 'Custom Default Settings Plugin Request')
     runs-on: ${{matrix.os}}

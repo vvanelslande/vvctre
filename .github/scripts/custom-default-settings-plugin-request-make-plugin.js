@@ -19,11 +19,6 @@ getRegexes(names, types, calls).forEach(test => {
   }
 })
 
-if (matches === 0) {
-  console.log('No matches')
-  process.exit(1)
-}
-
 if (matches === 1) {
   names.push(null)
 }

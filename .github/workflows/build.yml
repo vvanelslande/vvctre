@@ -76,10 +76,14 @@ jobs:
     needs: build
     runs-on: ubuntu-18.04
     steps:
-      - name: Discord Webhook
+      - name: Send message
         run: |
-          VERSION=${GITHUB_REF:10}
-          curl \
+          version=${GITHUB_REF:10}
+          message=$(curl \
             -H "Content-Type: application/json" \
-            --data "{\"embeds\":[{\"title\":\"$VERSION\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/$VERSION)\n• [Download Windows Build](https://github.com/vvanelslande/vvctre/releases/download/$VERSION/vvctre-$VERSION-Windows.7z)\n• [Download Linux Build](https://github.com/vvanelslande/vvctre/releases/download/$VERSION/vvctre-$VERSION-Linux.7z)\"}]}" \
-            ${{secrets.VVCTRE_RELEASES_CHANNEL_WEBHOOK}}
+            --data "{\"embeds\":[{\"title\":\"$version\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/$version)\n• [Download Windows Build](https://github.com/vvanelslande/vvctre/releases/download/$version/vvctre-$version-Windows.7z)\n• [Download Linux Build](https://github.com/vvanelslande/vvctre/releases/download/$version/vvctre-$version-Linux.7z)\"}]}" \
+            ${{secrets.VVCTRE_RELEASES_CHANNEL_WEBHOOK}})
+          message_id=$(echo $message | jq .id)
+          curl \
+            -H "Authorization: Bot ${{secrets.RELEASE_PUBLISHER_TOKEN}}" \
+            https://discord.com/api/v8/channels/722351217216323624/messages/$message_id/crosspost

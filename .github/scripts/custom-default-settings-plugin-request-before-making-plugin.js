@@ -3,6 +3,7 @@
 // Refer to the license.txt file included.
 
 const getRegexes = require('./common/custom-default-settings-plugin-request-regexes')
+const fs = require('fs').promises
 
 module.exports = async (github, context) => {
   const linesAfterEdit = []
@@ -41,7 +42,8 @@ module.exports = async (github, context) => {
       owner: context.repo.owner,
       repo: context.repo.repo,
       state: 'closed',
-      labels: ['Invalid']
+      labels: ['Invalid'],
+      body: 'Invalid'
     })
 
     await github.issues.lock({
@@ -49,6 +51,8 @@ module.exports = async (github, context) => {
       owner: context.repo.owner,
       repo: context.repo.repo
     })
+
+    await fs.writeFile('invalid', '')
   } else if (uselessLines.length > 0) {
     await github.issues.update({
       issue_number: context.issue.number,
@@ -65,5 +69,7 @@ module.exports = async (github, context) => {
         '\n'
       )}\n\`\`\`\n\nLines that aren't in https://vvanelslande.github.io/vvctre/Custom-Default-Settings-Plugin-Request are useless lines.`
     })
+    
+    await fs.writeFile('edited', '')
   }
 }
