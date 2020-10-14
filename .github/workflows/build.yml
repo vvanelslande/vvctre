@@ -85,5 +85,6 @@ jobs:
             ${{secrets.VVCTRE_RELEASES_CHANNEL_WEBHOOK}})
           message_id=$(echo $message | jq .id)
           curl \
+            -X POST \
             -H "Authorization: Bot ${{secrets.RELEASE_PUBLISHER_TOKEN}}" \
             https://discord.com/api/v8/channels/722351217216323624/messages/$message_id/crosspost
