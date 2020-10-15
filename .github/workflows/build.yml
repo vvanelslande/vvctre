@@ -86,5 +86,6 @@ jobs:
           message_id=$(echo $message | jq .id)
           curl \
             -X POST \
+            -H "Content-Length: 0" \
             -H "Authorization: Bot ${{secrets.RELEASE_PUBLISHER_TOKEN}}" \
             https://discord.com/api/v8/channels/722351217216323624/messages/$message_id/crosspost
