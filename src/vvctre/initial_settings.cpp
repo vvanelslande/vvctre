@@ -19,6 +19,7 @@
 #ifdef HAVE_CUBEB
 #include "audio_core/cubeb_input.h"
 #endif
+#include "audio_core/sdl2_input.h"
 #include "audio_core/sink.h"
 #include "audio_core/sink_details.h"
 #include "common/file_util.h"
@@ -494,18 +495,90 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     if (Settings::values.microphone_input_type ==
                         Settings::MicrophoneInputType::Real) {
+                        if (ImGui::BeginCombo("Backend##Microphone", [] {
+                                switch (Settings::values.microphone_real_device_backend) {
+                                case Settings::MicrophoneRealDeviceBackend::Auto:
+                                    return "Auto";
+#ifdef HAVE_CUBEB
+                                case Settings::MicrophoneRealDeviceBackend::Cubeb:
+                                    return "Cubeb";
+#endif
+                                case Settings::MicrophoneRealDeviceBackend::SDL2:
+                                    return "SDL2";
+                                case Settings::MicrophoneRealDeviceBackend::Null:
+                                    return "Null";
+                                default:
+                                    break;
+                                }
+
+                                return "Invalid";
+                            }())) {
+                            if (ImGui::Selectable("Auto")) {
+                                Settings::values.microphone_real_device_backend =
+                                    Settings::MicrophoneRealDeviceBackend::Auto;
+                            }
+#ifdef HAVE_CUBEB
+                            if (ImGui::Selectable("Cubeb")) {
+                                Settings::values.microphone_real_device_backend =
+                                    Settings::MicrophoneRealDeviceBackend::Cubeb;
+                            }
+#endif
+                            if (ImGui::Selectable("SDL2")) {
+                                Settings::values.microphone_real_device_backend =
+                                    Settings::MicrophoneRealDeviceBackend::SDL2;
+                            }
+                            if (ImGui::Selectable("Null")) {
+                                Settings::values.microphone_real_device_backend =
+                                    Settings::MicrophoneRealDeviceBackend::Null;
+                            }
+                            ImGui::EndCombo();
+                        }
+
                         if (ImGui::BeginCombo("Device##Microphone",
                                               Settings::values.microphone_device.c_str())) {
                             if (ImGui::Selectable("auto")) {
                                 Settings::values.microphone_device = "auto";
                             }
+                            switch (Settings::values.microphone_real_device_backend) {
+                            case Settings::MicrophoneRealDeviceBackend::Auto:
 #ifdef HAVE_CUBEB
-                            for (const auto& device : AudioCore::ListCubebInputDevices()) {
-                                if (ImGui::Selectable(device.c_str())) {
-                                    Settings::values.microphone_device = device;
+                                for (const auto& device : AudioCore::ListCubebInputDevices()) {
+                                    if (ImGui::Selectable(device.c_str())) {
+                                        Settings::values.microphone_device = device;
+                                    }
                                 }
-                            }
+#else
+                                for (const auto& device : AudioCore::ListSDL2InputDevices()) {
+                                    if (ImGui::Selectable(device.c_str())) {
+                                        Settings::values.microphone_device = device;
+                                    }
+                                }
 #endif
+                                break;
+                            case Settings::MicrophoneRealDeviceBackend::Cubeb:
+#ifdef HAVE_CUBEB
+                                for (const auto& device : AudioCore::ListCubebInputDevices()) {
+                                    if (ImGui::Selectable(device.c_str())) {
+                                        Settings::values.microphone_device = device;
+                                    }
+                                }
+#endif
+                                break;
+                            case Settings::MicrophoneRealDeviceBackend::SDL2:
+                                for (const auto& device : AudioCore::ListSDL2InputDevices()) {
+                                    if (ImGui::Selectable(device.c_str())) {
+                                        Settings::values.microphone_device = device;
+                                    }
+                                }
+                                break;
+                            case Settings::MicrophoneRealDeviceBackend::Null:
+                                if (ImGui::Selectable("null")) {
+                                    Settings::values.microphone_device = "null";
+                                }
+                                break;
+                            default:
+                                break;
+                            }
 
                             ImGui::EndCombo();
                         }

@@ -2970,12 +2970,21 @@ const char* vvctre_settings_get_audio_device_id() {
     return Settings::values.audio_device_id.c_str();
 }
 
-void vvctre_settings_set_microphone_input_type(int value) {
-    Settings::values.microphone_input_type = static_cast<Settings::MicrophoneInputType>(value);
+void vvctre_settings_set_microphone_input_type(Settings::MicrophoneInputType value) {
+    Settings::values.microphone_input_type = value;
 }
 
-int vvctre_settings_get_microphone_input_type() {
-    return static_cast<int>(Settings::values.microphone_input_type);
+Settings::MicrophoneInputType vvctre_settings_get_microphone_input_type() {
+    return Settings::values.microphone_input_type;
+}
+
+void vvctre_settings_set_microphone_real_device_backend(
+    Settings::MicrophoneRealDeviceBackend value) {
+    Settings::values.microphone_real_device_backend = value;
+}
+
+Settings::MicrophoneRealDeviceBackend vvctre_settings_get_microphone_real_device_backend() {
+    return Settings::values.microphone_real_device_backend;
 }
 
 void vvctre_settings_set_microphone_device(const char* value) {
@@ -4283,6 +4292,10 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
      (void*)&vvctre_settings_set_microphone_input_type},
     {"vvctre_settings_get_microphone_input_type",
      (void*)&vvctre_settings_get_microphone_input_type},
+    {"vvctre_settings_set_microphone_real_device_backend",
+     (void*)&vvctre_settings_set_microphone_real_device_backend},
+    {"vvctre_settings_get_microphone_real_device_backend",
+     (void*)&vvctre_settings_get_microphone_real_device_backend},
     {"vvctre_settings_set_microphone_device", (void*)&vvctre_settings_set_microphone_device},
     {"vvctre_settings_get_microphone_device", (void*)&vvctre_settings_get_microphone_device},
     // Camera Settings

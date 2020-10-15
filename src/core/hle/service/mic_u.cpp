@@ -5,6 +5,7 @@
 #ifdef HAVE_CUBEB
 #include "audio_core/cubeb_input.h"
 #endif
+#include "audio_core/sdl2_input.h"
 #include "common/logging/log.h"
 #include "core/core.h"
 #include "core/frontend/mic.h"
@@ -316,11 +317,35 @@ struct MIC_U::Impl {
             new_mic = std::make_unique<Frontend::Mic::NullMic>();
             break;
         case Settings::MicrophoneInputType::Real:
+            switch (Settings::values.microphone_real_device_backend) {
+            case Settings::MicrophoneRealDeviceBackend::Auto:
 #if HAVE_CUBEB
-            new_mic = std::make_unique<AudioCore::CubebInput>(Settings::values.microphone_device);
+                new_mic =
+                    std::make_unique<AudioCore::CubebInput>(Settings::values.microphone_device);
 #else
-            new_mic = std::make_unique<Frontend::Mic::NullMic>();
+                new_mic =
+                    std::make_unique<AudioCore::SDL2Input>(Settings::values.microphone_device);
 #endif
+                break;
+            case Settings::MicrophoneRealDeviceBackend::Cubeb:
+#ifdef HAVE_CUBEB
+                new_mic =
+                    std::make_unique<AudioCore::CubebInput>(Settings::values.microphone_device);
+#else
+                new_mic = std::make_unique<Frontend::Mic::NullMic>();
+#endif
+                break;
+            case Settings::MicrophoneRealDeviceBackend::SDL2:
+                new_mic =
+                    std::make_unique<AudioCore::SDL2Input>(Settings::values.microphone_device);
+                break;
+            case Settings::MicrophoneRealDeviceBackend::Null:
+                new_mic = std::make_unique<Frontend::Mic::NullMic>();
+                break;
+            default:
+                new_mic = std::make_unique<Frontend::Mic::NullMic>();
+                break;
+            }
             break;
         case Settings::MicrophoneInputType::Static:
             new_mic = std::make_unique<Frontend::Mic::StaticMic>();

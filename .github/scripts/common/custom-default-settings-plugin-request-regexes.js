@@ -207,6 +207,18 @@ module.exports = function getRegexes(names, types, calls) {
       }
     },
     {
+      regex: /^audio.microphone_real_device_backend (Cubeb|SDL2|Null)$/m,
+      call: match => {
+        names.push('vvctre_settings_set_microphone_real_device_backend')
+        types.push(['void', 'u8 value'])
+        calls.push(
+          `vvctre_settings_set_microphone_real_device_backend(${
+            { Cubeb: 1, SDL2: 2, Null: 3 }[match[1]]
+          });`
+        )
+      }
+    },
+    {
       regex: /^audio.microphone_device (.+)$/m,
       call: match => {
         names.push('vvctre_settings_set_microphone_device')

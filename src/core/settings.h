@@ -37,6 +37,13 @@ enum class MicrophoneInputType {
     Static,
 };
 
+enum class MicrophoneRealDeviceBackend : u8 {
+    Auto,
+    Cubeb,
+    SDL2,
+    Null,
+};
+
 enum class StereoRenderOption {
     Off,
     SideBySide,
@@ -130,6 +137,7 @@ struct Values {
     bool enable_audio_stretching = true;
     MicrophoneInputType microphone_input_type = MicrophoneInputType::None;
     std::string microphone_device = "auto";
+    MicrophoneRealDeviceBackend microphone_real_device_backend = MicrophoneRealDeviceBackend::Auto;
 
     // Camera
     std::array<std::string, Service::CAM::NumCameras> camera_engine{

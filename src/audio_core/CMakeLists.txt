@@ -30,6 +30,8 @@ add_library(audio_core STATIC
     time_stretch.h
     sdl2_sink.cpp
     sdl2_sink.h
+    sdl2_input.cpp
+    sdl2_input.h
     $<$<BOOL:${ENABLE_CUBEB}>:cubeb_sink.cpp cubeb_sink.h cubeb_input.cpp cubeb_input.h>
 )
 
