@@ -49,8 +49,8 @@ jobs:
         with:
           script: |
             core.exportVariable('ISSUE_BODY', context.payload.issue.body)
-      - name: Create body.json and set body_in_message output
-        id: create_body_json_and_set_body_in_message
+      - name: Create body.json and set body outputs
+        id: create_body_json_and_set_body_outputs
         uses: actions/github-script@v3
         with:
           script: |
@@ -59,53 +59,64 @@ jobs:
             await fs.writeFile('body.json', JSON.stringify({
               embeds: [
                 {
-                  author: {
-                    name: '',
-                    url: '',
-                    icon_url: ''
+                  thumbnail: {
+                    url: ''
                   },
-                  title: '',
-                  description: ''
+                  fields: [
+                    {
+                      name: 'Title',
+                      value: '',
+                      inline: true
+                    },
+                    {
+                      name: 'Number',
+                      value: '',
+                      inline: true
+                    },
+                    {
+                      name: 'Issue Creator',
+                      value: '',
+                      inline: true
+                    },
+                    {
+                      name: 'Issue URL',
+                      value: '',
+                      inline: true
+                    },
+                    {
+                      name: 'Action',
+                      value: '',
+                      inline: true
+                    },
+                    {
+                      name: 'Body Length',
+                      value: '',
+                      inline: true
+                    },
+                    {
+                      name: 'Body',
+                      value: '',
+                      inline: true
+                    }
+                  ]
                 }
               ]
             }))
 
-            core.setOutput('body_in_message', process.env.ISSUE_BODY.length <= 1500)
-      - name: Variable substitution (with issue body)
-        if: steps.create_body_json_and_set_body_in_message.outputs.body_in_message == 'true'
-        uses: microsoft/variable-substitution@v1 
+            core.setOutput('body', process.env.ISSUE_BODY.length <= 1024 ? process.env.ISSUE_BODY : (process.env.ISSUE_BODY.substring(0, 1023) + '…'))
+            core.setOutput('body_length', process.env.ISSUE_BODY.length)
+      - uses: microsoft/variable-substitution@v1
         with:
           files: body.json
         env:
-          embeds.0.author.name: ${{github.event.issue.user.login}}
-          embeds.0.author.url: ${{github.event.issue.user.html_url}}
-          embeds.0.author.icon_url: ${{github.event.issue.user.avatar_url}}
-          embeds.0.title: ${{github.event.issue.title}} (#${{github.event.issue.number}})
-          embeds.0.description: |
-            [Issue](https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}})
-
-            Action: ${{github.event.action}}
-            
-            Body:
-            ```
-            ${{env.ISSUE_BODY}}
-            ```
-      - name: Variable substitution (without issue body)
-        if: steps.create_body_json_and_set_body_in_message.outputs.body_in_message == 'false'
-        uses: microsoft/variable-substitution@v1 
-        with:
-          files: body.json
-        env:
-          embeds.0.author.name: ${{github.event.issue.user.login}}
-          embeds.0.author.url: ${{github.event.issue.user.html_url}}
-          embeds.0.author.icon_url: ${{github.event.issue.user.avatar_url}}
-          embeds.0.title: ${{github.event.issue.title}} (#${{github.event.issue.number}})
-          embeds.0.description: |
-            [Issue](https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}})
-
-            Action: ${{github.event.action}}
-            
-            Body length > 1500
+          embeds.0.thumbnail.url: ${{github.event.issue.user.avatar_url}}
+          embeds.0.fields.0.value: ${{github.event.issue.title}}
+          embeds.0.fields.1.value: ${{github.event.issue.number}}
+          embeds.0.fields.2.value: '[${{github.event.issue.user.login}}](${{github.event.issue.user.html_url}})'
+          embeds.0.fields.3.value: https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}}
+          embeds.0.fields.4.value: ${{github.event.action}}
+          embeds.0.fields.5.value: ${{steps.create_body_json_and_set_body_outputs.outputs.body_length}}
+          embeds.0.fields.6.value: ${{steps.create_body_json_and_set_body_outputs.outputs.body}}
       - name: Send message
         continue-on-error: true
         run: |
