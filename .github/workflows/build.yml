@@ -83,7 +83,7 @@ jobs:
             -H "Content-Type: application/json" \
             --data "{\"embeds\":[{\"title\":\"$version\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/$version)\n• [Download Windows Build](https://github.com/vvanelslande/vvctre/releases/download/$version/vvctre-$version-Windows.7z)\n• [Download Linux Build](https://github.com/vvanelslande/vvctre/releases/download/$version/vvctre-$version-Linux.7z)\"}]}" \
             ${{secrets.VVCTRE_RELEASES_CHANNEL_WEBHOOK}})
-          message_id=$(echo $message | jq .id)
+          message_id=$(echo $message | jq .id -r)
           curl \
             -X POST \
             -H "Content-Length: 0" \
