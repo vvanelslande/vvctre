@@ -4141,6 +4141,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
      (void*)&vvctre_gui_style_set_curve_tessellation_tol},
     {"vvctre_gui_style_set_circle_segment_max_error",
      (void*)&vvctre_gui_style_set_circle_segment_max_error},
+    {"vvctre_gui_style_get_alpha", (void*)&vvctre_gui_style_get_alpha},
     {"vvctre_gui_style_get_window_padding", (void*)&vvctre_gui_style_get_window_padding},
     {"vvctre_gui_style_get_window_rounding", (void*)&vvctre_gui_style_get_window_rounding},
     {"vvctre_gui_style_get_window_border_size", (void*)&vvctre_gui_style_get_window_border_size},
