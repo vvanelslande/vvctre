@@ -1918,7 +1918,13 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                      &Settings::values.post_processing_shader);
                     if (ImGui::IsItemHovered()) {
                         ImGui::BeginTooltip();
-                        ImGui::TextUnformatted("File name without extension and folder");
+                        ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
+                        ImGui::TextUnformatted(
+                            "This can be:\n- File name without extension and folder\n- none "
+                            "(builtin)\n- horizontal (builtin) (only if 3D Mode is Interlaced or "
+                            "Reverse Interlaced)\n- dubois (builtin) (only if 3D Mode is "
+                            "Anaglyph)");
+                        ImGui::PopTextWrapPos();
                         ImGui::EndTooltip();
                     }
 
