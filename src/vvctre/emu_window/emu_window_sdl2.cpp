@@ -1041,7 +1041,6 @@ void EmuWindow_SDL2::SwapBuffers() {
             menu_open = true;
         }
         if (ImGui::BeginPopup("Menu")) {
-
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Load File")) {
                     int length = wai_getExecutablePath(nullptr, 0, nullptr);
