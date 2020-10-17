@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -38,7 +39,7 @@ public:
 
     void AddTexturePath(u64 hash, const std::string& path);
     void FindCustomTextures();
-    void PreloadTextures();
+    void PreloadTextures(std::function<void(std::size_t current, std::size_t total)> callback);
     bool CustomTextureExists(u64 hash) const;
     const CustomTexPathInfo& LookupTexturePathInfo(u64 hash) const;
     bool IsTexturePathMapEmpty() const;

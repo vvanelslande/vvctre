@@ -166,6 +166,65 @@ int main(int argc, char** argv) {
             }
         });
     }
+    system.SetPreloadCustomTexturesFunction([&] {
+        std::atomic<bool> done = false;
+        Common::Event draw_gui;
+        draw_gui.Set();
+        std::atomic<std::size_t> current_atomic{1};
+        std::atomic<std::size_t> total_atomic{0};
+
+        std::thread([&] {
+            system.CustomTexCache().PreloadTextures([&](std::size_t current, std::size_t total) {
+                current_atomic = current;
+                total_atomic = total;
+                draw_gui.Set();
+            });
+            done = true;
+        }).detach();
+
+        SDL_Event event;
+        ImGuiIO& io = ImGui::GetIO();
+
+        while (!done) {
+            draw_gui.Wait();
+
+            while (SDL_PollEvent(&event)) {
+                ImGui_ImplSDL2_ProcessEvent(&event);
+
+                if (event.type == SDL_QUIT) {
+                    if (pfd::message("vvctre", "Would you like to exit now?", pfd::choice::yes_no,
+                                     pfd::icon::question)
+                            .result() == pfd::button::yes) {
+                        vvctreShutdown(&plugin_manager);
+                        std::exit(0);
+                    }
+                }
+            }
+
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplSDL2_NewFrame(window);
+            ImGui::NewFrame();
+
+            ImGui::OpenPopup("Preloading Custom Textures");
+            ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
+                                    ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Preloading Custom Textures", nullptr,
+                                       ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
+                                           ImGuiWindowFlags_NoResize |
+                                           ImGuiWindowFlags_AlwaysAutoResize)) {
+                ImGui::ProgressBar(
+                    static_cast<float>(current_atomic) / static_cast<float>(total_atomic),
+                    ImVec2(ImGui::CalcTextSize("Preloading Custom Textures").x, 0.0f));
+                ImGui::EndPopup();
+            }
+
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            SDL_GL_SwapWindow(window);
+        }
+    });
 
     std::shared_ptr<Service::CFG::Module> cfg = std::make_shared<Service::CFG::Module>();
     plugin_manager.cfg = cfg.get();

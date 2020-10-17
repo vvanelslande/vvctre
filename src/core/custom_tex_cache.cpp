@@ -80,7 +80,9 @@ void CustomTexCache::FindCustomTextures() {
     }
 }
 
-void CustomTexCache::PreloadTextures() {
+void CustomTexCache::PreloadTextures(
+    std::function<void(std::size_t current, std::size_t total)> callback) {
+    std::size_t current = 1;
     for (const auto& path : custom_texture_paths) {
         const auto& path_info = path.second;
         Core::CustomTexInfo tex_info;
@@ -99,6 +101,7 @@ void CustomTexCache::PreloadTextures() {
                 LOG_DEBUG(Render_OpenGL, "Loaded custom texture from {}", path_info.path);
                 Common::FlipRGBA8Texture(tex_info.tex, tex_info.width, tex_info.height);
                 CacheTexture(path_info.hash, tex_info.tex, tex_info.width, tex_info.height);
+                callback(current++, custom_texture_paths.size());
             } else {
                 LOG_ERROR(Render_OpenGL, "Texture {} size is not a power of 2", path_info.path);
             }

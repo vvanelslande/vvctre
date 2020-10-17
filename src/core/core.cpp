@@ -201,7 +201,7 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
         custom_tex_cache->FindCustomTextures();
     }
     if (Settings::values.preload_textures) {
-        custom_tex_cache->PreloadTextures();
+        preload_custom_textures_function();
     }
     status = ResultStatus::Success;
     m_emu_window = &emu_window;
@@ -391,6 +391,10 @@ void System::SetEmulationStartingAfterFirstTime(std::function<void()> function) 
 
 void System::SetOnLoadFailed(std::function<void(System::ResultStatus)> function) {
     on_load_failed = function;
+}
+
+void System::SetPreloadCustomTexturesFunction(std::function<void()> function) {
+    preload_custom_textures_function = function;
 }
 
 const bool System::IsOnLoadFailedSet() const {

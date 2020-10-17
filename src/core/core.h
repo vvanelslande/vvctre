@@ -228,6 +228,7 @@ public:
     void SetBeforeLoadingAfterFirstTime(std::function<void()> function);
     void SetEmulationStartingAfterFirstTime(std::function<void()> function);
     void SetOnLoadFailed(std::function<void(ResultStatus)> function);
+    void SetPreloadCustomTexturesFunction(std::function<void()> function);
     const bool IsOnLoadFailedSet() const;
 
 private:
@@ -291,6 +292,7 @@ private:
     std::function<void()> before_loading_after_first_time;
     std::function<void()> emulation_starting_after_first_time;
     std::function<void(ResultStatus)> on_load_failed;
+    std::function<void()> preload_custom_textures_function;
 };
 
 } // namespace Core
