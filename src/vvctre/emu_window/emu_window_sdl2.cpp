@@ -3164,6 +3164,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 return "Anaglyph";
                             case Settings::StereoRenderOption::Interlaced:
                                 return "Interlaced";
+                            case Settings::StereoRenderOption::ReverseInterlaced:
+                                return "Reverse Interlaced";
                             default:
                                 break;
                             }
@@ -3198,6 +3200,16 @@ void EmuWindow_SDL2::SwapBuffers() {
                                               Settings::values.render_3d ==
                                                   Settings::StereoRenderOption::Interlaced)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Interlaced;
+                            Settings::values.post_processing_shader = "horizontal (builtin)";
+                            VideoCore::g_renderer_shader_update_requested = true;
+                        }
+
+                        if (ImGui::Selectable(
+                                "Reverse Interlaced",
+                                Settings::values.render_3d ==
+                                    Settings::StereoRenderOption::ReverseInterlaced)) {
+                            Settings::values.render_3d =
+                                Settings::StereoRenderOption::ReverseInterlaced;
                             Settings::values.post_processing_shader = "horizontal (builtin)";
                             VideoCore::g_renderer_shader_update_requested = true;
                         }

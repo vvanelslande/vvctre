@@ -1945,6 +1945,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                 return "Anaglyph";
                             case Settings::StereoRenderOption::Interlaced:
                                 return "Interlaced";
+                            case Settings::StereoRenderOption::ReverseInterlaced:
+                                return "Reverse Interlaced";
                             default:
                                 break;
                             }
@@ -1975,6 +1977,15 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                               Settings::values.render_3d ==
                                                   Settings::StereoRenderOption::Interlaced)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Interlaced;
+                            Settings::values.post_processing_shader = "horizontal (builtin)";
+                        }
+
+                        if (ImGui::Selectable(
+                                "Reverse Interlaced",
+                                Settings::values.render_3d ==
+                                    Settings::StereoRenderOption::ReverseInterlaced)) {
+                            Settings::values.render_3d =
+                                Settings::StereoRenderOption::ReverseInterlaced;
                             Settings::values.post_processing_shader = "horizontal (builtin)";
                         }
 

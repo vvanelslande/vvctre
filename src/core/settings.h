@@ -4,12 +4,12 @@
 
 #pragma once
 
+#include <SDL.h>
 #include <array>
 #include <atomic>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <SDL.h>
 #include "common/common_types.h"
 #include "core/hle/service/cam/cam.h"
 #include "input_common/main.h"
@@ -49,6 +49,7 @@ enum class StereoRenderOption {
     SideBySide,
     Anaglyph,
     Interlaced,
+    ReverseInterlaced,
 };
 
 namespace NativeButton {
