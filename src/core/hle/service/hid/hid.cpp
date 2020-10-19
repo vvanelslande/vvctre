@@ -83,7 +83,7 @@ void Module::UpdatePadCallback(std::uintptr_t user_data, s64 cycles_late) {
     }
 
     if (home_button->GetStatus()) {
-        if (Settings::values.region_value == Settings::REGION_VALUE_AUTO_SELECT) {
+        if (Settings::values.region_value == Settings::Region::AutoSelect) {
             LOG_ERROR(Service_HID, "Can't open HOME Menu because region is Auto-select");
         } else {
             const u64 title_id = Service::APT::GetTitleIdForApplet(

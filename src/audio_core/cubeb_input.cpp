@@ -2,9 +2,9 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <cubeb/cubeb.h>
 #include <utility>
 #include <vector>
-#include <cubeb/cubeb.h>
 #include "audio_core/cubeb_input.h"
 #include "common/logging/log.h"
 

@@ -327,11 +327,10 @@ int main(int argc, char** argv) {
                 }
 
                 const nlohmann::json json = nlohmann::json::parse(body);
-                if (json["assets"].size() == 2) {
-                    if (fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor,
-                                    vvctre_version_patch) != json["tag_name"].get<std::string>()) {
-                        update_found = true;
-                    }
+
+                if (fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor,
+                                vvctre_version_patch) != json["tag_name"].get<std::string>()) {
+                    update_found = true;
                 }
             }).detach();
         }

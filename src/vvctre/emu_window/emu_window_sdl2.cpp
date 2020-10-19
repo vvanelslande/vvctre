@@ -3539,44 +3539,51 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("Restart With Different Region")) {
-                    if (Settings::values.region_value != Settings::REGION_VALUE_AUTO_SELECT &&
+                    if (Settings::values.region_value != Settings::Region::AutoSelect &&
                         ImGui::MenuItem("Auto-select")) {
-                        Settings::values.region_value = Settings::REGION_VALUE_AUTO_SELECT;
+                        Settings::values.region_value = Settings::Region::AutoSelect;
                         request_reset = true;
                     }
 
-                    if (Settings::values.region_value != 0 && ImGui::MenuItem("Japan")) {
-                        Settings::values.region_value = 0;
+                    if (Settings::values.region_value != Settings::Region::Japan &&
+                        ImGui::MenuItem("Japan")) {
+                        Settings::values.region_value = Settings::Region::Japan;
                         request_reset = true;
                     }
 
-                    if (Settings::values.region_value != 1 && ImGui::MenuItem("USA")) {
-                        Settings::values.region_value = 1;
+                    if (Settings::values.region_value != Settings::Region::USA &&
+                        ImGui::MenuItem("USA")) {
+                        Settings::values.region_value = Settings::Region::USA;
                         request_reset = true;
                     }
 
-                    if (Settings::values.region_value != 2 && ImGui::MenuItem("Europe")) {
-                        Settings::values.region_value = 2;
+                    if (Settings::values.region_value != Settings::Region::Europe &&
+                        ImGui::MenuItem("Europe")) {
+                        Settings::values.region_value = Settings::Region::Europe;
                         request_reset = true;
                     }
 
-                    if (Settings::values.region_value != 3 && ImGui::MenuItem("Australia")) {
-                        Settings::values.region_value = 3;
+                    if (Settings::values.region_value != Settings::Region::Australia &&
+                        ImGui::MenuItem("Australia")) {
+                        Settings::values.region_value = Settings::Region::Australia;
                         request_reset = true;
                     }
 
-                    if (Settings::values.region_value != 4 && ImGui::MenuItem("China")) {
-                        Settings::values.region_value = 4;
+                    if (Settings::values.region_value != Settings::Region::China &&
+                        ImGui::MenuItem("China")) {
+                        Settings::values.region_value = Settings::Region::China;
                         request_reset = true;
                     }
 
-                    if (Settings::values.region_value != 5 && ImGui::MenuItem("Korea")) {
-                        Settings::values.region_value = 5;
+                    if (Settings::values.region_value != Settings::Region::Korea &&
+                        ImGui::MenuItem("Korea")) {
+                        Settings::values.region_value = Settings::Region::Korea;
                         request_reset = true;
                     }
 
-                    if (Settings::values.region_value != 6 && ImGui::MenuItem("Taiwan")) {
-                        Settings::values.region_value = 6;
+                    if (Settings::values.region_value != Settings::Region::Taiwan &&
+                        ImGui::MenuItem("Taiwan")) {
+                        Settings::values.region_value = Settings::Region::Taiwan;
                         request_reset = true;
                     }
 

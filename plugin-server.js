@@ -29,7 +29,7 @@
 const http = require('http')
 const fs = require('fs')
 const path = require('path')
-const getRegexes = require('./.github/scripts/common/custom-default-settings-plugin-request-regexes')
+const getRegexes = require('./.github/scripts/common/custom-default-settings-regexes')
 
 const server = http
   .createServer((req, res) => {
@@ -333,7 +333,7 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 }
 
 VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
-  vvctre_set_os_window_position(g_plugin_manager, ${json.x}, ${json.y});
+    vvctre_set_os_window_position(g_plugin_manager, ${json.x}, ${json.y});
 }
 
 /*
@@ -406,7 +406,7 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 }
 
 VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
-  vvctre_set_os_window_size(g_plugin_manager, ${json.width}, ${json.height});
+    vvctre_set_os_window_size(g_plugin_manager, ${json.width}, ${json.height});
 }
 
 /*

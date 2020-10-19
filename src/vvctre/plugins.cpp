@@ -2803,11 +2803,11 @@ const char* vvctre_settings_get_record_movie() {
     return Settings::values.record_movie.c_str();
 }
 
-void vvctre_settings_set_region_value(int value) {
+void vvctre_settings_set_region_value(Settings::Region value) {
     Settings::values.region_value = value;
 }
 
-int vvctre_settings_get_region_value() {
+Settings::Region vvctre_settings_get_region_value() {
     return Settings::values.region_value;
 }
 
@@ -2823,12 +2823,12 @@ const char* vvctre_settings_get_log_filter() {
     return Settings::values.log_filter.c_str();
 }
 
-void vvctre_settings_set_initial_clock(int value) {
-    Settings::values.initial_clock = static_cast<Settings::InitialClock>(value);
+void vvctre_settings_set_initial_clock(Settings::InitialClock value) {
+    Settings::values.initial_clock = value;
 }
 
-int vvctre_settings_get_initial_clock() {
-    return static_cast<int>(Settings::values.initial_clock);
+Settings::InitialClock vvctre_settings_get_initial_clock() {
+    return Settings::values.initial_clock;
 }
 
 void vvctre_settings_set_unix_timestamp(u64 value) {
@@ -2996,28 +2996,29 @@ const char* vvctre_settings_get_microphone_device() {
 }
 
 // Camera Settings
-void vvctre_settings_set_camera_engine(int index, const char* value) {
-    Settings::values.camera_engine[index] = std::string(value);
+void vvctre_settings_set_camera_engine(Service::CAM::CameraIndex index, const char* value) {
+    Settings::values.camera_engine[static_cast<std::size_t>(index)] = std::string(value);
 }
 
-const char* vvctre_settings_get_camera_engine(int index) {
-    return Settings::values.camera_engine[index].c_str();
+const char* vvctre_settings_get_camera_engine(Service::CAM::CameraIndex index) {
+    return Settings::values.camera_engine[static_cast<std::size_t>(index)].c_str();
 }
 
-void vvctre_settings_set_camera_parameter(int index, const char* value) {
-    Settings::values.camera_parameter[index] = std::string(value);
+void vvctre_settings_set_camera_parameter(Service::CAM::CameraIndex index, const char* value) {
+    Settings::values.camera_parameter[static_cast<std::size_t>(index)] = std::string(value);
 }
 
-const char* vvctre_settings_get_camera_parameter(int index) {
-    return Settings::values.camera_parameter[index].c_str();
+const char* vvctre_settings_get_camera_parameter(Service::CAM::CameraIndex index) {
+    return Settings::values.camera_parameter[static_cast<std::size_t>(index)].c_str();
 }
 
-void vvctre_settings_set_camera_flip(int index, int value) {
-    Settings::values.camera_flip[index] = static_cast<Service::CAM::Flip>(value);
+void vvctre_settings_set_camera_flip(Service::CAM::CameraIndex index, int value) {
+    Settings::values.camera_flip[static_cast<std::size_t>(index)] =
+        static_cast<Service::CAM::Flip>(value);
 }
 
-int vvctre_settings_get_camera_flip(int index) {
-    return static_cast<int>(Settings::values.camera_flip[index]);
+int vvctre_settings_get_camera_flip(Service::CAM::CameraIndex index) {
+    return static_cast<int>(Settings::values.camera_flip[static_cast<std::size_t>(index)]);
 }
 
 // System Settings
@@ -3048,22 +3049,20 @@ void vvctre_settings_get_birthday(void* cfg, u8* month_out, u8* day_out) {
     *day_out = day;
 }
 
-void vvctre_settings_set_system_language(void* cfg, int value) {
-    static_cast<Service::CFG::Module*>(cfg)->SetSystemLanguage(
-        static_cast<Service::CFG::SystemLanguage>(value));
+void vvctre_settings_set_system_language(void* cfg, Service::CFG::SystemLanguage value) {
+    static_cast<Service::CFG::Module*>(cfg)->SetSystemLanguage(value);
 }
 
-int vvctre_settings_get_system_language(void* cfg) {
-    return static_cast<int>(static_cast<Service::CFG::Module*>(cfg)->GetSystemLanguage());
+Service::CFG::SystemLanguage vvctre_settings_get_system_language(void* cfg) {
+    return static_cast<Service::CFG::Module*>(cfg)->GetSystemLanguage();
 }
 
-void vvctre_settings_set_sound_output_mode(void* cfg, int value) {
-    static_cast<Service::CFG::Module*>(cfg)->SetSoundOutputMode(
-        static_cast<Service::CFG::SoundOutputMode>(value));
+void vvctre_settings_set_sound_output_mode(void* cfg, Service::CFG::SoundOutputMode value) {
+    static_cast<Service::CFG::Module*>(cfg)->SetSoundOutputMode(value);
 }
 
-int vvctre_settings_get_sound_output_mode(void* cfg) {
-    return static_cast<int>(static_cast<Service::CFG::Module*>(cfg)->GetSoundOutputMode());
+Service::CFG::SoundOutputMode vvctre_settings_get_sound_output_mode(void* cfg) {
+    return static_cast<Service::CFG::Module*>(cfg)->GetSoundOutputMode();
 }
 
 void vvctre_settings_set_country(void* cfg, u8 value) {
@@ -3235,12 +3234,12 @@ const char* vvctre_settings_get_texture_filter() {
     return Settings::values.texture_filter.c_str();
 }
 
-void vvctre_settings_set_render_3d(int value) {
-    Settings::values.render_3d = static_cast<Settings::StereoRenderOption>(value);
+void vvctre_settings_set_render_3d(Settings::StereoRenderOption value) {
+    Settings::values.render_3d = value;
 }
 
-int vvctre_settings_get_render_3d() {
-    return static_cast<int>(Settings::values.render_3d);
+Settings::StereoRenderOption vvctre_settings_get_render_3d() {
+    return Settings::values.render_3d;
 }
 
 void vvctre_settings_set_factor_3d(u8 value) {
@@ -3309,12 +3308,12 @@ u8 vvctre_settings_get_cemuhookudp_pad_index() {
 }
 
 // Layout Settings
-void vvctre_settings_set_layout(int value) {
-    Settings::values.layout = static_cast<Settings::Layout>(value);
+void vvctre_settings_set_layout(Settings::Layout value) {
+    Settings::values.layout = value;
 }
 
-int vvctre_settings_get_layout() {
-    return static_cast<int>(Settings::values.layout);
+Settings::Layout vvctre_settings_get_layout() {
+    return Settings::values.layout;
 }
 
 void vvctre_settings_set_swap_screens(bool value) {

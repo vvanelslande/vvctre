@@ -1,0 +1,155 @@
+name: Bot that makes plugins
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  before-making-plugin:
+    if: contains(github.event.issue.labels.*.name, 'The bot that makes plugins is enabled')
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.13.1'
+      - id: github_script
+        uses: actions/github-script@v3
+        env:
+          COMMENT_BODY: ${{github.event.comment.body}}
+        with:
+          script: |
+            if (!(/^Type: Custom Default Settings\r\n\r\n/.test(process.env.COMMENT_BODY))) {
+              core.setOutput('is_custom_default_settings', false)
+              return
+            } else {
+              const fs = require('fs').promises
+              await fs.writeFile('body.json', JSON.stringify({
+                embeds: [
+                  {
+                    thumbnail: {
+                      url: ''
+                    },
+                    fields: [
+                      {
+                        name: 'Issue Title',
+                        value: '',
+                        inline: true
+                      },
+                      {
+                        name: 'Issue Number',
+                        value: '',
+                        inline: true
+                      },
+                      {
+                        name: 'Action',
+                        value: '',
+                        inline: true
+                      },
+                      {
+                        name: 'Comment ID',
+                        value: '',
+                        inline: true
+                      },
+                      {
+                        name: 'Comment Creator',
+                        value: '',
+                        inline: true
+                      },
+                      {
+                        name: 'Comment URL',
+                        value: '',
+                        inline: true
+                      },
+                      {
+                        name: 'Comment Length',
+                        value: '',
+                        inline: true
+                      },
+                      {
+                        name: 'Comment',
+                        value: '',
+                        inline: true
+                      }
+                    ]
+                  }
+                ]
+              }))
+              core.setOutput('body', process.env.COMMENT_BODY.length <= 1024 ? process.env.COMMENT_BODY : (process.env.COMMENT_BODY.substring(0, 1023) + '…'))
+              core.setOutput('body_length', process.env.COMMENT_BODY.length)
+              core.setOutput('is_custom_default_settings', true)
+            }
+      - if: steps.github_script.outputs.is_custom_default_settings == 'true'
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: body.json
+        env:
+          embeds.0.thumbnail.url: ${{github.event.comment.user.avatar_url}}
+          embeds.0.fields.0.value: ${{github.event.issue.title}}
+          embeds.0.fields.1.value: ${{github.event.issue.number}}
+          embeds.0.fields.2.value: ${{github.event.action}}
+          embeds.0.fields.3.value: ${{github.event.comment.id}}
+          embeds.0.fields.4.value: '[${{github.event.comment.user.login}}](${{github.event.comment.user.html_url}})'
+          embeds.0.fields.5.value: https://github.com/vvanelslande/vvctre/issues/${{github.event.issue.number}}#issuecomment-${{github.event.comment.id}}
+          embeds.0.fields.6.value: ${{steps.github_script.outputs.body_length}}
+          embeds.0.fields.7.value: ${{steps.github_script.outputs.body}}
+      - if: steps.github_script.outputs.is_custom_default_settings == 'true'
+        name: Send message
+        run: |
+          curl \
+            --fail \
+            -H "Content-Type: application/json" \
+            --data @body.json \
+            ${{secrets.CDS_PLUGIN_BOT_LOGS}}
+  make-plugin:
+    if: contains(github.event.issue.labels.*.name, 'The bot that makes plugins is enabled')
+    runs-on: ${{matrix.os}}
+    needs: before-making-plugin
+    strategy:
+      matrix:
+        os: [windows-2019, ubuntu-18.04]
+    steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.13.1'
+      - name: Script
+        shell: bash
+        working-directory: ${{github.workspace}}
+        env:
+          COMMENT_BODY: ${{github.event.comment.body}}
+        run: |
+          export PLUGIN_TYPE=$(node .github/scripts/bot-that-makes-plugins/main.js)
+          echo "PLUGIN_TYPE=$PLUGIN_TYPE" >> $GITHUB_ENV
+
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            cl.exe //LD //Fe:vvctre-plugin-$PLUGIN_TYPE-${{github.event.comment.id}}.dll plugin.c
+          else
+            gcc plugin.c -shared -o vvctre-plugin-$PLUGIN_TYPE-${{github.event.comment.id}}.so
+          fi
+
+          mkdir zip
+
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            mv vvctre-plugin-$PLUGIN_TYPE-${{github.event.comment.id}}.dll plugin.c license.txt zip/
+          else
+            mv vvctre-plugin-$PLUGIN_TYPE-${{github.event.comment.id}}.so plugin.c license.txt zip/
+          fi
+      - uses: actions/upload-artifact@v2
+        with:
+          name: vvctre-plugin-${{env.PLUGIN_TYPE}}-${{github.event.comment.id}}-${{runner.os}}
+          path: zip
+  success:
+    runs-on: ubuntu-18.04
+    needs: make-plugin
+    steps:
+      - uses: actions/github-script@v3
+        with:
+          script: |
+            await github.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              body: `${context.payload.comment.body}\n\n---\nYou can download your plugin from Artifacts from https://github.com/vvanelslande/vvctre/actions/runs/${context.runId}.\nThe files are deleted after 30 days. You can edit your comment to rebuild the plugin.`
+            })

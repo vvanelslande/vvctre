@@ -3,27 +3,28 @@
 // Refer to the license.txt file included.
 
 const fs = require('fs')
-const getRegexes = require('./common/custom-default-settings-plugin-request-regexes')
+const getRegexes = require('../common/custom-default-settings-regexes')
 
-let matches = 0
-const names = []
-const types = []
-const calls = []
+module.exports = () => {
+  let matches = 0
+  const names = []
+  const types = []
+  const calls = []
 
-getRegexes(names, types, calls).forEach(test => {
-  if (test.regex.test(process.env.ISSUE_BODY)) {
-    const match = process.env.ISSUE_BODY.match(test.regex)
-    test.call(match)
+  getRegexes(names, types, calls).forEach(test => {
+    if (test.regex.test(process.env.COMMENT_BODY)) {
+      const match = process.env.COMMENT_BODY.match(test.regex)
+      test.call(match)
 
-    ++matches
+      ++matches
+    }
+  })
+
+  if (matches === 1) {
+    names.push(null)
   }
-})
 
-if (matches === 1) {
-  names.push(null)
-}
-
-const code = `// Copyright 2020 Valentin Vanelslande
+  const code = `// Copyright 2020 Valentin Vanelslande
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -118,4 +119,5 @@ ${calls.map(call => `    ${call}`).join('\n')}
 }
 `
 
-fs.writeFileSync('plugin.c', code)
+  fs.writeFileSync('plugin.c', code)
+}

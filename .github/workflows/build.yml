@@ -10,10 +10,20 @@ on:
 
 jobs:
   build:
+    name: ${{matrix.name}}
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: [windows-2019, ubuntu-18.04]
+        include:
+          - os: windows-2019
+            with_cubeb: false
+            name: windows-7-and-8
+          - os: windows-2019
+            with_cubeb: true
+            name: windows-8.1-and-later
+          - os: ubuntu-18.04
+            with_cubeb: true
+            name: linux
     steps:
       - name: Install Dependencies
         if: matrix.os == 'ubuntu-18.04'
@@ -25,8 +35,16 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: Configure CMake
+      - name: Configure CMake (without cubeb)
+        if: matrix.with_cubeb == false
         shell: bash
+        run: |
+          cd $GITHUB_WORKSPACE
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DENABLE_CUBEB=OFF
+      - name: Configure CMake (with cubeb)
+        shell: bash
+        if: matrix.with_cubeb == true
         run: |
           cd $GITHUB_WORKSPACE
           mkdir build && cd build
@@ -35,20 +53,7 @@ jobs:
         working-directory: ./build
         shell: bash
         run: cmake --build . --config Release
-      - name: Prepare to upload to GitHub Releases
-        if: github.event_name == 'push'
-        shell: bash
-        run: |
-          cd $GITHUB_WORKSPACE
-          cp license.txt ./build/bin/Release
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            rm ./build/bin/Release/*.pdb
-          fi
-          export VERSION=${GITHUB_REF:10}
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          7z a vvctre-$VERSION-${{runner.os}}.7z ./build/bin/Release/*
       - name: Prepare to upload artifact
-        if: github.event_name == 'pull_request'
         shell: bash
         run: |
           cd $GITHUB_WORKSPACE
@@ -56,32 +61,88 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ]; then
             rm ./build/bin/Release/*.pdb
           fi
-      - name: Upload to GitHub Releases
-        if: github.event_name == 'push'
-        uses: svenstaro/upload-release-action@v1-release
-        with:
-          repo_token: ${{secrets.GITHUB_TOKEN}}
-          file: vvctre-${{env.VERSION}}-${{runner.os}}.7z
-          asset_name: vvctre-${{env.VERSION}}-${{runner.os}}.7z
-          tag: ${{github.ref}}
-          overwrite: true
       - name: Upload artifact
-        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v1
         with:
-          name: vvctre-${{runner.os}}
+          name: vvctre-${{matrix.name}}
           path: build/bin/Release
-  success:
+  release:
     if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-18.04
     steps:
-      - name: Send message
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+      - name: Set version output and create 7z files
+        id: version
         run: |
           version=${GITHUB_REF:10}
+          echo "::set-output name=version::$version"
+
+          cd vvctre-windows-7-and-8
+          7z a vvctre-$version-windows-7-and-8.7z vvctre.exe SDL2.dll license.txt
+          cd ..
+
+          cd vvctre-windows-8.1-and-later
+          7z a vvctre-$version-windows-8.1-and-later.7z vvctre.exe SDL2.dll license.txt
+          cd ..
+
+          cd vvctre-linux
+          7z a vvctre-$version-linux.7z vvctre license.txt
+
+          commit_body=$(git log -1 --pretty="%b")
+          echo "::set-output name=commit_body::$commit_body"
+      - name: Set commit_body output
+        id: commit_body
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const child_process = require('child_process')
+
+            const commitBody = child_process.execSync('git log -1 --pretty="%b"', { cwd: process.env.GITHUB_WORKSPACE, encoding: 'utf8' })
+            core.setOutput('commit_body', commitBody.slice(0, -1))
+      - id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          tag_name: ${{github.ref}}
+          release_name: ${{steps.version.outputs.version}}
+          body: ${{steps.commit_body.outputs.commit_body}}
+          draft: false
+          prerelease: false
+      - name: Upload Windows 7 and 8 build
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          upload_url: ${{steps.create_release.outputs.upload_url}}
+          asset_path: ./vvctre-windows-7-and-8/vvctre-${{steps.version.outputs.version}}-windows-7-and-8.7z
+          asset_name: vvctre-${{steps.version.outputs.version}}-windows-7-and-8.7z
+          asset_content_type: application/x-7z-compressed
+      - name: Upload Windows 8.1+ build
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          upload_url: ${{steps.create_release.outputs.upload_url}}
+          asset_path: ./vvctre-windows-8.1-and-later/vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.7z
+          asset_name: vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.7z
+          asset_content_type: application/x-7z-compressed
+      - name: Upload Linux build
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          upload_url: ${{steps.create_release.outputs.upload_url}}
+          asset_path: ./vvctre-linux/vvctre-${{steps.version.outputs.version}}-linux.7z
+          asset_name: vvctre-${{steps.version.outputs.version}}-linux.7z
+          asset_content_type: application/x-7z-compressed
+      - name: Send and publish Discord message
+        run: |
           message=$(curl \
             -H "Content-Type: application/json" \
-            --data "{\"embeds\":[{\"title\":\"$version\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/$version)\n• [Download Windows Build](https://github.com/vvanelslande/vvctre/releases/download/$version/vvctre-$version-Windows.7z)\n• [Download Linux Build](https://github.com/vvanelslande/vvctre/releases/download/$version/vvctre-$version-Linux.7z)\"}]}" \
+            --data "{\"embeds\":[{\"title\":\"${{steps.version.outputs.version}}\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/${{steps.version.outputs.version}})\n• [Download Windows 7 and 8 build](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-7-and-8.7z)\n• [Download Windows 8.1+ build](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.7z)\n• [Download Linux build](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-linux.7z)\"}]}" \
             ${{secrets.VVCTRE_RELEASES_CHANNEL_WEBHOOK}})
           message_id=$(echo $message | jq .id -r)
           curl \

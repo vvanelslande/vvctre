@@ -238,8 +238,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             all_installed = GetInstalledList();
                         }
                         if (ImGui::MenuItem("HOME Menu")) {
-                            if (Settings::values.region_value ==
-                                Settings::REGION_VALUE_AUTO_SELECT) {
+                            if (Settings::values.region_value == Settings::Region::AutoSelect) {
                                 pfd::message("vvctre", "Region is Auto-select", pfd::choice::ok,
                                              pfd::icon::error);
                             } else {
@@ -297,49 +296,49 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     if (ImGui::BeginCombo("Region", [&] {
                             switch (Settings::values.region_value) {
-                            case -1:
+                            case Settings::Region::AutoSelect:
                                 return "Auto-select";
-                            case 0:
+                            case Settings::Region::Japan:
                                 return "Japan";
-                            case 1:
+                            case Settings::Region::USA:
                                 return "USA";
-                            case 2:
+                            case Settings::Region::Europe:
                                 return "Europe";
-                            case 3:
+                            case Settings::Region::Australia:
                                 return "Australia";
-                            case 4:
+                            case Settings::Region::China:
                                 return "China";
-                            case 5:
+                            case Settings::Region::Korea:
                                 return "Korea";
-                            case 6:
+                            case Settings::Region::Taiwan:
                                 return "Taiwan";
                             }
 
                             return "Invalid";
                         }())) {
                         if (ImGui::Selectable("Auto-select")) {
-                            Settings::values.region_value = Settings::REGION_VALUE_AUTO_SELECT;
+                            Settings::values.region_value = Settings::Region::AutoSelect;
                         }
                         if (ImGui::Selectable("Japan")) {
-                            Settings::values.region_value = 0;
+                            Settings::values.region_value = Settings::Region::Japan;
                         }
                         if (ImGui::Selectable("USA")) {
-                            Settings::values.region_value = 1;
+                            Settings::values.region_value = Settings::Region::USA;
                         }
                         if (ImGui::Selectable("Europe")) {
-                            Settings::values.region_value = 2;
+                            Settings::values.region_value = Settings::Region::Europe;
                         }
                         if (ImGui::Selectable("Australia")) {
-                            Settings::values.region_value = 3;
+                            Settings::values.region_value = Settings::Region::Australia;
                         }
                         if (ImGui::Selectable("China")) {
-                            Settings::values.region_value = 4;
+                            Settings::values.region_value = Settings::Region::China;
                         }
                         if (ImGui::Selectable("Korea")) {
-                            Settings::values.region_value = 5;
+                            Settings::values.region_value = Settings::Region::Korea;
                         }
                         if (ImGui::Selectable("Taiwan")) {
-                            Settings::values.region_value = 6;
+                            Settings::values.region_value = Settings::Region::Taiwan;
                         }
                         ImGui::EndCombo();
                     }

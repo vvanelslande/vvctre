@@ -2,23 +2,14 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-if (process.env.ISSUE_BODY === 'WIDTHxHEIGHT\r\n') {
-  console.log('No changes')
-  process.exit(1)
-}
-
-if (process.env.ISSUE_BODY === '400x480\r\n') {
-  console.log("It's the default window size")
-  process.exit(1)
-}
-
 const fs = require('fs')
 
-const match = process.env.ISSUE_BODY.match(
-  /^(?<width>\d+)x(?<height>\d+)(?:\r\n)?$/
-)
+module.exports = () => {
+  const match = process.env.COMMENT_BODY.match(
+    /^Type: Window Size\r\n\r\nWidth: (\d+)\r\nHeight: (\d+)/
+  )
 
-const code = `// Copyright 2020 Valentin Vanelslande
+  const code = `// Copyright 2020 Valentin Vanelslande
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -53,12 +44,13 @@ VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager,
 }
 
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
-    vvctre_set_os_window_size(g_plugin_manager, ${match.groups.width}, ${match.groups.height});
+    vvctre_set_os_window_size(g_plugin_manager, ${match[1]}, ${match[2]});
 }
 
 VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
-  vvctre_set_os_window_size(g_plugin_manager, ${match.groups.width}, ${match.groups.height});
+  vvctre_set_os_window_size(g_plugin_manager, ${match[1]}, ${match[2]});
 }
 `
 
-fs.writeFileSync('plugin.c', code)
+  fs.writeFileSync('plugin.c', code)
+}

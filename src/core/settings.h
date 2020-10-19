@@ -103,16 +103,23 @@ enum Values {
 
 } // namespace NativeAnalog
 
-// A special value for Values::region_value indicating that vvctre will automatically select a
-// region value to fit the region lockout info of the game
-static constexpr int REGION_VALUE_AUTO_SELECT = -1;
+enum class Region {
+    AutoSelect = -1,
+    Japan = 0,
+    USA = 1,
+    Europe = 2,
+    Australia = 3,
+    China = 4,
+    Korea = 5,
+    Taiwan = 6,
+};
 
 struct Values {
     // Start
     std::string file_path;
     std::string play_movie;
     std::string record_movie;
-    int region_value = REGION_VALUE_AUTO_SELECT;
+    Region region_value = Region::AutoSelect;
     std::string log_filter = "*:Info";
     InitialClock initial_clock = InitialClock::System;
     u64 unix_timestamp = 0;

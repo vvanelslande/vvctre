@@ -3,10 +3,9 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <SDL.h>
 #include <utility>
 #include <vector>
-#include <SDL.h>
-#include <cubeb/cubeb.h>
 #include "audio_core/sdl2_input.h"
 #include "common/logging/log.h"
 
