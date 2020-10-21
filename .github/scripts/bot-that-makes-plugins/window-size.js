@@ -15,7 +15,7 @@ module.exports = () => {
 
 #include <stddef.h>
 
-static const char* required_function_names[] = { "vvctre_set_os_window_size", NULL };
+static const char* required_function_name = "vvctre_set_os_window_size";
 
 typedef void (*vvctre_set_os_window_size_t)(void* plugin_manager, int width, int height);
 
@@ -34,7 +34,7 @@ VVCTRE_PLUGIN_EXPORT int GetRequiredFunctionCount() {
 }
 
 VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
-    return required_function_names;
+    return &required_function_name;
 }
 
 VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager,

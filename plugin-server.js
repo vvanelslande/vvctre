@@ -79,10 +79,6 @@ const server = http
             return
           }
 
-          if (matches === 1) {
-            names.push(null)
-          }
-
           const code = `// Copyright 2020 Valentin Vanelslande
 // Licensed under GPLv2 or any later version
 // License file text is after InitialSettingsOpening
@@ -140,11 +136,13 @@ typedef u32 PAddr; ///< Represents a pointer in the ARM11 physical address space
 #define VVCTRE_PLUGIN_EXPORT
 #endif
 
-static const char* required_function_names[] = {
-${names
-  .map(name => (name === null ? '    NULL,' : `    "${name}",`))
-  .join('\n')}
-};
+${
+  matches === 1
+    ? `static const char* required_function_name = "${names[0]}";`
+    : `static const char* required_function_names[] = {\n${names
+        .map(name => `    "${name}",`)
+        .join('\n')}\n};`
+}
 
 ${names
   .filter(Boolean)
@@ -159,7 +157,9 @@ VVCTRE_PLUGIN_EXPORT int GetRequiredFunctionCount() {
 }
 
 VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
-    return required_function_names;
+    return ${
+      matches === 1 ? '&required_function_name' : 'required_function_names'
+    };
 }
     
 VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager, void* required_functions[]) {
@@ -171,6 +171,7 @@ ${names
   .join('\n')}
 }
 
+
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 ${calls.map(call => `    ${call}`).join('\n')}
 }
@@ -178,7 +179,7 @@ ${calls.map(call => `    ${call}`).join('\n')}
 /*
 License:
 
-${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
+${fs.readFileSync(path.resolve(__dirname, 'license.txt'))}
 */
 `
 
@@ -268,7 +269,7 @@ VVCTRE_PLUGIN_EXPORT void AfterSwapWindow() {
 /*
 License:
 
-${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
+${fs.readFileSync(path.resolve(__dirname, 'license.txt'))}
 */
 `
 
@@ -303,7 +304,7 @@ ${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
 
 #include <stddef.h>
 
-static const char* required_function_names[] = { "vvctre_set_os_window_position", NULL };
+static const char* required_function_name = "vvctre_set_os_window_position";
 
 typedef void (*vvctre_set_os_window_position_t)(void* plugin_manager, int x, int y);
 
@@ -322,7 +323,7 @@ VVCTRE_PLUGIN_EXPORT int GetRequiredFunctionCount() {
 }
 
 VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
-    return required_function_names;
+    return &required_function_name;
 }
 
 VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager,
@@ -342,7 +343,7 @@ VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
 /*
 License:
 
-${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
+${fs.readFileSync(path.resolve(__dirname, 'license.txt'))}
 */
 `
 
@@ -377,7 +378,7 @@ ${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
 
 #include <stddef.h>
 
-static const char* required_function_names[] = { "vvctre_set_os_window_size", NULL };
+static const char* required_function_name = "vvctre_set_os_window_size";
 
 typedef void (*vvctre_set_os_window_size_t)(void* plugin_manager, int width, int height);
 
@@ -396,7 +397,7 @@ VVCTRE_PLUGIN_EXPORT int GetRequiredFunctionCount() {
 }
 
 VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
-    return required_function_names;
+    return &required_function_name;
 }
 
 VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager,
@@ -416,7 +417,7 @@ VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
 /*
 License:
 
-${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
+${fs.readFileSync(path.resolve(__dirname, 'license.txt'))}
 */
 `
 
@@ -477,7 +478,7 @@ VVCTRE_PLUGIN_EXPORT void Log(const char* line) {
 /*
 License:
 
-${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
+${fs.readFileSync(path.resolve(__dirname, 'license.txt'))}
 */
 `
 
