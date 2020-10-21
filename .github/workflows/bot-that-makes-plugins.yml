@@ -115,30 +115,47 @@ jobs:
         with:
           node-version: '14.13.1'
       - name: Script
+        id: script
         shell: bash
         working-directory: ${{github.workspace}}
         env:
           COMMENT_BODY: ${{github.event.comment.body}}
         run: |
-          export PLUGIN_TYPE=$(node .github/scripts/bot-that-makes-plugins/main.js)
-          echo "PLUGIN_TYPE=$PLUGIN_TYPE" >> $GITHUB_ENV
+          plugin_type=$(node .github/scripts/bot-that-makes-plugins/main.js)
+          echo "::set-output name=plugin_type::$plugin_type"
 
           if [ "$RUNNER_OS" == "Windows" ]; then
-            cl.exe //LD //Fe:vvctre-plugin-$PLUGIN_TYPE-${{github.event.comment.id}}.dll plugin.c
+            if [ "$plugin_type" == "log-file" ]; then
+              cl.exe //LD //Fe:vvctre-plugin-$plugin_type-${{github.event.comment.id}}.dll plugin.cpp
+            else
+              cl.exe //LD //Fe:vvctre-plugin-$plugin_type-${{github.event.comment.id}}.dll plugin.c
+            fi
           else
-            gcc plugin.c -shared -o vvctre-plugin-$PLUGIN_TYPE-${{github.event.comment.id}}.so
+            if [ "$plugin_type" == "log-file" ]; then
+              g++ plugin.cpp -shared -o vvctre-plugin-$plugin_type-${{github.event.comment.id}}.so
+            else
+              gcc plugin.c -shared -o vvctre-plugin-$plugin_type-${{github.event.comment.id}}.so
+            fi
           fi
 
           mkdir zip
 
           if [ "$RUNNER_OS" == "Windows" ]; then
-            mv vvctre-plugin-$PLUGIN_TYPE-${{github.event.comment.id}}.dll plugin.c license.txt zip/
+            if [ "$plugin_type" == "log-file" ]; then
+              mv vvctre-plugin-$plugin_type-${{github.event.comment.id}}.dll plugin.cpp license.txt zip/
+            else
+              mv vvctre-plugin-$plugin_type-${{github.event.comment.id}}.dll plugin.c license.txt zip/
+            fi
           else
-            mv vvctre-plugin-$PLUGIN_TYPE-${{github.event.comment.id}}.so plugin.c license.txt zip/
+            if [ "$plugin_type" == "log-file" ]; then
+              mv vvctre-plugin-$plugin_type-${{github.event.comment.id}}.so plugin.cpp license.txt zip/
+            else
+              mv vvctre-plugin-$plugin_type-${{github.event.comment.id}}.so plugin.c license.txt zip/
+            fi
           fi
       - uses: actions/upload-artifact@v2
         with:
-          name: vvctre-plugin-${{env.PLUGIN_TYPE}}-${{github.event.comment.id}}-${{runner.os}}
+          name: vvctre-plugin-${{steps.script.outputs.plugin_type}}-${{github.event.comment.id}}-${{runner.os}}
           path: zip
   success:
     runs-on: ubuntu-18.04

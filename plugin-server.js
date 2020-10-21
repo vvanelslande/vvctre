@@ -4,26 +4,27 @@
 
 /**
  * Only POST is allowed
+ * You can use vvctre-plugin-server.glitch.me if you don't want to self-host.
  *
  * /customdefaultsettings
- *    Request body: See https://vvanelslande.github.io/vvctre/Custom-Default-Settings-Plugin-Request
+ *    Request body: See https://vvanelslande.github.io/vvctre/custom-default-settings-plugin-bot-and-server-line-examples/
  *    Response body: code
- *    https://hoppscotch.io/?method=POST&url=https%3A%2F%2Fvvctre-plugin-server.glitch.me&path=%2Fcustomdefaultsettings&contentType=text%2Fplain&rawParams=start.file%20file.3ds
  *
  * /buttontotouch
  *    Request body: JSON with params, x, and y (example: { "params": "engine:null", "x": 100, "y": 100 })
  *    Response body: code
- *    https://hoppscotch.io/?method=POST&url=https%3A%2F%2Fvvctre-plugin-server.glitch.me&path=%2Fbuttontotouch&contentType=text%2Fplain&rawParams=%7B%0A%20%20%20%20%22params%22%3A%20%22engine%3Anull%22,%0A%20%20%20%20%22x%22%3A%206,%0A%20%20%20%20%22y%22%3A%206%0A%7D
  *
  * /windowposition
  *    Request body: JSON with x and y (example: { "x": 100, "y": 100 })
  *    Response body: code
- *    https://hoppscotch.io/?method=POST&url=https%3A%2F%2Fvvctre-plugin-server.glitch.me&path=%2Fwindowposition&contentType=text%2Fplain&rawParams=%7B%0A%20%20%20%20%22x%22%3A%20100,%0A%20%20%20%20%22y%22%3A%20100%0A%7D
  *
  * /windowsize
  *    Request body: JSON with width and height (example: { "width": 100, "height": 100 })
  *    Response body: code
- *    https://hoppscotch.io/?method=POST&url=https%3A%2F%2Fvvctre-plugin-server.glitch.me&path=%2Fwindowsize&contentType=text%2Fplain&rawParams=%7B%0A%20%20%20%20%22width%22%3A%20100,%0A%20%20%20%20%22height%22%3A%20100%0A%7D
+ *
+ * /logfile
+ *    Request body: File path
+ *    Response body: code
  */
 
 const http = require('http')
@@ -51,7 +52,7 @@ const server = http
 
     req.on('end', () => {
       switch (req.url) {
-        case '/customdefaultsettings':
+        case '/customdefaultsettings': {
           let matches = 0
           const names = []
           const types = []
@@ -177,7 +178,7 @@ ${calls.map(call => `    ${call}`).join('\n')}
 /*
 License:
 
-${fs.readFileSync(path.resolve('license.txt'))}
+${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
 */
 `
 
@@ -191,8 +192,9 @@ ${fs.readFileSync(path.resolve('license.txt'))}
           res.end()
 
           break
+        }
 
-        case '/buttontotouch':
+        case '/buttontotouch': {
           try {
             const json = JSON.parse(body)
 
@@ -266,7 +268,7 @@ VVCTRE_PLUGIN_EXPORT void AfterSwapWindow() {
 /*
 License:
 
-${fs.readFileSync(path.resolve('license.txt'))}
+${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
 */
 `
 
@@ -289,8 +291,9 @@ ${fs.readFileSync(path.resolve('license.txt'))}
           }
 
           break
+        }
 
-        case '/windowposition':
+        case '/windowposition': {
           try {
             const json = JSON.parse(body)
 
@@ -339,7 +342,7 @@ VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
 /*
 License:
 
-${fs.readFileSync(path.resolve('license.txt'))}
+${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
 */
 `
 
@@ -362,8 +365,9 @@ ${fs.readFileSync(path.resolve('license.txt'))}
           }
 
           break
+        }
 
-        case '/windowsize':
+        case '/windowsize': {
           try {
             const json = JSON.parse(body)
 
@@ -412,7 +416,7 @@ VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
 /*
 License:
 
-${fs.readFileSync(path.resolve('license.txt'))}
+${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
 */
 `
 
@@ -435,6 +439,59 @@ ${fs.readFileSync(path.resolve('license.txt'))}
           }
 
           break
+        }
+
+        case '/logfile': {
+          const code = `// Copyright 2020 Valentin Vanelslande
+// Licensed under GPLv2 or any later version
+// License file text is after the Log function
+
+#include <fstream>
+#include <iostream>
+
+#ifdef _WIN32
+#define VVCTRE_PLUGIN_EXPORT extern "C" __declspec(dllexport)
+#else
+#define VVCTRE_PLUGIN_EXPORT extern "C"
+#endif
+
+static std::ofstream file;
+
+VVCTRE_PLUGIN_EXPORT int GetRequiredFunctionCount() {
+    return 0;
+}
+
+VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
+    return nullptr;
+}
+
+VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager,
+                                       void* required_functions[]) {
+    file.open("${body.replace(/\\/g, '\\\\')}", std::ofstream::trunc);
+}
+
+VVCTRE_PLUGIN_EXPORT void Log(const char* line) {
+    file << line << std::endl;
+}
+  
+/*
+License:
+
+${fs.readFileSync(path.resolve(__dirname, '..', 'license.txt'))}
+*/
+`
+
+          res.writeHead(200, {
+            'Content-Type': 'text/x-c',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': '*'
+          })
+          res.write(code)
+          res.end()
+
+          break
+        }
 
         default:
           res.writeHead(400, {
