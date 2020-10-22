@@ -1,0 +1,68 @@
+name: Discord bot that makes plugins
+
+on:
+  repository_dispatch:
+    types:
+      [
+        make-custom-default-settings-plugin,
+        make-button-to-touch-plugin,
+        make-window-size-plugin,
+        make-window-position-plugin,
+        make-log-file-plugin,
+      ]
+
+jobs:
+  make-plugin:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [windows-2019, ubuntu-18.04]
+    steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '14.13.1'
+      - name: Script
+        id: script
+        shell: bash
+        working-directory: ${{github.workspace}}
+        env:
+          COMMENT_BODY: ${{github.event.client_payload.environment_variable_value}}
+        run: |
+          plugin_type=$(node .github/scripts/bot-that-makes-plugins/main.js)
+          echo "::set-output name=plugin_type::$plugin_type"
+
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            if [ "$plugin_type" == "log-file" ]; then
+              cl.exe //LD //Fe:vvctre-plugin-$plugin_type-${{github.run_number}}.dll plugin.cpp
+            else
+              cl.exe //LD //Fe:vvctre-plugin-$plugin_type-${{github.run_number}}.dll plugin.c
+            fi
+          else
+            if [ "$plugin_type" == "log-file" ]; then
+              g++ plugin.cpp -shared -o vvctre-plugin-$plugin_type-${{github.run_number}}.so
+            else
+              gcc plugin.c -shared -o vvctre-plugin-$plugin_type-${{github.run_number}}.so
+            fi
+          fi
+
+          mkdir zip
+
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            if [ "$plugin_type" == "log-file" ]; then
+              mv vvctre-plugin-$plugin_type-${{github.run_number}}.dll plugin.cpp license.txt zip/
+            else
+              mv vvctre-plugin-$plugin_type-${{github.run_number}}.dll plugin.c license.txt zip/
+            fi
+          else
+            if [ "$plugin_type" == "log-file" ]; then
+              mv vvctre-plugin-$plugin_type-${{github.run_number}}.so plugin.cpp license.txt zip/
+            else
+              mv vvctre-plugin-$plugin_type-${{github.run_number}}.so plugin.c license.txt zip/
+            fi
+          fi
+      - uses: actions/upload-artifact@v2
+        with:
+          name: vvctre-plugin-${{steps.script.outputs.plugin_type}}-${{github.run_number}}-${{runner.os}}
+          path: zip

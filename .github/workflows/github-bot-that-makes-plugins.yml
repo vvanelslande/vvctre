@@ -1,4 +1,4 @@
-name: Bot that makes plugins
+name: GitHub bot that makes plugins
 
 on:
   issue_comment:
