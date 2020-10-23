@@ -143,7 +143,7 @@ jobs:
           message=$(curl \
             -H "Content-Type: application/json" \
             --data "{\"embeds\":[{\"title\":\"${{steps.version.outputs.version}}\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/${{steps.version.outputs.version}})\n• [Download Windows 7 and 8 build](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-7-and-8.7z)\n• [Download Windows 8.1+ build](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.7z)\n• [Download Linux build](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-linux.7z)\"}]}" \
-            ${{secrets.VVCTRE_RELEASES_CHANNEL_WEBHOOK}})
+            ${{secrets.DISCORD_RELEASES_WEBHOOK}})
           message_id=$(echo $message | jq .id -r)
           curl \
             -X POST \
