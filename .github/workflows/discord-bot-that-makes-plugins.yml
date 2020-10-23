@@ -12,11 +12,13 @@ on:
       ]
 
 jobs:
-  make-plugin:
+  make_plugin:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
         os: [windows-2019, ubuntu-18.04]
+    outputs:
+      plugin_type: ${{steps.script.outputs.plugin_type}}
     steps:
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: actions/checkout@v2
@@ -66,3 +68,32 @@ jobs:
         with:
           name: vvctre-plugin-${{steps.script.outputs.plugin_type}}-${{github.run_number}}-${{runner.os}}
           path: zip
+  success:
+    needs: make_plugin
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+      - name: Create 7z files
+        run: |
+          cd vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-Windows
+          7z a vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-windows.7z *
+
+          cd ../vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-Linux
+          7z a vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-linux.7z *
+      - run: |
+          curl \
+            -F "payload_json={\"username\":\"Plugin Files\",\"content\":\"${{github.event.client_payload.mention}}\"}" \
+            -F "windows=@vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-Windows/vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-windows.7z" \
+            -F "linux=@vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-Linux/vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-linux.7z" \
+            ${{secrets.DISCORD_BOT_COMMANDS_WEBHOOK}}
+  failure:
+    if: failure()
+    runs-on: ubuntu-18.04
+    needs: make_plugin
+    steps:
+      - run: |
+          curl \
+            -H "Content-Type: application/json" \
+            --data "{\"username\":\"Error\",\"content\":\"${{github.event.client_payload.mention}}, a error occurred when making your plugin (${{github.run_number}})\"}" \
+            ${{secrets.DISCORD_BOT_COMMANDS_WEBHOOK}}
