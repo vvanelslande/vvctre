@@ -83,7 +83,7 @@ jobs:
           7z a vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-linux.7z *
       - run: |
           curl \
-            -F "payload_json={\"username\":\"Plugin Files\",\"content\":\"${{github.event.client_payload.mention}}\"}" \
+            -F "payload_json={\"content\":\"${{github.event.client_payload.mention}}\"}" \
             -F "windows=@vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-Windows/vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-windows.7z" \
             -F "linux=@vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-Linux/vvctre-plugin-${{needs.make_plugin.outputs.plugin_type}}-${{github.run_number}}-linux.7z" \
             ${{secrets.DISCORD_BOT_COMMANDS_WEBHOOK}}
@@ -95,5 +95,5 @@ jobs:
       - run: |
           curl \
             -H "Content-Type: application/json" \
-            --data "{\"username\":\"Error\",\"content\":\"${{github.event.client_payload.mention}}, a error occurred when making your plugin (${{github.run_number}})\"}" \
+            --data "{\"content\":\"${{github.event.client_payload.mention}}, a error occurred when making your plugin (${{github.run_number}})\"}" \
             ${{secrets.DISCORD_BOT_COMMANDS_WEBHOOK}}
