@@ -5,7 +5,7 @@
 const fs = require('fs')
 
 module.exports = () => {
-  const match = process.env.COMMENT_BODY.match(/^Type: Log File\r\n\r\n(.+)/)
+  const match = process.env.COMMENT_BODY.match(/^Type: Log File\r\n\r\n`(.+)`/)
 
   const code = `// Copyright 2020 Valentin Vanelslande
 // Licensed under GPLv2 or any later version

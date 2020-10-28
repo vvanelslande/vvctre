@@ -8,7 +8,11 @@ const window_position = require('./window-position')
 const window_size = require('./window-size')
 const log_file = require('./log-file')
 
-if (/^Type: Custom Default Settings\r\n\r\n/.test(process.env.COMMENT_BODY)) {
+if (
+  /^Type: Custom Default Settings\r\n\r\n```\r\n.*\r\n```/s.test(
+    process.env.COMMENT_BODY
+  )
+) {
   custom_default_settings()
   process.stdout.write('custom-default-settings')
 } else if (
@@ -32,7 +36,7 @@ if (/^Type: Custom Default Settings\r\n\r\n/.test(process.env.COMMENT_BODY)) {
 ) {
   window_size()
   process.stdout.write('window-size')
-} else if (/^Type: Log File\r\n\r\n(.+)/.test(process.env.COMMENT_BODY)) {
+} else if (/^Type: Log File\r\n\r\n`.+`/.test(process.env.COMMENT_BODY)) {
   log_file()
   process.stdout.write('log-file')
 } else {
