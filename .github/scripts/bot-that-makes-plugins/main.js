@@ -9,7 +9,7 @@ const window_size = require('./window-size')
 const log_file = require('./log-file')
 
 if (
-  /^Type: Custom Default Settings\r\n\r\n```\r\n.*\r\n```/s.test(
+  /^Type: Custom Default Settings\r\n\r\n```\r\n.+\r\n```/s.test(
     process.env.COMMENT_BODY
   )
 ) {
