@@ -1074,7 +1074,7 @@ const server = http
           for (const regex of regexes) {
             if (regex.regex.test(body)) {
               const match = body.match(regex.regex)
-              test.call(match)
+              regex.call(match)
 
               ++matches
             }
