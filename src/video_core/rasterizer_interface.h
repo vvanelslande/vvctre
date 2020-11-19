@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <atomic>
 #include <functional>
 #include "common/common_types.h"
 #include "core/hw/gpu.h"
