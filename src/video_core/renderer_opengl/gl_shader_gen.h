@@ -16,12 +16,6 @@
 
 namespace OpenGL {
 
-enum class ProgramType : u32 {
-    VS,
-    GS,
-    FS,
-};
-
 enum Attributes {
     ATTRIBUTE_POSITION,
     ATTRIBUTE_COLOR,
