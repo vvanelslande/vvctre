@@ -218,7 +218,8 @@ int main(int argc, char** argv) {
                 ImGui::EndPopup();
             }
 
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClearColor(Settings::values.background_color_red, Settings::values.background_color_green,
+                         Settings::values.background_color_blue, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
