@@ -92,6 +92,7 @@ private:
     bool show_ipc_recorder_window = false;
 
     // Installed
+    bool installed_menu_opened = false;
     std::vector<std::tuple<std::string, std::string>> all_installed;
     std::vector<std::tuple<std::string, std::string>> installed_search_results;
     std::string installed_search_text;
@@ -113,7 +114,7 @@ private:
     bool play_coins_changed = false;
 
     // Multiplayer
-    bool show_connect_to_citra_room = false;
+    bool multiplayer_menu_opened = false;
     CitraRoomList all_public_rooms;
     CitraRoomList public_rooms_search_results;
     std::string public_rooms_search_text;

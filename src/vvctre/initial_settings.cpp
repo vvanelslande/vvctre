@@ -2174,9 +2174,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
                                 const CitraRoom& room = rooms[i];
                                 const std::string popup_text = GetRoomPopupText(room);
-                                const std::string id =
-                                    fmt::format("{}##ip={},port={},popup_text={}", room.name,
-                                                room.ip, room.port, popup_text);
+                                const std::string id = fmt::format("{}##i={}", room.name, i);
                                 if (room.has_password) {
                                     ImGui::PushStyleColor(ImGuiCol_Text,
                                                           ImVec4(1.0f, 1.0f, 0.0f, 1.0f));

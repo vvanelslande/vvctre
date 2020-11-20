@@ -1065,8 +1065,52 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
                 }
 
-                if (ImGui::MenuItem("Load Installed")) {
-                    all_installed = GetInstalledList();
+                if (ImGui::BeginMenu("Load Installed")) {
+                    if (!installed_menu_opened) {
+                        all_installed = GetInstalledList();
+                        installed_menu_opened = true;
+                    }
+
+                    if (ImGui::InputTextWithHint("##search", "Search", &installed_search_text_,
+                                                 ImGuiInputTextFlags_EnterReturnsTrue)) {
+                        installed_search_text = installed_search_text_;
+                        installed_search_results.clear();
+
+                        if (!installed_search_text.empty()) {
+                            for (const auto& title : all_installed) {
+                                const auto [path, name] = title;
+
+                                if (Common::ToLower(name).find(Common::ToLower(installed_search_text)) !=
+                                    std::string::npos) {
+                                    installed_search_results.push_back(title);
+                                }
+                            }
+                        }
+                    }
+
+                    const auto& v =
+                        installed_search_text.empty() ? all_installed : installed_search_results;
+
+                    ImGuiListClipper clipper;
+                    clipper.Begin(v.size());
+
+                    while (clipper.Step()) {
+                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                            const auto [path, name] = v[i];
+
+                            if (ImGui::MenuItem(name.c_str())) {
+                                system.SetResetFilePath(path);
+                                system.RequestReset();
+                                all_installed.clear();
+                                installed_search_results.clear();
+                                installed_search_text.clear();
+                                installed_search_text_.clear();
+                                break;
+                            }
+                        }
+                    }
+
+                    ImGui::EndMenu();
                 }
 
                 if (ImGui::MenuItem("Install CIA")) {
@@ -3803,16 +3847,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                 ImGui::EndMenu();
             }
 
-            if (ImGui::BeginMenu("Multiplayer")) {
-                if (ImGui::MenuItem("Connect To Citra Room")) {
-                    if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
-                        all_public_rooms = GetPublicCitraRooms();
-                    }
-                    show_connect_to_citra_room = true;
-                }
-                ImGui::EndMenu();
-            }
-
             if (ImGui::BeginMenu("Paths")) {
                 const u64 program_id = system.Kernel().GetCurrentProcess()->codeset->program_id;
 
@@ -3958,6 +3992,105 @@ void EmuWindow_SDL2::SwapBuffers() {
                 ImGui::EndMenu();
             }
 
+            if (ImGui::BeginMenu("Multiplayer")) {
+                if (!multiplayer_menu_opened) {
+                    if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
+                        all_public_rooms = GetPublicCitraRooms();
+                    }
+                    multiplayer_menu_opened = true;
+                }
+
+                ImGui::InputText("IP", &Settings::values.multiplayer_ip);
+                ImGui::InputScalar("Port", ImGuiDataType_U16, &Settings::values.multiplayer_port);
+                ImGui::InputText("Nickname", &Settings::values.multiplayer_nickname);
+                ImGui::InputText("Password", &Settings::values.multiplayer_password);
+                if (ImGui::Button("Connect")) {
+                    ConnectToCitraRoom();
+                }
+
+                ImGui::NewLine();
+                ImGui::TextUnformatted("Public Rooms");
+
+                if (ImGui::Button("Refresh")) {
+                    all_public_rooms = GetPublicCitraRooms();
+
+                    public_rooms_search_text = public_rooms_search_text_;
+                    public_rooms_search_results.clear();
+
+                    const std::string lower_case_text = Common::ToLower(public_rooms_search_text);
+
+                    if (!public_rooms_search_text.empty()) {
+                        for (const CitraRoom& room : all_public_rooms) {
+                            if ((Common::ToLower(room.name).find(lower_case_text) !=
+                                 std::string::npos) ||
+                                (Common::ToLower(GetRoomPopupText(room)).find(lower_case_text) !=
+                                 std::string::npos)) {
+                                public_rooms_search_results.push_back(room);
+                            }
+                        }
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::InputTextWithHint("##search", "Search", &public_rooms_search_text_,
+                                             ImGuiInputTextFlags_EnterReturnsTrue)) {
+                    public_rooms_search_text = public_rooms_search_text_;
+                    public_rooms_search_results.clear();
+
+                    const std::string lower_case_text = Common::ToLower(public_rooms_search_text);
+
+                    if (!public_rooms_search_text.empty()) {
+                        for (const CitraRoom& room : all_public_rooms) {
+                            if ((Common::ToLower(room.name).find(lower_case_text) !=
+                                 std::string::npos) ||
+                                (Common::ToLower(GetRoomPopupText(room)).find(lower_case_text) !=
+                                 std::string::npos)) {
+                                public_rooms_search_results.push_back(room);
+                            }
+                        }
+                    }
+                }
+
+                const CitraRoomList& rooms = public_rooms_search_text.empty()
+                                             ? all_public_rooms
+                                             : public_rooms_search_results;
+
+                ImGuiListClipper clipper;
+                clipper.Begin(rooms.size());
+
+                while (clipper.Step()) {
+                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                        const CitraRoom& room = rooms[i];
+                        const std::string popup_text = GetRoomPopupText(room);
+                        const std::string id = fmt::format("{}##i={}", room.name, i);
+                        if (room.has_password) {
+                            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
+                            ImGui::Selectable(id.c_str());
+                            ImGui::PopStyleColor();
+                        } else {
+                            ImGui::Selectable(id.c_str());
+                        }
+                        if (ImGui::IsItemClicked()) {
+                            ImGui::OpenPopup(id.c_str());
+                        }
+                        if (ImGui::BeginPopup(id.c_str(), ImGuiWindowFlags_HorizontalScrollbar)) {
+                            ImGui::TextUnformatted(popup_text.c_str());
+                            if (ImGui::Button("Set IP And Port")) {
+                                Settings::values.multiplayer_ip = room.ip;
+                                Settings::values.multiplayer_port = room.port;
+                                ImGui::CloseCurrentPopup();
+                            }
+                            ImGui::SameLine();
+                            if (ImGui::Button("Close")) {
+                                ImGui::CloseCurrentPopup();
+                            }
+                            ImGui::EndPopup();
+                        }
+                    }
+                }
+
+                ImGui::EndMenu();
+            }
+
             plugin_manager.AddMenus();
 
             ImGui::EndPopup();
@@ -3976,6 +4109,16 @@ void EmuWindow_SDL2::SwapBuffers() {
                 system.RequestReset();
                 request_reset = false;
             }
+            installed_menu_opened = false;
+            all_installed.clear();
+            installed_search_results.clear();
+            installed_search_text.clear();
+            installed_search_text_.clear();
+            multiplayer_menu_opened = false;
+            all_public_rooms.clear();
+            public_rooms_search_results.clear();
+            public_rooms_search_text.clear();
+            public_rooms_search_text_.clear();
             amiibo_generate_and_load_search_results.clear();
             amiibo_generate_and_load_search_text.clear();
             amiibo_generate_and_load_search_text_.clear();
@@ -4521,191 +4664,6 @@ void EmuWindow_SDL2::SwapBuffers() {
         }
         if (!open) {
             room_member.Leave();
-        }
-    }
-
-    if (!all_installed.empty()) {
-        ImGui::OpenPopup("Installed");
-
-        ImGui::SetNextWindowPos(ImVec2());
-        ImGui::SetNextWindowSize(io.DisplaySize);
-
-        bool open = true;
-
-        if (ImGui::BeginPopupModal("Installed", &open,
-                                   ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
-                                       ImGuiWindowFlags_NoResize)) {
-            if (ImGui::InputTextWithHint("##search", "Search", &installed_search_text_,
-                                         ImGuiInputTextFlags_EnterReturnsTrue)) {
-                installed_search_text = installed_search_text_;
-                installed_search_results.clear();
-
-                if (!installed_search_text.empty()) {
-                    for (const auto& title : all_installed) {
-                        const auto [path, name] = title;
-
-                        if (Common::ToLower(name).find(Common::ToLower(installed_search_text)) !=
-                            std::string::npos) {
-                            installed_search_results.push_back(title);
-                        }
-                    }
-                }
-            }
-
-            if (ImGui::BeginChildFrame(ImGui::GetID("Installed"), ImVec2(-1.0f, -1.0f),
-                                       ImGuiWindowFlags_HorizontalScrollbar)) {
-                const auto& v =
-                    installed_search_text.empty() ? all_installed : installed_search_results;
-
-                ImGuiListClipper clipper;
-                clipper.Begin(v.size());
-
-                while (clipper.Step()) {
-                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                        const auto [path, name] = v[i];
-
-                        if (ImGui::Selectable(name.c_str())) {
-                            system.SetResetFilePath(path);
-                            system.RequestReset();
-                            all_installed.clear();
-                            installed_search_results.clear();
-                            installed_search_text.clear();
-                            installed_search_text_.clear();
-                            break;
-                        }
-                    }
-                }
-            }
-            ImGui::EndChildFrame();
-            ImGui::EndPopup();
-        }
-        if (!open) {
-            all_installed.clear();
-            installed_search_results.clear();
-            installed_search_text.clear();
-            installed_search_text_.clear();
-        }
-    }
-
-    if (show_connect_to_citra_room) {
-        ImGui::OpenPopup("Connect To Citra Room");
-
-        ImGui::SetNextWindowPos(ImVec2());
-        ImGui::SetNextWindowSize(io.DisplaySize);
-
-        if (ImGui::BeginPopupModal("Connect To Citra Room", &show_connect_to_citra_room,
-                                   ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
-                                       ImGuiWindowFlags_NoResize)) {
-            ImGui::InputText("IP", &Settings::values.multiplayer_ip);
-            ImGui::InputScalar("Port", ImGuiDataType_U16, &Settings::values.multiplayer_port);
-            ImGui::InputText("Nickname", &Settings::values.multiplayer_nickname);
-            ImGui::InputText("Password", &Settings::values.multiplayer_password);
-
-            ImGui::NewLine();
-            ImGui::TextUnformatted("Public Rooms");
-
-            if (ImGui::Button("Refresh")) {
-                all_public_rooms = GetPublicCitraRooms();
-
-                public_rooms_search_text = public_rooms_search_text_;
-                public_rooms_search_results.clear();
-
-                const std::string lower_case_text = Common::ToLower(public_rooms_search_text);
-
-                if (!public_rooms_search_text.empty()) {
-                    for (const CitraRoom& room : all_public_rooms) {
-                        if ((Common::ToLower(room.name).find(lower_case_text) !=
-                             std::string::npos) ||
-                            (Common::ToLower(GetRoomPopupText(room)).find(lower_case_text) !=
-                             std::string::npos)) {
-                            public_rooms_search_results.push_back(room);
-                        }
-                    }
-                }
-            }
-            ImGui::SameLine();
-            if (ImGui::InputTextWithHint("##search", "Search", &public_rooms_search_text_,
-                                         ImGuiInputTextFlags_EnterReturnsTrue)) {
-                public_rooms_search_text = public_rooms_search_text_;
-                public_rooms_search_results.clear();
-
-                const std::string lower_case_text = Common::ToLower(public_rooms_search_text);
-
-                if (!public_rooms_search_text.empty()) {
-                    for (const CitraRoom& room : all_public_rooms) {
-                        if ((Common::ToLower(room.name).find(lower_case_text) !=
-                             std::string::npos) ||
-                            (Common::ToLower(GetRoomPopupText(room)).find(lower_case_text) !=
-                             std::string::npos)) {
-                            public_rooms_search_results.push_back(room);
-                        }
-                    }
-                }
-            }
-
-            if (ImGui::BeginChildFrame(ImGui::GetID("Public Room List"),
-                                       ImVec2(-1.0f, -ImGui::GetFrameHeightWithSpacing() * 2.0f),
-                                       ImGuiWindowFlags_HorizontalScrollbar)) {
-                const CitraRoomList& rooms = public_rooms_search_text.empty()
-                                                 ? all_public_rooms
-                                                 : public_rooms_search_results;
-
-                ImGuiListClipper clipper;
-                clipper.Begin(rooms.size());
-
-                while (clipper.Step()) {
-                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                        const CitraRoom& room = rooms[i];
-                        const std::string popup_text = GetRoomPopupText(room);
-                        const std::string id =
-                            fmt::format("{}##ip={},port={},popup_text={}", room.name, room.ip,
-                                        room.port, popup_text);
-                        if (room.has_password) {
-                            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
-                            ImGui::Selectable(id.c_str());
-                            ImGui::PopStyleColor();
-                        } else {
-                            ImGui::Selectable(id.c_str());
-                        }
-                        if (ImGui::IsItemClicked()) {
-                            ImGui::OpenPopup(id.c_str());
-                        }
-                        if (ImGui::BeginPopup(id.c_str(), ImGuiWindowFlags_HorizontalScrollbar)) {
-                            ImGui::TextUnformatted(popup_text.c_str());
-                            if (ImGui::Button("Set IP And Port")) {
-                                Settings::values.multiplayer_ip = room.ip;
-                                Settings::values.multiplayer_port = room.port;
-                                ImGui::CloseCurrentPopup();
-                            }
-                            ImGui::SameLine();
-                            if (ImGui::Button("Close")) {
-                                ImGui::CloseCurrentPopup();
-                            }
-                            ImGui::EndPopup();
-                        }
-                    }
-                }
-            }
-            ImGui::EndChildFrame();
-
-            ImGui::NewLine();
-
-            if (ImGui::Button("Connect")) {
-                ConnectToCitraRoom();
-                show_connect_to_citra_room = false;
-                all_public_rooms.clear();
-                public_rooms_search_results.clear();
-                public_rooms_search_text.clear();
-                public_rooms_search_text_.clear();
-            }
-
-            ImGui::EndPopup();
-        }
-        if (!show_connect_to_citra_room) {
-            all_public_rooms.clear();
-            public_rooms_search_results.clear();
-            public_rooms_search_text.clear();
-            public_rooms_search_text_.clear();
         }
     }
 
