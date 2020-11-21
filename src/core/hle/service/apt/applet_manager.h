@@ -5,6 +5,7 @@
 #pragma once
 
 #include <array>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -108,6 +109,12 @@ enum class ApplicationJumpFlags : u8 {
     UseCurrentParameters = 2
 };
 
+struct DeliverArg {
+    std::vector<u8> parameter;
+    std::vector<u8> hmac;
+    u64 source_program_id = std::numeric_limits<u64>::max();
+};
+
 class AppletManager : public std::enable_shared_from_this<AppletManager> {
 public:
     explicit AppletManager(Core::System& system);
@@ -143,7 +150,7 @@ public:
 
     ResultCode PrepareToDoApplicationJump(u64 title_id, FS::MediaType media_type,
                                           ApplicationJumpFlags flags);
-    ResultCode DoApplicationJump();
+    ResultCode DoApplicationJump(DeliverArg arg);
     ResultCode PrepareToStartApplication(u64 title_id, FS::MediaType media_type);
     ResultCode StartApplication(std::vector<u8> parameter, std::vector<u8> hmac);
 
@@ -160,6 +167,7 @@ public:
     struct ApplicationJumpParameters {
         u64 next_title_id;
         FS::MediaType next_media_type;
+        ApplicationJumpFlags flags;
 
         u64 current_title_id;
         FS::MediaType current_media_type;
@@ -173,6 +181,9 @@ public:
         u64 next_title_id;
         FS::MediaType next_media_type;
     };
+
+    std::optional<DeliverArg> ReceiveDeliverArg() const;
+    void SetDeliverArg(std::optional<DeliverArg> arg);
 
 private:
     /// Parameter data to be returned in the next call to Glance/ReceiveParameter.
@@ -209,6 +220,7 @@ private:
     };
 
     ApplicationJumpParameters app_jump_parameters{};
+    std::optional<DeliverArg> deliver_arg{};
     std::optional<ApplicationStartParameters> app_start_parameters;
 
     // Holds data about the concurrently running applets in the system.
@@ -217,8 +229,6 @@ private:
     // This overload returns nullptr if no applet with the specified id has been started.
     AppletSlotData* GetAppletSlotData(AppletId id);
     AppletSlotData* GetAppletSlotData(AppletAttributes attributes);
-
-    void SetDeliveryArg(const std::vector<u8>& parameter, const std::vector<u8>& hmac);
 
     // Command that will be sent to the application when a library applet calls CloseLibraryApplet.
     SignalType library_applet_closing_command;

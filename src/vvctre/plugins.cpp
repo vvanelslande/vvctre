@@ -3438,6 +3438,67 @@ void* vvctre_get_cfg_module(void* core, void* plugin_manager) {
     }
 }
 
+void vvctre_set_hle_deliver_arg(void* core, bool set_to_nullopt, std::size_t parameter_size, u8* parameter_data, std::size_t hmac_size, u8* hmac_data, u64 source_program_id) {
+    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*static_cast<Core::System*>(core))) {
+        if (set_to_nullopt) {
+            apt->GetAppletManager()->SetDeliverArg(std::nullopt);
+        } else {
+            Service::APT::DeliverArg arg;
+            arg.parameter.resize(parameter_size);
+            if (parameter_data != nullptr) {
+                std::memcpy(arg.parameter.data(), parameter_data, parameter_size);
+            }
+            arg.hmac.resize(hmac_size);
+            if (hmac_data != nullptr) {
+                std::memcpy(arg.hmac.data(), hmac_data, hmac_size);
+            }
+            arg.source_program_id = source_program_id;
+            apt->GetAppletManager()->SetDeliverArg(arg);
+        }
+    }
+}
+
+bool vvctre_get_hle_deliver_arg(void* core, std::size_t* parameter_size, u8* parameter_data, std::size_t* hmac_size, u8* hmac_data, u64* source_program_id) {
+    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*static_cast<Core::System*>(core))) {
+        std::optional<Service::APT::DeliverArg> deliver_arg = apt->GetAppletManager()->ReceiveDeliverArg();
+        if (!deliver_arg) {
+            return false;
+        }
+        if (parameter_size != nullptr) {
+            *parameter_size = deliver_arg->parameter.size();
+        }
+        if (parameter_data != nullptr) {
+            std::memcpy(parameter_data, deliver_arg->parameter.data(), deliver_arg->parameter.size());
+        }
+        if (hmac_size != nullptr) {
+            *hmac_size = deliver_arg->hmac.size();
+        }
+        if (hmac_data != nullptr) {
+            std::memcpy(hmac_size, deliver_arg->hmac.data(), deliver_arg->hmac.size());
+        }
+        if (source_program_id != nullptr) {
+            *source_program_id = deliver_arg->source_program_id;
+        }
+        return true;
+    }
+    return false;
+}
+
+void vvctre_resize_hle_wireless_reboot_info(void* core, std::size_t size) {
+    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*static_cast<Core::System*>(core))) {
+        apt->GetWirelessRebootInfo().resize(size);
+    }
+}
+
+u8* vvctre_get_hle_wireless_reboot_info_pointer_and_size(void* core, std::size_t* size) {
+    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*static_cast<Core::System*>(core))) {
+        std::vector<u8>& wireless_reboot_info = apt->GetWirelessRebootInfo();
+        *size = wireless_reboot_info.size();
+        return wireless_reboot_info.empty() ? nullptr : wireless_reboot_info.data();
+    }
+    return nullptr;
+}
+
 // Hacks Settings
 void vvctre_settings_set_enable_priority_boost(bool value) {
     Settings::values.enable_priority_boost = value;
@@ -4457,6 +4518,10 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_settings_set_use_lle_module", (void*)&vvctre_settings_set_use_lle_module},
     {"vvctre_settings_get_use_lle_module", (void*)&vvctre_settings_get_use_lle_module},
     {"vvctre_get_cfg_module", (void*)&vvctre_get_cfg_module},
+    {"vvctre_set_hle_deliver_arg", (void*)&vvctre_set_hle_deliver_arg},
+    {"vvctre_get_hle_deliver_arg", (void*)&vvctre_get_hle_deliver_arg},
+    {"vvctre_resize_hle_wireless_reboot_info", (void*)&vvctre_resize_hle_wireless_reboot_info},
+    {"vvctre_get_hle_wireless_reboot_info_pointer_and_size", (void*)&vvctre_get_hle_wireless_reboot_info_pointer_and_size},
     // Multiplayer
     {"vvctre_settings_set_multiplayer_ip", (void*)&vvctre_settings_set_multiplayer_ip},
     {"vvctre_settings_get_multiplayer_ip", (void*)&vvctre_settings_get_multiplayer_ip},

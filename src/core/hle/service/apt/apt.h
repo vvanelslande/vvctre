@@ -63,12 +63,16 @@ public:
     explicit Module(Core::System& system);
     ~Module();
 
-    static std::vector<u8> wireless_reboot_info;
+    void SetWirelessRebootInfo(std::vector<u8> value);
+    std::vector<u8>& GetWirelessRebootInfo();
+    std::shared_ptr<AppletManager> GetAppletManager() const;
 
     class NSInterface : public ServiceFramework<NSInterface> {
     public:
         NSInterface(std::shared_ptr<Module> apt, const char* name, u32 max_session);
         ~NSInterface();
+
+        std::shared_ptr<Module> GetModule() const;
 
     protected:
         void SetWirelessRebootInfo(Kernel::HLERequestContext& ctx);
@@ -115,6 +119,7 @@ public:
         void PrepareToDoApplicationJump(Kernel::HLERequestContext& ctx);
         void DoApplicationJump(Kernel::HLERequestContext& ctx);
         void GetProgramIdOnApplicationJump(Kernel::HLERequestContext& ctx);
+        void ReceiveDeliverArg(Kernel::HLERequestContext& ctx);
         void CancelLibraryApplet(Kernel::HLERequestContext& ctx);
         void PrepareToCloseLibraryApplet(Kernel::HLERequestContext& ctx);
         void CloseLibraryApplet(Kernel::HLERequestContext& ctx);
@@ -157,7 +162,11 @@ private:
         ScreencapPostPermission::CleanThePermission; // TODO(JamePeng): verify the initial value
 
     std::shared_ptr<AppletManager> applet_manager;
+
+    std::vector<u8> wireless_reboot_info;
 };
+
+std::shared_ptr<Module> GetModule(Core::System& system);
 
 void InstallInterfaces(Core::System& system);
 

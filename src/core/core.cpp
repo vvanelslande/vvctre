@@ -24,6 +24,8 @@
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/process.h"
 #include "core/hle/kernel/thread.h"
+#include "core/hle/service/apt/applet_manager.h"
+#include "core/hle/service/apt/apt.h"
 #include "core/hle/service/fs/archive.h"
 #include "core/hle/service/service.h"
 #include "core/hle/service/sm/sm.h"
@@ -367,9 +369,23 @@ void System::Shutdown() {
 }
 
 void System::Reset() {
+    std::optional<Service::APT::DeliverArg> deliver_arg;
+    std::vector<u8> wireless_reboot_info;
+    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*this)) {
+        deliver_arg = apt->GetAppletManager()->ReceiveDeliverArg();
+        wireless_reboot_info = apt->GetWirelessRebootInfo();
+    }
+
     Shutdown();
     before_loading_after_first_time();
+
     Load(*m_emu_window, m_filepath);
+
+    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*this)) {
+        apt->GetAppletManager()->SetDeliverArg(std::move(deliver_arg));
+        apt->SetWirelessRebootInfo(wireless_reboot_info);
+    }
+
     emulation_starting_after_first_time();
 }
 

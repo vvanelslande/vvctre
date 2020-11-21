@@ -16,6 +16,7 @@
 #include "core/hle/kernel/shared_memory.h"
 #include "core/hle/kernel/shared_page.h"
 #include "core/hle/service/am/am.h"
+#include "core/hle/service/apt/apt.h"
 #include "core/hle/service/apt/applet_manager.h"
 #include "core/hle/service/hid/hid.h"
 #include "core/hle/service/hid/hid_spvr.h"
@@ -83,6 +84,10 @@ void Module::UpdatePadCallback(std::uintptr_t user_data, s64 cycles_late) {
     }
 
     if (home_button->GetStatus()) {
+        if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(system)) {
+            apt->GetAppletManager()->SetDeliverArg(std::nullopt);
+            apt->SetWirelessRebootInfo(std::vector<u8>{});
+        }
         if (Settings::values.region_value == Settings::Region::AutoSelect) {
             LOG_ERROR(Service_HID, "Can't open HOME Menu because region is Auto-select");
         } else {

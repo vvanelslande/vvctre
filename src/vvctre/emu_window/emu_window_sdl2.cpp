@@ -3649,6 +3649,18 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::EndMenu();
                 }
 
+                if (ImGui::MenuItem("Reset HLE Wireless Reboot Information")) {
+                    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(system)) {
+                        apt->SetWirelessRebootInfo(std::vector<u8>{});
+                    }
+                }
+
+                if (ImGui::MenuItem("Reset HLE Delivery Argument")) {
+                    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(system)) {
+                        apt->GetAppletManager()->SetDeliverArg(std::nullopt);
+                    }
+                }
+
                 ImGui::EndMenu();
             }
 

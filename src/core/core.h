@@ -60,11 +60,6 @@ namespace Core {
 
 class Timing;
 
-struct DeliveryArgument {
-    std::vector<u8> parameter;
-    std::vector<u8> hmac;
-};
-
 class System {
 public:
     System();
@@ -223,7 +218,6 @@ public:
         return registered_swkbd;
     }
 
-    std::optional<DeliveryArgument> delivery_arg;
 
     void SetBeforeLoadingAfterFirstTime(std::function<void()> function);
     void SetEmulationStartingAfterFirstTime(std::function<void()> function);

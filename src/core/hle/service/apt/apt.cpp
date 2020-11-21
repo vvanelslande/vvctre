@@ -27,19 +27,19 @@
 
 namespace Service::APT {
 
-std::vector<u8> Module::wireless_reboot_info;
-
 Module::NSInterface::NSInterface(std::shared_ptr<Module> apt, const char* name, u32 max_session)
     : ServiceFramework(name, max_session), apt(std::move(apt)) {}
 
 Module::NSInterface::~NSInterface() = default;
 
+std::shared_ptr<Module> Module::NSInterface::GetModule() const {
+    return apt;
+}
+
 void Module::NSInterface::SetWirelessRebootInfo(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x06, 1, 2); // 0x00060042
     u32 size = rp.Pop<u32>();
-    auto buffer = rp.PopStaticBuffer();
-
-    APT::Module::wireless_reboot_info = std::move(buffer);
+    apt->wireless_reboot_info = rp.PopStaticBuffer();
 
     auto rb = rp.MakeBuilder(1, 0);
     rb.Push(RESULT_SUCCESS);
@@ -247,7 +247,7 @@ void Module::APTInterface::GetWirelessRebootInfo(Kernel::HLERequestContext& ctx)
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 2);
     rb.Push(RESULT_SUCCESS);
-    rb.PushStaticBuffer(APT::Module::wireless_reboot_info, 0);
+    rb.PushStaticBuffer(apt->wireless_reboot_info, 0);
 }
 
 void Module::APTInterface::NotifyToWait(Kernel::HLERequestContext& ctx) {
@@ -442,19 +442,32 @@ void Module::APTInterface::PrepareToDoApplicationJump(Kernel::HLERequestContext&
 
 void Module::APTInterface::DoApplicationJump(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x32, 2, 4); // 0x00320084
-    const u32 param_size = rp.Pop<u32>();
-    const u32 hmac_size = rp.Pop<u32>();
+    u32 parameter_size = rp.Pop<u32>();
+    u32 hmac_size = rp.Pop<u32>();
 
-    [[maybe_unused]] const std::vector<u8>& param = rp.PopStaticBuffer();
-    [[maybe_unused]] const std::vector<u8>& hmac = rp.PopStaticBuffer();
+    std::vector<u8> parameter = rp.PopStaticBuffer();
+    std::vector<u8> hmac = rp.PopStaticBuffer();
 
-    LOG_WARNING(Service_APT, "(STUBBED) called param_size={:08X}, hmac_size={:08X}", param_size,
-                hmac_size);
+    constexpr u32 max_parameter_size = 0x300;
+    constexpr u32 max_hmac_size = 0x20;
+    if (parameter_size > max_parameter_size) {
+        LOG_ERROR(Service_APT,
+                  "Parameter size is outside the valid range (capped to {:#010X}): parameter_size={:#010X}",
+                  max_parameter_size, parameter_size);
+        parameter_size = max_parameter_size;
+    }
+    if (hmac_size > max_hmac_size) {
+        LOG_ERROR(Service_APT,
+                  "HMAC size is outside the valid range (capped to {:#010X}): hmac_size={:#010X}",
+                  max_hmac_size, hmac_size);
+        hmac_size = max_hmac_size;
+    }
 
-    // TODO(Subv): Set the delivery parameters before starting the new application.
+    LOG_INFO(Service_APT, "called parameter_size={:08X}, hmac_size={:08X}", parameter_size, hmac_size);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(apt->applet_manager->DoApplicationJump());
+    rb.Push(apt->applet_manager->DoApplicationJump(
+        DeliverArg{std::move(parameter), std::move(hmac)}));
 }
 
 void Module::APTInterface::GetProgramIdOnApplicationJump(Kernel::HLERequestContext& ctx) {
@@ -468,6 +481,25 @@ void Module::APTInterface::GetProgramIdOnApplicationJump(Kernel::HLERequestConte
     rb.Push(static_cast<u8>(parameters.current_media_type));
     rb.Push<u64>(parameters.next_title_id);
     rb.Push(static_cast<u8>(parameters.next_media_type));
+}
+
+void Module::APTInterface::ReceiveDeliverArg(Kernel::HLERequestContext& ctx) {
+    IPC::RequestParser rp(ctx, 0x35, 2, 4); // 0x00350080
+    const u32 parameter_size = rp.Pop<u32>();
+    const u32 hmac_size = rp.Pop<u32>();
+
+    LOG_DEBUG(Service_APT, "called parameter_size={:08X}, hmac_size={:08X}", parameter_size, hmac_size);
+
+    DeliverArg arg = apt->applet_manager->ReceiveDeliverArg().value_or(DeliverArg{});
+    arg.parameter.resize(parameter_size);
+    arg.hmac.resize(std::max<std::size_t>(hmac_size, 0x20));
+
+    IPC::RequestBuilder rb = rp.MakeBuilder(4, 4);
+    rb.Push(RESULT_SUCCESS);
+    rb.Push(arg.source_program_id);
+    rb.Push<u8>(1);
+    rb.PushStaticBuffer(std::move(arg.parameter), 0);
+    rb.PushStaticBuffer(std::move(arg.hmac), 1);
 }
 
 void Module::APTInterface::PrepareToStartApplication(Kernel::HLERequestContext& ctx) {
@@ -759,7 +791,10 @@ void Module::APTInterface::GetStartupArgument(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x51, 2, 0); // 0x00510080
     u32 parameter_size = rp.Pop<u32>();
     constexpr u32 max_parameter_size{0x1000};
-    const auto startup_argument_type = static_cast<StartupArgumentType>(rp.Pop<u8>());
+    const StartupArgumentType startup_argument_type = static_cast<StartupArgumentType>(rp.Pop<u8>());
+
+    LOG_WARNING(Service_APT, "called, startup_argument_type={}, parameter_size={:#010X}",
+                static_cast<u32>(startup_argument_type), parameter_size);
 
     if (parameter_size > max_parameter_size) {
         LOG_ERROR(Service_APT,
@@ -769,14 +804,35 @@ void Module::APTInterface::GetStartupArgument(Kernel::HLERequestContext& ctx) {
         parameter_size = max_parameter_size;
     }
 
-    std::vector<u8> parameter(parameter_size);
+    std::vector<u8> parameter;
+    bool exists = false;
 
-    LOG_WARNING(Service_APT, "(STUBBED) called, startup_argument_type={}, parameter_size={:#010X}",
-                static_cast<u32>(startup_argument_type), parameter_size);
+    if (auto arg = apt->applet_manager->ReceiveDeliverArg()) {
+        parameter = std::move(arg->parameter);
+
+        // TODO: This is a complete guess based on observations. It is unknown how the OtherMedia
+        // type is handled and how it interacts with the OtherApp type, and it is unknown if
+        // this (checking the jump parameters) is indeed the way the 3DS checks the types.
+        const AppletManager::ApplicationJumpParameters& jump_parameters = apt->applet_manager->GetApplicationJumpParameters();
+        switch (startup_argument_type) {
+        case StartupArgumentType::OtherApp:
+            exists = jump_parameters.current_title_id != jump_parameters.next_title_id &&
+                     jump_parameters.current_media_type == jump_parameters.next_media_type;
+            break;
+        case StartupArgumentType::Restart:
+            exists = jump_parameters.current_title_id == jump_parameters.next_title_id;
+            break;
+        case StartupArgumentType::OtherMedia:
+            exists = jump_parameters.current_media_type != jump_parameters.next_media_type;
+            break;
+        }
+    }
+
+    parameter.resize(parameter_size);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 2);
     rb.Push(RESULT_SUCCESS);
-    rb.Push<u32>(0);
+    rb.Push(exists);
     rb.PushStaticBuffer(std::move(parameter), 0);
 }
 
@@ -926,6 +982,26 @@ Module::Module(Core::System& system) : system(system) {
 }
 
 Module::~Module() {}
+
+std::shared_ptr<AppletManager> Module::GetAppletManager() const {
+    return applet_manager;
+}
+
+void Module::SetWirelessRebootInfo(std::vector<u8> value) {
+    wireless_reboot_info = value;
+}
+
+std::vector<u8>& Module::GetWirelessRebootInfo() {
+    return wireless_reboot_info;
+}
+
+std::shared_ptr<Module> GetModule(Core::System& system) {
+    std::shared_ptr<Service::APT::Module::APTInterface> apt = system.ServiceManager().GetService<Service::APT::Module::APTInterface>("APT:A");
+    if (apt == nullptr) {
+        return nullptr;
+    }
+    return apt->GetModule();
+}
 
 void InstallInterfaces(Core::System& system) {
     auto& service_manager = system.ServiceManager();

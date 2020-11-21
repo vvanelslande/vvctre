@@ -486,34 +486,30 @@ ResultVal<AppletManager::AppletInfo> AppletManager::GetAppletInfo(AppletId app_i
 
 ResultCode AppletManager::PrepareToDoApplicationJump(u64 title_id, FS::MediaType media_type,
                                                      ApplicationJumpFlags flags) {
-    // A running application can not launch another application directly because the applet state
-    // for the Application slot is already in use. The way this is implemented in hardware is to
-    // launch the Home Menu and tell it to launch our desired application.
-
-    // Save the title data to send it to the Home Menu when DoApplicationJump is called.
-    const auto& application_slot = applet_slots[static_cast<std::size_t>(AppletSlot::Application)];
-
-    ASSERT_MSG(flags != ApplicationJumpFlags::UseStoredParameters,
-               "Unimplemented application jump flags 1");
-
+    const auto& application_slot = applet_slots[static_cast<size_t>(AppletSlot::Application)];
     if (flags == ApplicationJumpFlags::UseCurrentParameters) {
         title_id = application_slot.title_id;
-        media_type = Service::AM::GetTitleMediaType(title_id);
+        media_type = Service::AM::GetTitleMediaType(application_slot.title_id);
     }
-
     app_jump_parameters.current_title_id = application_slot.title_id;
-    app_jump_parameters.current_media_type = media_type;
+    app_jump_parameters.current_media_type = Service::AM::GetTitleMediaType(application_slot.title_id);
     app_jump_parameters.next_title_id = title_id;
     app_jump_parameters.next_media_type = media_type;
-
+    app_jump_parameters.flags = flags;
     return RESULT_SUCCESS;
 }
 
-ResultCode AppletManager::DoApplicationJump() {
+ResultCode AppletManager::DoApplicationJump(DeliverArg arg) {
     auto& application_slot = applet_slots[static_cast<std::size_t>(AppletSlot::Application)];
     application_slot.Reset();
 
-    // TODO(Subv): Set the delivery parameters.
+    if (app_jump_parameters.flags != ApplicationJumpFlags::UseCurrentParameters) {
+        // The source program ID is not updated when using flags 0x2.
+        arg.source_program_id = application_slot.title_id;
+    }
+
+    // Set the delivery argument.
+    deliver_arg = std::move(arg);
 
     system.SetResetFilePath(Service::AM::GetTitleContentPath(app_jump_parameters.next_media_type,
                                                              app_jump_parameters.next_title_id));
@@ -547,7 +543,7 @@ ResultCode AppletManager::PrepareToStartApplication(u64 title_id, FS::MediaType 
 
 ResultCode AppletManager::StartApplication(std::vector<u8> parameter, std::vector<u8> hmac) {
     // The delivery argument is always unconditionally set.
-    SetDeliveryArg(parameter, hmac);
+    deliver_arg = DeliverArg{std::move(parameter), std::move(hmac)};
 
     // Note: APT first checks if we can launch the application via AM::CheckDemoLaunchRights and
     // returns 0xc8a12403 if we can't. We intentionally do not implement that check.
@@ -567,12 +563,13 @@ ResultCode AppletManager::StartApplication(std::vector<u8> parameter, std::vecto
 
     return RESULT_SUCCESS;
 }
+    
+std::optional<DeliverArg> AppletManager::ReceiveDeliverArg() const {
+    return deliver_arg;
+}
 
-void AppletManager::SetDeliveryArg(const std::vector<u8>& parameter, const std::vector<u8>& hmac) {
-    // TODO(Subv): This argument is retrieved via ReceiveDeliveryArg, that is not yet implemented.
-    auto& argument = system.delivery_arg.emplace();
-    argument.parameter = parameter;
-    argument.hmac = hmac;
+void AppletManager::SetDeliverArg(std::optional<DeliverArg> arg) {
+    deliver_arg = std::move(arg);
 }
 
 AppletManager::AppletManager(Core::System& system) : system(system) {
