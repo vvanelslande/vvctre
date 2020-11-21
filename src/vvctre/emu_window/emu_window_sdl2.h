@@ -40,6 +40,7 @@ public:
 
     void Close();
     void BeforeLoadingAfterFirstTime();
+    void OnResize();
 
     struct KeyboardData {
         const Frontend::KeyboardConfig& config;
@@ -61,9 +62,6 @@ public:
 private:
     /// Translates pixel position (0..1) to pixel positions
     std::pair<unsigned, unsigned> TouchToPixelPos(float touch_x, float touch_y) const;
-
-    /// Called by PollEvents when any event that may cause the window to be resized occurs
-    void OnResize();
 
     void ConnectToCitraRoom();
 

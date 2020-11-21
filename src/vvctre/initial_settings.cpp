@@ -2013,7 +2013,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                 }
 
                 if (ImGui::BeginTabItem("Controls")) {
-                    GUI_AddControlsSettings(is_open, nullptr, plugin_manager, io);
+                    GUI_AddControlsSettings(is_open, nullptr, plugin_manager, io, nullptr);
 
                     ImGui::EndTabItem();
                 }

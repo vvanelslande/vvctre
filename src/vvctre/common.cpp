@@ -27,6 +27,7 @@
 #include "input_common/main.h"
 #include "vvctre/common.h"
 #include "vvctre/plugins.h"
+#include "vvctre/emu_window/emu_window_sdl2.h"
 
 const u8 vvctre_version_major = 39;
 const u8 vvctre_version_minor = 0;
@@ -304,7 +305,7 @@ bool GUI_CameraAddBrowse(const char* label, std::size_t index) {
 }
 
 void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager& plugin_manager,
-                             ImGuiIO& io) {
+                             ImGuiIO& io, EmuWindow_SDL2* emu_window) {
     SDL_Event event;
 
     const auto GetInput = [&](InputCommon::Polling::DeviceType device_type) -> std::string {
@@ -328,18 +329,38 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 }
 
                 while (SDL_PollEvent(&event)) {
-                    if (event.type == SDL_KEYUP) {
+                    switch (event.type) {
+                    case SDL_WINDOWEVENT:
+                        switch (event.window.event) {
+                        case SDL_WINDOWEVENT_SIZE_CHANGED:
+                        case SDL_WINDOWEVENT_RESIZED:
+                        case SDL_WINDOWEVENT_MAXIMIZED:
+                        case SDL_WINDOWEVENT_RESTORED:
+                        case SDL_WINDOWEVENT_MINIMIZED:
+                            if (emu_window != nullptr) {
+                                emu_window->OnResize();
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                        break;
+                    case SDL_KEYUP:
                         for (auto& poller : pollers) {
                             poller->Stop();
                         }
                         return InputCommon::GenerateKeyboardParam(event.key.keysym.scancode);
-                    } else if (event.type == SDL_QUIT) {
-                        if (pfd::message("vvctre", "Would you like to exit now?",
-                                         pfd::choice::yes_no, pfd::icon::question)
+                    case SDL_QUIT:
+                        if (pfd::message("vvctre", "Would you like to exit now?", pfd::choice::yes_no,
+                                         pfd::icon::question)
                                 .result() == pfd::button::yes) {
                             vvctreShutdown(&plugin_manager);
                             std::exit(0);
                         }
+
+                        break;
+                    default:
+                        break;
                     }
                 }
             }
@@ -372,7 +393,23 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 }
 
                 while (SDL_PollEvent(&event)) {
-                    if (event.type == SDL_KEYUP) {
+                    switch (event.type) {
+                    case SDL_WINDOWEVENT:
+                        switch (event.window.event) {
+                        case SDL_WINDOWEVENT_SIZE_CHANGED:
+                        case SDL_WINDOWEVENT_RESIZED:
+                        case SDL_WINDOWEVENT_MAXIMIZED:
+                        case SDL_WINDOWEVENT_RESTORED:
+                        case SDL_WINDOWEVENT_MINIMIZED:
+                            if (emu_window != nullptr) {
+                                emu_window->OnResize();
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                        break;
+                    case SDL_KEYUP:
                         pollers.clear();
                         keyboard_scancodes.push_back(event.key.keysym.scancode);
                         if (keyboard_scancodes.size() == 5) {
@@ -383,13 +420,18 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                                 keyboard_scancodes[0], keyboard_scancodes[1], keyboard_scancodes[2],
                                 keyboard_scancodes[3], keyboard_scancodes[4], 0.5f);
                         }
-                    } else if (event.type == SDL_QUIT) {
-                        if (pfd::message("vvctre", "Would you like to exit now?",
-                                         pfd::choice::yes_no, pfd::icon::question)
+                        break;
+                    case SDL_QUIT:
+                        if (pfd::message("vvctre", "Would you like to exit now?", pfd::choice::yes_no,
+                                         pfd::icon::question)
                                 .result() == pfd::button::yes) {
                             vvctreShutdown(&plugin_manager);
                             std::exit(0);
                         }
+
+                        break;
+                    default:
+                        break;
                     }
                 }
             }

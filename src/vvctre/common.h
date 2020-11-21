@@ -16,6 +16,8 @@ namespace Core {
 class System;
 } // namespace Core
 
+class EmuWindow_SDL2;
+
 extern const u8 vvctre_version_major;
 extern const u8 vvctre_version_minor;
 extern const u8 vvctre_version_patch;
@@ -48,4 +50,4 @@ const std::string GetRoomPopupText(const CitraRoom& room);
 
 bool GUI_CameraAddBrowse(const char* label, std::size_t index);
 void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager& plugin_manager,
-                             ImGuiIO& io);
+                             ImGuiIO& io, EmuWindow_SDL2* emu_window);

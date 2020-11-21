@@ -3293,7 +3293,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("Controls")) {
-                    GUI_AddControlsSettings(is_open, &system, plugin_manager, io);
+                    GUI_AddControlsSettings(is_open, &system, plugin_manager, io, this);
 
                     ImGui::EndMenu();
                 }
