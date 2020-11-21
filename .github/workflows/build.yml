@@ -73,7 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
-      - name: Set version output and create 7z files
+      - name: Set version output, create 7z files, and create zip files
         id: version
         run: |
           version=${GITHUB_REF:10}
