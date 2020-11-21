@@ -7,11 +7,39 @@
 #include <unordered_map>
 #include <variant>
 #include <boost/container_hash/hash.hpp>
+#include "common/scope_exit.h"
 #include "core/core.h"
+#include "core/settings.h"
+#include "video_core/renderer_opengl/gl_shader_disk_cache.h"
 #include "video_core/renderer_opengl/gl_shader_manager.h"
 #include "video_core/video_core.h"
 
 namespace OpenGL {
+
+static u64 GetUniqueIdentifier(const Pica::Regs& registers, const std::vector<u32>& code) {
+    std::size_t hash = 0;
+    u64 registers_hash = Common::ComputeHash64(registers.reg_array.data(), Pica::Regs::NUM_REGS * sizeof(u32));
+    boost::hash_combine(hash, registers_hash);
+    if (code.size() > 0) {
+        u64 code_hash = Common::ComputeHash64(code.data(), code.size() * sizeof(u32));
+        boost::hash_combine(hash, code_hash);
+    }
+    return static_cast<u64>(hash);
+}
+
+static std::tuple<PicaVSConfig, Pica::Shader::ShaderSetup> BuildVsConfigFromEntry(
+    const ShaderDiskCacheEntry& entry) {
+    Pica::Shader::ProgramCode program_code{};
+    Pica::Shader::SwizzleData swizzle_data{};
+    std::copy_n(entry.GetCode().begin(), Pica::Shader::MAX_PROGRAM_CODE_LENGTH,
+                program_code.begin());
+    std::copy_n(entry.GetCode().begin() + Pica::Shader::MAX_PROGRAM_CODE_LENGTH,
+                Pica::Shader::MAX_SWIZZLE_DATA_LENGTH, swizzle_data.begin());
+    Pica::Shader::ShaderSetup setup;
+    setup.program_code = program_code;
+    setup.swizzle_data = swizzle_data;
+    return {PicaVSConfig{entry.GetRegisters().vs, setup}, setup};
+}
 
 static void SetShaderUniformBlockBinding(GLuint shader, const char* name, UniformBindings binding,
                                          std::size_t expected_size) {
@@ -147,14 +175,14 @@ template <typename KeyConfigType, std::string (*CodeGenerator)(const KeyConfigTy
 class ShaderCache {
 public:
     explicit ShaderCache(bool separable) : separable(separable) {}
-    GLuint Get(const KeyConfigType& config) {
+    std::tuple<GLuint, bool> Get(const KeyConfigType& config) {
         auto [iter, new_shader] = shaders.emplace(config, OGLShaderStage{separable});
         OGLShaderStage& cached_shader = iter->second;
         if (new_shader) {
             const std::string result = CodeGenerator(config, separable);
             cached_shader.Create(result.c_str(), ShaderType);
         }
-        return cached_shader.GetHandle();
+        return {cached_shader.GetHandle(), new_shader};
     }
 
 private:
@@ -174,13 +202,13 @@ template <typename KeyConfigType,
 class ShaderDoubleCache {
 public:
     explicit ShaderDoubleCache(bool separable) : separable(separable) {}
-    GLuint Get(const KeyConfigType& key, const Pica::Shader::ShaderSetup& setup) {
+    std::tuple<GLuint, bool> Get(const KeyConfigType& key, const Pica::Shader::ShaderSetup& setup) {
         auto map_it = shader_map.find(key);
         if (map_it == shader_map.end()) {
             const std::optional<std::string> program = CodeGenerator(setup, key, separable);
             if (!program) {
                 shader_map[key] = nullptr;
-                return 0;
+                return {0, false};
             }
 
             auto [iter, new_shader] = shader_cache.emplace(*program, OGLShaderStage{separable});
@@ -189,14 +217,14 @@ public:
                 cached_shader.Create(program->c_str(), ShaderType);
             }
             shader_map[key] = &cached_shader;
-            return cached_shader.GetHandle();
+            return {cached_shader.GetHandle(), new_shader};
         }
 
         if (map_it->second == nullptr) {
-            return 0;
+            return {0, false};
         }
 
-        return map_it->second->GetHandle();
+        return {map_it->second->GetHandle(), false};
     }
 
 private:
@@ -222,6 +250,7 @@ public:
         if (separable) {
             pipeline.Create();
         }
+        disk_cache = std::make_unique<ShaderDiskCache>(separable);
     }
 
     struct ShaderTuple {
@@ -261,6 +290,7 @@ public:
     FragmentShaders fragment_shaders;
     std::unordered_map<ShaderTuple, OGLProgram, ShaderTuple::Hash> program_cache;
     OGLPipeline pipeline;
+    std::unique_ptr<ShaderDiskCache> disk_cache;
 };
 
 ShaderProgramManager::ShaderProgramManager(bool separable, bool enable_hacks)
@@ -271,11 +301,20 @@ ShaderProgramManager::~ShaderProgramManager() = default;
 bool ShaderProgramManager::UseProgrammableVertexShader(const Pica::Regs& regs,
                                                        Pica::Shader::ShaderSetup& setup) {
     PicaVSConfig config{regs.vs, setup};
-    GLuint handle = impl->programmable_vertex_shaders.Get(config, setup);
+    auto [handle, new_shader] = impl->programmable_vertex_shaders.Get(config, setup);
     if (handle == 0) {
         return false;
     }
     impl->current.vs = handle;
+    if (Settings::values.use_hardware_shader && Settings::values.enable_disk_shader_cache && new_shader) {
+        std::vector<u32> code{setup.program_code.begin(), setup.program_code.end()};
+        code.insert(code.end(), setup.swizzle_data.begin(),
+                    setup.swizzle_data.end());
+        const u64 unique_identifier = GetUniqueIdentifier(regs, code);
+        const ShaderDiskCacheEntry entry{unique_identifier, ProgramType::VS, regs,
+                                         std::move(code)};
+        impl->disk_cache->Add(entry);
+    }
     return true;
 }
 
@@ -285,7 +324,7 @@ void ShaderProgramManager::UseTrivialVertexShader() {
 
 void ShaderProgramManager::UseFixedGeometryShader(const Pica::Regs& regs) {
     PicaFixedGSConfig gs_config(regs);
-    GLuint handle = impl->fixed_geometry_shaders.Get(gs_config);
+    auto [handle, _] = impl->fixed_geometry_shaders.Get(gs_config);
     impl->current.gs = handle;
 }
 
@@ -295,8 +334,13 @@ void ShaderProgramManager::UseTrivialGeometryShader() {
 
 void ShaderProgramManager::UseFragmentShader(const Pica::Regs& regs) {
     PicaFSConfig config = PicaFSConfig::BuildFromRegs(regs);
-    GLuint handle = impl->fragment_shaders.Get(config);
+    auto [handle, new_shader] = impl->fragment_shaders.Get(config);
     impl->current.fs = handle;
+    if (Settings::values.use_hardware_shader && Settings::values.enable_disk_shader_cache && new_shader) {
+        u64 unique_identifier = GetUniqueIdentifier(regs, {});
+        ShaderDiskCacheEntry entry{unique_identifier, ProgramType::FS, regs, {}};
+        impl->disk_cache->Add(entry);
+    }
 }
 
 void ShaderProgramManager::ApplyTo(OpenGLState& state) {
@@ -323,6 +367,53 @@ void ShaderProgramManager::ApplyTo(OpenGLState& state) {
             SetShaderSamplerBindings(cached_program.handle);
         }
         state.draw.shader_program = cached_program.handle;
+    }
+}
+
+void ShaderProgramManager::LoadDiskCache() {
+    Core::System& system = Core::System::GetInstance();
+
+    if (!impl->separable) {
+        LOG_ERROR(Render_OpenGL,
+                  "Cannot load disk cache as separate shader programs are unsupported!");
+        return;
+    }
+
+    const auto entries = impl->disk_cache->Load();
+    if (!entries) {
+        return;
+    }
+
+    SCOPE_EXIT({ system.DiskShaderCacheCallback(false, 0, 0); });
+
+    for (std::size_t i = 0; i < entries->size(); ++i) {
+        const auto& entry = entries->at(i);
+        const u64 unique_identifier = entry.GetUniqueIdentifier();
+
+        GLuint handle = 0;
+
+        if (entry.GetType() == ProgramType::VS) {
+            auto [conf, setup] = BuildVsConfigFromEntry(entry);
+            auto [h, _] = impl->programmable_vertex_shaders.Get(conf, setup);
+            handle = h;
+        } else if (entry.GetType() == ProgramType::FS) {
+            PicaFSConfig conf = PicaFSConfig::BuildFromRegs(entry.GetRegisters());
+            auto [h, _] = impl->fragment_shaders.Get(conf);
+            handle = h;
+        } else {
+            LOG_ERROR(Render_OpenGL, "Unsupported shader type ({}) found in disk shader cache, deleting it",
+                      static_cast<u32>(entry.GetType()));
+            impl->disk_cache->Delete();
+            return;
+        }
+
+        if (handle == 0) {
+            LOG_ERROR(Render_OpenGL, "Compilation failed, deleting cache");
+            impl->disk_cache->Delete();
+            return;
+        }
+
+        system.DiskShaderCacheCallback(true, i + 1, entries->size());
     }
 }
 

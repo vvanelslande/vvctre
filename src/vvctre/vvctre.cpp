@@ -368,6 +368,47 @@ int main(int argc, char** argv) {
         plugin_manager.BeforeLoadingAfterFirstTime();
     });
 
+    system.SetDiskShaderCacheCallback([&](bool loading, std::size_t current, std::size_t total) {
+        SDL_Event event;
+        ImGuiIO& io = ImGui::GetIO();
+
+        while (SDL_PollEvent(&event)) {
+            ImGui_ImplSDL2_ProcessEvent(&event);
+            if (event.type == SDL_QUIT) {
+                if (pfd::message("vvctre", "Would you like to exit now?", pfd::choice::yes_no,
+                                 pfd::icon::question)
+                        .result() == pfd::button::yes) {
+                    vvctreShutdown(&plugin_manager);
+                    std::exit(0);
+                }
+            }
+        }
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame(window);
+        ImGui::NewFrame();
+        const std::string overlay = fmt::format("{}/{}", current, total);
+        ImGui::OpenPopup("Loading Disk Shader Cache");
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
+                                ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("Loading Disk Shader Cache", nullptr,
+                                   ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
+                                   ImGuiWindowFlags_NoResize |
+                                   ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::ProgressBar(
+                static_cast<float>(current) / static_cast<float>(total),
+                ImVec2(ImGui::CalcTextSize("Loading Disk Shader Cache").x, 0.0f),
+                overlay.c_str());
+            ImGui::EndPopup();
+        }
+        glClearColor(Settings::values.background_color_red, Settings::values.background_color_green,
+                     Settings::values.background_color_blue, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        SDL_GL_SwapWindow(window);
+    });
+
     system.RegisterSoftwareKeyboard(std::make_shared<Frontend::SDL2_SoftwareKeyboard>(*emu_window));
     system.RegisterMiiSelector(std::make_shared<Frontend::SDL2_MiiSelector>(*emu_window));
     Camera::RegisterFactory("image", std::make_unique<Camera::ImageCameraFactory>());

@@ -2161,4 +2161,8 @@ void RasterizerOpenGL::ClearCache() {
     res_cache.Clear();
 }
 
+void RasterizerOpenGL::LoadDiskShaderCache() {
+    shader_program_manager->LoadDiskCache();
+}
+
 } // namespace OpenGL

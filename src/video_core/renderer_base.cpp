@@ -16,7 +16,7 @@ void RendererBase::UpdateCurrentFramebufferLayout() {
     render_window.UpdateCurrentFramebufferLayout(layout.width, layout.height);
 }
 
-void RendererBase::RefreshRasterizerSetting() {
+bool RendererBase::RefreshRasterizerSetting() {
     bool hardware_renderer_enabled = VideoCore::g_hardware_renderer_enabled;
     if (rasterizer == nullptr || opengl_rasterizer_active != hardware_renderer_enabled) {
         opengl_rasterizer_active = hardware_renderer_enabled;
@@ -26,5 +26,9 @@ void RendererBase::RefreshRasterizerSetting() {
         } else {
             rasterizer = std::make_unique<VideoCore::SWRasterizer>();
         }
+
+        return true;
     }
+
+    return false;
 }

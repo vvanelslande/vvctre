@@ -3123,6 +3123,20 @@ void EmuWindow_SDL2::SwapBuffers() {
                                     Settings::values.hardware_shader_accurate_multiplication;
                             }
 
+                            if (ImGui::Checkbox("Enable Disk Shader Cache",
+                                                &Settings::values.enable_disk_shader_cache)) {
+                                request_reset = true;
+                            }
+
+                            if (ImGui::IsItemHovered()) {
+                                ImGui::BeginTooltip();
+                                ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
+                                ImGui::TextUnformatted(
+                                    "If you change this, emulation will restart when the menu is closed");
+                                ImGui::PopTextWrapPos();
+                                ImGui::EndTooltip();
+                            }
+
                             ImGui::Unindent();
                         }
 

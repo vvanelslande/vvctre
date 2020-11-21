@@ -1885,6 +1885,9 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             ImGui::Checkbox(
                                 "Accurate Multiplication",
                                 &Settings::values.hardware_shader_accurate_multiplication);
+                            ImGui::Checkbox(
+                                "Enable Disk Shader Cache",
+                                &Settings::values.enable_disk_shader_cache);
                             ImGui::Unindent();
                         }
                         ImGui::Unindent();

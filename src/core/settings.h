@@ -160,6 +160,7 @@ struct Values {
     bool use_hardware_renderer = true;
     bool use_hardware_shader = true;
     bool hardware_shader_accurate_multiplication = false;
+    bool enable_disk_shader_cache = false;
     bool use_shader_jit = true;
     bool enable_vsync = false;
     bool dump_textures = false;

@@ -108,6 +108,7 @@ public:
     void UseTrivialGeometryShader();
     void UseFragmentShader(const Pica::Regs& config);
     void ApplyTo(OpenGLState& state);
+    void LoadDiskCache();
 
 private:
     class Impl;

@@ -74,6 +74,7 @@ public:
     }
 
     virtual void ClearCache() {}
+    virtual void LoadDiskShaderCache() {}
 };
 
 } // namespace VideoCore

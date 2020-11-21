@@ -316,7 +316,9 @@ void RendererOpenGL::SwapBuffers() {
     Core::System::GetInstance().perf_stats->BeginSystemFrame();
 
     prev_state.Apply();
-    RefreshRasterizerSetting();
+    if (RefreshRasterizerSetting() && Settings::values.use_hardware_renderer && Settings::values.use_hardware_shader && Settings::values.enable_disk_shader_cache) {
+        Rasterizer()->LoadDiskShaderCache();
+    }
 }
 
 /**

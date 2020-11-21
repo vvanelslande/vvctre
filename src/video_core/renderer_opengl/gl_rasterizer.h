@@ -57,6 +57,7 @@ public:
                            u32 pixel_stride, ScreenInfo& screen_info) override;
     bool AccelerateDrawBatch(bool is_indexed) override;
     void ClearCache() override;
+    void LoadDiskShaderCache() override;
 
 private:
     struct SamplerInfo {

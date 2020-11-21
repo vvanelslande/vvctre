@@ -3130,6 +3130,14 @@ bool vvctre_settings_get_hardware_shader_accurate_multiplication() {
     return Settings::values.hardware_shader_accurate_multiplication;
 }
 
+void vvctre_settings_set_enable_disk_shader_cache(bool value) {
+    Settings::values.enable_disk_shader_cache = value;
+}
+
+bool vvctre_settings_get_enable_disk_shader_cache() {
+    return Settings::values.enable_disk_shader_cache;
+}
+
 void vvctre_settings_set_use_shader_jit(bool value) {
     Settings::values.use_shader_jit = value;
 }
@@ -4336,6 +4344,10 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
      (void*)&vvctre_settings_set_hardware_shader_accurate_multiplication},
     {"vvctre_settings_get_hardware_shader_accurate_multiplication",
      (void*)&vvctre_settings_get_hardware_shader_accurate_multiplication},
+    {"vvctre_settings_set_enable_disk_shader_cache",
+     (void*)&vvctre_settings_set_enable_disk_shader_cache},
+    {"vvctre_settings_get_enable_disk_shader_cache",
+     (void*)&vvctre_settings_get_enable_disk_shader_cache},
     {"vvctre_settings_set_use_shader_jit", (void*)&vvctre_settings_set_use_shader_jit},
     {"vvctre_settings_get_use_shader_jit", (void*)&vvctre_settings_get_use_shader_jit},
     {"vvctre_settings_set_enable_vsync", (void*)&vvctre_settings_set_enable_vsync},

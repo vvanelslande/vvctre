@@ -229,6 +229,8 @@ public:
     void SetEmulationStartingAfterFirstTime(std::function<void()> function);
     void SetOnLoadFailed(std::function<void(ResultStatus)> function);
     void SetPreloadCustomTexturesFunction(std::function<void()> function);
+    void SetDiskShaderCacheCallback(std::function<void(bool, std::size_t, std::size_t)> function);
+    void DiskShaderCacheCallback(bool loading, std::size_t current, std::size_t total);
     const bool IsOnLoadFailedSet() const;
 
 private:
@@ -293,6 +295,7 @@ private:
     std::function<void()> emulation_starting_after_first_time;
     std::function<void(ResultStatus)> on_load_failed;
     std::function<void()> preload_custom_textures_function;
+    std::function<void(bool, std::size_t, std::size_t)> disk_shader_cache_callback;
 };
 
 } // namespace Core

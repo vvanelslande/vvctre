@@ -36,7 +36,7 @@ public:
         return render_window;
     }
 
-    void RefreshRasterizerSetting();
+    bool RefreshRasterizerSetting();
 
 protected:
     Frontend::EmuWindow& render_window; ///< Reference to the render window handle.

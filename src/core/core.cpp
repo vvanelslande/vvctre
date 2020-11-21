@@ -33,6 +33,7 @@
 #include "core/settings.h"
 #include "network/room_member.h"
 #include "video_core/video_core.h"
+#include "video_core/renderer_base.h"
 
 namespace Core {
 
@@ -202,6 +203,9 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
     }
     if (Settings::values.preload_textures) {
         preload_custom_textures_function();
+    }
+    if (Settings::values.use_hardware_renderer && Settings::values.use_hardware_shader && Settings::values.enable_disk_shader_cache) {
+        VideoCore::g_renderer->Rasterizer()->LoadDiskShaderCache();
     }
     status = ResultStatus::Success;
     m_emu_window = &emu_window;
@@ -395,6 +399,14 @@ void System::SetOnLoadFailed(std::function<void(System::ResultStatus)> function)
 
 void System::SetPreloadCustomTexturesFunction(std::function<void()> function) {
     preload_custom_textures_function = function;
+}
+
+void System::SetDiskShaderCacheCallback(std::function<void(bool, std::size_t, std::size_t)> function) {
+    disk_shader_cache_callback = function;
+}
+
+void System::DiskShaderCacheCallback(bool loading, std::size_t current, std::size_t total) {
+    disk_shader_cache_callback(loading, current, total);
 }
 
 const bool System::IsOnLoadFailedSet() const {
