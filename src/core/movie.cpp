@@ -97,7 +97,7 @@ struct ControllerState {
 static_assert(sizeof(ControllerState) == 7, "ControllerState should be 7 bytes");
 #pragma pack(pop)
 
-constexpr std::array<u8, 4> header_magic_bytes{{'V', 'C', 'M', MovieVersion}};
+constexpr std::array<u8, 4> header_magic_bytes{{'V', 'C', 'M', 2}};
 
 #pragma pack(push, 1)
 struct VCMHeader {
@@ -114,6 +114,7 @@ static_assert(sizeof(VCMHeader) == 256, "VCMHeader should be 256 bytes");
 bool Movie::IsPlayingInput() const {
     return play_mode == PlayMode::Playing;
 }
+
 bool Movie::IsRecordingInput() const {
     return play_mode == PlayMode::Recording;
 }

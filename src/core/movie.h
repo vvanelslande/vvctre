@@ -21,11 +21,10 @@ union PadState;
 } // namespace Service
 
 namespace Core {
+
 struct VCMHeader;
 struct ControllerState;
 enum class PlayMode;
-
-constexpr u8 MovieVersion = 2;
 
 class Movie {
 public:

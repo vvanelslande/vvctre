@@ -1011,7 +1011,6 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
     SDL_PumpEvents();
     LOG_INFO(Frontend, "Version: {}.{}.{}", vvctre_version_major, vvctre_version_minor,
              vvctre_version_patch);
-    LOG_INFO(Frontend, "Movie version: {}", Core::MovieVersion);
 }
 
 EmuWindow_SDL2::~EmuWindow_SDL2() = default;
