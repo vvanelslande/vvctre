@@ -173,7 +173,7 @@ jobs:
           message=$(curl \
             -H "Content-Type: application/json" \
             --data "{\"embeds\":[{\"title\":\"${{steps.version.outputs.version}}\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/${{steps.version.outputs.version}})\n• [Download Windows 7 and 8 build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-7-and-8.7z)\n• [Download Windows 7 and 8 build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-7-and-8.zip)\n• [Download Windows 8.1+ build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.7z)\n• [Download Windows 8.1+ build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.zip)\n• [Download Linux build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-linux.7z)\n• [Download Linux build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-linux.zip)\"}]}" \
-            ${{secrets.DISCORD_RELEASES_WEBHOOK}})
+            "${{secrets.DISCORD_RELEASES_WEBHOOK}}")
           message_id=$(echo $message | jq .id -r)
           curl \
             -X POST \
