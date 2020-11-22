@@ -53,6 +53,11 @@ RasterizerOpenGL::RasterizerOpenGL()
                     "Shadow might not be able to render because of unsupported OpenGL extensions.");
     }
 
+    if (!GLAD_GL_ARB_copy_image && !GLAD_GL_ARB_texture_barrier) {
+        LOG_WARNING(Render_OpenGL,
+                    "Some games might produce artifacts.");
+    }
+
     // Clipping plane 0 is always enabled for PICA fixed clip plane z <= 0
     state.clip_distance[0] = true;
 
@@ -612,10 +617,10 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
         uniform_block_data.dirty = true;
     }
 
-    bool need_duplicate_texture = false;
-    auto CheckBarrier = [&need_duplicate_texture, &color_surface](GLuint handle) {
+    bool need_duplicate_texture_or_barrier = false;
+    auto CheckDuplicateTextureOrBarrier = [&need_duplicate_texture_or_barrier, &color_surface](GLuint handle) {
         if (color_surface && color_surface->texture.handle == handle) {
-            need_duplicate_texture = true;
+            need_duplicate_texture_or_barrier = true;
         }
     };
 
@@ -635,7 +640,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
 
                     Surface surface = res_cache.GetTextureSurface(texture);
                     if (surface != nullptr) {
-                        CheckBarrier(state.image_shadow_texture_px = surface->texture.handle);
+                        CheckDuplicateTextureOrBarrier(state.image_shadow_texture_px = surface->texture.handle);
                     } else {
                         state.image_shadow_texture_px = 0;
                     }
@@ -654,7 +659,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                         regs.texturing.GetCubePhysicalAddress(CubeFace::PositiveX);
                     surface = res_cache.GetTextureSurface(info);
                     if (surface != nullptr) {
-                        CheckBarrier(state.image_shadow_texture_px = surface->texture.handle);
+                        CheckDuplicateTextureOrBarrier(state.image_shadow_texture_px = surface->texture.handle);
                     } else {
                         state.image_shadow_texture_px = 0;
                     }
@@ -663,7 +668,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                         regs.texturing.GetCubePhysicalAddress(CubeFace::NegativeX);
                     surface = res_cache.GetTextureSurface(info);
                     if (surface != nullptr) {
-                        CheckBarrier(state.image_shadow_texture_nx = surface->texture.handle);
+                        CheckDuplicateTextureOrBarrier(state.image_shadow_texture_nx = surface->texture.handle);
                     } else {
                         state.image_shadow_texture_nx = 0;
                     }
@@ -672,7 +677,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                         regs.texturing.GetCubePhysicalAddress(CubeFace::PositiveY);
                     surface = res_cache.GetTextureSurface(info);
                     if (surface != nullptr) {
-                        CheckBarrier(state.image_shadow_texture_py = surface->texture.handle);
+                        CheckDuplicateTextureOrBarrier(state.image_shadow_texture_py = surface->texture.handle);
                     } else {
                         state.image_shadow_texture_py = 0;
                     }
@@ -681,7 +686,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                         regs.texturing.GetCubePhysicalAddress(CubeFace::NegativeY);
                     surface = res_cache.GetTextureSurface(info);
                     if (surface != nullptr) {
-                        CheckBarrier(state.image_shadow_texture_ny = surface->texture.handle);
+                        CheckDuplicateTextureOrBarrier(state.image_shadow_texture_ny = surface->texture.handle);
                     } else {
                         state.image_shadow_texture_ny = 0;
                     }
@@ -690,7 +695,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                         regs.texturing.GetCubePhysicalAddress(CubeFace::PositiveZ);
                     surface = res_cache.GetTextureSurface(info);
                     if (surface != nullptr) {
-                        CheckBarrier(state.image_shadow_texture_pz = surface->texture.handle);
+                        CheckDuplicateTextureOrBarrier(state.image_shadow_texture_pz = surface->texture.handle);
                     } else {
                         state.image_shadow_texture_pz = 0;
                     }
@@ -699,7 +704,7 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
                         regs.texturing.GetCubePhysicalAddress(CubeFace::NegativeZ);
                     surface = res_cache.GetTextureSurface(info);
                     if (surface != nullptr) {
-                        CheckBarrier(state.image_shadow_texture_nz = surface->texture.handle);
+                        CheckDuplicateTextureOrBarrier(state.image_shadow_texture_nz = surface->texture.handle);
                     } else {
                         state.image_shadow_texture_nz = 0;
                     }
@@ -730,8 +735,8 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
             texture_samplers[texture_index].SyncWithConfig(texture.config);
             Surface surface = res_cache.GetTextureSurface(texture);
             if (surface != nullptr) {
-                CheckBarrier(state.texture_units[texture_index].texture_2d =
-                                 surface->texture.handle);
+                CheckDuplicateTextureOrBarrier(state.texture_units[texture_index].texture_2d =
+                                               surface->texture.handle);
             } else {
                 // Can occur when texture address is null or its memory is unmapped/invalid
                 // HACK: In this case, the correct behaviour for the PICA is to use the last
@@ -748,9 +753,9 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
     }
 
     OGLTexture temp_tex;
-    if (need_duplicate_texture) {
-        // The game is trying to use a surface as a texture and framebuffer at the same time
-        // which causes unpredictable behavior on the host.
+    if (need_duplicate_texture_or_barrier && GLAD_GL_ARB_copy_image) {
+        // Using a surface as a texture and framebuffer at the same time
+        // causes unpredictable behavior on the host.
         // Making a copy to sample from eliminates this issue and seems to be fairly cheap.
         temp_tex.Create();
         glBindTexture(GL_TEXTURE_2D, temp_tex.handle);
@@ -856,6 +861,10 @@ bool RasterizerOpenGL::Draw(bool accelerate, bool is_indexed) {
     if (shadow_rendering) {
         glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT |
                         GL_TEXTURE_UPDATE_BARRIER_BIT | GL_FRAMEBUFFER_BARRIER_BIT);
+    }
+
+    if (need_duplicate_texture_or_barrier && !GLAD_GL_ARB_copy_image && GLAD_GL_ARB_texture_barrier) {
+        glTextureBarrier();
     }
 
     // Mark framebuffer surfaces as dirty
