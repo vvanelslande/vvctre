@@ -74,7 +74,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
       - name: Set version output, create 7z files, and create zip files
-        id: version
+        id: step3
         run: |
           version=${GITHUB_REF:10}
           echo "::set-output name=version::$version"
@@ -90,11 +90,8 @@ jobs:
           cd ../vvctre-linux
           7z a vvctre-$version-linux.7z vvctre license.txt
           7z a vvctre-$version-linux.zip vvctre license.txt
-
-          commit_body=$(git log -1 --pretty="%b")
-          echo "::set-output name=commit_body::$commit_body"
       - name: Set commit_body output
-        id: commit_body
+        id: step4
         uses: actions/github-script@v3
         with:
           script: |
@@ -108,8 +105,8 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           tag_name: ${{github.ref}}
-          release_name: ${{steps.version.outputs.version}}
-          body: ${{steps.commit_body.outputs.commit_body}}
+          release_name: ${{steps.step3.outputs.version}}
+          body: ${{steps.step4.outputs.commit_body}}
           draft: false
           prerelease: false
       - name: Upload Windows 7 and 8 7z
@@ -118,8 +115,8 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: ./vvctre-windows-7-and-8/vvctre-${{steps.version.outputs.version}}-windows-7-and-8.7z
-          asset_name: vvctre-${{steps.version.outputs.version}}-windows-7-and-8.7z
+          asset_path: ./vvctre-windows-7-and-8/vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.7z
+          asset_name: vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.7z
           asset_content_type: application/x-7z-compressed
       - name: Upload Windows 7 and 8 zip
         uses: actions/upload-release-asset@v1
@@ -127,8 +124,8 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: ./vvctre-windows-7-and-8/vvctre-${{steps.version.outputs.version}}-windows-7-and-8.zip
-          asset_name: vvctre-${{steps.version.outputs.version}}-windows-7-and-8.zip
+          asset_path: ./vvctre-windows-7-and-8/vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.zip
+          asset_name: vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.zip
           asset_content_type: application/zip
       - name: Upload Windows 8.1+ 7z
         uses: actions/upload-release-asset@v1
@@ -136,8 +133,8 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: ./vvctre-windows-8.1-and-later/vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.7z
-          asset_name: vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.7z
+          asset_path: ./vvctre-windows-8.1-and-later/vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.7z
+          asset_name: vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.7z
           asset_content_type: application/x-7z-compressed
       - name: Upload Windows 8.1+ zip
         uses: actions/upload-release-asset@v1
@@ -145,8 +142,8 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: ./vvctre-windows-8.1-and-later/vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.zip
-          asset_name: vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.zip
+          asset_path: ./vvctre-windows-8.1-and-later/vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.zip
+          asset_name: vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.zip
           asset_content_type: application/zip
       - name: Upload Linux 7z
         uses: actions/upload-release-asset@v1
@@ -154,8 +151,8 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: ./vvctre-linux/vvctre-${{steps.version.outputs.version}}-linux.7z
-          asset_name: vvctre-${{steps.version.outputs.version}}-linux.7z
+          asset_path: ./vvctre-linux/vvctre-${{steps.step3.outputs.version}}-linux.7z
+          asset_name: vvctre-${{steps.step3.outputs.version}}-linux.7z
           asset_content_type: application/x-7z-compressed
       - name: Upload Linux zip
         uses: actions/upload-release-asset@v1
@@ -163,14 +160,14 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: ./vvctre-linux/vvctre-${{steps.version.outputs.version}}-linux.zip
-          asset_name: vvctre-${{steps.version.outputs.version}}-linux.zip
+          asset_path: ./vvctre-linux/vvctre-${{steps.step3.outputs.version}}-linux.zip
+          asset_name: vvctre-${{steps.step3.outputs.version}}-linux.zip
           asset_content_type: application/zip
       - name: Send and publish Discord message
         run: |
           message=$(curl \
             -H "Content-Type: application/json" \
-            --data "{\"embeds\":[{\"title\":\"${{steps.version.outputs.version}}\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/${{steps.version.outputs.version}})\n• [Download Windows 7 and 8 build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-7-and-8.7z)\n• [Download Windows 7 and 8 build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-7-and-8.zip)\n• [Download Windows 8.1+ build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.7z)\n• [Download Windows 8.1+ build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-windows-8.1-and-later.zip)\n• [Download Linux build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-linux.7z)\n• [Download Linux build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.version.outputs.version}}/vvctre-${{steps.version.outputs.version}}-linux.zip)\"}]}" \
+            --data "{\"embeds\":[{\"title\":\"${{steps.step3.outputs.version}}\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/${{steps.step3.outputs.version}})\n• [Download Windows 7 and 8 build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.7z)\n• [Download Windows 7 and 8 build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.zip)\n• [Download Windows 8.1+ build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.7z)\n• [Download Windows 8.1+ build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.zip)\n• [Download Linux build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-linux.7z)\n• [Download Linux build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-linux.zip)\"}]}" \
             "${{secrets.DISCORD_RELEASES_WEBHOOK}}")
           message_id=$(echo $message | jq .id -r)
           curl \
