@@ -82,14 +82,12 @@ jobs:
           cd vvctre-windows-7-and-8
           7z a vvctre-$version-windows-7-and-8.7z vvctre.exe SDL2.dll license.txt
           7z a vvctre-$version-windows-7-and-8.zip vvctre.exe SDL2.dll license.txt
-          cd ..
 
-          cd vvctre-windows-8.1-and-later
+          cd ../vvctre-windows-8.1-and-later
           7z a vvctre-$version-windows-8.1-and-later.7z vvctre.exe SDL2.dll license.txt
           7z a vvctre-$version-windows-8.1-and-later.zip vvctre.exe SDL2.dll license.txt
-          cd ..
 
-          cd vvctre-linux
+          cd ../vvctre-linux
           7z a vvctre-$version-linux.7z vvctre license.txt
           7z a vvctre-$version-linux.zip vvctre license.txt
 
