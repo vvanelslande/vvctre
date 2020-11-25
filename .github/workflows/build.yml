@@ -64,7 +64,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v1
         with:
-          name: vvctre-${{matrix.name}}
+          name: ${{matrix.name}}
           path: build/bin/Release
   release:
     if: github.event_name == 'push'
@@ -79,15 +79,15 @@ jobs:
           version=${GITHUB_REF:10}
           echo "::set-output name=version::$version"
 
-          cd vvctre-windows-7-and-8
+          cd windows-7-and-8
           7z a vvctre-$version-windows-7-and-8.7z vvctre.exe SDL2.dll license.txt
           7z a vvctre-$version-windows-7-and-8.zip vvctre.exe SDL2.dll license.txt
 
-          cd ../vvctre-windows-8.1-and-later
+          cd ../windows-8.1-and-later
           7z a vvctre-$version-windows-8.1-and-later.7z vvctre.exe SDL2.dll license.txt
           7z a vvctre-$version-windows-8.1-and-later.zip vvctre.exe SDL2.dll license.txt
 
-          cd ../vvctre-linux
+          cd ../linux
           7z a vvctre-$version-linux.7z vvctre license.txt
           7z a vvctre-$version-linux.zip vvctre license.txt
       - name: Set commit_body output
@@ -116,7 +116,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.step5.outputs.upload_url}}
-          asset_path: ./vvctre-windows-7-and-8/vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.7z
+          asset_path: ./windows-7-and-8/vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.7z
           asset_name: vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.7z
           asset_content_type: application/x-7z-compressed
       - name: Upload Windows 7 and 8 zip
@@ -125,7 +125,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.step5.outputs.upload_url}}
-          asset_path: ./vvctre-windows-7-and-8/vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.zip
+          asset_path: ./windows-7-and-8/vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.zip
           asset_name: vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.zip
           asset_content_type: application/zip
       - name: Upload Windows 8.1+ 7z
@@ -134,7 +134,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.step5.outputs.upload_url}}
-          asset_path: ./vvctre-windows-8.1-and-later/vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.7z
+          asset_path: ./windows-8.1-and-later/vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.7z
           asset_name: vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.7z
           asset_content_type: application/x-7z-compressed
       - name: Upload Windows 8.1+ zip
@@ -143,7 +143,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.step5.outputs.upload_url}}
-          asset_path: ./vvctre-windows-8.1-and-later/vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.zip
+          asset_path: ./windows-8.1-and-later/vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.zip
           asset_name: vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.zip
           asset_content_type: application/zip
       - name: Upload Linux 7z
@@ -152,7 +152,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.step5.outputs.upload_url}}
-          asset_path: ./vvctre-linux/vvctre-${{steps.step3.outputs.version}}-linux.7z
+          asset_path: ./linux/vvctre-${{steps.step3.outputs.version}}-linux.7z
           asset_name: vvctre-${{steps.step3.outputs.version}}-linux.7z
           asset_content_type: application/x-7z-compressed
       - name: Upload Linux zip
@@ -161,7 +161,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           upload_url: ${{steps.step5.outputs.upload_url}}
-          asset_path: ./vvctre-linux/vvctre-${{steps.step3.outputs.version}}-linux.zip
+          asset_path: ./linux/vvctre-${{steps.step3.outputs.version}}-linux.zip
           asset_name: vvctre-${{steps.step3.outputs.version}}-linux.zip
           asset_content_type: application/zip
       - name: Send and publish Discord message
