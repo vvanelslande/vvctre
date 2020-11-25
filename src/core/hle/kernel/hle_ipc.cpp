@@ -229,8 +229,6 @@ ResultCode HLERequestContext::WriteToOutgoingCommandBuffer(u32_le* dst_cmdbuf,
             IPC::StaticBufferDescInfo target_descriptor{dst_cmdbuf[static_buffer_offset]};
             VAddr target_address = dst_cmdbuf[static_buffer_offset + 1];
 
-            ASSERT_MSG(target_descriptor.size >= data.size(), "Static buffer data is too big");
-
             kernel.memory.WriteBlock(dst_process, target_address, data.data(), data.size());
 
             dst_cmdbuf[i++] = target_address;
