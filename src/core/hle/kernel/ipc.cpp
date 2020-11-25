@@ -119,11 +119,6 @@ ResultCode TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySy
             memory.ReadBlock(*dst_process, dst_address + static_buffer_offset, &target_buffer,
                              sizeof(target_buffer));
 
-            // Note: The real kernel doesn't seem to have any error recovery mechanisms for this
-            // case.
-            ASSERT_MSG(target_buffer.descriptor.size >= data.size(),
-                       "Static buffer data is too big");
-
             memory.WriteBlock(*dst_process, target_buffer.address, data.data(), data.size());
 
             cmd_buf[i++] = target_buffer.address;
