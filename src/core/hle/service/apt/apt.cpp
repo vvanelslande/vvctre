@@ -499,7 +499,7 @@ void Module::APTInterface::ReceiveDeliverArg(Kernel::HLERequestContext& ctx) {
     rb.Push(arg.source_program_id);
     rb.Push<u8>(1);
     rb.PushStaticBuffer(std::move(arg.parameter), 0);
-    rb.PushStaticBuffer(std::move(arg.hmac), 1);
+    rb.PushStaticBuffer(std::move(arg.hmac), 2);
 }
 
 void Module::APTInterface::PrepareToStartApplication(Kernel::HLERequestContext& ctx) {
