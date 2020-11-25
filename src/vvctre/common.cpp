@@ -26,8 +26,8 @@
 #include "core/settings.h"
 #include "input_common/main.h"
 #include "vvctre/common.h"
-#include "vvctre/plugins.h"
 #include "vvctre/emu_window/emu_window_sdl2.h"
+#include "vvctre/plugins.h"
 
 const u8 vvctre_version_major = 39;
 const u8 vvctre_version_minor = 3;
@@ -351,8 +351,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                         }
                         return InputCommon::GenerateKeyboardParam(event.key.keysym.scancode);
                     case SDL_QUIT:
-                        if (pfd::message("vvctre", "Would you like to exit now?", pfd::choice::yes_no,
-                                         pfd::icon::question)
+                        if (pfd::message("vvctre", "Would you like to exit now?",
+                                         pfd::choice::yes_no, pfd::icon::question)
                                 .result() == pfd::button::yes) {
                             vvctreShutdown(&plugin_manager);
                             std::exit(0);
@@ -422,8 +422,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                         }
                         break;
                     case SDL_QUIT:
-                        if (pfd::message("vvctre", "Would you like to exit now?", pfd::choice::yes_no,
-                                         pfd::icon::question)
+                        if (pfd::message("vvctre", "Would you like to exit now?",
+                                         pfd::choice::yes_no, pfd::icon::question)
                                 .result() == pfd::button::yes) {
                             vvctreShutdown(&plugin_manager);
                             std::exit(0);

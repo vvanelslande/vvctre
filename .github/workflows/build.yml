@@ -62,7 +62,7 @@ jobs:
             rm ./build/bin/Release/*.pdb
           fi
       - name: Upload artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.1
         with:
           name: ${{matrix.name}}
           path: build/bin/Release

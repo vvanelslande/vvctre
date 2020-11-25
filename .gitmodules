@@ -74,7 +74,7 @@ url = https://github.com/nlohmann/json.git
 [submodule "llhttp"]
 path = externals/llhttp
 url = https://github.com/nodejs/llhttp.git
-branch = releases
+branch = release
 
 [submodule "utfcpp"]
 path = externals/utfcpp
