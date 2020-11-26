@@ -12,6 +12,7 @@
 #include "core/arm/arm_interface.h"
 #include "enet/enet.h"
 #ifdef ARCHITECTURE_x86_64
+#include <dynarmic/exclusive_monitor.h>
 #include "core/arm/dynarmic/arm_dynarmic.h"
 #endif
 #include "core/arm/dyncom/arm_dyncom.h"
@@ -26,7 +27,7 @@
 #include "core/hle/kernel/thread.h"
 #include "core/hle/service/apt/applet_manager.h"
 #include "core/hle/service/apt/apt.h"
-#include "core/hle/service/fs/archive.h"
+#include "core/hle/service/fs/fs_user.h"
 #include "core/hle/service/service.h"
 #include "core/hle/service/sm/sm.h"
 #include "core/hw/hw.h"
@@ -39,7 +40,7 @@
 
 namespace Core {
 
-/*static*/ System System::s_instance;
+System System::s_instance;
 
 System::System() {
     if (enet_initialize() != 0) {
@@ -302,18 +303,20 @@ void System::Reschedule() {
 
 System::ResultStatus System::Init(Frontend::EmuWindow& emu_window, u32 system_mode) {
     memory = std::make_unique<Memory::MemorySystem>();
-    timing = std::make_unique<Timing>(Settings::values.enable_core_2 ? 2 : 1);
+    timing = std::make_unique<Timing>();
 
     kernel = std::make_unique<Kernel::KernelSystem>(
-        *memory, *timing, [this] { PrepareReschedule(); }, system_mode,
-        Settings::values.enable_core_2 ? 2 : 1);
+        *memory, *timing, [this] { PrepareReschedule(); }, system_mode);
 
     if (Settings::values.use_cpu_jit) {
 #ifdef ARCHITECTURE_x86_64
-        cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(this, *memory, 0, timing->GetTimer(0)));
+        exclusive_monitor =
+            std::make_shared<Dynarmic::ExclusiveMonitor>(Settings::values.enable_core_2 ? 2 : 1);
+        cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(this, *memory, 0, timing->GetTimer(0),
+                                                           exclusive_monitor.get()));
         if (Settings::values.enable_core_2) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_Dynarmic>(this, *memory, 1, timing->GetTimer(1)));
+            cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(
+                this, *memory, 1, timing->GetTimer(1), exclusive_monitor.get()));
         }
 #else
         cpu_cores.push_back(std::make_shared<ARM_DynCom>(this, *memory, 0, timing->GetTimer(0)));
@@ -447,6 +450,7 @@ void System::Shutdown() {
     kernel.reset();
     timing.reset();
     app_loader.reset();
+    exclusive_monitor.reset();
     room_member->SendGameInfo(Network::GameInfo{});
     powered_on = false;
 }
@@ -454,9 +458,18 @@ void System::Shutdown() {
 void System::Reset() {
     std::optional<Service::APT::DeliverArg> deliver_arg;
     std::vector<u8> wireless_reboot_info;
+    std::string current_gamecard_path;
+    std::unordered_map<u32, Service::FS::ProgramInfo> program_info_map;
+
     if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*this)) {
         deliver_arg = apt->GetAppletManager()->ReceiveDeliverArg();
         wireless_reboot_info = apt->GetWirelessRebootInfo();
+    }
+
+    if (std::shared_ptr<Service::FS::FS_USER> fs_user =
+            service_manager->GetService<Service::FS::FS_USER>("fs:USER")) {
+        current_gamecard_path = fs_user->GetCurrentGamecardPath();
+        program_info_map = fs_user->GetProgramInfoMap();
     }
 
     Shutdown();
@@ -467,6 +480,12 @@ void System::Reset() {
     if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*this)) {
         apt->GetAppletManager()->SetDeliverArg(std::move(deliver_arg));
         apt->SetWirelessRebootInfo(wireless_reboot_info);
+    }
+
+    if (std::shared_ptr<Service::FS::FS_USER> fs_user =
+            service_manager->GetService<Service::FS::FS_USER>("fs:USER")) {
+        fs_user->SetCurrentGamecardPath(current_gamecard_path);
+        fs_user->SetProgramInfoMap(program_info_map);
     }
 
     emulation_starting_after_first_time();

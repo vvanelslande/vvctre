@@ -11,9 +11,6 @@
 #include "core/file_sys/file_backend.h"
 #include "core/loader/loader.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace FileSys {
 
 constexpr u32 CIA_SECTION_ALIGNMENT = 0x40;

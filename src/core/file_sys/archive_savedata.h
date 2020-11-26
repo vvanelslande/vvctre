@@ -6,9 +6,6 @@
 
 #include "core/file_sys/archive_source_sd_savedata.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace FileSys {
 
 /// File system interface to the SaveData archive

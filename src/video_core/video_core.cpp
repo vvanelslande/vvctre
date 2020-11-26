@@ -10,13 +10,9 @@
 #include "video_core/renderer_opengl/renderer_opengl.h"
 #include "video_core/video_core.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Video Core namespace
-
 namespace VideoCore {
 
-std::unique_ptr<RendererBase> g_renderer; ///< Renderer plugin
-
+std::unique_ptr<RendererBase> g_renderer;
 std::atomic<bool> g_hardware_renderer_enabled;
 std::atomic<bool> g_shader_jit_enabled;
 std::atomic<bool> g_hardware_shader_enabled;
@@ -25,15 +21,12 @@ std::atomic<bool> g_renderer_background_color_update_requested;
 std::atomic<bool> g_renderer_sampler_update_requested;
 std::atomic<bool> g_renderer_shader_update_requested;
 std::atomic<bool> g_texture_filter_update_requested;
-// Screenshot
 std::atomic<bool> g_renderer_screenshot_requested;
 void* g_screenshot_bits;
 std::function<void()> g_screenshot_complete_callback;
 Layout::FramebufferLayout g_screenshot_framebuffer_layout;
-
 Memory::MemorySystem* g_memory;
 
-/// Initialize the video core
 void Init(Frontend::EmuWindow& emu_window, Memory::MemorySystem& memory) {
     g_memory = &memory;
     Pica::Init();
@@ -41,7 +34,6 @@ void Init(Frontend::EmuWindow& emu_window, Memory::MemorySystem& memory) {
     g_renderer->RefreshRasterizerSetting();
 }
 
-/// Shutdown the video core
 void Shutdown() {
     Pica::Shutdown();
     g_renderer.reset();

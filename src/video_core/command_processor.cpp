@@ -254,7 +254,8 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
     case PICA_REG_INDEX(pipeline.trigger_draw_indexed): {
         PrimitiveAssembler<Shader::OutputVertex>& primitive_assembler = g_state.primitive_assembler;
 
-        bool accelerate_draw = VideoCore::g_hardware_shader_enabled && primitive_assembler.IsEmpty();
+        bool accelerate_draw =
+            VideoCore::g_hardware_shader_enabled && primitive_assembler.IsEmpty();
 
         if (regs.pipeline.use_gs == PipelineRegs::UseGS::No) {
             auto topology = primitive_assembler.GetTopology();
@@ -262,12 +263,10 @@ static void WritePicaReg(u32 id, u32 value, u32 mask) {
                 topology == PipelineRegs::TriangleTopology::List) {
                 accelerate_draw = accelerate_draw && (regs.pipeline.num_vertices % 3) == 0;
             }
-            // TODO (wwylele): for Strip/Fan topology, if the primitive assember is not restarted
+            // TODO: for Strip/Fan topology, if the primitive assember is not restarted
             // after this draw call, the buffered vertex from this draw should "leak" to the next
             // draw, in which case we should buffer the vertex into the software primitive assember,
-            // or disable accelerate draw completely. However, there is not game found yet that does
-            // this, so this is left unimplemented for now. Revisit this when an issue is found in
-            // games.
+            // or disable accelerate draw completely.
         } else {
             accelerate_draw = false;
         }

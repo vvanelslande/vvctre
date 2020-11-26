@@ -21,12 +21,15 @@ bool Timing::Event::operator<(const Timing::Event& right) const {
     return std::tie(time, fifo_order) < std::tie(right.time, right.fifo_order);
 }
 
-Timing::Timing(u8 num_cores) {
-    for (u8 i = 0; i < num_cores; ++i) {
+Timing::Timing() {
+    timers.push_back(std::make_shared<Timer>());
+    if (Settings::values.enable_core_2) {
         timers.push_back(std::make_shared<Timer>());
     }
     current_timer = timers[0].get();
 }
+
+Timing::~Timing() = default;
 
 TimingEventType* Timing::RegisterEvent(const std::string& name, TimedCallback callback) {
     auto info = event_types.emplace(name, TimingEventType{callback, nullptr});

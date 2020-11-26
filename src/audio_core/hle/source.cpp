@@ -174,7 +174,7 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
     if (config.partial_embedded_buffer_dirty) {
         config.partial_embedded_buffer_dirty.Assign(0);
 
-        // As this bit is set by the game, three config options are also updated:
+        // As this bit is set by the game/program, three config options are also updated:
         // buffer_id (after a check comparing the buffer_id to something, probably to make sure it's
         // the same buffer?), flags2_raw.is_looping, and length.
 
@@ -241,8 +241,8 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
         // the mean time
         if (static_cast<s32>(config.length) < 0) {
             LOG_ERROR(Audio_DSP,
-                      "Skipping embedded buffer sample! Game passed in improper value for length. "
-                      "addr {:X} length {:X}",
+                      "Skipping embedded buffer sample! Game/program passed in improper value for length. "
+                      "address {:X} length {:X}",
                       config.physical_address, config.length);
         } else {
             state.input_queue.emplace(Buffer{

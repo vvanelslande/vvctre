@@ -68,11 +68,11 @@ ResultCode ServerSession::HandleSyncRequest(std::shared_ptr<Thread> thread) {
     // If this ServerSession has an associated HLE handler, forward the request to it.
     if (hle_handler != nullptr) {
         std::array<u32_le, IPC::COMMAND_BUFFER_LENGTH + 2 * IPC::MAX_STATIC_BUFFERS> cmd_buf;
-        Kernel::Process* current_process = thread->owner_process;
+        Process* current_process = thread->owner_process;
         kernel.memory.ReadBlock(*current_process, thread->GetCommandBufferAddress(), cmd_buf.data(),
                                 cmd_buf.size() * sizeof(u32));
 
-        Kernel::HLERequestContext context(kernel, SharedFrom(this), thread.get());
+        HLERequestContext context(kernel, SharedFrom(this), thread.get());
         context.PopulateFromIncomingCommandBuffer(cmd_buf.data(), *current_process);
 
         hle_handler->HandleSyncRequest(context);
@@ -80,7 +80,7 @@ ResultCode ServerSession::HandleSyncRequest(std::shared_ptr<Thread> thread) {
         // Only write the response immediately if the thread is still running. If the HLE handler
         // put the thread to sleep then the writing of the command buffer will be deferred to the
         // wakeup callback.
-        if (thread->status == Kernel::ThreadStatus::Running) {
+        if (thread->status == ThreadStatus::Running) {
             context.WriteToOutgoingCommandBuffer(cmd_buf.data(), *current_process);
             kernel.memory.WriteBlock(*current_process, thread->GetCommandBufferAddress(),
                                      cmd_buf.data(), cmd_buf.size() * sizeof(u32));

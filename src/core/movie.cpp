@@ -20,7 +20,7 @@
 
 namespace Core {
 
-/*static*/ Movie Movie::s_instance;
+Movie Movie::s_instance;
 
 enum class PlayMode { None, Recording, Playing };
 

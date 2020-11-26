@@ -17,7 +17,7 @@
 
 namespace Kernel {
 
-ResultCode TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySystem& memory,
+ResultCode TranslateCommandBuffer(KernelSystem& kernel, Memory::MemorySystem& memory,
                                   std::shared_ptr<Thread> src_thread,
                                   std::shared_ptr<Thread> dst_thread, VAddr src_address,
                                   VAddr dst_address,
@@ -196,7 +196,7 @@ ResultCode TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySy
             auto reserve_buffer = std::make_unique<u8[]>(Memory::PAGE_SIZE);
             dst_process->vm_manager.MapBackingMemoryToBase(
                 Memory::IPC_MAPPING_VADDR, Memory::IPC_MAPPING_SIZE, reserve_buffer.get(),
-                Memory::PAGE_SIZE, Kernel::MemoryState::Reserved);
+                Memory::PAGE_SIZE, MemoryState::Reserved);
 
             auto buffer = std::make_unique<u8[]>(num_pages * Memory::PAGE_SIZE);
             memory.ReadBlock(*src_process, source_address, buffer.get() + page_offset, size);
@@ -206,7 +206,7 @@ ResultCode TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySy
                 dst_process->vm_manager
                     .MapBackingMemoryToBase(Memory::IPC_MAPPING_VADDR, Memory::IPC_MAPPING_SIZE,
                                             buffer.get(), num_pages * Memory::PAGE_SIZE,
-                                            Kernel::MemoryState::Shared)
+                                            MemoryState::Shared)
                     .Unwrap();
 
             cmd_buf[i++] = target_address + page_offset;
@@ -214,7 +214,7 @@ ResultCode TranslateCommandBuffer(Kernel::KernelSystem& kernel, Memory::MemorySy
             // Reserve a page of memory after the mapped buffer
             dst_process->vm_manager.MapBackingMemoryToBase(
                 Memory::IPC_MAPPING_VADDR, Memory::IPC_MAPPING_SIZE, reserve_buffer.get(),
-                Memory::PAGE_SIZE, Kernel::MemoryState::Reserved);
+                Memory::PAGE_SIZE, MemoryState::Reserved);
 
             mapped_buffer_context.push_back({permissions, size, source_address,
                                              target_address + page_offset, std::move(buffer),

@@ -171,10 +171,10 @@ public:
 };
 
 ARM_Dynarmic::ARM_Dynarmic(Core::System* system, Memory::MemorySystem& memory, u32 id,
-                           std::shared_ptr<Core::Timing::Timer> timer)
+                           std::shared_ptr<Core::Timing::Timer> timer,
+                           Dynarmic::ExclusiveMonitor* exclusive_monitor)
     : ARM_Interface(id, timer), system(*system), memory(memory),
-      cb(std::make_unique<DynarmicUserCallbacks>(*this)) {
-    exclusive_monitor = std::make_shared<Dynarmic::ExclusiveMonitor>(1);
+      cb(std::make_unique<DynarmicUserCallbacks>(*this)), exclusive_monitor(exclusive_monitor) {
     PageTableChanged();
 }
 
@@ -332,7 +332,7 @@ void ARM_Dynarmic::ServeBreak() {
 
 std::unique_ptr<Dynarmic::A32::Jit> ARM_Dynarmic::MakeJit() {
     Dynarmic::A32::UserConfig config;
-    config.global_monitor = exclusive_monitor.get();
+    config.global_monitor = exclusive_monitor;
     config.callbacks = cb.get();
     if (current_page_table) {
         config.page_table = &current_page_table->pointers;

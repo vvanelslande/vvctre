@@ -6,11 +6,11 @@
 
 #include <algorithm>
 #include <array>
+#include <boost/container/small_vector.hpp>
 #include <chrono>
 #include <memory>
 #include <string>
 #include <vector>
-#include <boost/container/small_vector.hpp>
 #include "common/common_types.h"
 #include "common/swap.h"
 #include "core/hle/ipc.h"
@@ -19,11 +19,11 @@
 
 namespace Service {
 class ServiceFrameworkBase;
-}
+} // namespace Service
 
 namespace Memory {
 class MemorySystem;
-}
+} // namespace Memory
 
 namespace Kernel {
 
@@ -45,10 +45,10 @@ public:
 
     /**
      * Handles a sync request from the emulated application.
-     * @param context holds all the information relevant to his request (ServerSession, Translated
+     * @param context Holds all the information relevant to the request (ServerSession, translated
      * command buffer, etc).
      */
-    virtual void HandleSyncRequest(Kernel::HLERequestContext& context) = 0;
+    virtual void HandleSyncRequest(HLERequestContext& context) = 0;
 
     /**
      * Signals that a client has just connected to this HLE handler and keeps the

@@ -194,9 +194,10 @@ inline void RequestBuilder::PushMoveObjects(std::shared_ptr<O>... pointers) {
 }
 
 inline void RequestBuilder::PushStaticBuffer(std::vector<u8> buffer, u8 buffer_id) {
-    ASSERT_MSG(buffer_id < MAX_STATIC_BUFFERS, "Invalid static buffer id");
+    ASSERT_MSG(buffer_id < MAX_STATIC_BUFFERS, "Invalid static buffer ID");
 
     Push(StaticBufferDesc(buffer.size(), buffer_id));
+
     // This address will be replaced by the correct static buffer address during IPC translation.
     Push<VAddr>(0xDEADC0DE);
 

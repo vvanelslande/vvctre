@@ -25,7 +25,8 @@ class DynarmicUserCallbacks;
 class ARM_Dynarmic final : public ARM_Interface {
 public:
     ARM_Dynarmic(Core::System* system, Memory::MemorySystem& memory, u32 id,
-                 std::shared_ptr<Core::Timing::Timer> timer);
+                 std::shared_ptr<Core::Timing::Timer> timer,
+                 Dynarmic::ExclusiveMonitor* exclusive_monitor);
     ~ARM_Dynarmic() override;
 
     void Run() override;
@@ -69,5 +70,5 @@ private:
     Dynarmic::A32::Jit* jit = nullptr;
     Memory::PageTable* current_page_table = nullptr;
     std::map<Memory::PageTable*, std::unique_ptr<Dynarmic::A32::Jit>> jits;
-    std::shared_ptr<Dynarmic::ExclusiveMonitor> exclusive_monitor;
+    Dynarmic::ExclusiveMonitor* exclusive_monitor;
 };

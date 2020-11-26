@@ -9,9 +9,6 @@
 #include "common/logging/log.h"
 #include "core/file_sys/ivfc_archive.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace FileSys {
 
 IVFCArchive::IVFCArchive(std::shared_ptr<RomFSReader> file,
@@ -86,8 +83,6 @@ u64 IVFCArchive::GetFreeBytes() const {
     return 0;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 IVFCFile::IVFCFile(std::shared_ptr<RomFSReader> file,
                    std::unique_ptr<DelayGenerator> delay_generator_)
     : romfs_file(std::move(file)) {
@@ -115,8 +110,6 @@ bool IVFCFile::SetSize(const u64 size) const {
     LOG_ERROR(Service_FS, "Attempted to set the size of an IVFC file");
     return false;
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 IVFCFileInMemory::IVFCFileInMemory(std::vector<u8> bytes, u64 offset, u64 size,
                                    std::unique_ptr<DelayGenerator> delay_generator_)

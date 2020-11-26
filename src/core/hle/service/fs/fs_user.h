@@ -6,6 +6,7 @@
 
 #include <unordered_map>
 #include "common/common_types.h"
+#include "core/hle/service/fs/archive.h"
 #include "core/hle/service/service.h"
 
 namespace Core {
@@ -25,15 +26,24 @@ struct ClientSlot : public Kernel::SessionRequestHandler::SessionDataBase {
     u64 program_id = 0;
 };
 
+struct ProgramInfo {
+    u64 program_id;
+    MediaType media_type;
+};
+
 class FS_USER final : public ServiceFramework<FS_USER, ClientSlot> {
 public:
     explicit FS_USER(Core::System& system);
 
-    // On real HW this is part of FS:Reg. But since that module is only used by loader and pm, which
+    // On real HW this is part of fs:REG. But since that module is only used by loader and pm, which
     // we HLEed, we can just directly use it here
     void Register(u32 process_id, u64 program_id, const std::string& filepath);
 
-    std::string GetCurrentGamecardPath() const;
+    void SetCurrentGamecardPath(std::string value);
+    const std::string& GetCurrentGamecardPath() const;
+
+    void SetProgramInfoMap(std::unordered_map<u32, ProgramInfo> value);
+    const std::unordered_map<u32, ProgramInfo>& GetProgramInfoMap() const;
 
 private:
     void Initialize(Kernel::HLERequestContext& ctx);
@@ -81,7 +91,10 @@ private:
     static ResultVal<u16> GetSpecialContentIndexFromTMD(MediaType media_type, u64 title_id,
                                                         SpecialContentType type);
 
-    u32 priority = -1; ///< For SetPriority and GetPriority service functions
+    u32 priority = -1;
+
+    std::unordered_map<u32, ProgramInfo> program_info_map;
+    std::string current_gamecard_path;
 
     Core::System& system;
     ArchiveManager& archives;

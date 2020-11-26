@@ -3,12 +3,12 @@
 // Refer to the license.txt file included.
 
 #include <algorithm>
-#include <string>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 #include <fmt/format.h>
 #include <llhttp.h>
 #include <mbedtls/ssl.h>
+#include <string>
 #include "common/assert.h"
 #include "common/common_funcs.h"
 #include "common/logging/log.h"
@@ -1371,7 +1371,7 @@ void HTTP_C::Finalize(Kernel::HLERequestContext& ctx) {
 }
 
 void HTTP_C::DecryptClCertA() {
-    static constexpr u32 iv_length = 16;
+    static constexpr u32 IV_LENGTH = 16;
 
     FileSys::NCCHArchive archive(0x0004001b00010002, Service::FS::MediaType::NAND);
 
@@ -1403,21 +1403,21 @@ void HTTP_C::DecryptClCertA() {
         LOG_ERROR(Service_HTTP, "ctr-common-1-cert.bin missing");
         return;
     }
-    if (cert_file.Length() <= iv_length) {
+    if (cert_file.Length() <= IV_LENGTH) {
         LOG_ERROR(Service_HTTP, "ctr-common-1-cert.bin size is too small. Size: {}",
                   cert_file.Length());
         return;
     }
 
-    std::vector<u8> cert_data(cert_file.Length() - iv_length);
+    std::vector<u8> cert_data(cert_file.Length() - IV_LENGTH);
 
     using CryptoPP::AES;
     CryptoPP::CBC_Mode<AES>::Decryption aes_cert;
-    std::array<u8, iv_length> cert_iv;
-    std::memcpy(cert_iv.data(), cert_file.Data(), iv_length);
+    std::array<u8, IV_LENGTH> cert_iv;
+    std::memcpy(cert_iv.data(), cert_file.Data(), IV_LENGTH);
     aes_cert.SetKeyWithIV(key.data(), AES::BLOCKSIZE, cert_iv.data());
-    aes_cert.ProcessData(cert_data.data(), cert_file.Data() + iv_length,
-                         cert_file.Length() - iv_length);
+    aes_cert.ProcessData(cert_data.data(), cert_file.Data() + IV_LENGTH,
+                         cert_file.Length() - IV_LENGTH);
 
     const RomFS::RomFSFile key_file =
         RomFS::GetFile(romfs_buffer.data(), {u"ctr-common-1-key.bin"});
@@ -1425,20 +1425,20 @@ void HTTP_C::DecryptClCertA() {
         LOG_ERROR(Service_HTTP, "ctr-common-1-key.bin missing");
         return;
     }
-    if (key_file.Length() <= iv_length) {
+    if (key_file.Length() <= IV_LENGTH) {
         LOG_ERROR(Service_HTTP, "ctr-common-1-key.bin size is too small. Size: {}",
                   key_file.Length());
         return;
     }
 
-    std::vector<u8> key_data(key_file.Length() - iv_length);
+    std::vector<u8> key_data(key_file.Length() - IV_LENGTH);
 
     CryptoPP::CBC_Mode<AES>::Decryption aes_key;
-    std::array<u8, iv_length> key_iv;
-    std::memcpy(key_iv.data(), key_file.Data(), iv_length);
+    std::array<u8, IV_LENGTH> key_iv;
+    std::memcpy(key_iv.data(), key_file.Data(), IV_LENGTH);
     aes_key.SetKeyWithIV(key.data(), AES::BLOCKSIZE, key_iv.data());
-    aes_key.ProcessData(key_data.data(), key_file.Data() + iv_length,
-                        key_file.Length() - iv_length);
+    aes_key.ProcessData(key_data.data(), key_file.Data() + IV_LENGTH,
+                        key_file.Length() - IV_LENGTH);
 
     ClCertA.certificate = std::move(cert_data);
     ClCertA.private_key = std::move(key_data);

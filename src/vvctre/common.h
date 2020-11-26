@@ -49,5 +49,6 @@ CitraRoomList GetPublicCitraRooms();
 const std::string GetRoomPopupText(const CitraRoom& room);
 
 bool GUI_CameraAddBrowse(const char* label, std::size_t index);
+
 void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager& plugin_manager,
                              ImGuiIO& io, EmuWindow_SDL2* emu_window);

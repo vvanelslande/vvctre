@@ -12,9 +12,6 @@
 #include "core/file_sys/path_parser.h"
 #include "core/settings.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace FileSys {
 
 class SDMCDelayGenerator : public DelayGenerator {

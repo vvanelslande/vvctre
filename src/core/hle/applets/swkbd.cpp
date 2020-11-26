@@ -17,8 +17,6 @@
 #include "core/hle/service/hid/hid.h"
 #include "core/memory.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 namespace HLE::Applets {
 
 ResultCode SoftwareKeyboard::ReceiveParameter(Service::APT::MessageParameter const& parameter) {
@@ -32,11 +30,10 @@ ResultCode SoftwareKeyboard::ReceiveParameter(Service::APT::MessageParameter con
 
         std::memcpy(&capture_info, parameter.buffer.data(), sizeof(capture_info));
 
-        using Kernel::MemoryPermission;
         // Create a SharedMemory that directly points to this heap block.
         framebuffer_memory = Core::System::GetInstance().Kernel().CreateSharedMemoryForApplet(
-            0, capture_info.size, MemoryPermission::ReadWrite, MemoryPermission::ReadWrite,
-            "SoftwareKeyboard Memory");
+            0, capture_info.size, Kernel::MemoryPermission::ReadWrite,
+            Kernel::MemoryPermission::ReadWrite, "SoftwareKeyboard Memory");
 
         // Send the response message with the newly created SharedMemory
         Service::APT::MessageParameter result;

@@ -322,13 +322,17 @@ bool DSP_DSP::HasTooManyEventsRegistered() const {
     std::size_t number =
         std::count_if(pipes.begin(), pipes.end(), [](const auto& evt) { return evt != nullptr; });
 
-    if (interrupt_zero != nullptr)
+    if (interrupt_zero != nullptr) {
         number++;
-    if (interrupt_one != nullptr)
+    }
+
+    if (interrupt_one != nullptr) {
         number++;
+    }
 
     LOG_DEBUG(Service_DSP, "Number of events registered = {}", number);
-    return number >= max_number_of_interrupt_events;
+
+    return number >= MAX_NUMBER_OF_INTERRUPT_EVENTS;
 }
 
 DSP_DSP::DSP_DSP(Core::System& system)

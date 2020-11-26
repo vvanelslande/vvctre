@@ -897,11 +897,11 @@ ResultCode NWM_UDS::BeginHostingNetwork(const u8* network_info_buffer,
 
         node_info[0] = current_node;
 
-        // If the game has a preferred channel, use that instead.
+        // If the game/program has a preferred channel, use that instead.
         if (network_info.channel != 0)
-            network_channel = network_info.channel;
+            {network_channel = network_info.channel;}
         else
-            network_info.channel = DefaultNetworkChannel;
+            {network_info.channel = DefaultNetworkChannel;}
     }
 
     connection_status_event->Signal();

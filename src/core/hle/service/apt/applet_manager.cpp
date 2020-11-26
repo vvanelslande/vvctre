@@ -259,7 +259,7 @@ ResultVal<AppletManager::InitializeResult> AppletManager::Initialize(AppletId ap
     }
 
     slot_data->applet_id = static_cast<AppletId>(app_id);
-    // Note: In the real console the title id of a given applet slot is set by the APT module when
+    // Note: In the real console the program ID of a given applet slot is set by the APT module when
     // calling StartApplication.
     slot_data->title_id = system.Kernel().GetCurrentProcess()->codeset->program_id;
     slot_data->attributes.raw = attributes.raw;
@@ -466,7 +466,7 @@ ResultVal<AppletManager::AppletInfo> AppletManager::GetAppletInfo(AppletId app_i
         }
         LOG_WARNING(Service_APT, "Using HLE applet info for applet {:03X}",
                     static_cast<u32>(app_id));
-        // TODO(Subv): Get the title id for the current applet and write it in the response[2-3]
+        // TODO(Subv): Get the program ID for the current applet and write it in the response[2-3]
         return MakeResult<AppletInfo>({0, Service::FS::MediaType::NAND, true, true, 0});
     }
 
@@ -549,7 +549,7 @@ ResultCode AppletManager::StartApplication(std::vector<u8> parameter, std::vecto
     // returns 0xc8a12403 if we can't. We intentionally do not implement that check.
 
     // TODO(Subv): The APT service performs several checks here related to the exheader flags of the
-    // process we're launching and other things like title id blacklists. We do not yet implement
+    // process we're launching and other things like program ID blacklists. We do not yet implement
     // any of that.
 
     // TODO(Subv): The real APT service doesn't seem to check whether the titleid to launch is set

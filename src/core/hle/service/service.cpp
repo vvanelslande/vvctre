@@ -184,9 +184,6 @@ std::string ServiceFrameworkBase::GetFunctionName(u32 header) const {
     return handlers.at(header).name;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Module interface
-
 static bool AttemptLLE(const ServiceModuleInfo& service_module) {
     if (!Settings::values.lle_modules.at(service_module.name)) {
         return false;
@@ -205,7 +202,6 @@ static bool AttemptLLE(const ServiceModuleInfo& service_module) {
     return true;
 }
 
-/// Initialize ServiceManager
 void Init(Core::System& core) {
     SM::ServiceManager::InstallInterfaces(core);
 

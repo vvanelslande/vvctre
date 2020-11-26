@@ -3,9 +3,9 @@
 // Refer to the license.txt file included.
 
 #include <algorithm>
+#include <fmt/format.h>
 #include <memory>
 #include <vector>
-#include <fmt/format.h>
 #include "common/common_types.h"
 #include "common/file_util.h"
 #include "common/logging/log.h"
@@ -15,9 +15,6 @@
 #include "core/file_sys/path_parser.h"
 #include "core/file_sys/savedata_archive.h"
 #include "core/hle/service/fs/archive.h"
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
 
 namespace FileSys {
 

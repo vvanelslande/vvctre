@@ -11,9 +11,6 @@
 #include "core/file_sys/file_backend.h"
 #include "core/hle/result.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace Service::FS {
 enum class MediaType : u32;
 } // namespace Service::FS
@@ -32,7 +29,7 @@ enum class NCCHFileOpenType : u32 {
 };
 
 /// Helper function to generate a Path for NCCH archives
-Path MakeNCCHArchivePath(u64 tid, Service::FS::MediaType media_type);
+Path MakeNCCHArchivePath(u64 program_id, Service::FS::MediaType media_type);
 
 /// Helper function to generate a Path for NCCH files
 Path MakeNCCHFilePath(NCCHFileOpenType open_type, u32 content_index, NCCHFilePathType filepath_type,

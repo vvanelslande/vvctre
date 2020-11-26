@@ -25,13 +25,10 @@
 #include "mii.app.romfs.h"
 #include "shared_font.app.romfs.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace FileSys {
 
 struct NCCHArchivePath {
-    u64_le tid;
+    u64_le program_id;
     u32_le media_type;
     u32_le unknown;
 };
@@ -45,9 +42,9 @@ struct NCCHFilePath {
 };
 static_assert(sizeof(NCCHFilePath) == 0x14, "NCCHFilePath has wrong size!");
 
-Path MakeNCCHArchivePath(u64 tid, Service::FS::MediaType media_type) {
+Path MakeNCCHArchivePath(u64 program_id, Service::FS::MediaType media_type) {
     NCCHArchivePath path;
-    path.tid = static_cast<u64_le>(tid);
+    path.program_id = static_cast<u64_le>(program_id);
     path.media_type = static_cast<u32_le>(media_type);
     path.unknown = 0;
     std::vector<u8> archive(sizeof(path));
@@ -230,8 +227,6 @@ u64 NCCHArchive::GetFreeBytes() const {
     return 0;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 NCCHFile::NCCHFile(std::vector<u8> buffer, std::unique_ptr<DelayGenerator> delay_generator_)
     : file_buffer(std::move(buffer)) {
     delay_generator = std::move(delay_generator_);
@@ -264,8 +259,6 @@ bool NCCHFile::SetSize(const u64 size) const {
     return false;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 ArchiveFactory_NCCH::ArchiveFactory_NCCH() {}
 
 ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_NCCH::Open(const Path& path,
@@ -285,7 +278,7 @@ ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_NCCH::Open(const Path&
     std::memcpy(&open_path, binary.data(), sizeof(NCCHArchivePath));
 
     auto archive = std::make_unique<NCCHArchive>(
-        open_path.tid, static_cast<Service::FS::MediaType>(open_path.media_type & 0xFF));
+        open_path.program_id, static_cast<Service::FS::MediaType>(open_path.media_type & 0xFF));
     return MakeResult<std::unique_ptr<ArchiveBackend>>(std::move(archive));
 }
 

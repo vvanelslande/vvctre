@@ -50,7 +50,7 @@ static PAddr VirtualToPhysicalAddress(VAddr addr) {
         return 0;
     }
 
-    // Note: the region end check is inclusive because the game can pass in an address that
+    // Note: the region end check is inclusive because the game/program can pass in an address that
     // represents an open right boundary
     if (addr >= Memory::VRAM_VADDR && addr <= Memory::VRAM_VADDR_END) {
         return addr - Memory::VRAM_VADDR + Memory::VRAM_PADDR;
@@ -417,8 +417,9 @@ void GSP_GPU::SignalInterruptForThread(InterruptId interrupt_id, u32 thread_id) 
     //               executing any GSP commands, only waiting on the event.
     // TODO(Subv): The real GSP module triggers PDC0 after updating both the top and bottom
     // screen, it is currently unknown what PDC1 does.
-    int screen_id =
-        (interrupt_id == InterruptId::PDC0) ? 0 : (interrupt_id == InterruptId::PDC1) ? 1 : -1;
+    int screen_id = (interrupt_id == InterruptId::PDC0)   ? 0
+                    : (interrupt_id == InterruptId::PDC1) ? 1
+                                                          : -1;
     if (screen_id != -1) {
         FrameBufferUpdate* info = GetFrameBufferInfo(thread_id, screen_id);
         if (info->is_dirty) {
@@ -788,10 +789,9 @@ GSP_GPU::GSP_GPU(Core::System& system) : ServiceFramework("gsp::Gpu", 2), system
     };
     RegisterHandlers(functions);
 
-    using Kernel::MemoryPermission;
     shared_memory = system.Kernel()
-                        .CreateSharedMemory(nullptr, 0x1000, MemoryPermission::ReadWrite,
-                                            MemoryPermission::ReadWrite, 0,
+                        .CreateSharedMemory(nullptr, 0x1000, Kernel::MemoryPermission::ReadWrite,
+                                            Kernel::MemoryPermission::ReadWrite, 0,
                                             Kernel::MemoryRegion::BASE, "GSP:SharedMemory")
                         .Unwrap();
 

@@ -17,10 +17,12 @@
 namespace IPCDebugger {
 
 namespace {
+
 ObjectInfo GetObjectInfo(const Kernel::Object* object) {
     if (object == nullptr) {
         return {};
     }
+
     return {object->GetTypeName(), object->GetName(), static_cast<int>(object->GetObjectId())};
 }
 
@@ -28,6 +30,7 @@ ObjectInfo GetObjectInfo(const Kernel::Thread* thread) {
     if (thread == nullptr) {
         return {};
     }
+
     return {thread->GetTypeName(), thread->GetName(), static_cast<int>(thread->GetThreadId())};
 }
 
@@ -37,6 +40,7 @@ ObjectInfo GetObjectInfo(const Kernel::Process* process) {
     }
     return {process->GetTypeName(), process->GetName(), static_cast<int>(process->process_id)};
 }
+
 } // namespace
 
 Recorder::Recorder() = default;

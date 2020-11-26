@@ -11,9 +11,6 @@
 #include "core/file_sys/disk_archive.h"
 #include "core/file_sys/errors.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace FileSys {
 
 ResultVal<std::size_t> DiskFile::Read(const u64 offset, const std::size_t length,
@@ -53,8 +50,6 @@ bool DiskFile::SetSize(const u64 size) const {
 bool DiskFile::Close() const {
     return file->Close();
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 DiskDirectory::DiskDirectory(const std::string& path) {
     unsigned size = FileUtil::ScanDirectoryTree(path, directory);

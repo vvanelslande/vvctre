@@ -158,7 +158,7 @@ void Process::Run(s32 main_thread_priority, u32 stack_size) {
     status = ProcessStatus::Running;
 
     vm_manager.LogLayout(Log::Level::Debug);
-    Kernel::SetupMainThread(kernel, codeset->entrypoint, main_thread_priority, SharedFrom(this));
+    SetupMainThread(kernel, codeset->entrypoint, main_thread_priority, SharedFrom(this));
 }
 
 VAddr Process::GetLinearHeapAreaAddress() const {
@@ -422,13 +422,13 @@ ResultCode Process::Unmap(VAddr target, VAddr source, u32 size, VMAPermission pe
     return RESULT_SUCCESS;
 }
 
-Kernel::Process::Process(KernelSystem& kernel)
+Process::Process(KernelSystem& kernel)
     : Object(kernel), handle_table(kernel), vm_manager(kernel.memory), kernel(kernel) {
-
     kernel.memory.RegisterPageTable(&vm_manager.page_table);
 }
-Kernel::Process::~Process() {
-    if (status == Kernel::ProcessStatus::Exited) {
+
+Process::~Process() {
+    if (status == ProcessStatus::Exited) {
         return;
     }
 

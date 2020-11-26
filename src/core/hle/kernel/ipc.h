@@ -12,7 +12,7 @@
 
 namespace Memory {
 class MemorySystem;
-}
+} // namespace Memory
 
 namespace Kernel {
 
@@ -35,4 +35,5 @@ ResultCode TranslateCommandBuffer(KernelSystem& system, Memory::MemorySystem& me
                                   VAddr dst_address,
                                   std::vector<MappedBufferContext>& mapped_buffer_context,
                                   bool reply);
+
 } // namespace Kernel

@@ -31,7 +31,7 @@
 
 const u8 vvctre_version_major = 40;
 const u8 vvctre_version_minor = 0;
-const u8 vvctre_version_patch = 2;
+const u8 vvctre_version_patch = 3;
 
 void vvctreShutdown(PluginManager* plugin_manager) {
     if (plugin_manager != nullptr) {
@@ -58,48 +58,49 @@ std::vector<std::tuple<std::string, std::string>> GetInstalledList() {
     const auto AddTitlesForMediaType = [&](Service::FS::MediaType media_type) {
         FileUtil::FSTEntry entries;
         FileUtil::ScanDirectoryTree(Service::AM::GetMediaTitlePath(media_type), entries, 1);
-        for (const FileUtil::FSTEntry& tid_high : entries.children) {
-            for (const FileUtil::FSTEntry& tid_low : tid_high.children) {
-                std::string tid_string = tid_high.virtual_name + tid_low.virtual_name;
+        for (const FileUtil::FSTEntry& title_id_high : entries.children) {
+            for (const FileUtil::FSTEntry& title_id_low : title_id_high.children) {
+                std::string title_id_string =
+                    title_id_high.virtual_name + title_id_low.virtual_name;
 
-                if (tid_string.length() == Service::AM::TITLE_ID_VALID_LENGTH) {
-                    const u64 tid = std::stoull(tid_string, nullptr, 16);
+                if (title_id_string.length() == Service::AM::TITLE_ID_VALID_LENGTH) {
+                    const u64 title_id = std::stoull(title_id_string, nullptr, 16);
 
-                    const std::string path = Service::AM::GetTitleContentPath(media_type, tid);
+                    const std::string path = Service::AM::GetTitleContentPath(media_type, title_id);
                     std::unique_ptr<Loader::AppLoader> loader = Loader::GetLoader(path);
                     if (loader != nullptr) {
                         std::string title;
                         loader->ReadTitle(title);
 
-                        switch (std::stoull(tid_high.virtual_name, nullptr, 16)) {
+                        switch (std::stoull(title_id_high.virtual_name, nullptr, 16)) {
                         case 0x00040000: {
                             bootable.push_back(std::make_tuple(
-                                path, fmt::format("[Bootable] {} ({:016X})",
-                                                  title.empty() ? "Unknown" : title, tid)));
+                                path, fmt::format("{} ({:016X})", title.empty() ? "Unknown" : title,
+                                                  title_id)));
                             break;
                         }
                         case 0x0004000e: {
                             updates.push_back(std::make_tuple(
                                 path, fmt::format("[Update] {} ({:016X})",
-                                                  title.empty() ? "Unknown" : title, tid)));
+                                                  title.empty() ? "Unknown" : title, title_id)));
                             break;
                         }
                         case 0x0004008c: {
                             dlc.push_back(std::make_tuple(
                                 path, fmt::format("[DLC] {} ({:016X})",
-                                                  title.empty() ? "Unknown" : title, tid)));
+                                                  title.empty() ? "Unknown" : title, title_id)));
                             break;
                         }
                         case 0x00040001: {
                             download_play.push_back(std::make_tuple(
                                 path, fmt::format("[Download Play] {} ({:016X})",
-                                                  title.empty() ? "Unknown" : title, tid)));
+                                                  title.empty() ? "Unknown" : title, title_id)));
                             break;
                         }
                         default: {
                             system.push_back(std::make_tuple(
                                 path, fmt::format("[System] {} ({:016X})",
-                                                  title.empty() ? "Unknown" : title, tid)));
+                                                  title.empty() ? "Unknown" : title, title_id)));
                             break;
                         }
                         }

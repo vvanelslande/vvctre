@@ -25,12 +25,10 @@ ResultCode Mint::ReceiveParameter(const Service::APT::MessageParameter& paramete
 
     memcpy(&capture_info, parameter.buffer.data(), sizeof(capture_info));
 
-    // TODO: allocated memory never released
-    using Kernel::MemoryPermission;
     // Create a SharedMemory that directly points to this heap block.
     framebuffer_memory = Core::System::GetInstance().Kernel().CreateSharedMemoryForApplet(
-        0, capture_info.size, MemoryPermission::ReadWrite, MemoryPermission::ReadWrite,
-        "Mint Memory");
+        0, capture_info.size, Kernel::MemoryPermission::ReadWrite,
+        Kernel::MemoryPermission::ReadWrite, "Mint Memory");
 
     // Send the response message with the newly created SharedMemory
     Service::APT::MessageParameter result;

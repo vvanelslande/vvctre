@@ -1001,8 +1001,8 @@ void Module::Interface::DriverInitialize(Kernel::HLERequestContext& ctx) {
             context.flip = camera_id == 1 ? Flip::Horizontal : Flip::None;
             context.effect = Effect::None;
             context.format = OutputFormat::YUV422;
-            context.resolution =
-                context_id == 0 ? PRESET_RESOLUTION[5 /*DS_LCD*/] : PRESET_RESOLUTION[0 /*VGA*/];
+            context.resolution = context_id == 0 ? PRESET_RESOLUTION[5 /* DS_LCD */]
+                                                 : PRESET_RESOLUTION[0 /* VGA */];
         }
         cam->LoadCameraImplementation(camera, camera_id);
     }

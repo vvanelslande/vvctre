@@ -266,7 +266,7 @@ private:
     };
 
     template <typename SVCT, typename R>
-    struct WrapPass<SVCT, R /*empty for T, Ts...*/> {
+    struct WrapPass<SVCT, R /* Empty for T, Ts... */> {
         // Call function R(Context::svc)(Us...) and transfer the return value to registers
         template <typename... Us>
         static void Call(Context& context, SVCT svc, Us... u) {
@@ -286,7 +286,7 @@ private:
     template <typename R, typename... T>
     struct WrapHelper<R (Context::*)(T...)> {
         static void Call(Context& context, R (Context::*svc)(T...)) {
-            WrapPass<decltype(svc), R, T...>::Call(context, svc /*Empty for Us*/);
+            WrapPass<decltype(svc), R, T...>::Call(context, svc /* Empty for Us */);
         }
     };
 };

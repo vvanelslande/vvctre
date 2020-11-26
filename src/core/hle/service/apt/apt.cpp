@@ -452,7 +452,8 @@ void Module::APTInterface::DoApplicationJump(Kernel::HLERequestContext& ctx) {
     constexpr u32 max_hmac_size = 0x20;
     if (parameter_size > max_parameter_size) {
         LOG_ERROR(Service_APT,
-                  "Parameter size is outside the valid range (capped to {:#010X}): parameter_size={:#010X}",
+                  "Parameter size is outside the valid range (capped to {:#010X}): "
+                  "parameter_size={:#010X}",
                   max_parameter_size, parameter_size);
         parameter_size = max_parameter_size;
     }
@@ -463,11 +464,12 @@ void Module::APTInterface::DoApplicationJump(Kernel::HLERequestContext& ctx) {
         hmac_size = max_hmac_size;
     }
 
-    LOG_INFO(Service_APT, "called parameter_size={:08X}, hmac_size={:08X}", parameter_size, hmac_size);
+    LOG_INFO(Service_APT, "called parameter_size={:08X}, hmac_size={:08X}", parameter_size,
+             hmac_size);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(apt->applet_manager->DoApplicationJump(
-        DeliverArg{std::move(parameter), std::move(hmac)}));
+    rb.Push(
+        apt->applet_manager->DoApplicationJump(DeliverArg{std::move(parameter), std::move(hmac)}));
 }
 
 void Module::APTInterface::GetProgramIdOnApplicationJump(Kernel::HLERequestContext& ctx) {
@@ -488,7 +490,8 @@ void Module::APTInterface::ReceiveDeliverArg(Kernel::HLERequestContext& ctx) {
     const u32 parameter_size = rp.Pop<u32>();
     const u32 hmac_size = rp.Pop<u32>();
 
-    LOG_DEBUG(Service_APT, "called parameter_size={:08X}, hmac_size={:08X}", parameter_size, hmac_size);
+    LOG_DEBUG(Service_APT, "called parameter_size={:08X}, hmac_size={:08X}", parameter_size,
+              hmac_size);
 
     DeliverArg arg = apt->applet_manager->ReceiveDeliverArg().value_or(DeliverArg{});
     arg.parameter.resize(parameter_size);
@@ -791,7 +794,8 @@ void Module::APTInterface::GetStartupArgument(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x51, 2, 0); // 0x00510080
     u32 parameter_size = rp.Pop<u32>();
     constexpr u32 max_parameter_size{0x1000};
-    const StartupArgumentType startup_argument_type = static_cast<StartupArgumentType>(rp.Pop<u8>());
+    const StartupArgumentType startup_argument_type =
+        static_cast<StartupArgumentType>(rp.Pop<u8>());
 
     LOG_WARNING(Service_APT, "called, startup_argument_type={}, parameter_size={:#010X}",
                 static_cast<u32>(startup_argument_type), parameter_size);
@@ -813,7 +817,8 @@ void Module::APTInterface::GetStartupArgument(Kernel::HLERequestContext& ctx) {
         // TODO: This is a complete guess based on observations. It is unknown how the OtherMedia
         // type is handled and how it interacts with the OtherApp type, and it is unknown if
         // this (checking the jump parameters) is indeed the way the 3DS checks the types.
-        const AppletManager::ApplicationJumpParameters& jump_parameters = apt->applet_manager->GetApplicationJumpParameters();
+        const AppletManager::ApplicationJumpParameters& jump_parameters =
+            apt->applet_manager->GetApplicationJumpParameters();
         switch (startup_argument_type) {
         case StartupArgumentType::OtherApp:
             exists = jump_parameters.current_title_id != jump_parameters.next_title_id &&
@@ -971,12 +976,12 @@ std::shared_ptr<Module> Module::APTInterface::GetModule() {
 Module::Module(Core::System& system) : system(system) {
     applet_manager = std::make_shared<AppletManager>(system);
 
-    using Kernel::MemoryPermission;
-    shared_font_mem = system.Kernel()
-                          .CreateSharedMemory(nullptr, 0x332000, // 3272 KB
-                                              MemoryPermission::ReadWrite, MemoryPermission::Read,
-                                              0, Kernel::MemoryRegion::SYSTEM, "APT:SharedFont")
-                          .Unwrap();
+    shared_font_mem =
+        system.Kernel()
+            .CreateSharedMemory(nullptr, 0x332000, // 3272 KB
+                                Kernel::MemoryPermission::ReadWrite, Kernel::MemoryPermission::Read,
+                                0, Kernel::MemoryRegion::SYSTEM, "APT:SharedFont")
+            .Unwrap();
 
     lock = system.Kernel().CreateMutex(false, "APT_U:Lock");
 }
@@ -996,7 +1001,8 @@ std::vector<u8>& Module::GetWirelessRebootInfo() {
 }
 
 std::shared_ptr<Module> GetModule(Core::System& system) {
-    std::shared_ptr<Service::APT::Module::APTInterface> apt = system.ServiceManager().GetService<Service::APT::Module::APTInterface>("APT:A");
+    std::shared_ptr<Service::APT::Module::APTInterface> apt =
+        system.ServiceManager().GetService<Service::APT::Module::APTInterface>("APT:A");
     if (apt == nullptr) {
         return nullptr;
     }

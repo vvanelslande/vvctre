@@ -54,6 +54,10 @@ namespace Network {
 class RoomMember;
 } // namespace Network
 
+namespace Dynarmic {
+class ExclusiveMonitor;
+} // namespace Dynarmic
+
 class RendererBase;
 
 namespace Core {
@@ -243,9 +247,12 @@ private:
     /// AppLoader used to load the current executing application
     std::unique_ptr<Loader::AppLoader> app_loader;
 
-    /// ARM11 CPU core
+    /// ARM11 CPU cores
     std::vector<std::shared_ptr<ARM_Interface>> cpu_cores;
     ARM_Interface* running_core = nullptr;
+#ifdef ARCHITECTURE_x86_64
+    std::shared_ptr<Dynarmic::ExclusiveMonitor> exclusive_monitor;
+#endif
 
     /// DSP core
     std::shared_ptr<AudioCore::DspInterface> dsp_core;

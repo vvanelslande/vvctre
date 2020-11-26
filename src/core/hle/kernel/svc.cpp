@@ -77,10 +77,12 @@ enum class SystemInfoType {
      * parameter. See `SystemInfoMemUsageRegion`.
      */
     REGION_MEMORY_USAGE = 0,
+
     /**
      * Returns the memory usage for certain allocations done internally by the kernel.
      */
     KERNEL_ALLOCATED_PAGES = 2,
+
     /**
      * "This returns the total number of processes which were launched directly by the kernel.
      * For the ARM11 NATIVE_FIRM kernel, this is 5, for processes sm, fs, pm, loader, and pxi."
@@ -106,7 +108,7 @@ public:
 
 private:
     Core::System& system;
-    Kernel::KernelSystem& kernel;
+    KernelSystem& kernel;
     Memory::MemorySystem& memory;
 
     friend class SVCWrapper<SVC>;
@@ -320,8 +322,10 @@ ResultCode SVC::MapMemoryBlock(Handle handle, u32 addr, u32 permissions, u32 oth
 
     std::shared_ptr<SharedMemory> shared_memory =
         kernel.GetCurrentProcess()->handle_table.Get<SharedMemory>(handle);
-    if (shared_memory == nullptr)
+
+    if (shared_memory == nullptr) {
         return ERR_INVALID_HANDLE;
+    }
 
     MemoryPermission permissions_type = static_cast<MemoryPermission>(permissions);
     switch (permissions_type) {
@@ -609,7 +613,7 @@ ResultCode SVC::WaitSynchronizationN(s32* out, VAddr handles_address, s32 handle
     }
 }
 
-static ResultCode ReceiveIPCRequest(Kernel::KernelSystem& kernel, Memory::MemorySystem& memory,
+static ResultCode ReceiveIPCRequest(KernelSystem& kernel, Memory::MemorySystem& memory,
                                     std::shared_ptr<ServerSession> server_session,
                                     std::shared_ptr<Thread> thread) {
     if (server_session->parent->client == nullptr) {
@@ -1092,7 +1096,7 @@ ResultCode SVC::QueryProcessMemory(MemoryInfo* memory_info, PageInfo* page_info,
     // Query(Process)Memory merges vma with neighbours when they share the same state and
     // permissions, regardless of their physical mapping.
 
-    auto mismatch = [permissions, state](const std::pair<VAddr, Kernel::VirtualMemoryArea>& v) {
+    auto mismatch = [permissions, state](const std::pair<VAddr, VirtualMemoryArea>& v) {
         return v.second.permissions != permissions || v.second.meminfo_state != state;
     };
 

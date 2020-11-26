@@ -194,8 +194,8 @@ public:
     u32 GetRegionValue();
 
     /**
-     * Set the region codes preferred by the game so that CFG will adjust to it when the region
-     * setting is auto.
+     * Set the region codes preferred by the game/program so that CFG will adjust to it when the
+     * region setting is auto.
      * @param region_codes the preferred region codes to set
      */
     void SetPreferredRegionCodes(const std::vector<u32>& region_codes);

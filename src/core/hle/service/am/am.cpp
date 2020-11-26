@@ -4,10 +4,10 @@
 
 #include <algorithm>
 #include <cinttypes>
-#include <cstddef>
-#include <cstring>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
+#include <cstddef>
+#include <cstring>
 #include <fmt/format.h>
 #include "common/file_util.h"
 #include "common/logging/log.h"
@@ -36,15 +36,8 @@
 
 namespace Service::AM {
 
-constexpr u16 PLATFORM_CTR = 0x0004;
-constexpr u16 CATEGORY_SYSTEM = 0x0010;
-constexpr u16 CATEGORY_DLP = 0x0001;
-constexpr u8 VARIATION_SYSTEM = 0x02;
-constexpr u32 TID_HIGH_UPDATE = 0x0004000E;
-constexpr u32 TID_HIGH_DLC = 0x0004008C;
-
 struct TitleInfo {
-    u64_le tid;
+    u64_le program_id;
     u64_le size;
     u16_le version;
     u16_le unused;
@@ -395,10 +388,10 @@ InstallStatus InstallCIA(const std::string& path,
     return InstallStatus::ErrorInvalid;
 }
 
-Service::FS::MediaType GetTitleMediaType(u64 titleId) {
-    u16 platform = static_cast<u16>(titleId >> 48);
-    u16 category = static_cast<u16>((titleId >> 32) & 0xFFFF);
-    u8 variation = static_cast<u8>(titleId & 0xFF);
+Service::FS::MediaType GetTitleMediaType(u64 title_id) {
+    const u16 platform = static_cast<u16>(title_id >> 48);
+    const u16 category = static_cast<u16>((title_id >> 32) & 0xFFFF);
+    const u8 variation = static_cast<u8>(title_id & 0xFF);
 
     if (platform != PLATFORM_CTR) {
         return Service::FS::MediaType::NAND;
@@ -411,8 +404,8 @@ Service::FS::MediaType GetTitleMediaType(u64 titleId) {
     return Service::FS::MediaType::SDMC;
 }
 
-std::string GetTitleMetadataPath(Service::FS::MediaType media_type, u64 tid, bool update) {
-    std::string content_path = GetTitlePath(media_type, tid) + "content/";
+std::string GetTitleMetadataPath(Service::FS::MediaType media_type, u64 program_id, bool update) {
+    std::string content_path = GetTitlePath(media_type, program_id) + "content/";
 
     if (media_type == Service::FS::MediaType::GameCard) {
         LOG_ERROR(Service_AM, "Invalid request for nonexistent gamecard title metadata!");
@@ -452,18 +445,18 @@ std::string GetTitleMetadataPath(Service::FS::MediaType media_type, u64 tid, boo
     return content_path + fmt::format("{:08x}.tmd", (update ? update_id : base_id));
 }
 
-std::string GetTitleContentPath(Service::FS::MediaType media_type, u64 tid, std::size_t index,
-                                bool update) {
+std::string GetTitleContentPath(Service::FS::MediaType media_type, u64 program_id,
+                                std::size_t index, bool update) {
     if (media_type == FS::MediaType::GameCard) {
-        // TODO(B3N30): check if TID matches
-        auto fs_user =
+        // TODO(B3N30): check if title ID matches
+        std::shared_ptr<Service::FS::FS_USER> fs_user =
             Core::System::GetInstance().ServiceManager().GetService<Service::FS::FS_USER>(
                 "fs:USER");
         return fs_user->GetCurrentGamecardPath();
     }
 
-    std::string content_path = GetTitlePath(media_type, tid) + "content/";
-    const std::string tmd_path = GetTitleMetadataPath(media_type, tid, update);
+    std::string content_path = GetTitlePath(media_type, program_id) + "content/";
+    const std::string tmd_path = GetTitleMetadataPath(media_type, program_id, update);
 
     u32 content_id = 0;
     FileSys::TitleMetadata tmd;
@@ -490,9 +483,9 @@ std::string GetTitleContentPath(Service::FS::MediaType media_type, u64 tid, std:
     return fmt::format("{}{:08x}.app", content_path, content_id);
 }
 
-std::string GetTitlePath(Service::FS::MediaType media_type, u64 tid) {
-    u32 high = static_cast<u32>(tid >> 32);
-    u32 low = static_cast<u32>(tid & 0xFFFFFFFF);
+std::string GetTitlePath(Service::FS::MediaType media_type, u64 program_id) {
+    u32 high = static_cast<u32>(program_id >> 32);
+    u32 low = static_cast<u32>(program_id & 0xFFFFFFFF);
 
     if (media_type == Service::FS::MediaType::NAND || media_type == Service::FS::MediaType::SDMC) {
         return fmt::format("{}{:08x}/{:08x}/", GetMediaTitlePath(media_type), high, low);
@@ -544,11 +537,11 @@ void Module::ScanForTitles(Service::FS::MediaType media_type) {
             std::string tid_string = tid_high.virtual_name + tid_low.virtual_name;
 
             if (tid_string.length() == TITLE_ID_VALID_LENGTH) {
-                const u64 tid = std::stoull(tid_string, nullptr, 16);
+                const u64 program_id = std::stoull(tid_string, nullptr, 16);
 
-                FileSys::NCCHContainer container(GetTitleContentPath(media_type, tid));
+                FileSys::NCCHContainer container(GetTitleContentPath(media_type, program_id));
                 if (container.Load() == Loader::ResultStatus::Success) {
-                    am_title_list[static_cast<u32>(media_type)].push_back(tid);
+                    am_title_list[static_cast<u32>(media_type)].push_back(program_id);
                 }
             }
         }
@@ -746,7 +739,7 @@ ResultCode GetTitleInfoFromList(const std::vector<u64>& title_id_list,
         std::string tmd_path = GetTitleMetadataPath(media_type, title_id_list[i]);
 
         TitleInfo title_info = {};
-        title_info.tid = title_id_list[i];
+        title_info.program_id = title_id_list[i];
 
         FileSys::TitleMetadata tmd;
         if (tmd.Load(tmd_path) == Loader::ResultStatus::Success) {
@@ -1034,34 +1027,36 @@ void Module::Interface::QueryAvailableTitleDatabase(Kernel::HLERequestContext& c
 
 void Module::Interface::CheckContentRights(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x0025, 3, 0); // 0x2500C0
-    u64 tid = rp.Pop<u64>();
+    u64 program_id = rp.Pop<u64>();
     u16 content_index = rp.Pop<u16>();
 
     // TODO(shinyquagsire23): Read tickets for this instead?
-    bool has_rights =
-        FileUtil::Exists(GetTitleContentPath(Service::FS::MediaType::SDMC, tid, content_index));
+    bool has_rights = FileUtil::Exists(
+        GetTitleContentPath(Service::FS::MediaType::SDMC, program_id, content_index));
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     rb.Push(RESULT_SUCCESS); // No error
     rb.Push(has_rights);
 
-    LOG_WARNING(Service_AM, "(STUBBED) tid={:016x}, content_index={}", tid, content_index);
+    LOG_WARNING(Service_AM, "(STUBBED) program_id={:016x}, content_index={}", program_id,
+                content_index);
 }
 
 void Module::Interface::CheckContentRightsIgnorePlatform(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x002D, 3, 0); // 0x2D00C0
-    u64 tid = rp.Pop<u64>();
+    u64 program_id = rp.Pop<u64>();
     u16 content_index = rp.Pop<u16>();
 
     // TODO(shinyquagsire23): Read tickets for this instead?
-    bool has_rights =
-        FileUtil::Exists(GetTitleContentPath(Service::FS::MediaType::SDMC, tid, content_index));
+    bool has_rights = FileUtil::Exists(
+        GetTitleContentPath(Service::FS::MediaType::SDMC, program_id, content_index));
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
     rb.Push(RESULT_SUCCESS); // No error
     rb.Push(has_rights);
 
-    LOG_WARNING(Service_AM, "(STUBBED) tid={:016x}, content_index={}", tid, content_index);
+    LOG_WARNING(Service_AM, "(STUBBED) program_id={:016x}, content_index={}", program_id,
+                content_index);
 }
 
 void Module::Interface::BeginImportProgram(Kernel::HLERequestContext& ctx) {
@@ -1255,7 +1250,7 @@ void Module::Interface::GetProgramInfoFromCia(Kernel::HLERequestContext& ctx) {
     // double on some mediatypes. Since this is more of a required install size
     // we'll report what vvctre needs, but it would be good to be more accurate
     // here.
-    title_info.tid = tmd.GetTitleID();
+    title_info.program_id = tmd.GetTitleID();
     title_info.size = tmd.GetContentSizeByIndex(FileSys::TMDContentIndex::Main);
     title_info.version = tmd.GetTitleVersion();
     title_info.type = tmd.GetTitleType();

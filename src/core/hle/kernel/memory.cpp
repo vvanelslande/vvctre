@@ -21,8 +21,6 @@
 #include "core/memory.h"
 #include "core/settings.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 namespace Kernel {
 
 /// Size of the APPLICATION, SYSTEM and BASE memory regions (respectively) for each system

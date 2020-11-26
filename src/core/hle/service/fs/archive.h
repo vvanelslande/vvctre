@@ -4,11 +4,11 @@
 
 #pragma once
 
+#include <boost/container/flat_map.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <boost/container/flat_map.hpp>
 #include "common/common_types.h"
 #include "core/file_sys/archive_backend.h"
 #include "core/hle/result.h"
@@ -17,16 +17,17 @@
 
 /// The unique system identifier hash, also known as ID0
 static constexpr char SYSTEM_ID[]{"00000000000000000000000000000000"};
+
 /// The scrambled SD card CID, also known as ID1
 static constexpr char SDCARD_ID[]{"00000000000000000000000000000000"};
 
 namespace Loader {
 class AppLoader;
-}
+} // namespace Loader
 
 namespace Core {
 class System;
-}
+} // namespace Core
 
 namespace Service::FS {
 

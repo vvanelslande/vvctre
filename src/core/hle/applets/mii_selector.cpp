@@ -2,9 +2,9 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <boost/crc.hpp>
 #include <cstring>
 #include <string>
-#include <boost/crc.hpp>
 #include "common/assert.h"
 #include "common/logging/log.h"
 #include "common/string_util.h"
@@ -14,8 +14,6 @@
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/shared_memory.h"
 #include "core/hle/result.h"
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace HLE::Applets {
 
@@ -35,11 +33,10 @@ ResultCode MiiSelector::ReceiveParameter(const Service::APT::MessageParameter& p
 
     memcpy(&capture_info, parameter.buffer.data(), sizeof(capture_info));
 
-    using Kernel::MemoryPermission;
     // Create a SharedMemory that directly points to this heap block.
     framebuffer_memory = Core::System::GetInstance().Kernel().CreateSharedMemoryForApplet(
-        0, capture_info.size, MemoryPermission::ReadWrite, MemoryPermission::ReadWrite,
-        "MiiSelector Memory");
+        0, capture_info.size, Kernel::MemoryPermission::ReadWrite,
+        Kernel::MemoryPermission::ReadWrite, "MiiSelector Memory");
 
     // Send the response message with the newly created SharedMemory
     Service::APT::MessageParameter result;

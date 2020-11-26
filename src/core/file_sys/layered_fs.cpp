@@ -136,7 +136,7 @@ void LayeredFS::LoadRelocations() {
     }
 
     const FileUtil::DirectoryEntryCallable callback =
-        [this, &callback](u64* /*num_entries_out*/, const std::string& directory,
+        [this, &callback](u64* /* num_entries_out */, const std::string& directory,
                           const std::string& virtual_name) {
             auto* parent = directory_path_map.at(directory.substr(patch_path.size() - 1));
 
@@ -444,19 +444,19 @@ void LayeredFS::RebuildMetadata() {
     RomFSHeader header;
     header.header_length = sizeof(header);
     header.directory_hash_table = {
-        /*offset*/ sizeof(header),
-        /*length*/ static_cast<u32_le>(directory_hash_table.size() * sizeof(u32_le))};
+        /* offset */ sizeof(header),
+        /* length */ static_cast<u32_le>(directory_hash_table.size() * sizeof(u32_le))};
     header.directory_metadata_table = {
-        /*offset*/
+        /* offset */
         header.directory_hash_table.offset + header.directory_hash_table.length,
-        /*length*/ static_cast<u32_le>(directory_metadata_table.size())};
+        /* length */ static_cast<u32_le>(directory_metadata_table.size())};
     header.file_hash_table = {
-        /*offset*/
+        /* offset */
         header.directory_metadata_table.offset + header.directory_metadata_table.length,
-        /*length*/ static_cast<u32_le>(file_hash_table.size() * sizeof(u32_le))};
-    header.file_metadata_table = {/*offset*/ header.file_hash_table.offset +
+        /* length */ static_cast<u32_le>(file_hash_table.size() * sizeof(u32_le))};
+    header.file_metadata_table = {/* offset */ header.file_hash_table.offset +
                                       header.file_hash_table.length,
-                                  /*length*/ static_cast<u32_le>(file_metadata_table.size())};
+                                  /* length */ static_cast<u32_le>(file_metadata_table.size())};
     header.file_data_offset =
         Common::AlignUp(header.file_metadata_table.offset + header.file_metadata_table.length, 16);
 

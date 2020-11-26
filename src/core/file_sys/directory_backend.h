@@ -8,9 +8,6 @@
 #include <cstddef>
 #include "common/common_types.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace FileSys {
 
 // Structure of a directory entry, from http://3dbrew.org/wiki/FSDir:Read#Entry_format
@@ -21,13 +18,13 @@ struct Entry {
     char unknown1;                  // unknown (observed values: 0x0A, 0x70, 0xFD)
     std::array<char, 4>
         extension;     // 8.3 file extension (set to spaces for directories, null-terminated)
-    char unknown2;     // unknown (always 0x01)
-    char unknown3;     // unknown (0x00 or 0x08)
-    char is_directory; // directory flag
-    char is_hidden;    // hidden flag
-    char is_archive;   // archive flag
-    char is_read_only; // read-only flag
-    u64 file_size;     // file size (for files only)
+    char unknown2;     // Unknown (always 0x01)
+    char unknown3;     // Unknown (0x00 or 0x08)
+    char is_directory; // Directory flag
+    char is_hidden;    // Hidden flag
+    char is_archive;   // Archive flag
+    char is_read_only; // Read-only flag
+    u64 file_size;     // File size (for files only)
 };
 static_assert(sizeof(Entry) == 0x228, "Directory Entry struct isn't exactly 0x228 bytes long!");
 static_assert(offsetof(Entry, short_name) == 0x20C, "Wrong offset for short_name in Entry.");

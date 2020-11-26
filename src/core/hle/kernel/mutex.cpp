@@ -110,7 +110,7 @@ void Mutex::UpdatePriority() {
     }
 
     u32 best_priority = ThreadPrioLowest;
-    for (const std::shared_ptr<Kernel::Thread>& waiter : GetWaitingThreads()) {
+    for (const std::shared_ptr<Thread>& waiter : GetWaitingThreads()) {
         if (waiter->current_priority < best_priority) {
             best_priority = waiter->current_priority;
         }

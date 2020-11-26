@@ -129,10 +129,6 @@ ResultCode SharedMemory::Map(Process& target_process, VAddr address, MemoryPermi
     }
 
     // TODO(Subv): Check for the Shared Device Mem flag in the creator process.
-    /*if (was_created_with_shared_device_mem && address != 0) {
-        return ResultCode(ErrorDescription::InvalidCombination, ErrorModule::OS,
-    ErrorSummary::InvalidArgument, ErrorLevel::Usage);
-    }*/
 
     // TODO(Subv): The same process that created a SharedMemory object
     // can not map it in its own address space unless it was created with addr=0, result 0xD900182C.

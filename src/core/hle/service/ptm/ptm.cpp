@@ -129,8 +129,10 @@ static void WriteGameCoinData(GameCoin gamecoin_data) {
     if (archive_result.Code() == FileSys::FS_ERROR_NOT_FORMATTED) {
         // Format the archive to create the directories
         extdata_archive_factory.Format(archive_path, FileSys::ArchiveFormatInfo(), 0);
+
         // Open it again to get a valid archive now that the folder exists
         archive = extdata_archive_factory.Open(archive_path, 0).Unwrap();
+
         // Create the game coin file
         archive->CreateFile(gamecoin_path, sizeof(GameCoin));
     } else {
@@ -197,7 +199,7 @@ u16 Module::GetPlayCoins() {
 void Module::SetPlayCoins(u16 play_coins) {
     GameCoin game_coin = ReadGameCoinData();
     game_coin.total_coins = play_coins;
-    // TODO: This may introduce potential race condition if the game is reading the
+    // TODO: This may introduce potential race condition if the game/program is reading the
     // game coin data at the same time
     WriteGameCoinData(game_coin);
 }

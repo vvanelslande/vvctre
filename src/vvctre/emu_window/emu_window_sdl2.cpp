@@ -3958,11 +3958,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                                  ImGuiInputTextFlags_ReadOnly);
 
                 // Update
-                std::string update_folder = FileUtil::SanitizePath(
-                    Service::AM::GetTitlePath(Service::FS::MediaType::SDMC,
-                                              0x0004000e00000000 | static_cast<u32>(program_id)));
-                ImGui::InputText("Update##Folders", &update_folder[0], update_folder.length(),
-                                 ImGuiInputTextFlags_ReadOnly);
+                const u16 category = static_cast<u16>((program_id >> 32) & 0xFFFF);
+                if (!(category & Service::AM::CATEGORY_DLP)) {
+                    std::string update_folder = FileUtil::SanitizePath(Service::AM::GetTitlePath(
+                        Service::FS::MediaType::SDMC,
+                        0x0004000e00000000 | static_cast<u32>(program_id)));
+                    ImGui::InputText("Update##Folders", &update_folder[0], update_folder.length(),
+                                     ImGuiInputTextFlags_ReadOnly);
+                }
 
                 // Luma3DS Mod
                 std::string luma3ds_mod_folder = FileUtil::SanitizePath(fmt::format(

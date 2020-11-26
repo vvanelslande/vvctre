@@ -27,21 +27,7 @@
 #include "core/hle/service/fs/fs_user.h"
 #include "core/settings.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Namespace FS_User
-
-using Kernel::ClientSession;
-using Kernel::ServerSession;
-
 namespace Service::FS {
-
-struct ProgramInfo {
-    u64 program_id;
-    MediaType media_type;
-};
-
-static std::unordered_map<u32, ProgramInfo> program_info_map;
-static std::string current_gamecard_path;
 
 void FS_USER::Initialize(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x0801, 0, 2);
@@ -82,9 +68,9 @@ void FS_USER::OpenFile(Kernel::HLERequestContext& ctx) {
     }
 
     ctx.SleepClientThread("fs_user::open", open_timeout_ns,
-                          [](std::shared_ptr<Kernel::Thread> /*thread*/,
-                             Kernel::HLERequestContext& /*ctx*/,
-                             Kernel::ThreadWakeupReason /*reason*/) {
+                          [](std::shared_ptr<Kernel::Thread> /* thread */,
+                             Kernel::HLERequestContext& /* ctx */,
+                             Kernel::ThreadWakeupReason /* reason */) {
                               // Nothing to do here
                           });
 }
@@ -140,9 +126,9 @@ void FS_USER::OpenFileDirectly(Kernel::HLERequestContext& ctx) {
     }
 
     ctx.SleepClientThread("fs_user::open_directly", open_timeout_ns,
-                          [](std::shared_ptr<Kernel::Thread> /*thread*/,
-                             Kernel::HLERequestContext& /*ctx*/,
-                             Kernel::ThreadWakeupReason /*reason*/) {
+                          [](std::shared_ptr<Kernel::Thread> /* thread */,
+                             Kernel::HLERequestContext& /* ctx */,
+                             Kernel::ThreadWakeupReason /* reason */) {
                               // Nothing to do here
                           });
 }
@@ -857,8 +843,20 @@ void FS_USER::Register(u32 process_id, u64 program_id, const std::string& filepa
     }
 }
 
-std::string FS_USER::GetCurrentGamecardPath() const {
+void FS_USER::SetCurrentGamecardPath(std::string value) {
+    current_gamecard_path = std::move(value);
+}
+
+const std::string& FS_USER::GetCurrentGamecardPath() const {
     return current_gamecard_path;
+}
+
+void FS_USER::SetProgramInfoMap(std::unordered_map<u32, ProgramInfo> value) {
+    program_info_map = value;
+}
+
+const std::unordered_map<u32, ProgramInfo>& FS_USER::GetProgramInfoMap() const {
+    return program_info_map;
 }
 
 ResultVal<u16> FS_USER::GetSpecialContentIndexFromGameCard(u64 title_id, SpecialContentType type) {

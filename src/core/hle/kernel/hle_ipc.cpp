@@ -27,6 +27,7 @@ void SessionRequestHandler::ClientConnected(std::shared_ptr<ServerSession> serve
 
 void SessionRequestHandler::ClientDisconnected(std::shared_ptr<ServerSession> server_session) {
     server_session->SetHleHandler(nullptr);
+
     connected_sessions.erase(
         std::remove_if(connected_sessions.begin(), connected_sessions.end(),
                        [&](const SessionInfo& info) { return info.session == server_session; }),
@@ -57,13 +58,15 @@ std::shared_ptr<Event> HLERequestContext::SleepClientThread(const std::string& r
                           cmd_buff.size() * sizeof(u32));
     };
 
-    auto event = kernel.CreateEvent(Kernel::ResetType::OneShot, "HLE Pause Event: " + reason);
+    std::shared_ptr<Event> event =
+        kernel.CreateEvent(ResetType::OneShot, "HLE Pause Event: " + reason);
     thread->status = ThreadStatus::WaitHleEvent;
     thread->wait_objects = {event};
     event->AddWaitingThread(SharedFrom(thread));
 
-    if (timeout.count() > 0)
+    if (timeout.count() > 0) {
         thread->WakeAfterDelay(timeout.count());
+    }
 
     return event;
 }

@@ -233,7 +233,7 @@ void ThreadManager::DebugThreadQueue() {
                   GetCurrentThread()->GetObjectId());
     }
 
-    for (std::shared_ptr<Kernel::Thread>& t : thread_list) {
+    for (std::shared_ptr<Thread>& t : thread_list) {
         u32 priority = ready_queue.contains(t.get());
         if (priority != -1) {
             LOG_DEBUG(Kernel, "0x{:02X} {}", priority, t->GetObjectId());
@@ -315,7 +315,7 @@ ResultVal<std::shared_ptr<Thread>> KernelSystem::CreateThread(std::string name, 
                           ErrorSummary::InvalidArgument, ErrorLevel::Permanent);
     }
 
-    std::shared_ptr<Kernel::Thread> thread = std::make_shared<Thread>(*this, processor_id);
+    std::shared_ptr<Thread> thread = std::make_shared<Thread>(*this, processor_id);
 
     thread_managers[processor_id]->thread_list.push_back(thread);
     thread_managers[processor_id]->ready_queue.prepare(priority);
@@ -470,7 +470,7 @@ VAddr Thread::GetCommandBufferAddress() const {
     return GetTLSAddress() + command_header_offset;
 }
 
-ThreadManager::ThreadManager(Kernel::KernelSystem& kernel, u32 core_id) : kernel(kernel) {
+ThreadManager::ThreadManager(KernelSystem& kernel, u32 core_id) : kernel(kernel) {
     ThreadWakeupEventType = kernel.timing.RegisterEvent(
         "ThreadWakeupCallback_" + std::to_string(core_id),
         [this](u64 thread_id, s64 cycle_late) { ThreadWakeupCallback(thread_id, cycle_late); });

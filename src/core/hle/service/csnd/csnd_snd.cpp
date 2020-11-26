@@ -194,11 +194,11 @@ void CSND_SND::Initialize(Kernel::HLERequestContext& ctx) {
     capture_state_offset = rp.Pop<u32>();
     type1_command_offset = rp.Pop<u32>();
 
-    using Kernel::MemoryPermission;
     mutex = system.Kernel().CreateMutex(false, "CSND:mutex");
+
     shared_memory = system.Kernel()
-                        .CreateSharedMemory(nullptr, size, MemoryPermission::ReadWrite,
-                                            MemoryPermission::ReadWrite, 0,
+                        .CreateSharedMemory(nullptr, size, Kernel::MemoryPermission::ReadWrite,
+                                            Kernel::MemoryPermission::ReadWrite, 0,
                                             Kernel::MemoryRegion::BASE, "CSND:SharedMemory")
                         .Unwrap();
 

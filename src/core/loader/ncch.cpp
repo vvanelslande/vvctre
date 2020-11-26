@@ -5,9 +5,9 @@
 #include <algorithm>
 #include <cinttypes>
 #include <cstring>
+#include <fmt/format.h>
 #include <memory>
 #include <vector>
-#include <fmt/format.h>
 #include "common/logging/log.h"
 #include "common/string_util.h"
 #include "common/swap.h"
@@ -24,9 +24,6 @@
 #include "core/loader/smdh.h"
 #include "core/memory.h"
 #include "network/room_member.h"
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Loader namespace
 
 namespace Loader {
 
@@ -62,20 +59,18 @@ std::pair<std::optional<u32>, ResultStatus> AppLoader_NCCH::LoadKernelSystemMode
 }
 
 ResultStatus AppLoader_NCCH::LoadExec(std::shared_ptr<Kernel::Process>& process) {
-    using Kernel::CodeSet;
-
     if (!is_loaded) {
         return ResultStatus::ErrorNotLoaded;
     }
 
     std::vector<u8> code;
     u64_le program_id;
-    if (ResultStatus::Success == ReadCode(code) &&
-        ResultStatus::Success == ReadProgramId(program_id)) {
+    if (ReadCode(code) == ResultStatus::Success &&
+        ReadProgramId(program_id) == ResultStatus::Success) {
         std::string process_name = Common::StringFromFixedZeroTerminatedBuffer(
             (const char*)overlay_ncch->exheader_header.codeset_info.name, 8);
 
-        std::shared_ptr<CodeSet> codeset =
+        std::shared_ptr<Kernel::CodeSet> codeset =
             Core::System::GetInstance().Kernel().CreateCodeSet(process_name, program_id);
 
         codeset->CodeSegment().offset = 0;
@@ -123,8 +118,7 @@ ResultStatus AppLoader_NCCH::LoadExec(std::shared_ptr<Kernel::Process>& process)
             overlay_ncch->exheader_header.arm11_system_local_caps.ideal_processor;
 
         // Copy data while converting endianness
-        using KernelCaps = std::array<u32, ExHeader_ARM11_KernelCaps::NUM_DESCRIPTORS>;
-        KernelCaps kernel_caps;
+        std::array<u32, ExHeader_ARM11_KernelCaps::NUM_DESCRIPTORS> kernel_caps;
         std::copy_n(overlay_ncch->exheader_header.arm11_kernel_caps.descriptors, kernel_caps.size(),
                     begin(kernel_caps));
         process->ParseKernelCaps(kernel_caps.data(), kernel_caps.size());
@@ -178,21 +172,23 @@ ResultStatus AppLoader_NCCH::Load(std::shared_ptr<Kernel::Process>& process) {
     }
 
     ReadProgramId(ncch_program_id);
-    std::string program_id{fmt::format("{:016X}", ncch_program_id)};
 
-    LOG_INFO(Loader, "Program ID: {}", program_id);
+    LOG_INFO(Loader, "Program ID: {:016X}", ncch_program_id);
 
-    update_ncch.OpenFile(Service::AM::GetTitleContentPath(
-        Service::FS::MediaType::SDMC, 0x0004000e00000000 | static_cast<u32>(ncch_program_id)));
-    result = update_ncch.Load();
-    if (result == ResultStatus::Success) {
-        overlay_ncch = &update_ncch;
+    const u16 category = static_cast<u16>((ncch_program_id >> 32) & 0xFFFF);
+    if (!(category & Service::AM::CATEGORY_DLP)) {
+        update_ncch.OpenFile(Service::AM::GetTitleContentPath(
+            Service::FS::MediaType::SDMC, 0x0004000e00000000 | static_cast<u32>(ncch_program_id)));
+        result = update_ncch.Load();
+        if (result == ResultStatus::Success) {
+            overlay_ncch = &update_ncch;
+        }
     }
 
     is_loaded = true; // Set state to loaded
 
     result = LoadExec(process); // Load the executable into memory for booting
-    if (ResultStatus::Success != result) {
+    if (result != ResultStatus::Success) {
         return result;
     }
 
@@ -210,8 +206,9 @@ ResultStatus AppLoader_NCCH::Load(std::shared_ptr<Kernel::Process>& process) {
 
 ResultStatus AppLoader_NCCH::IsExecutable(bool& out_executable) {
     Loader::ResultStatus result = overlay_ncch->Load();
-    if (result != Loader::ResultStatus::Success)
+    if (result != Loader::ResultStatus::Success) {
         return result;
+    }
 
     out_executable = overlay_ncch->ncch_header.is_executable != 0;
     return ResultStatus::Success;
@@ -272,9 +269,16 @@ ResultStatus AppLoader_NCCH::ReadUpdateRomFS(std::shared_ptr<FileSys::RomFSReade
 ResultStatus AppLoader_NCCH::DumpUpdateRomFS(const std::string& target_path) {
     u64 program_id;
     ReadProgramId(program_id);
-    update_ncch.OpenFile(Service::AM::GetTitleContentPath(
-        Service::FS::MediaType::SDMC, 0x0004000e00000000 | static_cast<u32>(program_id)));
-    return update_ncch.DumpRomFS(target_path);
+
+    const u16 category = static_cast<u16>((program_id >> 32) & 0xFFFF);
+
+    if (!(category & Service::AM::CATEGORY_DLP)) {
+        update_ncch.OpenFile(Service::AM::GetTitleContentPath(
+            Service::FS::MediaType::SDMC, 0x0004000e00000000 | static_cast<u32>(program_id)));
+        return update_ncch.DumpRomFS(target_path);
+    }
+
+    return ResultStatus::Success;
 }
 
 ResultStatus AppLoader_NCCH::ReadTitle(std::string& title) {

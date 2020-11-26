@@ -17,19 +17,14 @@ constexpr std::size_t COMMAND_BUFFER_LENGTH = 0x100 / sizeof(u32);
 // Maximum number of static buffers per thread.
 constexpr std::size_t MAX_STATIC_BUFFERS = 16;
 
-// These errors are commonly returned by invalid IPC translations, so alias them here for
-// convenience.
-// TODO(yuriks): These will probably go away once translation is implemented inside the kernel.
-using Kernel::ERR_INVALID_BUFFER_DESCRIPTOR;
-constexpr auto ERR_INVALID_HANDLE = Kernel::ERR_INVALID_HANDLE_OS;
-
 enum DescriptorType : u32 {
-    // Buffer related descriptors types (mask : 0x0F)
+    // Buffer related descriptors types (mask: 0x0F)
     StaticBuffer = 0x02,
     PXIBuffer = 0x04,
     MappedBuffer = 0x08,
-    // Handle related descriptors types (mask : 0x30, but need to check for buffer related
-    // descriptors first )
+
+    // Handle related descriptors types (mask: 0x30, but need to check for buffer related
+    // descriptors first
     CopyHandle = 0x00,
     MoveHandle = 0x10,
     CallingPid = 0x20,

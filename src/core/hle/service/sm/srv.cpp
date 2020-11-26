@@ -30,7 +30,7 @@ void SRV::RegisterClient(Kernel::HLERequestContext& ctx) {
     const auto pid_descriptor = rp.Pop<u32>();
     if (pid_descriptor != IPC::CallingPidDesc()) {
         IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-        rb.Push(IPC::ERR_INVALID_BUFFER_DESCRIPTOR);
+        rb.Push(Kernel::ERR_INVALID_BUFFER_DESCRIPTOR);
         return;
     }
     const auto caller_pid = rp.Pop<u32>();

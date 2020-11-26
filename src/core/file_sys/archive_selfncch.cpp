@@ -13,9 +13,6 @@
 #include "core/file_sys/ivfc_archive.h"
 #include "core/hle/kernel/process.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace FileSys {
 
 enum class SelfNCCHFilePathType : u32 {
@@ -260,22 +257,24 @@ void ArchiveFactory_SelfNCCH::Register(Loader::AppLoader& app_loader) {
 
     std::shared_ptr<RomFSReader> update_romfs_file;
     if (Loader::ResultStatus::Success == app_loader.ReadUpdateRomFS(update_romfs_file)) {
-
         data.update_romfs_file = std::move(update_romfs_file);
     }
 
     std::vector<u8> buffer;
 
-    if (Loader::ResultStatus::Success == app_loader.ReadIcon(buffer))
+    if (app_loader.ReadIcon(buffer) == Loader::ResultStatus::Success) {
         data.icon = std::make_shared<std::vector<u8>>(std::move(buffer));
+    }
 
     buffer.clear();
-    if (Loader::ResultStatus::Success == app_loader.ReadLogo(buffer))
+    if (app_loader.ReadLogo(buffer) == Loader::ResultStatus::Success) {
         data.logo = std::make_shared<std::vector<u8>>(std::move(buffer));
+    }
 
     buffer.clear();
-    if (Loader::ResultStatus::Success == app_loader.ReadBanner(buffer))
+    if (app_loader.ReadBanner(buffer) == Loader::ResultStatus::Success) {
         data.banner = std::make_shared<std::vector<u8>>(std::move(buffer));
+    }
 }
 
 ResultVal<std::unique_ptr<ArchiveBackend>> ArchiveFactory_SelfNCCH::Open(const Path& path,

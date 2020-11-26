@@ -10,9 +10,6 @@
 #include "core/file_sys/file_backend.h"
 #include "core/settings.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace FileSys {
 
 class SDMCWriteOnlyDelayGenerator : public DelayGenerator {

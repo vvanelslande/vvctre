@@ -85,8 +85,7 @@ enum class MemoryRegion : u16 {
 class KernelSystem {
 public:
     explicit KernelSystem(Memory::MemorySystem& memory, Core::Timing& timing,
-                          std::function<void()> prepare_reschedule_callback, u32 system_mode,
-                          u32 num_cores);
+                          std::function<void()> prepare_reschedule_callback, u32 system_mode);
     ~KernelSystem();
 
     using PortPair = std::pair<std::shared_ptr<ServerPort>, std::shared_ptr<ClientPort>>;

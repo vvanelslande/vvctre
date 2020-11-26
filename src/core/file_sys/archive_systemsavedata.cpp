@@ -4,18 +4,15 @@
 
 #include <algorithm>
 #include <cstring>
+#include <fmt/format.h>
 #include <memory>
 #include <vector>
-#include <fmt/format.h>
 #include "common/common_types.h"
 #include "common/file_util.h"
 #include "core/file_sys/archive_systemsavedata.h"
 #include "core/file_sys/errors.h"
 #include "core/file_sys/savedata_archive.h"
 #include "core/hle/service/fs/archive.h"
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
 
 namespace FileSys {
 

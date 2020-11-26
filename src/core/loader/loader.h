@@ -20,22 +20,17 @@ struct AddressMapping;
 class Process;
 } // namespace Kernel
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Loader namespace
-
 namespace Loader {
 
-/// File types supported by CTR
 enum class FileType {
     Unknown,
     CCI,
     CXI,
     CIA,
     ELF,
-    THREEDSX, // 3DSX
+    THREEDSX,
 };
 
-/// Return type for functions in Loader namespace
 enum class ResultStatus {
     Success,
     Error,
@@ -52,23 +47,12 @@ constexpr u32 MakeMagic(char a, char b, char c, char d) {
     return a | b << 8 | c << 16 | d << 24;
 }
 
-/// Interface for loading an application
 class AppLoader : NonCopyable {
 public:
     explicit AppLoader(FileUtil::IOFile&& file) : file(std::move(file)) {}
     virtual ~AppLoader() {}
 
-    /**
-     * Returns the type of this file
-     * @return FileType corresponding to the loaded file
-     */
     virtual FileType GetFileType() = 0;
-
-    /**
-     * Load the application and return the created Process instance
-     * @param process The newly created process.
-     * @return The status result of the operation.
-     */
     virtual ResultStatus Load(std::shared_ptr<Kernel::Process>& process) = 0;
 
     /**
@@ -82,66 +66,31 @@ public:
         return std::make_pair(2, ResultStatus::Success);
     }
 
-    /**
-     * Get whether this application is executable.
-     * @param out_executable Reference to store the executable flag into.
-     * @return ResultStatus result of function
-     */
     virtual ResultStatus IsExecutable(bool& out_executable) {
         out_executable = true;
         return ResultStatus::Success;
     }
 
-    /**
-     * Get the code (typically .code section) of the application
-     * @param buffer Reference to buffer to store data
-     * @return ResultStatus result of function
-     */
     virtual ResultStatus ReadCode(std::vector<u8>& buffer) {
         return ResultStatus::ErrorNotImplemented;
     }
 
-    /**
-     * Get the icon (typically icon section) of the application
-     * @param buffer Reference to buffer to store data
-     * @return ResultStatus result of function
-     */
     virtual ResultStatus ReadIcon(std::vector<u8>& buffer) {
         return ResultStatus::ErrorNotImplemented;
     }
 
-    /**
-     * Get the banner (typically banner section) of the application
-     * @param buffer Reference to buffer to store data
-     * @return ResultStatus result of function
-     */
     virtual ResultStatus ReadBanner(std::vector<u8>& buffer) {
         return ResultStatus::ErrorNotImplemented;
     }
 
-    /**
-     * Get the logo (typically logo section) of the application
-     * @param buffer Reference to buffer to store data
-     * @return ResultStatus result of function
-     */
     virtual ResultStatus ReadLogo(std::vector<u8>& buffer) {
         return ResultStatus::ErrorNotImplemented;
     }
 
-    /**
-     * Get the program id of the application
-     * @param out_program_id Reference to store program id into
-     * @return ResultStatus result of function
-     */
     virtual ResultStatus ReadProgramId(u64& out_program_id) {
         return ResultStatus::ErrorNotImplemented;
     }
 
-    /**
-     * Get the extdata id for the application
-     * @param out_extdata_id Reference to store extdata id into
-     * @return ResultStatus result of function
-     */
     virtual ResultStatus ReadExtdataId(u64& out_extdata_id) {
         return ResultStatus::ErrorNotImplemented;
     }
@@ -156,11 +105,6 @@ public:
         return ResultStatus::ErrorNotImplemented;
     }
 
-    /**
-     * Dump the RomFS of the application
-     * @param target_path The target path to dump to
-     * @return ResultStatus result of function
-     */
     virtual ResultStatus DumpRomFS(const std::string& target_path) {
         return ResultStatus::ErrorNotImplemented;
     }
@@ -175,20 +119,10 @@ public:
         return ResultStatus::ErrorNotImplemented;
     }
 
-    /**
-     * Dump the update RomFS of the application
-     * @param target_path The target path to dump to
-     * @return ResultStatus result of function
-     */
     virtual ResultStatus DumpUpdateRomFS(const std::string& target_path) {
         return ResultStatus::ErrorNotImplemented;
     }
 
-    /**
-     * Get the title of the application
-     * @param title Reference to store the application title into
-     * @return ResultStatus result of function
-     */
     virtual ResultStatus ReadTitle(std::string& title) {
         return ResultStatus::ErrorNotImplemented;
     }

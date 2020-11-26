@@ -3,11 +3,11 @@
 // Refer to the license.txt file included.
 
 #include <cinttypes>
-#include <cstring>
-#include <memory>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/sha.h>
+#include <cstring>
+#include <memory>
 #include "common/common_types.h"
 #include "common/logging/log.h"
 #include "core/core.h"
@@ -18,17 +18,15 @@
 #include "core/hw/aes/key.h"
 #include "core/loader/loader.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// FileSys namespace
-
 namespace FileSys {
 
-static const int kMaxSections = 8;   ///< Maximum number of sections (files) in an ExeFs
-static const int kBlockSize = 0x200; ///< Size of ExeFS blocks (in bytes)
+static const int MAX_SECTIONS = 8;   ///< Maximum number of sections (files) in an ExeFS
+static const int BLOCK_SIZE = 0x200; ///< Size of ExeFS blocks (in bytes)
 
 u64 GetModId(u64 program_id) {
-    if ((program_id >> 32) == 0x0004000e00000000) { // Apply the mods to updates
-        return 0x0004000000000000 | static_cast<u32>(program_id);
+    constexpr u64 UPDATE_MASK = 0x0000000e'00000000;
+    if ((program_id & 0x000000ff'00000000) == UPDATE_MASK) { // Apply the mods to updates
+        return program_id & ~UPDATE_MASK;
     }
     return program_id;
 }
@@ -156,7 +154,7 @@ Loader::ResultStatus NCCHContainer::LoadHeader() {
         file.ReadBytes(&ncsd_header, sizeof(NCSD_Header));
         ASSERT(Loader::MakeMagic('N', 'C', 'S', 'D') == ncsd_header.magic);
         ASSERT(partition < 8);
-        ncch_offset = ncsd_header.partitions[partition].offset * kBlockSize;
+        ncch_offset = ncsd_header.partitions[partition].offset * BLOCK_SIZE;
         LOG_ERROR(Service_FS, "{}", ncch_offset);
         file.Seek(ncch_offset, SEEK_SET);
         file.ReadBytes(&ncch_header, sizeof(NCCH_Header));
@@ -191,7 +189,7 @@ Loader::ResultStatus NCCHContainer::Load() {
             file.ReadBytes(&ncsd_header, sizeof(NCSD_Header));
             ASSERT(Loader::MakeMagic('N', 'C', 'S', 'D') == ncsd_header.magic);
             ASSERT(partition < 8);
-            ncch_offset = ncsd_header.partitions[partition].offset * kBlockSize;
+            ncch_offset = ncsd_header.partitions[partition].offset * BLOCK_SIZE;
             file.Seek(ncch_offset, SEEK_SET);
             file.ReadBytes(&ncch_header, sizeof(NCCH_Header));
         }
@@ -310,8 +308,8 @@ Loader::ResultStatus NCCHContainer::Load() {
                     };
                 };
                 auto offset_exheader = u32ToBEArray(0x200); // exheader offset
-                auto offset_exefs = u32ToBEArray(ncch_header.exefs_offset * kBlockSize);
-                auto offset_romfs = u32ToBEArray(ncch_header.romfs_offset * kBlockSize);
+                auto offset_exefs = u32ToBEArray(ncch_header.exefs_offset * BLOCK_SIZE);
+                auto offset_romfs = u32ToBEArray(ncch_header.romfs_offset * BLOCK_SIZE);
                 std::copy(offset_exheader.begin(), offset_exheader.end(),
                           exheader_ctr.begin() + 12);
                 std::copy(offset_exefs.begin(), offset_exefs.end(), exefs_ctr.begin() + 12);
@@ -410,8 +408,8 @@ Loader::ResultStatus NCCHContainer::Load() {
 
         // DLC can have an ExeFS and a RomFS but no extended header
         if (ncch_header.exefs_size) {
-            exefs_offset = ncch_header.exefs_offset * kBlockSize;
-            u32 exefs_size = ncch_header.exefs_size * kBlockSize;
+            exefs_offset = ncch_header.exefs_offset * BLOCK_SIZE;
+            u32 exefs_size = ncch_header.exefs_size * BLOCK_SIZE;
 
             LOG_DEBUG(Service_FS, "ExeFS offset:                0x{:08X}", exefs_offset);
             LOG_DEBUG(Service_FS, "ExeFS size:                  0x{:08X}", exefs_size);
@@ -492,8 +490,8 @@ Loader::ResultStatus NCCHContainer::LoadSectionExeFS(const char* name, std::vect
     // instead of the ExeFS.
     if (std::strcmp(name, "logo") == 0) {
         if (ncch_header.logo_region_offset && ncch_header.logo_region_size) {
-            std::size_t logo_offset = ncch_header.logo_region_offset * kBlockSize;
-            std::size_t logo_size = ncch_header.logo_region_size * kBlockSize;
+            std::size_t logo_offset = ncch_header.logo_region_offset * BLOCK_SIZE;
+            std::size_t logo_size = ncch_header.logo_region_size * BLOCK_SIZE;
 
             buffer.resize(logo_size);
             file.Seek(ncch_offset + logo_offset, SEEK_SET);
@@ -509,12 +507,13 @@ Loader::ResultStatus NCCHContainer::LoadSectionExeFS(const char* name, std::vect
     }
 
     // If we don't have any separate files, we'll need a full ExeFS
-    if (!exefs_file.IsOpen())
+    if (!exefs_file.IsOpen()) {
         return Loader::ResultStatus::Error;
+    }
 
-    LOG_DEBUG(Service_FS, "{} sections:", kMaxSections);
+    LOG_DEBUG(Service_FS, "{} sections:", MAX_SECTIONS);
     // Iterate through the ExeFs archive until we find a section with the specified name...
-    for (unsigned section_number = 0; section_number < kMaxSections; section_number++) {
+    for (unsigned section_number = 0; section_number < MAX_SECTIONS; section_number++) {
         const auto& section = exefs_header.section[section_number];
 
         // Load the specified section...
@@ -661,11 +660,13 @@ Loader::ResultStatus NCCHContainer::LoadOverrideExeFSSection(const char* name,
 Loader::ResultStatus NCCHContainer::ReadRomFS(std::shared_ptr<RomFSReader>& romfs_file,
                                               bool use_layered_fs) {
     Loader::ResultStatus result = Load();
-    if (result != Loader::ResultStatus::Success)
+    if (result != Loader::ResultStatus::Success) {
         return result;
+    }
 
-    if (ReadOverrideRomFS(romfs_file) == Loader::ResultStatus::Success)
+    if (ReadOverrideRomFS(romfs_file) == Loader::ResultStatus::Success) {
         return Loader::ResultStatus::Success;
+    }
 
     if (!has_romfs) {
         LOG_DEBUG(Service_FS, "RomFS requested from NCCH which has no RomFS");
@@ -676,8 +677,8 @@ Loader::ResultStatus NCCHContainer::ReadRomFS(std::shared_ptr<RomFSReader>& romf
         return Loader::ResultStatus::Error;
     }
 
-    u32 romfs_offset = ncch_offset + (ncch_header.romfs_offset * kBlockSize) + 0x1000;
-    u32 romfs_size = (ncch_header.romfs_size * kBlockSize) - 0x1000;
+    u32 romfs_offset = ncch_offset + (ncch_header.romfs_offset * BLOCK_SIZE) + 0x1000;
+    u32 romfs_size = (ncch_header.romfs_size * BLOCK_SIZE) - 0x1000;
 
     LOG_DEBUG(Service_FS, "RomFS offset:           0x{:08X}", romfs_offset);
     LOG_DEBUG(Service_FS, "RomFS size:             0x{:08X}", romfs_size);

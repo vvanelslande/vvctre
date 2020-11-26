@@ -73,7 +73,7 @@ struct SMDH {
     };
 
     /**
-     * Gets the short game title from SMDH
+     * Gets the short title from SMDH
      * @param language title language
      * @return UTF-16 array of the short title
      */

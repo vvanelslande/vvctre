@@ -119,8 +119,6 @@ struct TimingEventType {
     const std::string* name;
 };
 
-constexpr int MAX_SLICE_LENGTH = 20000;
-
 class Timing {
 public:
     struct Event {
@@ -134,7 +132,7 @@ public:
     };
 
     // Currently Service::HID::pad_update_ticks is the smallest interval for an event that gets
-    // always scheduled. Therfore we use this as orientation for the MAX_SLICE_LENGTH
+    // always scheduled. Therefore we use this as orientation for the MAX_SLICE_LENGTH
     // For performance bigger slice length are desired, though this will lead to cores desync
     // But we never want to schedule events into the current slice, because then cores might to
     // run small slices to sync up again. This is especially important for events that are always
@@ -192,9 +190,8 @@ public:
         u64 idled_cycles = 0;
     };
 
-    explicit Timing(u8 num_cores);
-
-    ~Timing() {}
+    Timing();
+    ~Timing();
 
     TimingEventType* RegisterEvent(const std::string& name, TimedCallback callback);
 

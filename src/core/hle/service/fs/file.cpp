@@ -72,9 +72,9 @@ void File::Read(Kernel::HLERequestContext& ctx) {
 
     std::chrono::nanoseconds read_timeout_ns{backend->GetReadDelayNs(length)};
     ctx.SleepClientThread("file::read", read_timeout_ns,
-                          [](std::shared_ptr<Kernel::Thread> /*thread*/,
-                             Kernel::HLERequestContext& /*ctx*/,
-                             Kernel::ThreadWakeupReason /*reason*/) {
+                          [](std::shared_ptr<Kernel::Thread> /* thread */,
+                             Kernel::HLERequestContext& /* ctx */,
+                             Kernel::ThreadWakeupReason /* reason */) {
                               // Nothing to do here
                           });
 }
@@ -191,8 +191,7 @@ void File::GetPriority(Kernel::HLERequestContext& ctx) {
 
 void File::OpenLinkFile(Kernel::HLERequestContext& ctx) {
     LOG_WARNING(Service_FS, "(STUBBED) File command OpenLinkFile {}", GetName());
-    using Kernel::ClientSession;
-    using Kernel::ServerSession;
+
     auto [server, client] = system.Kernel().CreateSessionPair(GetName());
     ClientConnected(server);
 
@@ -238,8 +237,6 @@ void File::OpenSubFile(Kernel::HLERequestContext& ctx) {
         return;
     }
 
-    using Kernel::ClientSession;
-    using Kernel::ServerSession;
     auto [server, client] = system.Kernel().CreateSessionPair(GetName());
     ClientConnected(server);
 

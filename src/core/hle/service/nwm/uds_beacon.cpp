@@ -4,11 +4,11 @@
 
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 
-#include <cstring>
 #include <cryptopp/aes.h>
 #include <cryptopp/md5.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/sha.h>
+#include <cstring>
 #include "common/assert.h"
 #include "core/hle/service/nwm/nwm_uds.h"
 #include "core/hle/service/nwm/uds_beacon.h"
@@ -272,7 +272,7 @@ std::vector<u8> GenerateNintendoSecondEncryptedDataTag(const NetworkInfo& networ
 
     const std::size_t tag_length = sizeof(EncryptedDataTag) - sizeof(TagHeader) + payload_size;
 
-    // TODO(Subv): What does the 3DS do when a game has too much data to fit into the tag?
+    // TODO(Subv): What does the 3DS do when a game/program has too much data to fit into the tag?
     ASSERT_MSG(tag_length <= 255, "Data is too big.");
 
     EncryptedDataTag tag{};

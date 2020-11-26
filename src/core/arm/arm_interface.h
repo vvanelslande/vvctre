@@ -15,7 +15,8 @@
 class ARM_Interface : NonCopyable {
 public:
     explicit ARM_Interface(u32 id, std::shared_ptr<Core::Timing::Timer> timer)
-        : timer(timer), id(id){};
+        : timer(timer), id(id) {}
+
     virtual ~ARM_Interface() {}
 
     class ThreadContext {

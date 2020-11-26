@@ -18,13 +18,9 @@ namespace Memory {
 class MemorySystem;
 } // namespace Memory
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Video Core namespace
-
 namespace VideoCore {
 
 extern std::unique_ptr<RendererBase> g_renderer;
-
 extern std::atomic<bool> g_hardware_renderer_enabled;
 extern std::atomic<bool> g_shader_jit_enabled;
 extern std::atomic<bool> g_hardware_shader_enabled;
@@ -33,18 +29,14 @@ extern std::atomic<bool> g_renderer_background_color_update_requested;
 extern std::atomic<bool> g_renderer_sampler_update_requested;
 extern std::atomic<bool> g_renderer_shader_update_requested;
 extern std::atomic<bool> g_texture_filter_update_requested;
-
 extern std::atomic<bool> g_renderer_screenshot_requested;
 extern void* g_screenshot_bits;
 extern std::function<void()> g_screenshot_complete_callback;
 extern Layout::FramebufferLayout g_screenshot_framebuffer_layout;
-
 extern Memory::MemorySystem* g_memory;
 
-/// Initialize the video core
 void Init(Frontend::EmuWindow& emu_window, Memory::MemorySystem& memory);
 
-/// Shutdown the video core
 void Shutdown();
 
 /// Request a screenshot of the next frame

@@ -6,12 +6,12 @@
 
 #include <array>
 #include <bitset>
+#include <boost/container/static_vector.hpp>
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <boost/container/static_vector.hpp>
 #include "common/bit_field.h"
 #include "common/common_types.h"
 #include "core/hle/kernel/handle_table.h"
@@ -111,12 +111,13 @@ public:
 
 class Process final : public Object {
 public:
-    explicit Process(Kernel::KernelSystem& kernel);
+    explicit Process(KernelSystem& kernel);
     ~Process() override;
 
     std::string GetTypeName() const override {
         return "Process";
     }
+
     std::string GetName() const override {
         return codeset->name;
     }
@@ -129,25 +130,31 @@ public:
     HandleTable handle_table;
 
     std::shared_ptr<CodeSet> codeset;
+
     /// Resource limit descriptor for this process
     std::shared_ptr<ResourceLimit> resource_limit;
 
     /// The process may only call SVCs which have the corresponding bit set.
     std::bitset<0x80> svc_access_mask;
+
     /// Maximum size of the handle table for the process.
     unsigned int handle_table_size = 0x200;
+
     /// Special memory ranges mapped into this processes address space. This is used to give
     /// processes access to specific I/O regions and device memory.
     boost::container::static_vector<AddressMapping, 8> address_mappings;
     ProcessFlags flags;
+
     /// Kernel compatibility version for this process
     u16 kernel_version = 0;
-    /// The default CPU for this process, threads are scheduled on this cpu by default.
+
+    /// The default CPU for this process, threads are scheduled on this CPU by default.
     u8 ideal_processor = 0;
+
     /// Current status of the process
     ProcessStatus status;
 
-    /// The id of this process
+    /// The ID of this process
     u32 process_id;
 
     /**
@@ -166,7 +173,6 @@ public:
      */
     void Run(s32 main_thread_priority, u32 stack_size);
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
     // Memory Management
 
     VMManager vm_manager;

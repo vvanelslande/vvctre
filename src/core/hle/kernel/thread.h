@@ -56,7 +56,7 @@ enum class ThreadWakeupReason {
 
 class ThreadManager {
 public:
-    explicit ThreadManager(Kernel::KernelSystem& kernel, u32 core_id);
+    explicit ThreadManager(KernelSystem& kernel, u32 core_id);
     ~ThreadManager();
 
     /**
@@ -122,7 +122,7 @@ private:
      */
     void ThreadWakeupCallback(u64 thread_id, s64 cycles_late);
 
-    Kernel::KernelSystem& kernel;
+    KernelSystem& kernel;
     ARM_Interface* cpu;
 
     std::shared_ptr<Thread> current_thread;

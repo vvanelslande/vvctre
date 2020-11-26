@@ -73,11 +73,11 @@ std::shared_ptr<Thread> WaitObject::GetHighestPriorityReadyThread() const {
 }
 
 void WaitObject::WakeupAllWaitingThreads() {
-    while (std::shared_ptr<Kernel::Thread> thread = GetHighestPriorityReadyThread()) {
+    while (std::shared_ptr<Thread> thread = GetHighestPriorityReadyThread()) {
         if (!thread->IsSleepingOnWaitAll()) {
             Acquire(thread.get());
         } else {
-            for (std::shared_ptr<Kernel::WaitObject>& object : thread->wait_objects) {
+            for (std::shared_ptr<WaitObject>& object : thread->wait_objects) {
                 object->Acquire(thread.get());
             }
         }
@@ -87,7 +87,7 @@ void WaitObject::WakeupAllWaitingThreads() {
             thread->wakeup_callback(ThreadWakeupReason::Signal, thread, SharedFrom(this));
         }
 
-        for (std::shared_ptr<Kernel::WaitObject>& object : thread->wait_objects) {
+        for (std::shared_ptr<WaitObject>& object : thread->wait_objects) {
             object->RemoveWaitingThread(thread.get());
         }
         thread->wait_objects.clear();

@@ -9,23 +9,14 @@
 #include "common/common_types.h"
 #include "core/loader/loader.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Loader namespace
-
 namespace Loader {
 
-/// Loads an 3DSX file
 class AppLoader_THREEDSX final : public AppLoader {
 public:
     AppLoader_THREEDSX(FileUtil::IOFile&& file, const std::string& filename,
                        const std::string& filepath)
         : AppLoader(std::move(file)), filename(std::move(filename)), filepath(filepath) {}
 
-    /**
-     * Returns the type of the file
-     * @param file FileUtil::IOFile open file
-     * @return FileType found, or FileType::Unknown if this loader doesn't know it
-     */
     static FileType IdentifyType(FileUtil::IOFile& file);
 
     FileType GetFileType() override {

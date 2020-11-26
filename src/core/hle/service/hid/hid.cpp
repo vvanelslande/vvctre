@@ -224,11 +224,10 @@ void Module::UpdateAccelerometerCallback(std::uintptr_t user_data, s64 cycles_la
     Core::Movie::GetInstance().HandleAccelerometerStatus(accelerometer_entry);
 
     // Make up "raw" entry
-    // TODO(wwylele):
+    // TODO:
     // From hardware testing, the raw_entry values are approximately, but not exactly, as twice as
     // corresponding entries (or with a minus sign). It may caused by system calibration to the
-    // accelerometer. Figure out how it works, or, if no game reads raw_entry, the following three
-    // lines can be removed and leave raw_entry unimplemented.
+    // accelerometer. Figure out how it works.
     mem->accelerometer.raw_entry.x = -2 * accelerometer_entry.x;
     mem->accelerometer.raw_entry.z = 2 * accelerometer_entry.y;
     mem->accelerometer.raw_entry.y = -2 * accelerometer_entry.z;
