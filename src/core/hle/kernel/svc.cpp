@@ -902,19 +902,11 @@ ResultCode SVC::CreateThread(Handle* out_handle, u32 entry_point, u32 arg, VAddr
     }
 
     switch (processor_id) {
-    case ThreadProcessorIdAll:
-        LOG_INFO(Kernel_SVC,
-                 "Newly created thread is allowed to be run in any core, for now run in core 1.");
-        processor_id = ThreadProcessorId0;
-        break;
-    case ThreadProcessorId0:
+    case ThreadProcessorIdAny:
+        processor_id = ThreadProcessorId1;
         break;
     case ThreadProcessorId1:
-        if (!Settings::values.enable_core_2) {
-            LOG_WARNING(Kernel_SVC, "Newly created thread will run on core 1 because the core 2 is "
-                                    "disabled");
-            processor_id = 0;
-        }
+    case ThreadProcessorId2:
         break;
     default:
         ASSERT_MSG(false, "Unsupported thread processor ID: {}", processor_id);

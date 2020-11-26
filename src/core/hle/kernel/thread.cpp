@@ -293,8 +293,16 @@ ResultVal<std::shared_ptr<Thread>> KernelSystem::CreateThread(std::string name, 
         return ERR_OUT_OF_RANGE;
     }
 
-    if (processor_id > ThreadProcessorIdMax) {
-        LOG_ERROR(Kernel_SVC, "Invalid processor id: {}", processor_id);
+    if (processor_id == ThreadProcessorId2) {
+        if (!Settings::values.enable_core_2) {
+            LOG_WARNING(Kernel, "Thread will run on core 1 because the core 2 is "
+                                "disabled");
+            processor_id = 0;
+        }
+    }
+
+    if (processor_id > ThreadProcessorId2) {
+        LOG_ERROR(Kernel_SVC, "Invalid processor ID: {}", processor_id);
         return ERR_OUT_OF_RANGE_KERNEL;
     }
 
