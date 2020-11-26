@@ -11,10 +11,10 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
-#include <map>
-#include <numeric>
 #include <fcntl.h>
 #include <fmt/format.h>
+#include <map>
+#include <numeric>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -149,9 +149,9 @@ WSADATA InitData;
 
 struct Breakpoint {
     bool active;
-    VAddr addr;
-    u32 len;
-    std::array<u8, 4> inst;
+    VAddr address;
+    u32 length;
+    std::array<u8, 4> instruction;
 };
 
 using BreakpointMap = std::map<VAddr, Breakpoint>;
@@ -161,10 +161,15 @@ BreakpointMap breakpoints_write;
 } // Anonymous namespace
 
 static Kernel::Thread* FindThreadById(int id) {
-    const auto& threads = Core::System::GetInstance().Kernel().GetThreadManager().GetThreadList();
-    for (auto& thread : threads) {
-        if (thread->GetThreadId() == static_cast<u32>(id)) {
-            return thread.get();
+    Core::System& system = Core::System::GetInstance();
+    Kernel::KernelSystem& kernel = system.Kernel();
+    u32 num_cores = system.GetNumCores();
+    for (u32 i = 0; i < num_cores; ++i) {
+        const auto& threads = kernel.GetThreadManager(i).GetThreadList();
+        for (auto& thread : threads) {
+            if (thread->GetThreadId() == static_cast<u32>(id)) {
+                return thread.get();
+            }
         }
     }
     return nullptr;
@@ -398,32 +403,35 @@ static BreakpointMap& GetBreakpointMap(BreakpointType type) {
  * Remove the breakpoint from the given address of the specified type.
  *
  * @param type Type of breakpoint.
- * @param addr Address of breakpoint.
+ * @param address Address of breakpoint.
  */
-static void RemoveBreakpoint(BreakpointType type, VAddr addr) {
+static void RemoveBreakpoint(BreakpointType type, VAddr address) {
     BreakpointMap& p = GetBreakpointMap(type);
 
-    const auto bp = p.find(addr);
+    const auto bp = p.find(address);
     if (bp == p.end()) {
         return;
     }
 
     LOG_DEBUG(Debug_GDBStub, "gdb: removed a breakpoint: {:08x} bytes at {:08x} of type {}",
-              bp->second.len, bp->second.addr, static_cast<int>(type));
+              bp->second.length, bp->second.address, static_cast<int>(type));
 
     if (type == BreakpointType::Execute) {
         Core::System& system = Core::System::GetInstance();
-        system.Memory().WriteBlock(*system.Kernel().GetCurrentProcess(), bp->second.addr,
-                                   bp->second.inst.data(), bp->second.inst.size());
-        system.CPU().ClearInstructionCache();
+        system.Memory().WriteBlock(*system.Kernel().GetCurrentProcess(), bp->second.address,
+                                   bp->second.instruction.data(), bp->second.instruction.size());
+        u32 num_cores = system.GetNumCores();
+        for (u32 i = 0; i < num_cores; ++i) {
+            system.GetCore(i).ClearInstructionCache();
+        }
     }
 
-    p.erase(addr);
+    p.erase(address);
 }
 
-BreakpointAddress GetNextBreakpointFromAddress(VAddr addr, BreakpointType type) {
+BreakpointAddress GetNextBreakpointFromAddress(VAddr address, BreakpointType type) {
     const BreakpointMap& p = GetBreakpointMap(type);
-    const auto next_breakpoint = p.lower_bound(addr);
+    const auto next_breakpoint = p.lower_bound(address);
     BreakpointAddress breakpoint;
 
     if (next_breakpoint != p.end()) {
@@ -437,19 +445,19 @@ BreakpointAddress GetNextBreakpointFromAddress(VAddr addr, BreakpointType type) 
     return breakpoint;
 }
 
-bool CheckBreakpoint(VAddr addr, BreakpointType type) {
+bool CheckBreakpoint(VAddr address, BreakpointType type) {
     if (!IsConnected()) {
         return false;
     }
 
     const BreakpointMap& p = GetBreakpointMap(type);
-    const auto bp = p.find(addr);
+    const auto bp = p.find(address);
 
     if (bp == p.end()) {
         return false;
     }
 
-    u32 len = bp->second.len;
+    u32 length = bp->second.length;
 
     // IDA Pro defaults to 4-byte breakpoints for all non-hardware breakpoints
     // no matter if it's a 4-byte or 2-byte instruction. When you execute a
@@ -460,14 +468,16 @@ bool CheckBreakpoint(VAddr addr, BreakpointType type) {
     // breakpoint to 1. This should be fine since the CPU should never begin executing
     // an instruction anywhere except the beginning of the instruction.
     if (type == BreakpointType::Execute) {
-        len = 1;
+        length = 1;
     }
 
-    if (bp->second.active && (addr >= bp->second.addr && addr < bp->second.addr + len)) {
+    if (bp->second.active &&
+        (address >= bp->second.address && address < bp->second.address + length)) {
         LOG_DEBUG(Debug_GDBStub,
                   "Found breakpoint type {} @ {:08x}, range: {:08x}"
                   " - {:08x} ({:x} bytes)",
-                  static_cast<int>(type), addr, bp->second.addr, bp->second.addr + len, len);
+                  static_cast<int>(type), address, bp->second.address, bp->second.address + length,
+                  length);
         return true;
     }
 
@@ -542,10 +552,14 @@ static void HandleQuery() {
         SendReply(target_xml);
     } else if (strncmp(query, "fThreadInfo", strlen("fThreadInfo")) == 0) {
         std::string val = "m";
-        const auto& threads =
-            Core::System::GetInstance().Kernel().GetThreadManager().GetThreadList();
-        for (const auto& thread : threads) {
-            val += fmt::format("{:x},", thread->GetThreadId());
+        Core::System& system = Core::System::GetInstance();
+        Kernel::KernelSystem& kernel = system.Kernel();
+        u32 num_cores = system.GetNumCores();
+        for (u32 i = 0; i < num_cores; ++i) {
+            const auto& threads = kernel.GetThreadManager(i).GetThreadList();
+            for (const auto& thread : threads) {
+                val += fmt::format("{:x},", thread->GetThreadId());
+            }
         }
         val.pop_back();
         SendReply(val.c_str());
@@ -555,11 +569,15 @@ static void HandleQuery() {
         std::string buffer;
         buffer += "l<?xml version=\"1.0\"?>";
         buffer += "<threads>";
-        const auto& threads =
-            Core::System::GetInstance().GetInstance().Kernel().GetThreadManager().GetThreadList();
-        for (const auto& thread : threads) {
-            buffer += fmt::format(R"*(<thread id="{:x}" name="Thread {:x}"></thread>)*",
-                                  thread->GetThreadId(), thread->GetThreadId());
+        Core::System& system = Core::System::GetInstance();
+        Kernel::KernelSystem& kernel = system.Kernel();
+        const u32 num_cores = system.GetNumCores();
+        for (u32 i = 0; i < num_cores; ++i) {
+            const auto& threads = kernel.GetThreadManager(i).GetThreadList();
+            for (const auto& thread : threads) {
+                buffer += fmt::format(R"*(<thread id="{:x}" name="Thread {:x}"></thread>)*",
+                                      thread->GetThreadId(), thread->GetThreadId());
+            }
         }
         buffer += "</threads>";
         SendReply(buffer.c_str());
@@ -618,11 +636,11 @@ static void SendSignal(Kernel::Thread* thread, u32 signal, bool full = true) {
 
     std::string buffer;
     if (full) {
-        ARM_Interface& cpu = Core::System::GetInstance().CPU();
+        ARM_Interface& running_core = Core::System::GetInstance().GetRunningCore();
         buffer = fmt::format("T{:02x}{:02x}:{:08x};{:02x}:{:08x};{:02x}:{:08x}", latest_signal,
-                             PC_REGISTER, htonl(cpu.GetPC()), SP_REGISTER,
-                             htonl(cpu.GetReg(SP_REGISTER)), LR_REGISTER,
-                             htonl(cpu.GetReg(LR_REGISTER)));
+                             PC_REGISTER, htonl(running_core.GetPC()), SP_REGISTER,
+                             htonl(running_core.GetReg(SP_REGISTER)), LR_REGISTER,
+                             htonl(running_core.GetReg(LR_REGISTER)));
     } else {
         buffer = fmt::format("T{:02x}", latest_signal);
     }
@@ -783,7 +801,7 @@ static void WriteRegister() {
         return SendReply("E01");
     }
 
-    Core::System::GetInstance().CPU().LoadContext(current_thread->context);
+    Core::System::GetInstance().GetRunningCore().LoadContext(current_thread->context);
 
     SendReply("OK");
 }
@@ -814,7 +832,7 @@ static void WriteRegisters() {
         }
     }
 
-    Core::System::GetInstance().CPU().LoadContext(current_thread->context);
+    Core::System::GetInstance().GetRunningCore().LoadContext(current_thread->context);
 
     SendReply("OK");
 }
@@ -824,56 +842,56 @@ static void ReadMemory() {
     static u8 reply[GDB_BUFFER_SIZE - 4];
 
     auto start_offset = command_buffer + 1;
-    auto addr_pos = std::find(start_offset, command_buffer + command_length, ',');
-    VAddr addr = HexToInt(start_offset, static_cast<u32>(addr_pos - start_offset));
+    auto address_position = std::find(start_offset, command_buffer + command_length, ',');
+    VAddr address = HexToInt(start_offset, static_cast<u32>(address_position - start_offset));
 
-    start_offset = addr_pos + 1;
-    u32 len =
+    start_offset = address_position + 1;
+    u32 length =
         HexToInt(start_offset, static_cast<u32>((command_buffer + command_length) - start_offset));
 
-    LOG_DEBUG(Debug_GDBStub, "gdb: addr: {:08x} len: {:08x}\n", addr, len);
+    LOG_DEBUG(Debug_GDBStub, "gdb: address: {:08x} len: {:08x}\n", address, length);
 
-    if (len * 2 > sizeof(reply)) {
+    if (length * 2 > sizeof(reply)) {
         SendReply("E01");
     }
 
-    if (!Memory::IsValidVirtualAddress(*Core::System::GetInstance().Kernel().GetCurrentProcess(),
-                                       addr)) {
+    Core::System& system = Core::System::GetInstance();
+    Kernel::KernelSystem& kernel = system.Kernel();
+
+    if (!Memory::IsValidVirtualAddress(*kernel.GetCurrentProcess(), address)) {
         return SendReply("E00");
     }
 
-    std::vector<u8> data(len);
-    Core::System::GetInstance().Memory().ReadBlock(
-        *Core::System::GetInstance().Kernel().GetCurrentProcess(), addr, data.data(), len);
+    std::vector<u8> data(length);
+    system.Memory().ReadBlock(*kernel.GetCurrentProcess(), address, data.data(), length);
 
-    MemToGdbHex(reply, data.data(), len);
-    reply[len * 2] = '\0';
+    MemToGdbHex(reply, data.data(), length);
+    reply[length * 2] = '\0';
     SendReply(reinterpret_cast<char*>(reply));
 }
 
 /// Modify location in memory with data received from the gdb client.
 static void WriteMemory() {
     auto start_offset = command_buffer + 1;
-    auto addr_pos = std::find(start_offset, command_buffer + command_length, ',');
-    VAddr addr = HexToInt(start_offset, static_cast<u32>(addr_pos - start_offset));
+    auto address_position = std::find(start_offset, command_buffer + command_length, ',');
+    VAddr address = HexToInt(start_offset, static_cast<u32>(address_position - start_offset));
 
-    start_offset = addr_pos + 1;
-    auto len_pos = std::find(start_offset, command_buffer + command_length, ':');
-    u32 len = HexToInt(start_offset, static_cast<u32>(len_pos - start_offset));
+    start_offset = address_position + 1;
+    auto length_position = std::find(start_offset, command_buffer + command_length, ':');
+    u32 length = HexToInt(start_offset, static_cast<u32>(length_position - start_offset));
 
     Core::System& system = Core::System::GetInstance();
+    Kernel::Process& current_process = *system.Kernel().GetCurrentProcess();
 
-    if (!Memory::IsValidVirtualAddress(*system.Kernel().GetCurrentProcess(), addr)) {
+    if (!Memory::IsValidVirtualAddress(*system.Kernel().GetCurrentProcess(), address)) {
         return SendReply("E00");
     }
 
-    std::vector<u8> data(len);
+    std::vector<u8> data(length);
 
-    GdbHexToMem(data.data(), len_pos + 1, len);
-
-    system.Memory().WriteBlock(*system.Kernel().GetCurrentProcess(), addr, data.data(), len);
-    system.CPU().ClearInstructionCache();
-
+    GdbHexToMem(data.data(), length_position + 1, length);
+    system.Memory().WriteBlock(current_process, address, data.data(), length);
+    system.GetRunningCore().ClearInstructionCache();
     SendReply("OK");
 }
 
@@ -885,18 +903,17 @@ void Break(bool is_memory_break) {
 
 /// Tell the CPU that it should perform a single step.
 static void Step() {
-    ARM_Interface& cpu = Core::System::GetInstance().CPU();
+    ARM_Interface& running_core = Core::System::GetInstance().GetRunningCore();
 
     if (command_length > 1) {
         RegWrite(PC_REGISTER, GdbHexToInt(command_buffer + 1), current_thread);
-        cpu.LoadContext(current_thread->context);
+        running_core.LoadContext(current_thread->context);
     }
 
     step_loop = true;
     halt_loop = true;
     send_trap = true;
-
-    cpu.ClearInstructionCache();
+    running_core.ClearInstructionCache();
 }
 
 bool IsMemoryBreak() {
@@ -912,39 +929,38 @@ static void Continue() {
     memory_break = false;
     step_loop = false;
     halt_loop = false;
-
-    Core::System::GetInstance().CPU().ClearInstructionCache();
+    Core::System::GetInstance().GetRunningCore().ClearInstructionCache();
 }
 
 /**
  * Commit breakpoint to list of breakpoints.
  *
  * @param type Type of breakpoint.
- * @param addr Address of breakpoint.
- * @param len Length of breakpoint.
+ * @param address Address of breakpoint.
+ * @param length Length of breakpoint.
  */
-static bool CommitBreakpoint(BreakpointType type, VAddr addr, u32 len) {
+static bool CommitBreakpoint(BreakpointType type, VAddr address, u32 length) {
     BreakpointMap& p = GetBreakpointMap(type);
 
     Breakpoint breakpoint;
     breakpoint.active = true;
-    breakpoint.addr = addr;
-    breakpoint.len = len;
-    Core::System::GetInstance().Memory().ReadBlock(
-        *Core::System::GetInstance().Kernel().GetCurrentProcess(), addr, breakpoint.inst.data(),
-        breakpoint.inst.size());
+    breakpoint.address = address;
+    breakpoint.length = length;
+    Core::System& system = Core::System::GetInstance();
+    Memory::MemorySystem& memory = system.Memory();
+    Kernel::Process& current_process = *system.Kernel().GetCurrentProcess();
+    memory.ReadBlock(current_process, address, breakpoint.instruction.data(),
+                     breakpoint.instruction.size());
 
     static constexpr std::array<u8, 4> btrap{0x70, 0x00, 0x20, 0xe1};
     if (type == BreakpointType::Execute) {
-        Core::System& system = Core::System::GetInstance();
-        system.Memory().WriteBlock(*system.Kernel().GetCurrentProcess(), addr, btrap.data(),
-                                   btrap.size());
-        system.CPU().ClearInstructionCache();
+        memory.WriteBlock(current_process, address, btrap.data(), btrap.size());
+        system.GetRunningCore().ClearInstructionCache();
     }
-    p.insert({addr, breakpoint});
+    p.insert({address, breakpoint});
 
     LOG_DEBUG(Debug_GDBStub, "gdb: added {} breakpoint: {:08x} bytes at {:08x}\n",
-              static_cast<int>(type), breakpoint.len, breakpoint.addr);
+              static_cast<int>(type), breakpoint.length, breakpoint.address);
 
     return true;
 }
@@ -973,25 +989,25 @@ static void AddBreakpoint() {
     }
 
     auto start_offset = command_buffer + 3;
-    auto addr_pos = std::find(start_offset, command_buffer + command_length, ',');
-    VAddr addr = HexToInt(start_offset, static_cast<u32>(addr_pos - start_offset));
+    auto address_position = std::find(start_offset, command_buffer + command_length, ',');
+    VAddr address = HexToInt(start_offset, static_cast<u32>(address_position - start_offset));
 
-    start_offset = addr_pos + 1;
-    u32 len =
+    start_offset = address_position + 1;
+    u32 length =
         HexToInt(start_offset, static_cast<u32>((command_buffer + command_length) - start_offset));
 
     if (type == BreakpointType::Access) {
         // Access is made up of Read and Write types, so add both breakpoints
         type = BreakpointType::Read;
 
-        if (!CommitBreakpoint(type, addr, len)) {
+        if (!CommitBreakpoint(type, address, length)) {
             return SendReply("E02");
         }
 
         type = BreakpointType::Write;
     }
 
-    if (!CommitBreakpoint(type, addr, len)) {
+    if (!CommitBreakpoint(type, address, length)) {
         return SendReply("E02");
     }
 
@@ -1022,18 +1038,18 @@ static void RemoveBreakpoint() {
     }
 
     auto start_offset = command_buffer + 3;
-    auto addr_pos = std::find(start_offset, command_buffer + command_length, ',');
-    VAddr addr = HexToInt(start_offset, static_cast<u32>(addr_pos - start_offset));
+    auto address_position = std::find(start_offset, command_buffer + command_length, ',');
+    VAddr address = HexToInt(start_offset, static_cast<u32>(address_position - start_offset));
 
     if (type == BreakpointType::Access) {
         // Access is made up of Read and Write types, so add both breakpoints
         type = BreakpointType::Read;
-        RemoveBreakpoint(type, addr);
+        RemoveBreakpoint(type, address);
 
         type = BreakpointType::Write;
     }
 
-    RemoveBreakpoint(type, addr);
+    RemoveBreakpoint(type, address);
     SendReply("OK");
 }
 
@@ -1119,7 +1135,7 @@ void ToggleServer(bool status) {
         server_enabled = status;
 
         // Start server
-        if (!IsConnected() && Core::System::GetInstance().IsPoweredOn()) {
+        if (!IsConnected() && Core::System::GetInstance().IsInitialized()) {
             Init();
         }
     } else {
@@ -1165,34 +1181,35 @@ static void Init(u16 port) {
     WSAStartup(MAKEWORD(2, 2), &InitData);
 #endif
 
-    int tmpsock = static_cast<int>(socket(PF_INET, SOCK_STREAM, 0));
-    if (tmpsock == -1) {
+    int temporary_socket = static_cast<int>(socket(PF_INET, SOCK_STREAM, 0));
+    if (temporary_socket == -1) {
         LOG_ERROR(Debug_GDBStub, "Failed to create gdb socket");
     }
 
     // Set socket to SO_REUSEADDR so it can always bind on the same port
     int reuse_enabled = 1;
-    if (setsockopt(tmpsock, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse_enabled,
+    if (setsockopt(temporary_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse_enabled,
                    sizeof(reuse_enabled)) < 0) {
         LOG_ERROR(Debug_GDBStub, "Failed to set gdb socket option");
     }
 
-    const sockaddr* server_addr = reinterpret_cast<const sockaddr*>(&saddr_server);
-    socklen_t server_addrlen = sizeof(saddr_server);
-    if (bind(tmpsock, server_addr, server_addrlen) < 0) {
+    const sockaddr* server_address = reinterpret_cast<const sockaddr*>(&saddr_server);
+    socklen_t server_address_length = sizeof(saddr_server);
+    if (bind(temporary_socket, server_address, server_address_length) < 0) {
         LOG_ERROR(Debug_GDBStub, "Failed to bind gdb socket");
     }
 
-    if (listen(tmpsock, 1) < 0) {
+    if (listen(temporary_socket, 1) < 0) {
         LOG_ERROR(Debug_GDBStub, "Failed to listen to gdb socket");
     }
 
     // Wait for gdb to connect
     LOG_INFO(Debug_GDBStub, "Waiting for gdb to connect...\n");
-    sockaddr_in saddr_client;
-    sockaddr* client_addr = reinterpret_cast<sockaddr*>(&saddr_client);
-    socklen_t client_addrlen = sizeof(saddr_client);
-    gdbserver_socket = static_cast<int>(accept(tmpsock, client_addr, &client_addrlen));
+    sockaddr_in client_address_;
+    sockaddr* client_address = reinterpret_cast<sockaddr*>(&client_address_);
+    socklen_t client_address_length = sizeof(client_address_);
+    gdbserver_socket =
+        static_cast<int>(accept(temporary_socket, client_address, &client_address_length));
     if (gdbserver_socket < 0) {
         // In the case that we couldn't start the server for whatever reason, just start CPU
         // execution like normal.
@@ -1202,12 +1219,12 @@ static void Init(u16 port) {
         LOG_ERROR(Debug_GDBStub, "Failed to accept gdb client");
     } else {
         LOG_INFO(Debug_GDBStub, "Client connected.\n");
-        saddr_client.sin_addr.s_addr = ntohl(saddr_client.sin_addr.s_addr);
+        client_address_.sin_addr.s_addr = ntohl(client_address_.sin_addr.s_addr);
     }
 
     // Clean up temporary socket if it's still alive at this point.
-    if (tmpsock != -1) {
-        shutdown(tmpsock, SHUT_RDWR);
+    if (temporary_socket != -1) {
+        shutdown(temporary_socket, SHUT_RDWR);
     }
 }
 

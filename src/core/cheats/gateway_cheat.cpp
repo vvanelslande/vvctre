@@ -35,11 +35,8 @@ static inline std::enable_if_t<std::is_integral_v<T>> WriteOp(const GatewayCheat
                                                               WriteFunction write_func,
                                                               Core::System& system) {
     u32 addr = line.address + state.offset;
-    T val = read_func(addr);
-    if (val != static_cast<T>(line.value)) {
-        write_func(addr, static_cast<T>(line.value));
-        system.CPU().InvalidateCacheRange(addr, sizeof(T));
-    }
+    write_func(addr, static_cast<T>(line.value));
+    system.InvalidateCacheRange(addr, sizeof(T));
 }
 
 template <typename T, typename ReadFunction, typename CompareFunc>
@@ -108,11 +105,8 @@ static inline std::enable_if_t<std::is_integral_v<T>> IncrementiveWriteOp(
     const GatewayCheat::CheatLine& line, State& state, ReadFunction read_func,
     WriteFunction write_func, Core::System& system) {
     u32 addr = line.value + state.offset;
-    T val = read_func(addr);
-    if (val != static_cast<T>(state.reg)) {
-        write_func(addr, static_cast<T>(state.reg));
-        system.CPU().InvalidateCacheRange(addr, sizeof(T));
-    }
+    write_func(addr, static_cast<T>(state.reg));
+    system.InvalidateCacheRange(addr, sizeof(T));
     state.offset += sizeof(T);
 }
 
@@ -150,7 +144,8 @@ static inline void PatchOp(const GatewayCheat::CheatLine& line, State& state, Co
     }
     u32 num_bytes = line.value;
     u32 addr = line.address + state.offset;
-    system.CPU().InvalidateCacheRange(addr, num_bytes);
+    system.InvalidateCacheRange(addr, num_bytes);
+
     bool first = true;
     u32 bit_offset = 0;
     if (num_bytes > 0)

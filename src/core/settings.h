@@ -130,6 +130,7 @@ struct Values {
 
     // General
     bool use_cpu_jit = true;
+    bool enable_core_2 = false;
     bool limit_speed = true;
     u16 speed_limit = 100;
     bool use_custom_cpu_ticks = false;
@@ -269,9 +270,6 @@ struct Values {
         {"PDN", false},
         {"SPI", false},
     };
-
-    // Hacks
-    bool enable_priority_boost = true;
 
     // Multiplayer
     std::string multiplayer_ip = "127.0.0.1";

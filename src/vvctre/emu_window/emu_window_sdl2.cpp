@@ -1079,8 +1079,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                             for (const auto& title : all_installed) {
                                 const auto [path, name] = title;
 
-                                if (Common::ToLower(name).find(Common::ToLower(installed_search_text)) !=
-                                    std::string::npos) {
+                                if (Common::ToLower(name).find(Common::ToLower(
+                                        installed_search_text)) != std::string::npos) {
                                     installed_search_results.push_back(title);
                                 }
                             }
@@ -1220,7 +1220,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::EndPopup();
                         }
 
-                        glClearColor(Settings::values.background_color_red, Settings::values.background_color_green,
+                        glClearColor(Settings::values.background_color_red,
+                                     Settings::values.background_color_green,
                                      Settings::values.background_color_blue, 0.0f);
                         glClear(GL_COLOR_BUFFER_BIT);
                         ImGui::Render();
@@ -1420,6 +1421,26 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                     ImGui::PushTextWrapPos();
                     ImGui::TextUnformatted("If you enable or disable the CPU JIT, emulation will "
+                                           "restart when the menu is closed.");
+                    ImGui::PopTextWrapPos();
+
+                    ImGui::NewLine();
+
+                    if (ImGui::Checkbox("Enable Core 2", &Settings::values.enable_core_2)) {
+                        request_reset = true;
+                    }
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
+                        ImGui::TextUnformatted("This is needed to play some games (including "
+                                               "Donkey Kong Country Returns 3D, Sonic Boom: Fire & "
+                                               "Ice, and Sonic Boom: Shattered Crystal)");
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
+
+                    ImGui::PushTextWrapPos();
+                    ImGui::TextUnformatted("If you enable or disable the core 2, emulation will "
                                            "restart when the menu is closed.");
                     ImGui::PopTextWrapPos();
 
@@ -3130,8 +3151,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                             if (ImGui::IsItemHovered()) {
                                 ImGui::BeginTooltip();
                                 ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
-                                ImGui::TextUnformatted(
-                                    "If you change this, emulation will restart when the menu is closed");
+                                ImGui::TextUnformatted("If you change this, emulation will restart "
+                                                       "when the menu is closed");
                                 ImGui::PopTextWrapPos();
                                 ImGui::EndTooltip();
                             }
@@ -3308,21 +3329,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                             request_reset = true;
                         }
                     }
-
-                    ImGui::EndMenu();
-                }
-
-                if (ImGui::BeginMenu("Hacks")) {
-                    if (ImGui::Checkbox("Priority Boost",
-                                        &Settings::values.enable_priority_boost)) {
-                        request_reset = true;
-                    }
-
-                    ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
-                    ImGui::TextUnformatted(
-                        "If you enable or disable Priority Boost, emulation will "
-                        "restart when the menu is closed.");
-                    ImGui::PopTextWrapPos();
 
                     ImGui::EndMenu();
                 }
@@ -3649,13 +3655,15 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::MenuItem("Reset HLE Wireless Reboot Information")) {
-                    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(system)) {
+                    if (std::shared_ptr<Service::APT::Module> apt =
+                            Service::APT::GetModule(system)) {
                         apt->SetWirelessRebootInfo(std::vector<u8>{});
                     }
                 }
 
                 if (ImGui::MenuItem("Reset HLE Delivery Argument")) {
-                    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(system)) {
+                    if (std::shared_ptr<Service::APT::Module> apt =
+                            Service::APT::GetModule(system)) {
                         apt->GetAppletManager()->SetDeliverArg(std::nullopt);
                     }
                 }
@@ -4076,8 +4084,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 const CitraRoomList& rooms = public_rooms_search_text.empty()
-                                             ? all_public_rooms
-                                             : public_rooms_search_results;
+                                                 ? all_public_rooms
+                                                 : public_rooms_search_results;
 
                 ImGuiListClipper clipper;
                 clipper.Begin(rooms.size());

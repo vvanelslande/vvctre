@@ -41,7 +41,7 @@ void Apply() {
     VideoCore::g_texture_filter_update_requested = true;
 
     Core::System& system = Core::System::GetInstance();
-    if (system.IsPoweredOn()) {
+    if (system.IsInitialized()) {
         AudioCore::DspInterface& dsp = system.DSP();
         dsp.SetSink(values.audio_sink_id, values.audio_device_id);
         dsp.EnableStretching(values.enable_audio_stretching);

@@ -117,24 +117,25 @@ public:
      */
     ResultStatus Load(Frontend::EmuWindow& emu_window, const std::string& filepath);
 
-    /**
-     * Indicates if the emulated system is powered on (all subsystems initialized and able to run an
-     * application).
-     * @returns True if the emulated system is powered on, otherwise false.
-     */
-    bool IsPoweredOn() const {
-        return cpu_core != nullptr;
-    }
-
-    /// Prepare the core emulation for a reschedule
+    bool IsInitialized() const;
     void PrepareReschedule();
 
-    /**
-     * Gets a reference to the emulated CPU.
-     * @returns A reference to the emulated CPU.
-     */
-    ARM_Interface& CPU() {
-        return *cpu_core;
+    ARM_Interface& GetRunningCore() {
+        return *running_core;
+    }
+
+    ARM_Interface& GetCore(u32 core_id) {
+        return *cpu_cores[core_id];
+    }
+
+    u32 GetNumCores() const {
+        return cpu_cores.size();
+    }
+
+    void InvalidateCacheRange(u32 start_address, std::size_t length) {
+        for (const auto& cpu : cpu_cores) {
+            cpu->InvalidateCacheRange(start_address, length);
+        }
     }
 
     /**
@@ -218,7 +219,6 @@ public:
         return registered_swkbd;
     }
 
-
     void SetBeforeLoadingAfterFirstTime(std::function<void()> function);
     void SetEmulationStartingAfterFirstTime(std::function<void()> function);
     void SetOnLoadFailed(std::function<void(ResultStatus)> function);
@@ -244,7 +244,8 @@ private:
     std::unique_ptr<Loader::AppLoader> app_loader;
 
     /// ARM11 CPU core
-    std::shared_ptr<ARM_Interface> cpu_core;
+    std::vector<std::shared_ptr<ARM_Interface>> cpu_cores;
+    ARM_Interface* running_core = nullptr;
 
     /// DSP core
     std::shared_ptr<AudioCore::DspInterface> dsp_core;
@@ -275,6 +276,8 @@ private:
     std::shared_ptr<Network::RoomMember> room_member;
 
     static System s_instance;
+
+    bool powered_on = false;
 
     ResultStatus status = ResultStatus::Success;
 

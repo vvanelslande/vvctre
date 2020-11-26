@@ -397,7 +397,7 @@ bool vvctre_get_paused(void* plugin_manager) {
 }
 
 bool vvctre_emulation_running(void* core) {
-    return static_cast<Core::System*>(core)->IsPoweredOn();
+    return static_cast<Core::System*>(core)->IsInitialized();
 }
 
 // Memory
@@ -434,51 +434,147 @@ void vvctre_write_u64(void* core, VAddr address, u64 value) {
 }
 
 void vvctre_invalidate_cache_range(void* core, u32 address, std::size_t length) {
-    static_cast<Core::System*>(core)->CPU().InvalidateCacheRange(address, length);
+    static_cast<Core::System*>(core)->GetRunningCore().InvalidateCacheRange(address, length);
+}
+
+void vvctre_invalidate_core_1_cache_range(void* core, u32 address, std::size_t length) {
+    static_cast<Core::System*>(core)->GetCore(0).InvalidateCacheRange(address, length);
+}
+
+void vvctre_invalidate_core_2_cache_range(void* core, u32 address, std::size_t length) {
+    static_cast<Core::System*>(core)->GetCore(1).InvalidateCacheRange(address, length);
 }
 
 // Debugging
 void vvctre_set_pc(void* core, u32 addr) {
-    static_cast<Core::System*>(core)->CPU().SetPC(addr);
+    static_cast<Core::System*>(core)->GetRunningCore().SetPC(addr);
+}
+
+void vvctre_set_core_1_pc(void* core, u32 addr) {
+    static_cast<Core::System*>(core)->GetCore(0).SetPC(addr);
+}
+
+void vvctre_set_core_2_pc(void* core, u32 addr) {
+    static_cast<Core::System*>(core)->GetCore(1).SetPC(addr);
 }
 
 u32 vvctre_get_pc(void* core) {
-    return static_cast<Core::System*>(core)->CPU().GetPC();
+    return static_cast<Core::System*>(core)->GetRunningCore().GetPC();
+}
+
+u32 vvctre_get_core_1_pc(void* core) {
+    return static_cast<Core::System*>(core)->GetCore(0).GetPC();
+}
+
+u32 vvctre_get_core_2_pc(void* core) {
+    return static_cast<Core::System*>(core)->GetCore(1).GetPC();
 }
 
 void vvctre_set_register(void* core, int index, u32 value) {
-    static_cast<Core::System*>(core)->CPU().SetReg(index, value);
+    static_cast<Core::System*>(core)->GetRunningCore().SetReg(index, value);
+}
+
+void vvctre_set_core_1_register(void* core, int index, u32 value) {
+    static_cast<Core::System*>(core)->GetCore(0).SetReg(index, value);
+}
+
+void vvctre_set_core_2_register(void* core, int index, u32 value) {
+    static_cast<Core::System*>(core)->GetCore(1).SetReg(index, value);
 }
 
 u32 vvctre_get_register(void* core, int index) {
-    return static_cast<Core::System*>(core)->CPU().GetReg(index);
+    return static_cast<Core::System*>(core)->GetRunningCore().GetReg(index);
+}
+
+u32 vvctre_get_core_1_register(void* core, int index) {
+    return static_cast<Core::System*>(core)->GetCore(0).GetReg(index);
+}
+
+u32 vvctre_get_core_2_register(void* core, int index) {
+    return static_cast<Core::System*>(core)->GetCore(1).GetReg(index);
 }
 
 void vvctre_set_vfp_register(void* core, int index, u32 value) {
-    static_cast<Core::System*>(core)->CPU().SetVFPReg(index, value);
+    static_cast<Core::System*>(core)->GetRunningCore().SetVFPReg(index, value);
+}
+
+void vvctre_set_core_1_vfp_register(void* core, int index, u32 value) {
+    static_cast<Core::System*>(core)->GetCore(0).SetVFPReg(index, value);
+}
+
+void vvctre_set_core_2_vfp_register(void* core, int index, u32 value) {
+    static_cast<Core::System*>(core)->GetCore(1).SetVFPReg(index, value);
 }
 
 u32 vvctre_get_vfp_register(void* core, int index) {
-    return static_cast<Core::System*>(core)->CPU().GetVFPReg(index);
+    return static_cast<Core::System*>(core)->GetRunningCore().GetVFPReg(index);
+}
+
+u32 vvctre_get_core_1_vfp_register(void* core, int index) {
+    return static_cast<Core::System*>(core)->GetCore(0).GetVFPReg(index);
+}
+
+u32 vvctre_get_core_2_vfp_register(void* core, int index) {
+    return static_cast<Core::System*>(core)->GetCore(1).GetVFPReg(index);
 }
 
 void vvctre_set_vfp_system_register(void* core, int index, u32 value) {
-    static_cast<Core::System*>(core)->CPU().SetVFPSystemReg(static_cast<VFPSystemRegister>(index),
-                                                            value);
+    static_cast<Core::System*>(core)->GetRunningCore().SetVFPSystemReg(
+        static_cast<VFPSystemRegister>(index), value);
+}
+
+void vvctre_set_core_1_vfp_system_register(void* core, int index, u32 value) {
+    static_cast<Core::System*>(core)->GetCore(0).SetVFPSystemReg(
+        static_cast<VFPSystemRegister>(index), value);
+}
+
+void vvctre_set_core_2_vfp_system_register(void* core, int index, u32 value) {
+    static_cast<Core::System*>(core)->GetCore(1).SetVFPSystemReg(
+        static_cast<VFPSystemRegister>(index), value);
 }
 
 u32 vvctre_get_vfp_system_register(void* core, int index) {
-    return static_cast<Core::System*>(core)->CPU().GetVFPSystemReg(
+    return static_cast<Core::System*>(core)->GetRunningCore().GetVFPSystemReg(
+        static_cast<VFPSystemRegister>(index));
+}
+
+u32 vvctre_get_core_1_vfp_system_register(void* core, int index) {
+    return static_cast<Core::System*>(core)->GetCore(0).GetVFPSystemReg(
+        static_cast<VFPSystemRegister>(index));
+}
+
+u32 vvctre_get_core_2_vfp_system_register(void* core, int index) {
+    return static_cast<Core::System*>(core)->GetCore(1).GetVFPSystemReg(
         static_cast<VFPSystemRegister>(index));
 }
 
 void vvctre_set_cp15_register(void* core, int index, u32 value) {
-    static_cast<Core::System*>(core)->CPU().SetCP15Register(static_cast<CP15Register>(index),
-                                                            value);
+    static_cast<Core::System*>(core)->GetRunningCore().SetCP15Register(
+        static_cast<CP15Register>(index), value);
+}
+
+void vvctre_set_core_1_cp15_register(void* core, int index, u32 value) {
+    static_cast<Core::System*>(core)->GetCore(0).SetCP15Register(static_cast<CP15Register>(index),
+                                                                 value);
+}
+
+void vvctre_set_core_2_cp15_register(void* core, int index, u32 value) {
+    static_cast<Core::System*>(core)->GetCore(1).SetCP15Register(static_cast<CP15Register>(index),
+                                                                 value);
 }
 
 u32 vvctre_get_cp15_register(void* core, int index) {
-    return static_cast<Core::System*>(core)->CPU().GetCP15Register(
+    return static_cast<Core::System*>(core)->GetRunningCore().GetCP15Register(
+        static_cast<CP15Register>(index));
+}
+
+u32 vvctre_get_core_1_cp15_register(void* core, int index) {
+    return static_cast<Core::System*>(core)->GetCore(0).GetCP15Register(
+        static_cast<CP15Register>(index));
+}
+
+u32 vvctre_get_core_2_cp15_register(void* core, int index) {
+    return static_cast<Core::System*>(core)->GetCore(1).GetCP15Register(
         static_cast<CP15Register>(index));
 }
 
@@ -2881,6 +2977,14 @@ bool vvctre_settings_get_use_cpu_jit() {
     return Settings::values.use_cpu_jit;
 }
 
+void vvctre_settings_set_enable_core_2(bool value) {
+    Settings::values.enable_core_2 = value;
+}
+
+bool vvctre_settings_get_enable_core_2() {
+    return Settings::values.enable_core_2;
+}
+
 void vvctre_settings_set_limit_speed(bool value) {
     Settings::values.limit_speed = value;
 }
@@ -3438,8 +3542,11 @@ void* vvctre_get_cfg_module(void* core, void* plugin_manager) {
     }
 }
 
-void vvctre_set_hle_deliver_arg(void* core, bool set_to_nullopt, std::size_t parameter_size, u8* parameter_data, std::size_t hmac_size, u8* hmac_data, u64 source_program_id) {
-    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*static_cast<Core::System*>(core))) {
+void vvctre_set_hle_deliver_arg(void* core, bool set_to_nullopt, std::size_t parameter_size,
+                                u8* parameter_data, std::size_t hmac_size, u8* hmac_data,
+                                u64 source_program_id) {
+    if (std::shared_ptr<Service::APT::Module> apt =
+            Service::APT::GetModule(*static_cast<Core::System*>(core))) {
         if (set_to_nullopt) {
             apt->GetAppletManager()->SetDeliverArg(std::nullopt);
         } else {
@@ -3458,9 +3565,12 @@ void vvctre_set_hle_deliver_arg(void* core, bool set_to_nullopt, std::size_t par
     }
 }
 
-bool vvctre_get_hle_deliver_arg(void* core, std::size_t* parameter_size, u8* parameter_data, std::size_t* hmac_size, u8* hmac_data, u64* source_program_id) {
-    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*static_cast<Core::System*>(core))) {
-        std::optional<Service::APT::DeliverArg> deliver_arg = apt->GetAppletManager()->ReceiveDeliverArg();
+bool vvctre_get_hle_deliver_arg(void* core, std::size_t* parameter_size, u8* parameter_data,
+                                std::size_t* hmac_size, u8* hmac_data, u64* source_program_id) {
+    if (std::shared_ptr<Service::APT::Module> apt =
+            Service::APT::GetModule(*static_cast<Core::System*>(core))) {
+        std::optional<Service::APT::DeliverArg> deliver_arg =
+            apt->GetAppletManager()->ReceiveDeliverArg();
         if (!deliver_arg) {
             return false;
         }
@@ -3468,7 +3578,8 @@ bool vvctre_get_hle_deliver_arg(void* core, std::size_t* parameter_size, u8* par
             *parameter_size = deliver_arg->parameter.size();
         }
         if (parameter_data != nullptr) {
-            std::memcpy(parameter_data, deliver_arg->parameter.data(), deliver_arg->parameter.size());
+            std::memcpy(parameter_data, deliver_arg->parameter.data(),
+                        deliver_arg->parameter.size());
         }
         if (hmac_size != nullptr) {
             *hmac_size = deliver_arg->hmac.size();
@@ -3485,27 +3596,20 @@ bool vvctre_get_hle_deliver_arg(void* core, std::size_t* parameter_size, u8* par
 }
 
 void vvctre_resize_hle_wireless_reboot_info(void* core, std::size_t size) {
-    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*static_cast<Core::System*>(core))) {
+    if (std::shared_ptr<Service::APT::Module> apt =
+            Service::APT::GetModule(*static_cast<Core::System*>(core))) {
         apt->GetWirelessRebootInfo().resize(size);
     }
 }
 
 u8* vvctre_get_hle_wireless_reboot_info_pointer_and_size(void* core, std::size_t* size) {
-    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*static_cast<Core::System*>(core))) {
+    if (std::shared_ptr<Service::APT::Module> apt =
+            Service::APT::GetModule(*static_cast<Core::System*>(core))) {
         std::vector<u8>& wireless_reboot_info = apt->GetWirelessRebootInfo();
         *size = wireless_reboot_info.size();
         return wireless_reboot_info.empty() ? nullptr : wireless_reboot_info.data();
     }
     return nullptr;
-}
-
-// Hacks Settings
-void vvctre_settings_set_enable_priority_boost(bool value) {
-    Settings::values.enable_priority_boost = value;
-}
-
-bool vvctre_settings_get_enable_priority_boost() {
-    return Settings::values.enable_priority_boost;
 }
 
 // Multiplayer
@@ -3669,21 +3773,22 @@ void vvctre_coretiming_remove_event(void* core, const void* event) {
         static_cast<const Core::TimingEventType*>(event));
 }
 
-void vvctre_coretiming_remove_normal_and_threadsafe_event(void* core, const void* event) {
-    static_cast<Core::System*>(core)->CoreTiming().RemoveNormalAndThreadsafeEvent(
-        static_cast<const Core::TimingEventType*>(event));
-}
-
 void vvctre_coretiming_schedule_event(void* core, s64 cycles_into_future, const void* event,
                                       std::uintptr_t user_data) {
     static_cast<Core::System*>(core)->CoreTiming().ScheduleEvent(
         cycles_into_future, static_cast<const Core::TimingEventType*>(event), user_data);
 }
 
-void vvctre_coretiming_schedule_event_threadsafe(void* core, s64 cycles_into_future,
-                                                 const void* event, std::uintptr_t user_data) {
-    static_cast<Core::System*>(core)->CoreTiming().ScheduleEventThreadsafe(
-        cycles_into_future, static_cast<const Core::TimingEventType*>(event), user_data);
+void vvctre_coretiming_schedule_event_core_1(void* core, s64 cycles_into_future, const void* event,
+                                             std::uintptr_t user_data) {
+    static_cast<Core::System*>(core)->CoreTiming().ScheduleEvent(
+        cycles_into_future, static_cast<const Core::TimingEventType*>(event), user_data, 0);
+}
+
+void vvctre_coretiming_schedule_event_core_2(void* core, s64 cycles_into_future, const void* event,
+                                             std::uintptr_t user_data) {
+    static_cast<Core::System*>(core)->CoreTiming().ScheduleEvent(
+        cycles_into_future, static_cast<const Core::TimingEventType*>(event), user_data, 1);
 }
 
 void vvctre_coretiming_unschedule(void* core, const void* event, std::uintptr_t user_data) {
@@ -3695,28 +3800,84 @@ u64 vvctre_coretiming_get_ticks(void* core) {
     return static_cast<Core::System*>(core)->CoreTiming().GetTicks();
 }
 
+u64 vvctre_coretiming_get_ticks_core_1(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetTicks();
+}
+
+u64 vvctre_coretiming_get_ticks_core_2(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetTicks();
+}
+
 u64 vvctre_coretiming_get_idle_ticks(void* core) {
-    return static_cast<Core::System*>(core)->CoreTiming().GetIdleTicks();
+    return static_cast<Core::System*>(core)->GetRunningCore().GetTimer().GetIdleTicks();
+}
+
+u64 vvctre_coretiming_get_idle_ticks_core_1(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetTimer(0)->GetIdleTicks();
+}
+
+u64 vvctre_coretiming_get_idle_ticks_core_2(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetTimer(1)->GetIdleTicks();
 }
 
 void vvctre_coretiming_add_ticks(void* core, u64 ticks) {
-    static_cast<Core::System*>(core)->CoreTiming().AddTicks(ticks);
+    static_cast<Core::System*>(core)->GetRunningCore().GetTimer().AddTicks(ticks);
+}
+
+void vvctre_coretiming_add_ticks_core_1(void* core, u64 ticks) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(0)->AddTicks(ticks);
+}
+
+void vvctre_coretiming_add_ticks_core_2(void* core, u64 ticks) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(1)->AddTicks(ticks);
 }
 
 void vvctre_coretiming_advance(void* core) {
-    static_cast<Core::System*>(core)->CoreTiming().Advance();
+    static_cast<Core::System*>(core)->GetRunningCore().GetTimer().Advance();
+}
+
+void vvctre_coretiming_advance_core_1(void* core) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(0)->Advance();
+}
+
+void vvctre_coretiming_advance_core_2(void* core) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(1)->Advance();
 }
 
 void vvctre_coretiming_move_events(void* core) {
-    static_cast<Core::System*>(core)->CoreTiming().MoveEvents();
+    static_cast<Core::System*>(core)->GetRunningCore().GetTimer().MoveEvents();
+}
+
+void vvctre_coretiming_move_events_core_1(void* core) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(0)->MoveEvents();
+}
+
+void vvctre_coretiming_move_events_core_2(void* core) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(0)->MoveEvents();
 }
 
 void vvctre_coretiming_idle(void* core) {
-    static_cast<Core::System*>(core)->CoreTiming().Idle();
+    static_cast<Core::System*>(core)->GetRunningCore().GetTimer().Idle();
+}
+
+void vvctre_coretiming_idle_core_1(void* core) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(0)->Idle();
+}
+
+void vvctre_coretiming_idle_core_2(void* core) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(1)->Idle();
 }
 
 void vvctre_coretiming_force_exception_check(void* core, s64 cycles) {
-    static_cast<Core::System*>(core)->CoreTiming().ForceExceptionCheck(cycles);
+    static_cast<Core::System*>(core)->GetRunningCore().GetTimer().ForceExceptionCheck(cycles);
+}
+
+void vvctre_coretiming_force_exception_check_core_1(void* core, s64 cycles) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(0)->ForceExceptionCheck(cycles);
+}
+
+void vvctre_coretiming_force_exception_check_core_2(void* core, s64 cycles) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(1)->ForceExceptionCheck(cycles);
 }
 
 s64 vvctre_coretiming_get_global_time_us(void* core) {
@@ -3724,7 +3885,43 @@ s64 vvctre_coretiming_get_global_time_us(void* core) {
 }
 
 s64 vvctre_coretiming_get_downcount(void* core) {
-    return static_cast<Core::System*>(core)->CoreTiming().GetDowncount();
+    return static_cast<Core::System*>(core)->GetRunningCore().GetTimer().GetDowncount();
+}
+
+s64 vvctre_coretiming_get_downcount_core_1(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetTimer(0)->GetDowncount();
+}
+
+s64 vvctre_coretiming_get_downcount_core_2(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetTimer(1)->GetDowncount();
+}
+
+s64 vvctre_coretiming_get_global_ticks(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetGlobalTicks();
+}
+
+void vvctre_coretiming_set_next_slice(void* core, s64 max_slice_length) {
+    static_cast<Core::System*>(core)->GetRunningCore().GetTimer().SetNextSlice(max_slice_length);
+}
+
+void vvctre_coretiming_set_next_slice_core_1(void* core, s64 max_slice_length) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(0)->SetNextSlice(max_slice_length);
+}
+
+void vvctre_coretiming_set_next_slice_core_2(void* core, s64 max_slice_length) {
+    static_cast<Core::System*>(core)->CoreTiming().GetTimer(1)->SetNextSlice(max_slice_length);
+}
+
+s64 vvctre_coretiming_get_max_slice_length(void* core) {
+    return static_cast<Core::System*>(core)->GetRunningCore().GetTimer().GetMaxSliceLength();
+}
+
+s64 vvctre_coretiming_get_max_slice_length_core_1(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetTimer(0)->GetMaxSliceLength();
+}
+
+s64 vvctre_coretiming_get_max_slice_length_core_2(void* core) {
+    return static_cast<Core::System*>(core)->CoreTiming().GetTimer(1)->GetMaxSliceLength();
 }
 
 // Other
@@ -3829,17 +4026,39 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_read_u64", (void*)&vvctre_read_u64},
     {"vvctre_write_u64", (void*)&vvctre_write_u64},
     {"vvctre_invalidate_cache_range", (void*)&vvctre_invalidate_cache_range},
+    {"vvctre_invalidate_core_1_cache_range", (void*)&vvctre_invalidate_core_1_cache_range},
+    {"vvctre_invalidate_core_2_cache_range", (void*)&vvctre_invalidate_core_2_cache_range},
     // Debugging
     {"vvctre_set_pc", (void*)&vvctre_set_pc},
+    {"vvctre_set_core_1_pc", (void*)&vvctre_set_core_1_pc},
+    {"vvctre_set_core_2_pc", (void*)&vvctre_set_core_2_pc},
     {"vvctre_get_pc", (void*)&vvctre_get_pc},
+    {"vvctre_get_core_1_pc", (void*)&vvctre_get_core_1_pc},
+    {"vvctre_get_core_2_pc", (void*)&vvctre_get_core_2_pc},
     {"vvctre_set_register", (void*)&vvctre_set_register},
+    {"vvctre_set_core_1_register", (void*)&vvctre_set_core_1_register},
+    {"vvctre_set_core_2_register", (void*)&vvctre_set_core_2_register},
     {"vvctre_get_register", (void*)&vvctre_get_register},
+    {"vvctre_get_core_1_register", (void*)&vvctre_get_core_1_register},
+    {"vvctre_get_core_2_register", (void*)&vvctre_get_core_2_register},
     {"vvctre_set_vfp_register", (void*)&vvctre_set_vfp_register},
+    {"vvctre_set_core_1_vfp_register", (void*)&vvctre_set_core_1_vfp_register},
+    {"vvctre_set_core_2_vfp_register", (void*)&vvctre_set_core_2_vfp_register},
     {"vvctre_get_vfp_register", (void*)&vvctre_get_vfp_register},
+    {"vvctre_get_core_1_vfp_register", (void*)&vvctre_get_core_1_vfp_register},
+    {"vvctre_get_core_2_vfp_register", (void*)&vvctre_get_core_2_vfp_register},
     {"vvctre_set_vfp_system_register", (void*)&vvctre_set_vfp_system_register},
+    {"vvctre_set_core_1_vfp_system_register", (void*)&vvctre_set_core_1_vfp_system_register},
+    {"vvctre_set_core_2_vfp_system_register", (void*)&vvctre_set_core_2_vfp_system_register},
     {"vvctre_get_vfp_system_register", (void*)&vvctre_get_vfp_system_register},
+    {"vvctre_get_core_1_vfp_system_register", (void*)&vvctre_get_core_1_vfp_system_register},
+    {"vvctre_get_core_2_vfp_system_register", (void*)&vvctre_get_core_2_vfp_system_register},
     {"vvctre_set_cp15_register", (void*)&vvctre_set_cp15_register},
+    {"vvctre_set_core_1_cp15_register", (void*)&vvctre_set_core_1_cp15_register},
+    {"vvctre_set_core_2_cp15_register", (void*)&vvctre_set_core_2_cp15_register},
     {"vvctre_get_cp15_register", (void*)&vvctre_get_cp15_register},
+    {"vvctre_get_core_1_cp15_register", (void*)&vvctre_get_core_1_cp15_register},
+    {"vvctre_get_core_2_cp15_register", (void*)&vvctre_get_core_2_cp15_register},
     {"vvctre_ipc_recorder_set_enabled", (void*)&vvctre_ipc_recorder_set_enabled},
     {"vvctre_ipc_recorder_get_enabled", (void*)&vvctre_ipc_recorder_get_enabled},
     {"vvctre_ipc_recorder_bind_callback", (void*)&vvctre_ipc_recorder_bind_callback},
@@ -4330,6 +4549,8 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     // General Settings
     {"vvctre_settings_set_use_cpu_jit", (void*)&vvctre_settings_set_use_cpu_jit},
     {"vvctre_settings_get_use_cpu_jit", (void*)&vvctre_settings_get_use_cpu_jit},
+    {"vvctre_settings_set_enable_core_2", (void*)&vvctre_settings_set_enable_core_2},
+    {"vvctre_settings_get_enable_core_2", (void*)&vvctre_settings_get_enable_core_2},
     {"vvctre_settings_set_limit_speed", (void*)&vvctre_settings_set_limit_speed},
     {"vvctre_settings_get_limit_speed", (void*)&vvctre_settings_get_limit_speed},
     {"vvctre_settings_set_speed_limit", (void*)&vvctre_settings_set_speed_limit},
@@ -4509,11 +4730,6 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
      (void*)&vvctre_settings_get_custom_layout_bottom_bottom},
     {"vvctre_settings_get_layout_width", (void*)&vvctre_settings_get_layout_width},
     {"vvctre_settings_get_layout_height", (void*)&vvctre_settings_get_layout_height},
-    // Hacks Settings
-    {"vvctre_settings_set_enable_priority_boost",
-     (void*)&vvctre_settings_set_enable_priority_boost},
-    {"vvctre_settings_get_enable_priority_boost",
-     (void*)&vvctre_settings_get_enable_priority_boost},
     // Modules
     {"vvctre_settings_set_use_lle_module", (void*)&vvctre_settings_set_use_lle_module},
     {"vvctre_settings_get_use_lle_module", (void*)&vvctre_settings_get_use_lle_module},
@@ -4521,7 +4737,8 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_set_hle_deliver_arg", (void*)&vvctre_set_hle_deliver_arg},
     {"vvctre_get_hle_deliver_arg", (void*)&vvctre_get_hle_deliver_arg},
     {"vvctre_resize_hle_wireless_reboot_info", (void*)&vvctre_resize_hle_wireless_reboot_info},
-    {"vvctre_get_hle_wireless_reboot_info_pointer_and_size", (void*)&vvctre_get_hle_wireless_reboot_info_pointer_and_size},
+    {"vvctre_get_hle_wireless_reboot_info_pointer_and_size",
+     (void*)&vvctre_get_hle_wireless_reboot_info_pointer_and_size},
     // Multiplayer
     {"vvctre_settings_set_multiplayer_ip", (void*)&vvctre_settings_set_multiplayer_ip},
     {"vvctre_settings_get_multiplayer_ip", (void*)&vvctre_settings_get_multiplayer_ip},
@@ -4555,21 +4772,46 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     // CoreTiming
     {"vvctre_coretiming_register_event", (void*)&vvctre_coretiming_register_event},
     {"vvctre_coretiming_remove_event", (void*)&vvctre_coretiming_remove_event},
-    {"vvctre_coretiming_remove_normal_and_threadsafe_event",
-     (void*)&vvctre_coretiming_remove_normal_and_threadsafe_event},
     {"vvctre_coretiming_schedule_event", (void*)&vvctre_coretiming_schedule_event},
-    {"vvctre_coretiming_schedule_event_threadsafe",
-     (void*)&vvctre_coretiming_schedule_event_threadsafe},
+    {"vvctre_coretiming_schedule_event_core_1", (void*)&vvctre_coretiming_schedule_event_core_1},
+    {"vvctre_coretiming_schedule_event_core_2", (void*)&vvctre_coretiming_schedule_event_core_2},
     {"vvctre_coretiming_unschedule", (void*)&vvctre_coretiming_unschedule},
     {"vvctre_coretiming_get_ticks", (void*)&vvctre_coretiming_get_ticks},
+    {"vvctre_coretiming_get_ticks_core_1", (void*)&vvctre_coretiming_get_ticks_core_1},
+    {"vvctre_coretiming_get_ticks_core_2", (void*)&vvctre_coretiming_get_ticks_core_2},
     {"vvctre_coretiming_get_idle_ticks", (void*)&vvctre_coretiming_get_idle_ticks},
+    {"vvctre_coretiming_get_idle_ticks_core_1", (void*)&vvctre_coretiming_get_idle_ticks_core_1},
+    {"vvctre_coretiming_get_idle_ticks_core_2", (void*)&vvctre_coretiming_get_idle_ticks_core_2},
     {"vvctre_coretiming_add_ticks", (void*)&vvctre_coretiming_add_ticks},
+    {"vvctre_coretiming_add_ticks_core_1", (void*)&vvctre_coretiming_add_ticks_core_1},
+    {"vvctre_coretiming_add_ticks_core_2", (void*)&vvctre_coretiming_add_ticks_core_2},
     {"vvctre_coretiming_advance", (void*)&vvctre_coretiming_advance},
+    {"vvctre_coretiming_advance_core_1", (void*)&vvctre_coretiming_advance_core_1},
+    {"vvctre_coretiming_advance_core_2", (void*)&vvctre_coretiming_advance_core_2},
     {"vvctre_coretiming_move_events", (void*)&vvctre_coretiming_move_events},
+    {"vvctre_coretiming_move_events_core_1", (void*)&vvctre_coretiming_move_events_core_1},
+    {"vvctre_coretiming_move_events_core_2", (void*)&vvctre_coretiming_move_events_core_2},
     {"vvctre_coretiming_idle", (void*)&vvctre_coretiming_idle},
+    {"vvctre_coretiming_idle_core_1", (void*)&vvctre_coretiming_idle_core_1},
+    {"vvctre_coretiming_idle_core_2", (void*)&vvctre_coretiming_idle_core_2},
     {"vvctre_coretiming_force_exception_check", (void*)&vvctre_coretiming_force_exception_check},
+    {"vvctre_coretiming_force_exception_check_core_1",
+     (void*)&vvctre_coretiming_force_exception_check_core_1},
+    {"vvctre_coretiming_force_exception_check_core_2",
+     (void*)&vvctre_coretiming_force_exception_check_core_2},
     {"vvctre_coretiming_get_global_time_us", (void*)&vvctre_coretiming_get_global_time_us},
     {"vvctre_coretiming_get_downcount", (void*)&vvctre_coretiming_get_downcount},
+    {"vvctre_coretiming_get_downcount_core_1", (void*)&vvctre_coretiming_get_downcount_core_1},
+    {"vvctre_coretiming_get_downcount_core_2", (void*)&vvctre_coretiming_get_downcount_core_2},
+    {"vvctre_coretiming_get_global_ticks", (void*)&vvctre_coretiming_get_global_ticks},
+    {"vvctre_coretiming_set_next_slice", (void*)&vvctre_coretiming_set_next_slice},
+    {"vvctre_coretiming_set_next_slice_core_1", (void*)&vvctre_coretiming_set_next_slice_core_1},
+    {"vvctre_coretiming_set_next_slice_core_2", (void*)&vvctre_coretiming_set_next_slice_core_2},
+    {"vvctre_coretiming_get_max_slice_length", (void*)&vvctre_coretiming_get_max_slice_length},
+    {"vvctre_coretiming_get_max_slice_length_core_1",
+     (void*)&vvctre_coretiming_get_max_slice_length_core_1},
+    {"vvctre_coretiming_get_max_slice_length_core_2",
+     (void*)&vvctre_coretiming_get_max_slice_length_core_2},
     // Other
     {"vvctre_get_version", (void*)&vvctre_get_version},
     {"vvctre_get_version_major", (void*)&vvctre_get_version_major},

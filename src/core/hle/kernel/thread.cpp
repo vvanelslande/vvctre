@@ -34,13 +34,9 @@ void Thread::Acquire(Thread* thread) {
     ASSERT_MSG(!ShouldWait(thread), "object unavailable!");
 }
 
-u32 ThreadManager::NewThreadId() {
-    return next_thread_id++;
-}
-
-Thread::Thread(KernelSystem& kernel)
-    : WaitObject(kernel), context(kernel.GetThreadManager().NewContext()),
-      thread_manager(kernel.GetThreadManager()) {}
+Thread::Thread(KernelSystem& kernel, u32 core_id)
+    : WaitObject(kernel), context(kernel.GetThreadManager(core_id).NewContext()),
+      thread_manager(kernel.GetThreadManager(core_id)) {}
 
 Thread::~Thread() {}
 
@@ -86,7 +82,7 @@ void ThreadManager::SwitchContext(Thread* new_thread) {
 
     // Save context for previous thread
     if (previous_thread) {
-        previous_thread->last_running_ticks = timing.GetTicks();
+        previous_thread->last_running_ticks = cpu->GetTimer().GetTicks();
         cpu->SaveContext(previous_thread->context);
 
         if (previous_thread->status == ThreadStatus::Running) {
@@ -113,11 +109,8 @@ void ThreadManager::SwitchContext(Thread* new_thread) {
         new_thread->status = ThreadStatus::Running;
 
         if (previous_process.get() != current_thread->owner_process) {
-            kernel.SetCurrentProcess(SharedFrom(current_thread->owner_process));
+            kernel.SetCurrentProcessForCPU(SharedFrom(current_thread->owner_process), cpu->GetID());
         }
-
-        // Restores thread to its nominal priority if it has been temporarily changed
-        new_thread->current_priority = new_thread->nominal_priority;
 
         cpu->LoadContext(new_thread->context);
         cpu->SetCP15Register(CP15_THREAD_URO, new_thread->GetTLSAddress());
@@ -129,7 +122,7 @@ void ThreadManager::SwitchContext(Thread* new_thread) {
 }
 
 Thread* ThreadManager::PopNextReadyThread() {
-    Thread* next;
+    Thread* next = nullptr;
     Thread* thread = GetCurrentThread();
 
     if (thread && thread->status == ThreadStatus::Running) {
@@ -314,22 +307,22 @@ ResultVal<std::shared_ptr<Thread>> KernelSystem::CreateThread(std::string name, 
                           ErrorSummary::InvalidArgument, ErrorLevel::Permanent);
     }
 
-    auto thread{std::make_shared<Thread>(*this)};
+    std::shared_ptr<Kernel::Thread> thread = std::make_shared<Thread>(*this, processor_id);
 
-    thread_manager->thread_list.push_back(thread);
-    thread_manager->ready_queue.prepare(priority);
+    thread_managers[processor_id]->thread_list.push_back(thread);
+    thread_managers[processor_id]->ready_queue.prepare(priority);
 
-    thread->thread_id = thread_manager->NewThreadId();
+    thread->thread_id = NewThreadId();
     thread->status = ThreadStatus::Dormant;
     thread->entry_point = entry_point;
     thread->stack_top = stack_top;
     thread->nominal_priority = thread->current_priority = priority;
-    thread->last_running_ticks = timing.GetTicks();
+    thread->last_running_ticks = timing.GetTimer(processor_id)->GetTicks();
     thread->processor_id = processor_id;
     thread->wait_objects.clear();
     thread->wait_address = 0;
     thread->name = std::move(name);
-    thread_manager->wakeup_callback_table[thread->thread_id] = thread.get();
+    thread_managers[processor_id]->wakeup_callback_table[thread->thread_id] = thread.get();
     thread->owner_process = &owner_process;
 
     // Find the next available TLS index, and mark it as used
@@ -374,7 +367,7 @@ ResultVal<std::shared_ptr<Thread>> KernelSystem::CreateThread(std::string name, 
     // to initialize the context
     ResetThreadContext(thread->context, stack_top, entry_point, arg);
 
-    thread_manager->ready_queue.push_back(thread->current_priority, thread.get());
+    thread_managers[processor_id]->ready_queue.push_back(thread->current_priority, thread.get());
     thread->status = ThreadStatus::Ready;
 
     return MakeResult<std::shared_ptr<Thread>>(std::move(thread));
@@ -430,26 +423,7 @@ bool ThreadManager::HaveReadyThreads() {
     return ready_queue.get_first() != nullptr;
 }
 
-void ThreadManager::PriorityBoostStarvedThreads() {
-    const u64 current_ticks = kernel.timing.GetTicks();
-
-    for (auto& thread : thread_list) {
-        const u64 boost_ticks = 1400000;
-
-        u64 delta = current_ticks - thread->last_running_ticks;
-
-        if (thread->status == ThreadStatus::Ready && delta > boost_ticks) {
-            const s32 priority = std::max(ready_queue.get_first()->current_priority, 40u);
-            thread->BoostPriority(priority);
-        }
-    }
-}
-
 void ThreadManager::Reschedule() {
-    if (Settings::values.enable_priority_boost) {
-        PriorityBoostStarvedThreads();
-    }
-
     Thread* cur = GetCurrentThread();
     Thread* next = PopNextReadyThread();
 
@@ -459,6 +433,9 @@ void ThreadManager::Reschedule() {
         LOG_TRACE(Kernel, "context switch {} -> idle", cur->GetObjectId());
     } else if (next) {
         LOG_TRACE(Kernel, "context switch idle -> {}", next->GetObjectId());
+    } else {
+        LOG_TRACE(Kernel, "context switch idle -> idle, do nothing");
+        return;
     }
 
     SwitchContext(next);
@@ -485,11 +462,10 @@ VAddr Thread::GetCommandBufferAddress() const {
     return GetTLSAddress() + command_header_offset;
 }
 
-ThreadManager::ThreadManager(Kernel::KernelSystem& kernel) : kernel(kernel) {
-    ThreadWakeupEventType =
-        kernel.timing.RegisterEvent("ThreadWakeupCallback", [this](u64 thread_id, s64 cycle_late) {
-            ThreadWakeupCallback(thread_id, cycle_late);
-        });
+ThreadManager::ThreadManager(Kernel::KernelSystem& kernel, u32 core_id) : kernel(kernel) {
+    ThreadWakeupEventType = kernel.timing.RegisterEvent(
+        "ThreadWakeupCallback_" + std::to_string(0),
+        [this](u64 thread_id, s64 cycle_late) { ThreadWakeupCallback(thread_id, cycle_late); });
 }
 
 ThreadManager::~ThreadManager() {

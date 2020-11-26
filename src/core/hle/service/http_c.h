@@ -4,12 +4,12 @@
 
 #pragma once
 
+#include <curl/curl.h>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <curl/curl.h>
 #include "core/hle/kernel/shared_memory.h"
 #include "core/hle/service/service.h"
 
@@ -190,7 +190,7 @@ private:
 
     std::shared_ptr<Kernel::SharedMemory> shared_memory = nullptr;
 
-    /// The next number to use when a new HTTP session is initalized.
+    /// The next number to use when a new HTTP session is initialized.
     u32 session_counter = 0;
 
     /// The next handle number to use when a new HTTP context is created.

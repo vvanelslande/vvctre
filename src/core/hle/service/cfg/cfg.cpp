@@ -878,7 +878,7 @@ void InstallInterfaces(Core::System& system) {
 std::string GetConsoleIdHash(Core::System& system) {
     u64_le console_id{};
     std::array<u8, sizeof(console_id)> buffer;
-    if (system.IsPoweredOn()) {
+    if (system.IsInitialized()) {
         auto cfg = GetModule(system);
         ASSERT_MSG(cfg, "CFG Module missing!");
         console_id = cfg->GetConsoleUniqueId();

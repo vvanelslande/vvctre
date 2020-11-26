@@ -4,11 +4,11 @@
 
 #pragma once
 
+#include <boost/container/flat_set.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <boost/container/flat_set.hpp>
 #include "common/common_types.h"
 #include "common/thread_queue_list.h"
 #include "core/arm/arm_interface.h"
@@ -57,14 +57,8 @@ enum class ThreadWakeupReason {
 
 class ThreadManager {
 public:
-    explicit ThreadManager(Kernel::KernelSystem& kernel);
+    explicit ThreadManager(Kernel::KernelSystem& kernel, u32 core_id);
     ~ThreadManager();
-
-    /**
-     * Creates a new thread ID
-     * @return The new thread ID
-     */
-    u32 NewThreadId();
 
     /**
      * Gets the current thread
@@ -129,13 +123,9 @@ private:
      */
     void ThreadWakeupCallback(u64 thread_id, s64 cycles_late);
 
-    /// Boost low priority threads (temporarily) that have been starved
-    void PriorityBoostStarvedThreads();
-
     Kernel::KernelSystem& kernel;
     ARM_Interface* cpu;
 
-    u32 next_thread_id = 1;
     std::shared_ptr<Thread> current_thread;
     Common::ThreadQueueList<Thread*, ThreadPrioLowest + 1> ready_queue;
     std::unordered_map<u64, Thread*> wakeup_callback_table;
@@ -152,7 +142,7 @@ private:
 
 class Thread final : public WaitObject {
 public:
-    explicit Thread(KernelSystem&);
+    explicit Thread(KernelSystem&, u32 core_id);
     ~Thread() override;
 
     std::string GetName() const override {

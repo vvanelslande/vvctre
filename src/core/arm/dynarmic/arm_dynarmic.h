@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <dynarmic/A32/a32.h>
 #include <map>
 #include <memory>
-#include <dynarmic/A32/a32.h>
 #include "common/common_types.h"
 #include "core/arm/arm_interface.h"
 #include "core/arm/dynarmic/arm_dynarmic_cp15.h"
@@ -24,7 +24,8 @@ class DynarmicUserCallbacks;
 
 class ARM_Dynarmic final : public ARM_Interface {
 public:
-    ARM_Dynarmic(Core::System* system, Memory::MemorySystem& memory);
+    ARM_Dynarmic(Core::System* system, Memory::MemorySystem& memory, u32 id,
+                 std::shared_ptr<Core::Timing::Timer> timer);
     ~ARM_Dynarmic() override;
 
     void Run() override;

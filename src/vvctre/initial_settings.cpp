@@ -225,7 +225,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                     ImGui::EndPopup();
                                 }
 
-                                glClearColor(Settings::values.background_color_red, Settings::values.background_color_green,
+                                glClearColor(Settings::values.background_color_red,
+                                             Settings::values.background_color_green,
                                              Settings::values.background_color_blue, 0.0f);
                                 glClear(GL_COLOR_BUFFER_BIT);
                                 ImGui::Render();
@@ -388,6 +389,16 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                 if (ImGui::BeginTabItem("General")) {
                     ImGui::Checkbox("Use CPU JIT", &Settings::values.use_cpu_jit);
+                    ImGui::Checkbox("Enable Core 2", &Settings::values.enable_core_2);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
+                        ImGui::TextUnformatted("This is needed to play some games (including "
+                                               "Donkey Kong Country Returns 3D, Sonic Boom: Fire & "
+                                               "Ice, and Sonic Boom: Shattered Crystal)");
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
                     ImGui::Checkbox("Limit Speed", &Settings::values.limit_speed);
                     ImGui::Checkbox("Enable Custom CPU Ticks",
                                     &Settings::values.use_custom_cpu_ticks);
@@ -1885,9 +1896,8 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             ImGui::Checkbox(
                                 "Accurate Multiplication",
                                 &Settings::values.hardware_shader_accurate_multiplication);
-                            ImGui::Checkbox(
-                                "Enable Disk Shader Cache",
-                                &Settings::values.enable_disk_shader_cache);
+                            ImGui::Checkbox("Enable Disk Shader Cache",
+                                            &Settings::values.enable_disk_shader_cache);
                             ImGui::Unindent();
                         }
                         ImGui::Unindent();
@@ -2216,11 +2226,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::Checkbox(module.first.c_str(), &module.second);
                     }
 
-                    ImGui::EndTabItem();
-                }
-
-                if (ImGui::BeginTabItem("Hacks")) {
-                    ImGui::Checkbox("Priority Boost", &Settings::values.enable_priority_boost);
                     ImGui::EndTabItem();
                 }
 

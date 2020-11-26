@@ -133,7 +133,7 @@ std::optional<BinaryResponse> FDKDecoder::Impl::Decode(const BinaryRequest& requ
     response.size = request.size;
 
     if (decoder == nullptr) {
-        LOG_DEBUG(Audio_DSP, "Decoder not initalized");
+        LOG_DEBUG(Audio_DSP, "Decoder not initialized");
         // This is a hack to continue games that are not compiled with the AAC codec
         response.num_channels = 2;
         response.num_samples = 1024;
