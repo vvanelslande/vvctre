@@ -464,7 +464,7 @@ VAddr Thread::GetCommandBufferAddress() const {
 
 ThreadManager::ThreadManager(Kernel::KernelSystem& kernel, u32 core_id) : kernel(kernel) {
     ThreadWakeupEventType = kernel.timing.RegisterEvent(
-        "ThreadWakeupCallback_" + std::to_string(0),
+        "ThreadWakeupCallback_" + std::to_string(core_id),
         [this](u64 thread_id, s64 cycle_late) { ThreadWakeupCallback(thread_id, cycle_late); });
 }
 

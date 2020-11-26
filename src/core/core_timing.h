@@ -133,7 +133,7 @@ public:
         bool operator<(const Event& right) const;
     };
 
-    // currently Service::HID::pad_update_ticks is the smallest interval for an event that gets
+    // Currently Service::HID::pad_update_ticks is the smallest interval for an event that gets
     // always scheduled. Therfore we use this as orientation for the MAX_SLICE_LENGTH
     // For performance bigger slice length are desired, though this will lead to cores desync
     // But we never want to schedule events into the current slice, because then cores might to
@@ -172,9 +172,11 @@ public:
         // accomodated by the standard adaptor class.
         std::vector<Event> event_queue;
         u64 event_fifo_id = 0;
-        // the queue for storing the events from other threads threadsafe until they will be added
+
+        // The queue for storing the events from other threads threadsafe until they will be added
         // to the event_queue by the emu thread
         Common::MPSCQueue<Event> ts_queue;
+
         // Are we in a function that has been called from Advance()
         // If events are sheduled from a function that gets called from Advance(),
         // don't change slice_length and downcount.
@@ -192,9 +194,8 @@ public:
 
     explicit Timing(u8 num_cores);
 
-    ~Timing(){};
+    ~Timing() {}
 
-    /// Returns the event_type identifier.
     TimingEventType* RegisterEvent(const std::string& name, TimedCallback callback);
 
     void ScheduleEvent(s64 cycles_into_future, const TimingEventType* event_type, u64 userdata = 0,
