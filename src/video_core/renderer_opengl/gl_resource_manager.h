@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <glad/glad.h>
 #include <utility>
 #include <vector>
-#include <glad/glad.h>
 #include "common/common_types.h"
 #include "video_core/renderer_opengl/gl_shader_util.h"
 
@@ -34,7 +34,8 @@ public:
     /// Deletes the internal OpenGL resource
     void Release();
 
-    static void Allocate(GLenum target, GLsizei levels, GLenum internalformat, GLenum format, GLenum type, GLsizei width, GLsizei height = 1, GLsizei depth = 1);
+    static void Allocate(GLenum target, GLsizei levels, GLenum internalformat, GLenum format,
+                         GLenum type, GLsizei width, GLsizei height = 1, GLsizei depth = 1);
 
     GLuint handle = 0;
 };

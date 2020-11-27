@@ -22,7 +22,8 @@ ShaderDiskCacheEntry::ShaderDiskCacheEntry(u64 unique_identifier, ProgramType ty
       code(std::move(code)) {}
 
 bool ShaderDiskCacheEntry::Load(FileUtil::IOFile& file) {
-    if (file.ReadBytes(&unique_identifier, sizeof(unique_identifier)) != sizeof(unique_identifier) ||
+    if (file.ReadBytes(&unique_identifier, sizeof(unique_identifier)) !=
+            sizeof(unique_identifier) ||
         file.ReadBytes(&type, sizeof(type)) != sizeof(type)) {
         return false;
     }
@@ -52,8 +53,7 @@ bool ShaderDiskCacheEntry::Load(FileUtil::IOFile& file) {
 }
 
 bool ShaderDiskCacheEntry::Save(FileUtil::IOFile& file) const {
-    if (file.WriteObject(unique_identifier) != 1 ||
-        file.WriteObject(static_cast<u8>(type)) != 1) {
+    if (file.WriteObject(unique_identifier) != 1 || file.WriteObject(static_cast<u8>(type)) != 1) {
         return false;
     }
 
@@ -153,7 +153,8 @@ void ShaderDiskCache::Add(const ShaderDiskCacheEntry& entry) {
     }
 
     if (!entry.Save(file)) {
-        LOG_ERROR(Render_OpenGL, "Failed to save disk shader cache entry, deleting disk shader cache");
+        LOG_ERROR(Render_OpenGL,
+                  "Failed to save disk shader cache entry, deleting disk shader cache");
         file.Close();
         Delete();
         return;
@@ -167,7 +168,8 @@ bool ShaderDiskCache::IsUsable() const {
 }
 
 std::string ShaderDiskCache::GetCacheFilePath() {
-    return FileUtil::SanitizePath(fmt::format("{}/{:016X}.vsc", FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir), GetProgramID()));
+    return FileUtil::SanitizePath(fmt::format(
+        "{}/{:016X}.vsc", FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir), GetProgramID()));
 }
 
 u64 ShaderDiskCache::GetProgramID() {

@@ -2,9 +2,9 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <SDL.h>
 #include <string>
 #include <vector>
-#include <SDL.h>
 #include "audio_core/audio_types.h"
 #include "audio_core/sdl2_sink.h"
 #include "common/assert.h"
@@ -61,15 +61,17 @@ SDL2Sink::SDL2Sink(std::string device_name) : impl(std::make_unique<Impl>()) {
 }
 
 SDL2Sink::~SDL2Sink() {
-    if (impl->audio_device_id <= 0)
+    if (impl->audio_device_id <= 0) {
         return;
+    }
 
     SDL_CloseAudioDevice(impl->audio_device_id);
 }
 
 unsigned int SDL2Sink::GetNativeSampleRate() const {
-    if (impl->audio_device_id <= 0)
+    if (impl->audio_device_id <= 0) {
         return native_sample_rate;
+    }
 
     return impl->sample_rate;
 }

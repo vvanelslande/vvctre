@@ -2,8 +2,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <memory>
 #include <boost/range/algorithm/fill.hpp>
+#include <memory>
 #include "common/alignment.h"
 #include "common/assert.h"
 #include "common/bit_field.h"

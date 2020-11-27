@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <optional>
 #include <boost/icl/interval_set.hpp>
+#include <optional>
 #include "common/common_types.h"
 
 namespace Kernel {

@@ -2,6 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <array>
 #include "core/arm/dynarmic/arm_dynarmic_cp15.h"
 #include "core/arm/skyeye_common/arm_regformat.h"
 #include "core/arm/skyeye_common/armstate.h"

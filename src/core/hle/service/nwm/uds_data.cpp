@@ -5,12 +5,12 @@
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 
 #include <algorithm>
-#include <cstring>
 #include <cryptopp/aes.h>
 #include <cryptopp/ccm.h>
 #include <cryptopp/filters.h>
 #include <cryptopp/md5.h>
 #include <cryptopp/modes.h>
+#include <cstring>
 #include "core/hle/service/nwm/nwm_uds.h"
 #include "core/hle/service/nwm/uds_data.h"
 #include "core/hw/aes/key.h"

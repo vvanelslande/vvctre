@@ -21,9 +21,11 @@ public:
     std::string GetTypeName() const override {
         return "SharedMemory";
     }
+
     std::string GetName() const override {
         return name;
     }
+
     void SetName(std::string name) {
         this->name = std::move(name);
     }
@@ -85,22 +87,30 @@ private:
     /// Offset in FCRAM of the shared memory block in the linear heap if no address was specified
     /// during creation.
     PAddr linear_heap_phys_offset = 0;
+
     /// Backing memory for this shared memory block.
     std::vector<std::pair<u8*, u32>> backing_blocks;
+
     /// Size of the memory block. Page-aligned.
     u32 size = 0;
+
     /// Permission restrictions applied to the process which created the block.
     MemoryPermission permissions{};
+
     /// Permission restrictions applied to other processes mapping the block.
     MemoryPermission other_permissions{};
+
     /// Process that created this shared memory block.
     Process* owner_process;
+
     /// Address of shared memory block in the owner process if specified.
     VAddr base_address = 0;
+
     /// Name of shared memory object.
     std::string name;
 
     MemoryRegionInfo::IntervalSet holding_memory;
+    MemoryRegion region;
 
     friend class KernelSystem;
     KernelSystem& kernel;

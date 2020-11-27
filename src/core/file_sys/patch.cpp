@@ -3,12 +3,12 @@
 // Refer to the license.txt file included.
 
 #include <array>
+#include <boost/crc.hpp>
 #include <cstring>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <type_traits>
-#include <boost/crc.hpp>
 #include "common/logging/log.h"
 #include "core/file_sys/patch.h"
 
@@ -27,29 +27,33 @@ bool ApplyIpsPatch(const std::vector<u8>& ips, std::vector<u8>& buffer) {
     while (cursor < patch_length) {
         std::string eof_check(ips.begin() + cursor, ips.begin() + cursor + 3);
 
-        if (eof_check == "EOF")
+        if (eof_check == "EOF") {
             return false;
+        }
 
         u32 offset = ips[cursor] << 16 | ips[cursor + 1] << 8 | ips[cursor + 2];
         std::size_t length = ips[cursor + 3] << 8 | ips[cursor + 4];
 
-        // check for an rle record
+        // Check for an rle record
         if (length == 0) {
             length = ips[cursor + 5] << 8 | ips[cursor + 6];
 
-            if (buffer.size() < offset + length)
+            if (buffer.size() < offset + length) {
                 return false;
+            }
 
-            for (u32 i = 0; i < length; ++i)
+            for (u32 i = 0; i < length; ++i) {
                 buffer[offset + i] = ips[cursor + 7];
+            }
 
             cursor += 8;
 
             continue;
         }
 
-        if (buffer.size() < offset + length)
+        if (buffer.size() < offset + length) {
             return false;
+        }
 
         std::memcpy(&buffer[offset], &ips[cursor + 5], length);
         cursor += length + 5;

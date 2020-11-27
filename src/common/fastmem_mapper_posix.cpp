@@ -4,14 +4,14 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <fcntl.h>
 #include <memory>
 #include <string>
-#include <vector>
-#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 #include "common/assert.h"
 #include "common/common_types.h"
 #include "common/fastmem_mapper.h"

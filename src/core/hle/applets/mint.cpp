@@ -39,6 +39,7 @@ ResultCode Mint::ReceiveParameter(const Service::APT::MessageParameter& paramete
     result.object = framebuffer_memory;
 
     SendParameter(result);
+
     return RESULT_SUCCESS;
 }
 
@@ -58,7 +59,9 @@ ResultCode Mint::StartImpl(const Service::APT::AppletStartupParameter& parameter
     message.sender_id = id;
     SendParameter(message);
 
+    framebuffer_memory.reset();
     is_running = false;
+
     return RESULT_SUCCESS;
 }
 

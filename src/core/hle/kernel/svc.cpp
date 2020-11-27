@@ -1253,8 +1253,9 @@ s64 SVC::GetSystemTick() {
 /// Creates a memory block at the specified address with the specified permissions and size
 ResultCode SVC::CreateMemoryBlock(Handle* out_handle, u32 addr, u32 size, u32 my_permission,
                                   u32 other_permission) {
-    if (size % Memory::PAGE_SIZE != 0)
+    if (size % Memory::PAGE_SIZE != 0) {
         return ERR_MISALIGNED_SIZE;
+    }
 
     std::shared_ptr<SharedMemory> shared_memory = nullptr;
 
@@ -1273,8 +1274,9 @@ ResultCode SVC::CreateMemoryBlock(Handle* out_handle, u32 addr, u32 size, u32 my
     };
 
     if (!VerifyPermissions(static_cast<MemoryPermission>(my_permission)) ||
-        !VerifyPermissions(static_cast<MemoryPermission>(other_permission)))
+        !VerifyPermissions(static_cast<MemoryPermission>(other_permission))) {
         return ERR_INVALID_COMBINATION;
+    }
 
     // TODO(Subv): Processes with memory type APPLICATION are not allowed
     // to create memory blocks with addr = 0, any attempts to do so
@@ -1291,8 +1293,9 @@ ResultCode SVC::CreateMemoryBlock(Handle* out_handle, u32 addr, u32 size, u32 my
     // then we have to allocate from the same region as the caller process instead of the BASE
     // region.
     MemoryRegion region = MemoryRegion::BASE;
-    if (addr == 0 && current_process->flags.shared_device_mem)
+    if (addr == 0 && current_process->flags.shared_device_mem) {
         region = current_process->flags.memory_region;
+    }
 
     CASCADE_RESULT(shared_memory,
                    kernel.CreateSharedMemory(
@@ -1301,6 +1304,7 @@ ResultCode SVC::CreateMemoryBlock(Handle* out_handle, u32 addr, u32 size, u32 my
     CASCADE_RESULT(*out_handle, current_process->handle_table.Create(std::move(shared_memory)));
 
     LOG_WARNING(Kernel_SVC, "called addr=0x{:08X}", addr);
+
     return RESULT_SUCCESS;
 }
 
@@ -1318,6 +1322,7 @@ ResultCode SVC::CreatePort(Handle* server_port, Handle* client_port, VAddr name_
     CASCADE_RESULT(*server_port, current_process->handle_table.Create(std::move(server)));
 
     LOG_TRACE(Kernel_SVC, "called max_sessions={}", max_sessions);
+
     return RESULT_SUCCESS;
 }
 

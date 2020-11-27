@@ -2,11 +2,11 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <SoundTouch.h>
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <memory>
-#include <SoundTouch.h>
 #include "audio_core/audio_types.h"
 #include "audio_core/time_stretch.h"
 #include "common/logging/log.h"

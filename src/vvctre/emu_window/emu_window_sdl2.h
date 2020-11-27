@@ -5,11 +5,11 @@
 #pragma once
 
 #include <functional>
+#include <imgui.h>
 #include <memory>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <imgui.h>
 #include "core/frontend/applets/mii_selector.h"
 #include "core/frontend/applets/swkbd.h"
 #include "core/frontend/emu_window.h"

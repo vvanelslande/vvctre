@@ -12,10 +12,10 @@
 namespace Kernel {
 
 SharedMemory::SharedMemory(KernelSystem& kernel) : Object(kernel), kernel(kernel) {}
+
 SharedMemory::~SharedMemory() {
     for (const auto& interval : holding_memory) {
-        kernel.GetMemoryRegion(MemoryRegion::SYSTEM)
-            ->Free(interval.lower(), interval.upper() - interval.lower());
+        kernel.GetMemoryRegion(region)->Free(interval.lower(), interval.upper() - interval.lower());
     }
     if (base_address != 0 && owner_process != nullptr) {
         owner_process->vm_manager.ChangeMemoryState(base_address, size, MemoryState::Locked,
@@ -34,12 +34,13 @@ ResultVal<std::shared_ptr<SharedMemory>> KernelSystem::CreateSharedMemory(
     shared_memory->size = size;
     shared_memory->permissions = permissions;
     shared_memory->other_permissions = other_permissions;
+    shared_memory->region = region;
 
     if (address == 0) {
         // We need to allocate a block from the Linear Heap ourselves.
         // We'll manually allocate some memory from the linear heap in the specified region.
         MemoryRegionInfo* memory_region = GetMemoryRegion(region);
-        auto offset = memory_region->LinearAllocate(size);
+        std::optional<u32> offset = memory_region->LinearAllocate(size);
 
         ASSERT_MSG(offset, "Not enough space in region to allocate shared memory!");
 
@@ -53,7 +54,7 @@ ResultVal<std::shared_ptr<SharedMemory>> KernelSystem::CreateSharedMemory(
             shared_memory->owner_process->memory_used += size;
         }
     } else {
-        auto& vm_manager = shared_memory->owner_process->vm_manager;
+        Kernel::VMManager& vm_manager = shared_memory->owner_process->vm_manager;
         // The memory is already available and mapped in the owner process.
 
         CASCADE_CODE(vm_manager.ChangeMemoryState(address, size, MemoryState::Private,
@@ -84,6 +85,7 @@ std::shared_ptr<SharedMemory> KernelSystem::CreateSharedMemoryForApplet(
     shared_memory->size = size;
     shared_memory->permissions = permissions;
     shared_memory->other_permissions = other_permissions;
+    shared_memory->region = MemoryRegion::SYSTEM;
     for (const auto& interval : backing_blocks) {
         shared_memory->backing_blocks.push_back(
             {memory.GetFCRAMPointer(interval.lower()), interval.upper() - interval.lower()});

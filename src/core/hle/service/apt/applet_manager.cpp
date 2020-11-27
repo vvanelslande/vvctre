@@ -492,7 +492,8 @@ ResultCode AppletManager::PrepareToDoApplicationJump(u64 title_id, FS::MediaType
         media_type = Service::AM::GetTitleMediaType(application_slot.title_id);
     }
     app_jump_parameters.current_title_id = application_slot.title_id;
-    app_jump_parameters.current_media_type = Service::AM::GetTitleMediaType(application_slot.title_id);
+    app_jump_parameters.current_media_type =
+        Service::AM::GetTitleMediaType(application_slot.title_id);
     app_jump_parameters.next_title_id = title_id;
     app_jump_parameters.next_media_type = media_type;
     app_jump_parameters.flags = flags;
@@ -563,7 +564,7 @@ ResultCode AppletManager::StartApplication(std::vector<u8> parameter, std::vecto
 
     return RESULT_SUCCESS;
 }
-    
+
 std::optional<DeliverArg> AppletManager::ReceiveDeliverArg() const {
     return deliver_arg;
 }

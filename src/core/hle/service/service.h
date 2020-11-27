@@ -5,11 +5,11 @@
 #pragma once
 
 #include <array>
+#include <boost/container/flat_map.hpp>
 #include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>
-#include <boost/container/flat_map.hpp>
 #include "common/common_types.h"
 #include "core/hle/kernel/hle_ipc.h"
 #include "core/hle/kernel/object.h"

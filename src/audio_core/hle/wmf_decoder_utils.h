@@ -6,15 +6,15 @@
 // AAC decoder related APIs are only available with WIN7+
 #define WINVER _WIN32_WINNT_WIN7
 
-#include <optional>
-#include <string>
-#include <tuple>
-#include <vector>
 #include <comdef.h>
 #include <mfapi.h>
 #include <mferror.h>
 #include <mfidl.h>
 #include <mftransform.h>
+#include <optional>
+#include <string>
+#include <tuple>
+#include <vector>
 
 #include "adts.h"
 
@@ -23,6 +23,7 @@ namespace MFDecoder {
 template <typename T>
 struct Symbol {
     Symbol() = default;
+
     Symbol(HMODULE dll, const char* name) {
         if (dll) {
             ptr_symbol = reinterpret_cast<T*>(GetProcAddress(dll, name));

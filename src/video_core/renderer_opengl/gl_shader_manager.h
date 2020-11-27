@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <memory>
 #include <glad/glad.h>
+#include <memory>
 #include "video_core/rasterizer_interface.h"
 #include "video_core/regs_lighting.h"
 #include "video_core/renderer_opengl/gl_resource_manager.h"

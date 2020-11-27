@@ -4,8 +4,8 @@
 
 #include <algorithm>
 #include <array>
-#include <cstddef>
 #include <boost/container/static_vector.hpp>
+#include <cstddef>
 #include "common/bit_field.h"
 #include "common/common_types.h"
 #include "common/logging/log.h"

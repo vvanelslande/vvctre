@@ -93,10 +93,9 @@ ResultCode SoftwareKeyboard::StartImpl(Service::APT::AppletStartupParameter cons
     ASSERT_MSG(parameter.buffer.size() == sizeof(config),
                "The size of the parameter (SoftwareKeyboardConfig) is wrong");
 
-    memcpy(&config, parameter.buffer.data(), parameter.buffer.size());
+    std::memcpy(&config, parameter.buffer.data(), parameter.buffer.size());
     text_memory = std::static_pointer_cast<Kernel::SharedMemory, Kernel::Object>(parameter.object);
 
-    using namespace Frontend;
     frontend_applet = Core::System::GetInstance().GetSoftwareKeyboard();
     ASSERT(frontend_applet);
 
@@ -107,11 +106,11 @@ ResultCode SoftwareKeyboard::StartImpl(Service::APT::AppletStartupParameter cons
 }
 
 void SoftwareKeyboard::Update() {
-    if (!frontend_applet->DataReady())
+    if (!frontend_applet->DataReady()) {
         return;
+    }
 
-    using namespace Frontend;
-    const KeyboardData& data = frontend_applet->ReceiveData();
+    const Frontend::KeyboardData& data = frontend_applet->ReceiveData();
 
     switch (config.num_buttons_m1) {
     case SoftwareKeyboardButtonConfig::SingleButton: {
@@ -206,17 +205,18 @@ void SoftwareKeyboard::Finalize() {
     message.sender_id = id;
     SendParameter(message);
 
+    framebuffer_memory.reset();
+    text_memory.reset();
     is_running = false;
-    text_memory = nullptr;
 }
 
 Frontend::KeyboardConfig SoftwareKeyboard::ToFrontendConfig(
     const SoftwareKeyboardConfig& config) const {
-    using namespace Frontend;
-    KeyboardConfig frontend_config;
+    Frontend::KeyboardConfig frontend_config;
     frontend_config.button_config =
-        static_cast<ButtonConfig>(static_cast<u32>(config.num_buttons_m1));
-    frontend_config.accept_mode = static_cast<AcceptedInput>(static_cast<u32>(config.valid_input));
+        static_cast<Frontend::ButtonConfig>(static_cast<u32>(config.num_buttons_m1));
+    frontend_config.accept_mode =
+        static_cast<Frontend::AcceptedInput>(static_cast<u32>(config.valid_input));
     frontend_config.multiline_mode = config.multiline;
     frontend_config.max_text_length = config.max_text_length;
     frontend_config.max_digits = config.max_digits;
@@ -238,4 +238,5 @@ Frontend::KeyboardConfig SoftwareKeyboard::ToFrontendConfig(
         static_cast<bool>(config.filter_flags & SoftwareKeyboardFilter::Callback);
     return frontend_config;
 }
+
 } // namespace HLE::Applets

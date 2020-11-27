@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <tuple>
 #include <glad/glad.h>
+#include <tuple>
 #include "common/common_types.h"
 #include "video_core/renderer_opengl/gl_resource_manager.h"
 

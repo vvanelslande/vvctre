@@ -27,8 +27,8 @@ namespace OpenGL {
 
 class ShaderDiskCacheEntry {
 public:
-    explicit ShaderDiskCacheEntry(u64 unique_identifier, ProgramType type,
-                                  Pica::Regs registers, std::vector<u32> code);
+    explicit ShaderDiskCacheEntry(u64 unique_identifier, ProgramType type, Pica::Regs registers,
+                                  std::vector<u32> code);
     ShaderDiskCacheEntry() = default;
     ~ShaderDiskCacheEntry() = default;
 

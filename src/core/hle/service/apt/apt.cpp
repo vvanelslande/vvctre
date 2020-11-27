@@ -495,14 +495,14 @@ void Module::APTInterface::ReceiveDeliverArg(Kernel::HLERequestContext& ctx) {
 
     DeliverArg arg = apt->applet_manager->ReceiveDeliverArg().value_or(DeliverArg{});
     arg.parameter.resize(parameter_size);
-    arg.hmac.resize(std::max<std::size_t>(hmac_size, 0x20));
+    arg.hmac.resize(hmac_size);
 
     IPC::RequestBuilder rb = rp.MakeBuilder(4, 4);
     rb.Push(RESULT_SUCCESS);
     rb.Push(arg.source_program_id);
     rb.Push<u8>(1);
     rb.PushStaticBuffer(std::move(arg.parameter), 0);
-    rb.PushStaticBuffer(std::move(arg.hmac), 2);
+    rb.PushStaticBuffer(std::move(arg.hmac), 1);
 }
 
 void Module::APTInterface::PrepareToStartApplication(Kernel::HLERequestContext& ctx) {

@@ -4,11 +4,11 @@
 
 #include <algorithm>
 #include <array>
+#include <boost/asio.hpp>
 #include <chrono>
 #include <cstring>
 #include <functional>
 #include <thread>
-#include <boost/asio.hpp>
 #include "common/logging/log.h"
 #include "input_common/udp/client.h"
 #include "input_common/udp/protocol.h"

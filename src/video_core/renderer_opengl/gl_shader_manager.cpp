@@ -3,10 +3,10 @@
 // Refer to the license.txt file included.
 
 #include <algorithm>
+#include <boost/container_hash/hash.hpp>
 #include <thread>
 #include <unordered_map>
 #include <variant>
-#include <boost/container_hash/hash.hpp>
 #include "common/scope_exit.h"
 #include "core/core.h"
 #include "core/settings.h"
@@ -18,7 +18,8 @@ namespace OpenGL {
 
 static u64 GetUniqueIdentifier(const Pica::Regs& registers, const std::vector<u32>& code) {
     std::size_t hash = 0;
-    u64 registers_hash = Common::ComputeHash64(registers.reg_array.data(), Pica::Regs::NUM_REGS * sizeof(u32));
+    u64 registers_hash =
+        Common::ComputeHash64(registers.reg_array.data(), Pica::Regs::NUM_REGS * sizeof(u32));
     boost::hash_combine(hash, registers_hash);
     if (code.size() > 0) {
         u64 code_hash = Common::ComputeHash64(code.data(), code.size() * sizeof(u32));
@@ -306,13 +307,12 @@ bool ShaderProgramManager::UseProgrammableVertexShader(const Pica::Regs& regs,
         return false;
     }
     impl->current.vs = handle;
-    if (Settings::values.use_hardware_shader && Settings::values.enable_disk_shader_cache && new_shader) {
+    if (Settings::values.use_hardware_shader && Settings::values.enable_disk_shader_cache &&
+        new_shader) {
         std::vector<u32> code{setup.program_code.begin(), setup.program_code.end()};
-        code.insert(code.end(), setup.swizzle_data.begin(),
-                    setup.swizzle_data.end());
+        code.insert(code.end(), setup.swizzle_data.begin(), setup.swizzle_data.end());
         const u64 unique_identifier = GetUniqueIdentifier(regs, code);
-        const ShaderDiskCacheEntry entry{unique_identifier, ProgramType::VS, regs,
-                                         std::move(code)};
+        const ShaderDiskCacheEntry entry{unique_identifier, ProgramType::VS, regs, std::move(code)};
         impl->disk_cache->Add(entry);
     }
     return true;
@@ -336,7 +336,8 @@ void ShaderProgramManager::UseFragmentShader(const Pica::Regs& regs) {
     PicaFSConfig config = PicaFSConfig::BuildFromRegs(regs);
     auto [handle, new_shader] = impl->fragment_shaders.Get(config);
     impl->current.fs = handle;
-    if (Settings::values.use_hardware_shader && Settings::values.enable_disk_shader_cache && new_shader) {
+    if (Settings::values.use_hardware_shader && Settings::values.enable_disk_shader_cache &&
+        new_shader) {
         u64 unique_identifier = GetUniqueIdentifier(regs, {});
         ShaderDiskCacheEntry entry{unique_identifier, ProgramType::FS, regs, {}};
         impl->disk_cache->Add(entry);
@@ -401,7 +402,8 @@ void ShaderProgramManager::LoadDiskCache() {
             auto [h, _] = impl->fragment_shaders.Get(conf);
             handle = h;
         } else {
-            LOG_ERROR(Render_OpenGL, "Unsupported shader type ({}) found in disk shader cache, deleting it",
+            LOG_ERROR(Render_OpenGL,
+                      "Unsupported shader type ({}) found in disk shader cache, deleting it",
                       static_cast<u32>(entry.GetType()));
             impl->disk_cache->Delete();
             return;

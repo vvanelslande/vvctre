@@ -7,8 +7,8 @@
 #include <array>
 #include <cstddef>
 #include <functional>
-#include <type_traits>
 #include <nihstro/shader_bytecode.h>
+#include <type_traits>
 #include "common/assert.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"

@@ -4,12 +4,12 @@
 
 #include <algorithm>
 #include <chrono>
+#include <fmt/chrono.h>
+#include <fmt/format.h>
 #include <iterator>
 #include <mutex>
 #include <numeric>
 #include <thread>
-#include <fmt/chrono.h>
-#include <fmt/format.h>
 #include "common/file_util.h"
 #include "core/core.h"
 #include "core/hw/gpu.h"

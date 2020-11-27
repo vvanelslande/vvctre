@@ -2,6 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <SDL.h>
 #include <algorithm>
 #include <atomic>
 #include <cmath>
@@ -14,7 +15,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <SDL.h>
 #include "common/assert.h"
 #include "common/logging/log.h"
 #include "common/math_util.h"

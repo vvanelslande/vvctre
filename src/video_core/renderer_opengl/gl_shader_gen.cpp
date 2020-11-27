@@ -5,8 +5,8 @@
 #include <array>
 #include <cstddef>
 #include <cstring>
-#include <string_view>
 #include <fmt/format.h>
+#include <string_view>
 #include "common/assert.h"
 #include "common/bit_field.h"
 #include "common/bit_set.h"

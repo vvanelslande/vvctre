@@ -2,12 +2,12 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <sstream>
 #include <cryptopp/hex.h>
 #include <cryptopp/integer.h>
 #include <cryptopp/nbtheory.h>
 #include <cryptopp/sha.h>
 #include <fmt/format.h>
+#include <sstream>
 #include "common/file_util.h"
 #include "common/logging/log.h"
 #include "core/hw/rsa/rsa.h"
@@ -49,9 +49,9 @@ void InitSlots() {
         return;
     }
 
-    const std::size_t length = file.GetSize();
-    if (length != 65536) {
-        LOG_ERROR(HW_AES, "Bootrom9 size is wrong: {}", length);
+    const std::size_t size = file.GetSize();
+    if (size != 65536) {
+        LOG_ERROR(HW_AES, "Bootrom9 size is wrong: {}", size);
         return;
     }
 

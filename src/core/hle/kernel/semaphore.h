@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <string>
 #include <queue>
+#include <string>
 #include "common/common_types.h"
 #include "core/hle/kernel/object.h"
 #include "core/hle/kernel/wait_object.h"

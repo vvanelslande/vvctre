@@ -27,6 +27,7 @@ enum class MediaType : u32;
 namespace Service::AM {
 
 namespace ErrCodes {
+
 enum {
     CIACurrentlyInstalling = 4,
     InvalidTID = 31,
@@ -35,6 +36,7 @@ enum {
     InvalidTIDInList = 60,
     InvalidCIAHeader = 104,
 };
+
 } // namespace ErrCodes
 
 enum class CIAInstallState : u32 {
@@ -111,40 +113,39 @@ InstallStatus InstallCIA(const std::string& path,
                          std::function<ProgressCallback>&& update_callback = nullptr);
 
 /**
- * Get the mediatype for an installed title
+ * Get the media type for an installed title
  * @param title_id the installed title ID
  * @returns MediaType which the installed title will reside on
  */
-Service::FS::MediaType GetTitleMediaType(u64 title_id);
+Service::FS::MediaType GetTitleMediaType(u64 titleId);
 
 /**
  * Get the .tmd path for a title
  * @param media_type the media the title exists on
- * @param program_id the title ID to get
+ * @param tid the title ID to get
  * @param update set true if the incoming TMD should be used instead of the current TMD
  * @returns string path to the .tmd file if it exists, otherwise a path to create one is given.
  */
-std::string GetTitleMetadataPath(Service::FS::MediaType media_type, u64 program_id,
-                                 bool update = false);
+std::string GetTitleMetadataPath(Service::FS::MediaType media_type, u64 tid, bool update = false);
 
 /**
  * Get the .app path for a title's installed content index.
  * @param media_type the media the title exists on
- * @param program_id the title ID to get
+ * @param tid the title ID to get
  * @param index the content index to get
  * @param update set true if the incoming TMD should be used instead of the current TMD
  * @returns string path to the .app file
  */
-std::string GetTitleContentPath(FS::MediaType media_type, u64 program_id, std::size_t index = 0,
+std::string GetTitleContentPath(FS::MediaType media_type, u64 tid, std::size_t index = 0,
                                 bool update = false);
 
 /**
  * Get the folder for a title's installed content.
  * @param media_type the media the title exists on
- * @param program_id the title ID to get
+ * @param tid the title ID to get
  * @returns string path to the title folder
  */
-std::string GetTitlePath(Service::FS::MediaType media_type, u64 program_id);
+std::string GetTitlePath(Service::FS::MediaType media_type, u64 tid);
 
 /**
  * Get the title/ folder for a storage medium.

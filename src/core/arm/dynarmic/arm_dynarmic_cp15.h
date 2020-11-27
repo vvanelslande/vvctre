@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <memory>
 #include <dynarmic/A32/coprocessor.h>
+#include <memory>
 #include "common/common_types.h"
 
 struct CP15State {

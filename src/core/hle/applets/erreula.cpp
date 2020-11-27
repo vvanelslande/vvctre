@@ -58,7 +58,9 @@ ResultCode ErrEula::StartImpl(const Service::APT::AppletStartupParameter& parame
     message.sender_id = id;
     SendParameter(message);
 
+    framebuffer_memory.reset();
     is_running = false;
+
     return RESULT_SUCCESS;
 }
 

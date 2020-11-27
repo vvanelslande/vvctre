@@ -5,9 +5,9 @@
 #pragma once
 
 #include <array>
+#include <boost/crc.hpp>
 #include <optional>
 #include <type_traits>
-#include <boost/crc.hpp>
 #include "common/bit_field.h"
 #include "common/swap.h"
 

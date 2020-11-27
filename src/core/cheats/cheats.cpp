@@ -2,9 +2,9 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <fmt/format.h>
 #include <fstream>
 #include <functional>
-#include <fmt/format.h>
 #include "common/file_util.h"
 #include "core/cheats/cheats.h"
 #include "core/cheats/gateway_cheat.h"

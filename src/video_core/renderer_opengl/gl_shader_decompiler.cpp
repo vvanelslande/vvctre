@@ -3,13 +3,13 @@
 // Refer to the license.txt file included.
 
 #include <exception>
+#include <fmt/format.h>
 #include <map>
+#include <nihstro/shader_bytecode.h>
 #include <set>
 #include <string>
 #include <tuple>
 #include <utility>
-#include <fmt/format.h>
-#include <nihstro/shader_bytecode.h>
 #include "common/assert.h"
 #include "common/common_types.h"
 #include "video_core/renderer_opengl/gl_shader_decompiler.h"
@@ -619,9 +619,9 @@ private:
                 std::string dest_reg =
                     (instr.mad.dest.Value() < 0x10)
                         ? outputreg_getter(static_cast<u32>(instr.mad.dest.Value().GetIndex()))
-                        : (instr.mad.dest.Value() < 0x20)
-                              ? "reg_tmp" + std::to_string(instr.mad.dest.Value().GetIndex())
-                              : "";
+                    : (instr.mad.dest.Value() < 0x20)
+                        ? "reg_tmp" + std::to_string(instr.mad.dest.Value().GetIndex())
+                        : "";
 
                 if (sanitize_mul) {
                     SetDest(swizzle, dest_reg,

@@ -4,11 +4,11 @@
 
 #include <algorithm>
 #include <array>
-#include <cmath>
-#include <numeric>
 #include <boost/container/static_vector.hpp>
 #include <boost/range/algorithm/fill.hpp>
+#include <cmath>
 #include <nihstro/shader_bytecode.h>
+#include <numeric>
 #include "common/assert.h"
 #include "common/common_types.h"
 #include "common/logging/log.h"
@@ -165,9 +165,9 @@ static void RunInterpreter(const ShaderSetup& setup, UnitState& state, unsigned 
             float24* dest =
                 (instr.common.dest.Value() < 0x10)
                     ? &state.registers.output[instr.common.dest.Value().GetIndex()][0]
-                    : (instr.common.dest.Value() < 0x20)
-                          ? &state.registers.temporary[instr.common.dest.Value().GetIndex()][0]
-                          : dummy_vec4_float24;
+                : (instr.common.dest.Value() < 0x20)
+                    ? &state.registers.temporary[instr.common.dest.Value().GetIndex()][0]
+                    : dummy_vec4_float24;
 
             switch (instr.opcode.Value().EffectiveOpCode()) {
             case OpCode::Id::ADD: {
@@ -460,9 +460,9 @@ static void RunInterpreter(const ShaderSetup& setup, UnitState& state, unsigned 
                 float24* dest =
                     (instr.mad.dest.Value() < 0x10)
                         ? &state.registers.output[instr.mad.dest.Value().GetIndex()][0]
-                        : (instr.mad.dest.Value() < 0x20)
-                              ? &state.registers.temporary[instr.mad.dest.Value().GetIndex()][0]
-                              : dummy_vec4_float24;
+                    : (instr.mad.dest.Value() < 0x20)
+                        ? &state.registers.temporary[instr.mad.dest.Value().GetIndex()][0]
+                        : dummy_vec4_float24;
 
                 for (int i = 0; i < 4; ++i) {
                     if (!swizzle.DestComponentEnabled(i)) {

@@ -7,9 +7,9 @@
 #include <array>
 #include <cstddef>
 #include <cstring>
+#include <glad/glad.h>
 #include <memory>
 #include <vector>
-#include <glad/glad.h>
 #include "common/bit_field.h"
 #include "common/common_types.h"
 #include "common/vector_math.h"

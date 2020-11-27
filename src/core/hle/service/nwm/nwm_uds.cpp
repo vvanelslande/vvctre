@@ -3,8 +3,8 @@
 // Refer to the license.txt file included.
 
 #include <algorithm>
-#include <cstring>
 #include <cryptopp/osrng.h>
+#include <cstring>
 #include "common/common_types.h"
 #include "common/logging/log.h"
 #include "core/core.h"
@@ -898,10 +898,11 @@ ResultCode NWM_UDS::BeginHostingNetwork(const u8* network_info_buffer,
         node_info[0] = current_node;
 
         // If the game/program has a preferred channel, use that instead.
-        if (network_info.channel != 0)
-            {network_channel = network_info.channel;}
-        else
-            {network_info.channel = DefaultNetworkChannel;}
+        if (network_info.channel != 0) {
+            network_channel = network_info.channel;
+        } else {
+            network_info.channel = DefaultNetworkChannel;
+        }
     }
 
     connection_status_event->Signal();

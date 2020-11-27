@@ -378,7 +378,8 @@ int main(int argc, char** argv) {
                 ImGui::EndPopup();
             }
 
-            glClearColor(Settings::values.background_color_red, Settings::values.background_color_green,
+            glClearColor(Settings::values.background_color_red,
+                         Settings::values.background_color_green,
                          Settings::values.background_color_blue, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui::Render();
@@ -431,12 +432,11 @@ int main(int argc, char** argv) {
                                 ImGuiCond_Always, ImVec2(0.5f, 0.5f));
         if (ImGui::BeginPopupModal("Loading Disk Shader Cache", nullptr,
                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove |
-                                   ImGuiWindowFlags_NoResize |
-                                   ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::ProgressBar(
-                static_cast<float>(current) / static_cast<float>(total),
-                ImVec2(ImGui::CalcTextSize("Loading Disk Shader Cache").x, 0.0f),
-                overlay.c_str());
+                                       ImGuiWindowFlags_NoResize |
+                                       ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::ProgressBar(static_cast<float>(current) / static_cast<float>(total),
+                               ImVec2(ImGui::CalcTextSize("Loading Disk Shader Cache").x, 0.0f),
+                               overlay.c_str());
             ImGui::EndPopup();
         }
         glClearColor(Settings::values.background_color_red, Settings::values.background_color_green,

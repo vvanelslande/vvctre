@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <glad/glad.h>
 #include <map>
 #include <type_traits>
-#include <glad/glad.h>
 #include "common/common_types.h"
 #include "common/math_util.h"
 #include "video_core/renderer_opengl/gl_resource_manager.h"

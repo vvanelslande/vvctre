@@ -4,8 +4,8 @@
 
 #include <array>
 #include <atomic>
-#include <thread>
 #include <teakra/teakra.h>
+#include <thread>
 #include "audio_core/lle/lle.h"
 #include "common/assert.h"
 #include "common/bit_field.h"

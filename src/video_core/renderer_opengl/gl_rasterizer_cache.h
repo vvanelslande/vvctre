@@ -18,9 +18,9 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-#include <unordered_map>
 #include <boost/container_hash/hash.hpp>
 #include <glad/glad.h>
+#include <unordered_map>
 #include "common/assert.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"
@@ -171,11 +171,10 @@ struct CachedSurface : SurfaceParams, std::enable_shared_from_this<CachedSurface
 
     static constexpr unsigned int GetGLBytesPerPixel(PixelFormat format) {
         // OpenGL needs 4 bpp alignment for D24 since using GL_UNSIGNED_INT as type
-        return format == PixelFormat::Invalid
-                   ? 0
-                   : (format == PixelFormat::D24 || GetFormatType(format) == SurfaceType::Texture)
-                         ? 4
-                         : SurfaceParams::GetFormatBpp(format) / 8;
+        return format == PixelFormat::Invalid ? 0
+               : (format == PixelFormat::D24 || GetFormatType(format) == SurfaceType::Texture)
+                   ? 4
+                   : SurfaceParams::GetFormatBpp(format) / 8;
     }
 
     std::vector<u8> gl_buffer;

@@ -31,7 +31,7 @@ ResultCode MiiSelector::ReceiveParameter(const Service::APT::MessageParameter& p
     Service::APT::CaptureBufferInfo capture_info;
     ASSERT(sizeof(capture_info) == parameter.buffer.size());
 
-    memcpy(&capture_info, parameter.buffer.data(), sizeof(capture_info));
+    std::memcpy(&capture_info, parameter.buffer.data(), sizeof(capture_info));
 
     // Create a SharedMemory that directly points to this heap block.
     framebuffer_memory = Core::System::GetInstance().Kernel().CreateSharedMemoryForApplet(
@@ -54,22 +54,21 @@ ResultCode MiiSelector::StartImpl(const Service::APT::AppletStartupParameter& pa
     ASSERT_MSG(parameter.buffer.size() == sizeof(config),
                "The size of the parameter (MiiConfig) is wrong");
 
-    memcpy(&config, parameter.buffer.data(), parameter.buffer.size());
+    std::memcpy(&config, parameter.buffer.data(), parameter.buffer.size());
 
-    using namespace Frontend;
     frontend_applet = Core::System::GetInstance().GetMiiSelector();
     ASSERT(frontend_applet);
 
-    MiiSelectorConfig frontend_config = ToFrontendConfig(config);
+    Frontend::MiiSelectorConfig frontend_config = ToFrontendConfig(config);
     frontend_applet->Setup(frontend_config);
 
     is_running = true;
+
     return RESULT_SUCCESS;
 }
 
 void MiiSelector::Update() {
-    using namespace Frontend;
-    const MiiSelectorData& data = frontend_applet->ReceiveData();
+    const Frontend::MiiSelectorData& data = frontend_applet->ReceiveData();
     result.return_code = data.return_code;
     if (result.return_code == 0) {
         result.selected_mii_data = data.mii;
@@ -91,6 +90,7 @@ void MiiSelector::Finalize() {
     message.sender_id = id;
     SendParameter(message);
 
+    framebuffer_memory.reset();
     is_running = false;
 }
 
@@ -119,4 +119,5 @@ Frontend::MiiSelectorConfig MiiSelector::ToFrontendConfig(const MiiConfig& confi
     frontend_config.initially_selected_mii_index = config.initially_selected_mii_index;
     return frontend_config;
 }
+
 } // namespace HLE::Applets

@@ -3,13 +3,13 @@
 // Refer to the license.txt file included.
 
 #include <algorithm>
-#include <exception>
-#include <optional>
-#include <sstream>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/sha.h>
+#include <exception>
 #include <fmt/format.h>
+#include <optional>
+#include <sstream>
 #include "common/file_util.h"
 #include "common/logging/log.h"
 #include "common/string_util.h"

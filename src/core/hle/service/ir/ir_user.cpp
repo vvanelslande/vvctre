@@ -2,8 +2,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <memory>
 #include <boost/crc.hpp>
+#include <memory>
 #include "common/string_util.h"
 #include "common/swap.h"
 #include "core/core.h"

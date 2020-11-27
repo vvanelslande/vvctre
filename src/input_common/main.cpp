@@ -2,9 +2,9 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <SDL.h>
 #include <memory>
 #include <thread>
-#include <SDL.h>
 #include "common/param_package.h"
 #include "input_common/analog_from_button.h"
 #include "input_common/keyboard.h"
