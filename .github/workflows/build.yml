@@ -164,15 +164,9 @@ jobs:
           asset_path: ./linux/vvctre-${{steps.step3.outputs.version}}-linux.zip
           asset_name: vvctre-${{steps.step3.outputs.version}}-linux.zip
           asset_content_type: application/zip
-      - name: Send and publish Discord message
+      - name: Send Discord message
         run: |
-          message=$(curl \
+          curl \
             -H "Content-Type: application/json" \
             --data "{\"embeds\":[{\"title\":\"${{steps.step3.outputs.version}}\",\"description\":\"• [Release](https://github.com/vvanelslande/vvctre/releases/tag/${{steps.step3.outputs.version}})\n• [Download Windows 7 and 8 build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.7z)\n• [Download Windows 7 and 8 build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-windows-7-and-8.zip)\n• [Download Windows 8.1+ build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.7z)\n• [Download Windows 8.1+ build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-windows-8.1-and-later.zip)\n• [Download Linux build (7z)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-linux.7z)\n• [Download Linux build (zip)](https://github.com/vvanelslande/vvctre/releases/download/${{steps.step3.outputs.version}}/vvctre-${{steps.step3.outputs.version}}-linux.zip)\"}]}" \
-            "${{secrets.DISCORD_RELEASES_WEBHOOK}}")
-          message_id=$(echo $message | jq .id -r)
-          curl \
-            -X POST \
-            -H "Content-Length: 0" \
-            -H "Authorization: Bot ${{secrets.DISCORD_BOT_TOKEN}}" \
-            https://discord.com/api/v8/channels/722351217216323624/messages/$message_id/crosspost
+            "${{secrets.DISCORD_RELEASES_WEBHOOK}}"
