@@ -265,8 +265,9 @@ std::vector<u8> GenerateNintendoFirstEncryptedDataTag(const NetworkInfo& network
 std::vector<u8> GenerateNintendoSecondEncryptedDataTag(const NetworkInfo& network_info,
                                                        const NodeList& nodes) {
     // This tag is only present if the payload is larger than EncryptedDataSizeCutoff (0xFA).
-    if (nodes.size() * sizeof(NodeInfo) <= EncryptedDataSizeCutoff)
+    if (nodes.size() * sizeof(NodeInfo) <= EncryptedDataSizeCutoff) {
         return {};
+    }
 
     const std::size_t payload_size = nodes.size() * sizeof(NodeInfo) - EncryptedDataSizeCutoff;
 
