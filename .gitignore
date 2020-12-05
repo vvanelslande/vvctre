@@ -19,3 +19,6 @@ Thumbs.db
 
 # Dear ImGui
 imgui.ini
+
+# Jekyll
+website/_site/

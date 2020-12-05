@@ -1,0 +1,69 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <img
+      alt="API Status"
+      src="https://img.shields.io/website?label=API&&up_message=Up&down_message=Down&url=https%3A%2F%2Fvvctre.dynv6.net%3A8831%2Fpm11api%2Fstatus"
+    /><br /><br />
+
+    Type:<br />
+    <select id="type">
+      <option value="custom_default_settings">Custom Default Settings</option>
+      <option value="button_to_touch">Button To Touch</option>
+      <option value="window_size">Window Size</option>
+      <option value="window_position">Window Position</option>
+      <option value="log_file">Log File</option></select
+    ><br /><br />
+
+    <div id="custom_default_settings_div">
+      Lines (see
+      <a
+        href="{{ site.baseurl }}/plugin-maker-custom-default-settings-line-examples/"
+        >Plugin Maker Custom Default Settings Line Examples</a
+      >):
+      <br />
+      <textarea id="custom_default_settings_lines"></textarea>
+    </div>
+
+    <div id="button_to_touch_div" style="display: none">
+      X:<br />
+      <input type="text" id="button_to_touch_x" value="6" /><br /><br />
+      Y:<br />
+      <input type="text" id="button_to_touch_y" value="6" /><br /><br />
+      Params:<br />
+      <input
+        type="text"
+        id="button_to_touch_params"
+        value="engine:keyboard,code:6"
+      />
+    </div>
+
+    <div id="window_size_div" style="display: none">
+      Width:<br />
+      <input type="text" id="window_size_width" value="400" /><br /><br />
+      Height:<br />
+      <input type="text" id="window_size_height" value="480" />
+    </div>
+
+    <div id="window_position_div" style="display: none">
+      X:<br />
+      <input type="text" id="window_position_x" value="0" /><br /><br />
+      Y:<br />
+      <input type="text" id="window_position_y" value="0" />
+    </div>
+
+    <div id="log_file_div" style="display: none">
+      File path:<br />
+      <input type="text" id="log_file_file_path" value="log.txt" />
+    </div>
+
+    <br />
+    <button id="makePlugin">Make Plugin</button>
+
+    <script src="{{ site.baseurl }}/plugin-maker/custom-default-settings-regexes.js"></script>
+    <script src="{{ site.baseurl }}/plugin-maker/code-and-builds-user-github-account.js"></script>
+  </body>
+</html>
