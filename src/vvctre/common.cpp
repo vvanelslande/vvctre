@@ -31,7 +31,7 @@
 
 const u8 vvctre_version_major = 40;
 const u8 vvctre_version_minor = 0;
-const u8 vvctre_version_patch = 4;
+const u8 vvctre_version_patch = 5;
 
 void vvctreShutdown(PluginManager* plugin_manager) {
     if (plugin_manager != nullptr) {

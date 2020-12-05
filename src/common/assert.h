@@ -54,4 +54,4 @@ __declspec(noinline, noreturn)
 #endif
 
 #define UNIMPLEMENTED() LOG_CRITICAL(Debug, "Unimplemented code!")
-#define UNIMPLEMENTED_MSG(_a_, ...) ASSERT_MSG(false, _a_, __VA_ARGS__)
+#define UNIMPLEMENTED_MSG(_a_, ...) LOG_CRITICAL(Debug, _a_, __VA_ARGS__)
