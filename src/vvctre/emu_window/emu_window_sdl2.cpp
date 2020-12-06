@@ -4491,10 +4491,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::InputText("Status", &status_string,
                                              ImGuiInputTextFlags_ReadOnly);
 
-                            if (!record.function_name.empty()) {
-                                ImGui::InputText("Function Name", &record.function_name,
-                                                 ImGuiInputTextFlags_ReadOnly);
-                            }
+                            ImGui::InputText("Function Name", &record.function_name,
+                                             ImGuiInputTextFlags_ReadOnly);
 
                             if (!record.untranslated_request_cmdbuf.empty()) {
                                 std::string function_header_code_string =
@@ -4504,10 +4502,8 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                  ImGuiInputTextFlags_ReadOnly);
                             }
 
-                            if (!service_name.empty()) {
-                                ImGui::InputText("Service Name", &service_name,
-                                                 ImGuiInputTextFlags_ReadOnly);
-                            }
+                            ImGui::InputText("Service Name", &service_name,
+                                             ImGuiInputTextFlags_ReadOnly);
 
                             ImGui::InputText("Client Process Name", &record.client_process.name,
                                              ImGuiInputTextFlags_ReadOnly);
