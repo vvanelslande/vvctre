@@ -5,7 +5,7 @@
 #include "core/hle/kernel/client_port.h"
 #include "core/hle/kernel/config_mem.h"
 #include "core/hle/kernel/handle_table.h"
-#include "core/hle/kernel/ipc_debugger/recorder.h"
+#include "core/hle/kernel/ipc_recorder.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/memory.h"
 #include "core/hle/kernel/process.h"
@@ -17,7 +17,6 @@
 
 namespace Kernel {
 
-/// Initialize the kernel
 KernelSystem::KernelSystem(Memory::MemorySystem& memory, Core::Timing& timing,
                            std::function<void()> prepare_reschedule_callback, u32 system_mode)
     : memory(memory), timing(timing),
@@ -30,13 +29,12 @@ KernelSystem::KernelSystem(Memory::MemorySystem& memory, Core::Timing& timing,
         thread_managers.push_back(std::make_unique<ThreadManager>(*this, 1));
     }
     timer_manager = std::make_unique<TimerManager>(timing);
-    ipc_recorder = std::make_unique<IPCDebugger::Recorder>();
+    ipc_recorder = std::make_unique<IPC::Recorder>();
     stored_processes.assign(Settings::values.enable_core_2 ? 2 : 1, nullptr);
 
     next_thread_id = 1;
 }
 
-/// Shutdown the kernel
 KernelSystem::~KernelSystem() {
     ResetThreadIDs();
 }
@@ -129,11 +127,11 @@ const SharedPage::Handler& KernelSystem::GetSharedPageHandler() const {
     return *shared_page_handler;
 }
 
-IPCDebugger::Recorder& KernelSystem::GetIPCRecorder() {
+IPC::Recorder& KernelSystem::GetIPCRecorder() {
     return *ipc_recorder;
 }
 
-const IPCDebugger::Recorder& KernelSystem::GetIPCRecorder() const {
+const IPC::Recorder& KernelSystem::GetIPCRecorder() const {
     return *ipc_recorder;
 }
 

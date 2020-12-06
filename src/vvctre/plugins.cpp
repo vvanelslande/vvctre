@@ -22,7 +22,7 @@
 #include "core/cheats/cheats.h"
 #include "core/cheats/gateway_cheat.h"
 #include "core/core.h"
-#include "core/hle/kernel/ipc_debugger/recorder.h"
+#include "core/hle/kernel/ipc_recorder.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/cam/cam.h"
 #include "core/hle/service/cfg/cfg.h"
@@ -582,7 +582,7 @@ bool vvctre_ipc_recorder_get_enabled(void* core) {
 
 void vvctre_ipc_recorder_bind_callback(void* core, void (*callback)(const char* json)) {
     static_cast<Core::System*>(core)->Kernel().GetIPCRecorder().BindCallback(
-        [callback](const IPCDebugger::RequestRecord& record) {
+        [callback](const IPC::RequestRecord& record) {
             const nlohmann::json json = {
                 {"id", record.id},
                 {"status", static_cast<int>(record.status)},

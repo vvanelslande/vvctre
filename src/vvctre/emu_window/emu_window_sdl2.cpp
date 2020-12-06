@@ -845,15 +845,15 @@ static const std::vector<std::tuple<u64, std::string>> amiibos = {
     {0x078f000003810002, "Ice Climbers"},
 };
 
-static std::string IPC_Recorder_GetStatusString(IPCDebugger::RequestStatus status) {
+static std::string IPC_Recorder_GetStatusString(IPC::RequestStatus status) {
     switch (status) {
-    case IPCDebugger::RequestStatus::Sent:
+    case IPC::RequestStatus::Sent:
         return "Sent";
-    case IPCDebugger::RequestStatus::Handling:
+    case IPC::RequestStatus::Handling:
         return "Handling";
-    case IPCDebugger::RequestStatus::Handled:
+    case IPC::RequestStatus::Handled:
         return "Handled";
-    case IPCDebugger::RequestStatus::HLEUnimplemented:
+    case IPC::RequestStatus::HLEUnimplemented:
         return "HLEUnimplemented";
     default:
         break;
@@ -3472,26 +3472,22 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::EndMenu();
                 }
 
-                if (ImGui::BeginMenu("Debugging")) {
-                    if (ImGui::Checkbox("IPC Recorder", &show_ipc_recorder_window)) {
-                        if (!show_ipc_recorder_window) {
-                            IPCDebugger::Recorder& r = system.Kernel().GetIPCRecorder();
-
-                            r.SetEnabled(false);
-                            r.UnbindCallback(ipc_recorder_callback);
-
-                            all_ipc_records.clear();
-                            ipc_recorder_search_results.clear();
-                            ipc_recorder_search_text.clear();
-                            ipc_recorder_search_text_.clear();
-                            ipc_recorder_callback = nullptr;
-                        }
-                    }
-
-                    ImGui::EndMenu();
-                }
-
                 ImGui::Checkbox("Cheats", &show_cheats_window);
+
+                if (ImGui::Checkbox("IPC Recorder", &show_ipc_recorder_window)) {
+                    if (!show_ipc_recorder_window) {
+                        IPC::Recorder& r = system.Kernel().GetIPCRecorder();
+
+                        r.SetEnabled(false);
+                        r.UnbindCallback(ipc_recorder_callback);
+
+                        all_ipc_records.clear();
+                        ipc_recorder_search_results.clear();
+                        ipc_recorder_search_text.clear();
+                        ipc_recorder_search_text_.clear();
+                        ipc_recorder_callback = nullptr;
+                    }
+                }
 
                 ImGui::EndMenu();
             }
@@ -4362,22 +4358,21 @@ void EmuWindow_SDL2::SwapBuffers() {
 
         if (ImGui::Begin("IPC Recorder", &show_ipc_recorder_window,
                          ImGuiWindowFlags_NoSavedSettings)) {
-            IPCDebugger::Recorder& r = system.Kernel().GetIPCRecorder();
+            IPC::Recorder& r = system.Kernel().GetIPCRecorder();
             bool enabled = r.IsEnabled();
 
             if (ImGui::Checkbox("Enabled", &enabled)) {
                 r.SetEnabled(enabled);
 
                 if (enabled) {
-                    ipc_recorder_callback =
-                        r.BindCallback([&](const IPCDebugger::RequestRecord& record) {
-                            const int index = record.id - ipc_recorder_id_offset;
-                            if (all_ipc_records.size() > index) {
-                                all_ipc_records[index] = record;
-                            } else {
-                                all_ipc_records.emplace_back(record);
-                            }
-                        });
+                    ipc_recorder_callback = r.BindCallback([&](const IPC::RequestRecord& record) {
+                        const int index = record.id - ipc_recorder_id_offset;
+                        if (all_ipc_records.size() > index) {
+                            all_ipc_records[index] = record;
+                        } else {
+                            all_ipc_records.emplace_back(record);
+                        }
+                    });
                 } else {
                     r.UnbindCallback(ipc_recorder_callback);
                     ipc_recorder_callback = nullptr;
@@ -4402,7 +4397,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                 ipc_recorder_search_results.clear();
 
                 if (!ipc_recorder_search_text.empty()) {
-                    for (const IPCDebugger::RequestRecord& record : all_ipc_records) {
+                    for (const IPC::RequestRecord& record : all_ipc_records) {
                         std::string service_name;
 
                         if (record.client_port.id != -1) {
@@ -4444,16 +4439,16 @@ void EmuWindow_SDL2::SwapBuffers() {
 
             if (ImGui::BeginChildFrame(ImGui::GetID("Records"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
-                std::vector<IPCDebugger::RequestRecord>& records =
-                    ipc_recorder_search_text.empty() ? all_ipc_records
-                                                     : ipc_recorder_search_results;
+                std::vector<IPC::RequestRecord>& records = ipc_recorder_search_text.empty()
+                                                               ? all_ipc_records
+                                                               : ipc_recorder_search_results;
 
                 ImGuiListClipper clipper;
                 clipper.Begin(records.size());
 
                 while (clipper.Step()) {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
-                        IPCDebugger::RequestRecord& record = records[i];
+                        IPC::RequestRecord& record = records[i];
                         std::string service_name;
 
                         if (record.client_port.id != -1) {
@@ -4624,7 +4619,7 @@ void EmuWindow_SDL2::SwapBuffers() {
         }
 
         if (!show_ipc_recorder_window) {
-            IPCDebugger::Recorder& r = system.Kernel().GetIPCRecorder();
+            IPC::Recorder& r = system.Kernel().GetIPCRecorder();
 
             r.SetEnabled(false);
             r.UnbindCallback(ipc_recorder_callback);

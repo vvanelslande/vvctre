@@ -6,7 +6,7 @@
 #include "common/logging/log.h"
 #include "core/hle/kernel/client_port.h"
 #include "core/hle/kernel/client_session.h"
-#include "core/hle/kernel/ipc_debugger/recorder.h"
+#include "core/hle/kernel/ipc_ipc_recorder.h"
 #include "core/hle/kernel/process.h"
 #include "core/hle/kernel/server_port.h"
 #include "core/hle/kernel/server_session.h"
@@ -14,7 +14,7 @@
 #include "core/hle/kernel/thread.h"
 #include "core/hle/service/service.h"
 
-namespace IPCDebugger {
+namespace IPC {
 
 namespace {
 
@@ -166,4 +166,4 @@ void Recorder::SetEnabled(bool enabled_) {
     enabled.store(enabled_, std::memory_order_relaxed);
 }
 
-} // namespace IPCDebugger
+} // namespace IPC

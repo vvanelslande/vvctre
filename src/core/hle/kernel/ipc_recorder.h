@@ -19,11 +19,9 @@ class ClientSession;
 class Thread;
 } // namespace Kernel
 
-namespace IPCDebugger {
+namespace IPC {
 
-/**
- * Record of a kernel object, for debugging purposes.
- */
+// Record of a kernel object
 struct ObjectInfo {
     std::string type;
     std::string name;
@@ -56,9 +54,11 @@ struct RequestRecord {
     ObjectInfo server_session;
     std::string function_name; // Not available for LLE or portless
     bool is_hle = false;
+
     // Request info is only available when status is not `Invalid` or `Sent`
     std::vector<u32> untranslated_request_cmdbuf;
     std::vector<u32> translated_request_cmdbuf;
+
     // Reply info is only available when status is `Handled`
     std::vector<u32> untranslated_reply_cmdbuf;
     std::vector<u32> translated_reply_cmdbuf;
@@ -104,7 +104,7 @@ public:
     void SetHLEUnimplemented(const std::shared_ptr<Kernel::Thread>& client_thread);
 
     /**
-     * Set the status of the debugger (enabled/disabled).
+     * Set the status of the recorder (enabled/disabled).
      */
     void SetEnabled(bool enabled);
 
@@ -126,4 +126,4 @@ private:
     mutable std::shared_mutex callback_mutex;
 };
 
-} // namespace IPCDebugger
+} // namespace IPC

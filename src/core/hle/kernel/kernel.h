@@ -18,23 +18,23 @@
 
 namespace ConfigMem {
 class Handler;
-}
+} // namespace ConfigMem
 
 namespace SharedPage {
 class Handler;
-}
+} // namespace SharedPage
 
 namespace Memory {
 class MemorySystem;
-}
+} // namespace Memory
 
 namespace Core {
 class Timing;
-}
+} // namespace Core
 
-namespace IPCDebugger {
+namespace IPC {
 class Recorder;
-}
+} // namespace IPC
 
 namespace Kernel {
 
@@ -94,7 +94,7 @@ public:
     /**
      * Creates an address arbiter.
      *
-     * @param name Optional name used for debugging.
+     * @param name Optional name.
      * @returns The created AddressArbiter.
      */
     std::shared_ptr<AddressArbiter> CreateAddressArbiter(std::string name = "Unknown");
@@ -179,10 +179,10 @@ public:
      * @param permissions Permission restrictions applied to the process which created the block.
      * @param other_permissions Permission restrictions applied to other processes mapping the
      * block.
-     * @param address The address from which to map the Shared Memory.
+     * @param address The address from which to map the shared memory.
      * @param region If the address is 0, the shared memory will be allocated in this region of the
      * linear heap.
-     * @param name Optional object name, used for debugging purposes.
+     * @param name Optional object name.
      */
     ResultVal<std::shared_ptr<SharedMemory>> CreateSharedMemory(
         Process* owner_process, u32 size, MemoryPermission permissions,
@@ -196,7 +196,7 @@ public:
      * @param permissions Permission restrictions applied to the process which created the block.
      * @param other_permissions Permission restrictions applied to other processes mapping the
      * block.
-     * @param name Optional object name, used for debugging purposes.
+     * @param name Optional object name.
      */
     std::shared_ptr<SharedMemory> CreateSharedMemoryForApplet(u32 offset, u32 size,
                                                               MemoryPermission permissions,
@@ -232,8 +232,8 @@ public:
     SharedPage::Handler& GetSharedPageHandler();
     const SharedPage::Handler& GetSharedPageHandler() const;
 
-    IPCDebugger::Recorder& GetIPCRecorder();
-    const IPCDebugger::Recorder& GetIPCRecorder() const;
+    IPC::Recorder& GetIPCRecorder();
+    const IPC::Recorder& GetIPCRecorder() const;
 
     MemoryRegionInfo* GetMemoryRegion(MemoryRegion region);
 
@@ -293,7 +293,7 @@ private:
     std::unique_ptr<ConfigMem::Handler> config_mem_handler;
     std::unique_ptr<SharedPage::Handler> shared_page_handler;
 
-    std::unique_ptr<IPCDebugger::Recorder> ipc_recorder;
+    std::unique_ptr<IPC::Recorder> ipc_recorder;
 
     u32 next_thread_id;
 };

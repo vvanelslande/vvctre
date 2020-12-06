@@ -50,8 +50,7 @@ public:
     }
 
     /**
-     * Gets the string representation of the path for debugging
-     * @return String representation of the path for debugging
+     * @returns String representation of the path
      */
     std::string DebugStr() const;
 

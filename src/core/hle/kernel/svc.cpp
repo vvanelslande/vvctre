@@ -19,7 +19,7 @@
 #include "core/hle/kernel/event.h"
 #include "core/hle/kernel/handle_table.h"
 #include "core/hle/kernel/ipc.h"
-#include "core/hle/kernel/ipc_debugger/recorder.h"
+#include "core/hle/kernel/ipc_recorder.h"
 #include "core/hle/kernel/memory.h"
 #include "core/hle/kernel/mutex.h"
 #include "core/hle/kernel/process.h"

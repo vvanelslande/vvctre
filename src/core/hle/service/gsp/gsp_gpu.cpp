@@ -63,6 +63,7 @@ static PAddr VirtualToPhysicalAddress(VAddr addr) {
     }
 
     LOG_ERROR(HW_Memory, "Unknown virtual address @ 0x{:08X}", addr);
+
     // To help with debugging, set bit on address so that it's obviously invalid.
     // TODO: find the correct way to handle this error
     return addr | 0x80000000;

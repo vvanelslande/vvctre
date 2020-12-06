@@ -177,7 +177,7 @@ public:
     /// Changes the permissions of a range of addresses, splitting VMAs as necessary.
     ResultCode ReprotectRange(VAddr target, u32 size, VMAPermission new_perms);
 
-    /// Dumps the address space layout to the log, for debugging
+    /// Dumps the address space layout to the log
     void LogLayout(Log::Level log_level) const;
 
     /// Gets a list of backing memory blocks for the specified range

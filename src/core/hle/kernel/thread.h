@@ -59,39 +59,25 @@ public:
     explicit ThreadManager(KernelSystem& kernel, u32 core_id);
     ~ThreadManager();
 
-    /**
-     * Gets the current thread
-     */
+    // Gets the current thread
     Thread* GetCurrentThread() const;
 
-    /**
-     * Reschedules to the next available thread (call after current thread is suspended)
-     */
+    // Reschedules to the next available thread (call after current thread is suspended)
     void Reschedule();
 
-    /**
-     * Prints the thread queue for debugging purposes
-     */
+    // Prints the thread queue
     void DebugThreadQueue();
 
-    /**
-     * Returns whether there are any threads that are ready to run.
-     */
+    // Returns whether there are any threads that are ready to run.
     bool HaveReadyThreads();
 
-    /**
-     * Waits the current thread on a sleep
-     */
+    // Waits the current thread on a sleep
     void WaitCurrentThread_Sleep();
 
-    /**
-     * Stops the current thread and removes it from the thread_list
-     */
+    // Stops the current thread and removes it from the thread_list
     void ExitCurrentThread();
 
-    /**
-     * Get a const reference to the thread list for debug use
-     */
+    // Get a const reference to the thread list for debug use
     const std::vector<std::shared_ptr<Thread>>& GetThreadList();
 
     void SetCPU(ARM_Interface& cpu) {
@@ -111,7 +97,7 @@ private:
 
     /**
      * Pops and returns the next thread from the thread queue
-     * @return A pointer to the next ready thread
+     * @returns A pointer to the next ready thread
      */
     Thread* PopNextReadyThread();
 

@@ -180,7 +180,7 @@ public:
     /**
      * Puts the specified guest thread to sleep until the returned event is signaled or until the
      * specified timeout expires.
-     * @param reason Reason for pausing the thread, to be used for debugging purposes.
+     * @param reason Reason for pausing the thread.
      * @param timeout Timeout in nanoseconds after which the thread will be awoken and the callback
      * invoked with a Timeout reason.
      * @param callback Callback to be invoked when the thread is resumed. This callback must write
