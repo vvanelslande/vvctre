@@ -176,7 +176,7 @@ public:
      * changed. The function wil be called every time the event is triggered. The callback function
      * must not bind or unbind a function. Doing so will cause a deadlock
      * @param callback The function to call
-     * @return A handle used for removing the function from the registered list
+     * @returns A handle used for removing the function from the registered list
      */
     CallbackHandle<State> BindOnStateChanged(std::function<void(const State&)> callback);
 
@@ -185,7 +185,7 @@ public:
      * function wil be called every time the event is triggered. The callback function must not bind
      * or unbind a function. Doing so will cause a deadlock
      * @param callback The function to call
-     * @return A handle used for removing the function from the registered list
+     * @returns A handle used for removing the function from the registered list
      */
     CallbackHandle<Error> BindOnError(std::function<void(const Error&)> callback);
 
@@ -194,7 +194,7 @@ public:
      * The function wil be called everytime the event is triggered.
      * The callback function must not bind or unbind a function. Doing so will cause a deadlock
      * @param callback The function to call
-     * @return A handle used for removing the function from the registered list
+     * @returns A handle used for removing the function from the registered list
      */
     CallbackHandle<WifiPacket> BindOnWifiPacketReceived(
         std::function<void(const WifiPacket&)> callback);
@@ -204,7 +204,7 @@ public:
      * The function wil be called every time the event is triggered.
      * The callback function must not bind or unbind a function. Doing so will cause a deadlock
      * @param callback The function to call
-     * @return A handle used for removing the function from the registered list
+     * @returns A handle used for removing the function from the registered list
      */
     CallbackHandle<RoomInformation> BindOnRoomInformationChanged(
         std::function<void(const RoomInformation&)> callback);
@@ -214,7 +214,7 @@ public:
      * The function wil be called every time the event is triggered.
      * The callback function must not bind or unbind a function. Doing so will cause a deadlock
      * @param callback The function to call
-     * @return A handle used for removing the function from the registered list
+     * @returns A handle used for removing the function from the registered list
      */
     CallbackHandle<ChatEntry> BindOnChatMessageReceived(
         std::function<void(const ChatEntry&)> callback);
@@ -224,7 +224,7 @@ public:
      * received. The function will be called every time the event is triggered. The callback
      * function must not bind or unbind a function. Doing so will cause a deadlock
      * @param callback The function to call
-     * @return A handle used for removing the function from the registered list
+     * @returns A handle used for removing the function from the registered list
      */
     CallbackHandle<StatusMessageEntry> BindOnStatusMessageReceived(
         std::function<void(const StatusMessageEntry&)> callback);

@@ -110,7 +110,7 @@ public:
      * Creates a mutex.
      * @param initial_locked Specifies if the mutex should be locked initially
      * @param name Optional name of mutex
-     * @return Pointer to new Mutex object
+     * @returns Pointer to new Mutex object
      */
     std::shared_ptr<Mutex> CreateMutex(bool initial_locked, std::string name = "Unknown");
 
@@ -127,7 +127,7 @@ public:
      * @param processor_id The ID(s) of the processors on which the thread is desired to be run
      * @param stack_top The address of the thread's stack top
      * @param owner_process The parent process for the thread
-     * @return A shared pointer to the newly created thread
+     * @returns A shared pointer to the newly created thread
      */
     ResultVal<std::shared_ptr<Thread>> CreateThread(std::string name, VAddr entry_point,
                                                     u32 priority, u32 arg, s32 processor_id,
@@ -138,7 +138,7 @@ public:
      * @param initial_count Number of slots reserved for other threads
      * @param max_count Maximum number of slots the semaphore can have
      * @param name Optional name of semaphore
-     * @return The created semaphore
+     * @returns The created semaphore
      */
     ResultVal<std::shared_ptr<Semaphore>> CreateSemaphore(s32 initial_count, s32 max_count,
                                                           std::string name = "Unknown");
@@ -147,7 +147,7 @@ public:
      * Creates a timer
      * @param reset_type ResetType describing how to create the timer
      * @param name Optional name of timer
-     * @return The created Timer
+     * @returns The created Timer
      */
     std::shared_ptr<Timer> CreateTimer(ResetType reset_type, std::string name = "Unknown");
 
@@ -156,7 +156,7 @@ public:
      *
      * @param max_sessions Maximum number of sessions to the port
      * @param name Optional name of the ports
-     * @return The created port tuple
+     * @returns The created port tuple
      */
     PortPair CreatePortPair(u32 max_sessions, std::string name = "UnknownPort");
 
@@ -164,7 +164,7 @@ public:
      * Creates a pair of ServerSession and an associated ClientSession.
      * @param name        Optional name of the ports.
      * @param client_port Optional The ClientPort that spawned this session.
-     * @return The created session tuple
+     * @returns The created session tuple
      */
     SessionPair CreateSessionPair(const std::string& name = "Unknown",
                                   std::shared_ptr<ClientPort> client_port = nullptr);

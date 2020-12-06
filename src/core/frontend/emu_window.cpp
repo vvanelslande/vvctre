@@ -55,7 +55,7 @@ EmuWindow::~EmuWindow() {
  * @param layout FramebufferLayout object describing the framebuffer size and screen positions
  * @param framebuffer_x Framebuffer x-coordinate to check
  * @param framebuffer_y Framebuffer y-coordinate to check
- * @return True if the coordinates are within the touchpad, otherwise false
+ * @returns True if the coordinates are within the touchpad, otherwise false
  */
 static bool IsWithinTouchscreen(const Layout::FramebufferLayout& layout, unsigned framebuffer_x,
                                 unsigned framebuffer_y) {

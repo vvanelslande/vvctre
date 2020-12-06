@@ -230,20 +230,20 @@ public:
 
     /**
      * Ensure NCCH header is loaded and ready for reading sections
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     Loader::ResultStatus LoadHeader();
 
     /**
      * Ensure ExeFS and exheader is loaded and ready for reading sections
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     Loader::ResultStatus Load();
 
     /**
      * Attempt to find overridden sections for the NCCH and mark the container as tainted
      * if any are found.
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     Loader::ResultStatus LoadOverrides();
 
@@ -251,7 +251,7 @@ public:
      * Reads an application ExeFS section of an NCCH file (e.g. .code, .logo, etc.)
      * @param name Name of section to read out of NCCH file
      * @param buffer Vector to read data into
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     Loader::ResultStatus LoadSectionExeFS(const char* name, std::vector<u8>& buffer);
 
@@ -260,7 +260,7 @@ public:
      * (e.g. code.bin, logo.bcma.lz, icon.icn, banner.bnr)
      * @param name Name of section to read from external files
      * @param buffer Vector to read data into
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     Loader::ResultStatus LoadOverrideExeFSSection(const char* name, std::vector<u8>& buffer);
 
@@ -270,7 +270,7 @@ public:
      * @param romfs_file The file containing the RomFS
      * @param offset The offset the romfs begins on
      * @param size The size of the romfs
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     Loader::ResultStatus ReadRomFS(std::shared_ptr<RomFSReader>& romfs_file,
                                    bool use_layered_fs = true);
@@ -278,7 +278,7 @@ public:
     /**
      * Dump the RomFS of the NCCH container to the user folder.
      * @param target_path target path to dump to
-     * @return ResultStatus result of function.
+     * @returns ResultStatus result of function.
      */
     Loader::ResultStatus DumpRomFS(const std::string& target_path);
 
@@ -288,44 +288,44 @@ public:
      * @param romfs_file The file containing the RomFS
      * @param offset The offset the romfs begins on
      * @param size The size of the romfs
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     Loader::ResultStatus ReadOverrideRomFS(std::shared_ptr<RomFSReader>& romfs_file);
 
     /**
      * Get the Program ID of the NCCH container
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     Loader::ResultStatus ReadProgramId(u64_le& program_id);
 
     /**
      * Get the Extdata ID of the NCCH container
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     Loader::ResultStatus ReadExtdataId(u64& extdata_id);
 
     /**
      * Apply a patch for .code (if it exists).
      * This should only be called after allocating .bss.
-     * @return ResultStatus success if a patch was applied, ErrorNotUsed if no patch was found
+     * @returns ResultStatus success if a patch was applied, ErrorNotUsed if no patch was found
      */
     Loader::ResultStatus ApplyCodePatch(std::vector<u8>& code) const;
 
     /**
      * Checks whether the NCCH container contains an ExeFS
-     * @return bool check result
+     * @returns bool check result
      */
     bool HasExeFS();
 
     /**
      * Checks whether the NCCH container contains a RomFS
-     * @return bool check result
+     * @returns bool check result
      */
     bool HasRomFS();
 
     /**
      * Checks whether the NCCH container contains an ExHeader
-     * @return bool check result
+     * @returns bool check result
      */
     bool HasExHeader();
 

@@ -221,7 +221,7 @@ static_assert(sizeof(PadData::Gyroscope) == 12, "UDP Response Gyroscope struct h
 /**
  * Create a Response Message from the data
  * @param data array of bytes sent from the server
- * @return boost::none if it failed to parse or Type if it succeeded. The client can then safely
+ * @returns boost::none if it failed to parse or Type if it succeeded. The client can then safely
  * copy the data into the appropriate struct for that Type
  */
 std::optional<Type> Validate(u8* data, std::size_t size);

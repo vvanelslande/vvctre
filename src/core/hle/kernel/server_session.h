@@ -96,7 +96,7 @@ private:
      * which will be invoked to handle the IPC requests that this session receives.
      * @param kernel The kernel instance to create the server session on
      * @param name Optional name of the server session.
-     * @return The created server session
+     * @returns The created server session
      */
     static ResultVal<std::shared_ptr<ServerSession>> Create(KernelSystem& kernel,
                                                             std::string name = "Unknown");

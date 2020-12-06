@@ -58,7 +58,7 @@ public:
 
     /**
      * Check if a thread can wait on the object
-     * @return True if a thread can wait on the object, otherwise false
+     * @returns True if a thread can wait on the object, otherwise false
      */
     bool IsWaitable() const;
 
@@ -76,7 +76,7 @@ std::shared_ptr<T> SharedFrom(T* raw) {
 
 /**
  * Attempts to downcast the given Object pointer to a pointer to T.
- * @return Derived pointer to the object, or `nullptr` if `object` isn't of type T.
+ * @returns Derived pointer to the object, or `nullptr` if `object` isn't of type T.
  */
 template <typename T>
 inline std::shared_ptr<T> DynamicObjectCast(std::shared_ptr<Object> object) {

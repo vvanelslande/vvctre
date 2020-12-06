@@ -69,7 +69,7 @@ private:
         /**
          * Processes a single stereo PCM16 sample.
          * @param x0 Input sample
-         * @return Output sample
+         * @returns Output sample
          */
         std::array<s16, 2> ProcessSample(const std::array<s16, 2>& x0);
 
@@ -97,7 +97,7 @@ private:
         /**
          * Processes a single stereo PCM16 sample.
          * @param x0 Input sample
-         * @return Output sample
+         * @returns Output sample
          */
         std::array<s16, 2> ProcessSample(const std::array<s16, 2>& x0);
 

@@ -27,7 +27,7 @@ public:
     /**
      * Submits vertex attributes
      * @param input attributes of a vertex output from vertex shader
-     * @return if the buffer is full and the geometry shader should be invoked
+     * @returns if the buffer is full and the geometry shader should be invoked
      */
     virtual bool SubmitVertex(const Shader::AttributeBuffer& input) = 0;
 };

@@ -44,21 +44,21 @@ public:
 
     /**
      * Get a pointer to the data contained in the packet
-     * @return Pointer to the data
+     * @returns Pointer to the data
      */
     const void* GetData() const;
 
     /**
      * This function returns the number of bytes pointed to by
      * what getData returns.
-     * @return Data size, in bytes
+     * @returns Data size, in bytes
      */
     std::size_t GetDataSize() const;
 
     /**
      * This function is useful to know if there is some data
      * left to be read, without actually reading it.
-     * @return True if all data was read, false otherwise
+     * @returns True if all data was read, false otherwise
      */
     bool EndOfPacket() const;
 
@@ -107,7 +107,7 @@ private:
      * Check if the packet can extract a given number of bytes
      * This function updates accordingly the state of the packet.
      * @param size Size to check
-     * @return True if size bytes can be read from the packet
+     * @returns True if size bytes can be read from the packet
      */
     bool CheckSize(std::size_t size);
 

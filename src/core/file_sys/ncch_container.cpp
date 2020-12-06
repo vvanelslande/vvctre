@@ -35,7 +35,7 @@ u64 GetModId(u64 program_id) {
  * Get the decompressed size of an LZSS compressed ExeFS file
  * @param buffer Buffer of compressed file
  * @param size Size of compressed buffer
- * @return Size of decompressed buffer
+ * @returns Size of decompressed buffer
  */
 static u32 LZSS_GetDecompressedSize(const u8* buffer, u32 size) {
     u32 offset_size;
@@ -49,7 +49,7 @@ static u32 LZSS_GetDecompressedSize(const u8* buffer, u32 size) {
  * @param compressed_size Size of compressed buffer
  * @param decompressed Decompressed buffer
  * @param decompressed_size Size of decompressed buffer
- * @return True on success, otherwise false
+ * @returns True on success, otherwise false
  */
 static bool LZSS_Decompress(const u8* compressed, u32 compressed_size, u8* decompressed,
                             u32 decompressed_size) {

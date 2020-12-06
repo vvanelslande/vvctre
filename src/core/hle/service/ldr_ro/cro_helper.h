@@ -520,7 +520,7 @@ private:
     /**
      * Finds an exported named symbol in this module.
      * @param name the name of the symbol to find
-     * @return VAddr the virtual address of the symbol; 0 if not found.
+     * @returns VAddr the virtual address of the symbol; 0 if not found.
      */
     VAddr FindExportNamedSymbol(const std::string& name) const;
 

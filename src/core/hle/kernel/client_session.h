@@ -38,7 +38,7 @@ public:
     /**
      * Sends an SyncRequest from the current emulated thread.
      * @param thread Thread that initiated the request.
-     * @return ResultCode of the operation.
+     * @returns ResultCode of the operation.
      */
     ResultCode SendSyncRequest(std::shared_ptr<Thread> thread);
 

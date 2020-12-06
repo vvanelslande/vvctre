@@ -37,7 +37,7 @@ public:
 
     /**
      * Initialize the archive.
-     * @return true if it initialized successfully
+     * @returns true if it initialized successfully
      */
     bool Initialize();
 

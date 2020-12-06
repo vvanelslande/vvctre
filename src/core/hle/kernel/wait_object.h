@@ -22,7 +22,7 @@ public:
     /**
      * Check if the specified thread should wait until the object is available
      * @param thread The thread about which we're deciding.
-     * @return True if the current thread should wait due to this object being unavailable
+     * @returns True if the current thread should wait due to this object being unavailable
      */
     virtual bool ShouldWait(const Thread* thread) const = 0;
 

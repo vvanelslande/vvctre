@@ -46,8 +46,8 @@ public:
      * @param config The new configuration we've got for this Source from the application.
      * @param adpcm_coeffs ADPCM coefficients to use if config tells us to use them (may contain
      * invalid values otherwise).
-     * @return The current status of this Source. This is given back to the emulated application via
-     * SharedMemory.
+     * @returns The current status of this Source. This is given back to the emulated application
+     * via SharedMemory.
      */
     SourceStatus::Status Tick(SourceConfiguration::Configuration& config,
                               const s16_le (&adpcm_coeffs)[16]);

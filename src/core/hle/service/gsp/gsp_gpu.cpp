@@ -127,7 +127,7 @@ static void WriteSingleHWReg(u32 base_address, u32 data) {
  * @param base_address The address of the first register in the sequence
  * @param size_in_bytes The number of registers to update (size of data)
  * @param data A vector containing the source data
- * @return RESULT_SUCCESS if the parameters are valid, error code otherwise
+ * @returns RESULT_SUCCESS if the parameters are valid, error code otherwise
  */
 static ResultCode WriteHWRegs(u32 base_address, u32 size_in_bytes, const std::vector<u8>& data) {
     // This magic number is verified to be done by the gsp module
@@ -170,7 +170,7 @@ static ResultCode WriteHWRegs(u32 base_address, u32 size_in_bytes, const std::ve
  * @param size_in_bytes The number of registers to update (size of data)
  * @param data    A vector containing the data to write
  * @param masks   A vector containing the masks
- * @return RESULT_SUCCESS if the parameters are valid, error code otherwise
+ * @returns RESULT_SUCCESS if the parameters are valid, error code otherwise
  */
 static ResultCode WriteHWRegsWithMask(u32 base_address, u32 size_in_bytes,
                                       const std::vector<u8>& data, const std::vector<u8>& masks) {

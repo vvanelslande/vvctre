@@ -78,7 +78,7 @@ public:
      * @param id_code IdCode of the archive to open
      * @param archive_path Path to the archive, used with Binary paths
      * @param program_id the program ID of the client that requests the operation
-     * @return Handle to the opened archive
+     * @returns Handle to the opened archive
      */
     ResultVal<ArchiveHandle> OpenArchive(ArchiveIdCode id_code, const FileSys::Path& archive_path,
                                          u64 program_id);
@@ -94,7 +94,7 @@ public:
      * @param archive_handle Handle to an open Archive object
      * @param path Path to the File inside of the Archive
      * @param mode Mode under which to open the File
-     * @return Pair containing the opened File object and the open delay
+     * @returns Pair containing the opened File object and the open delay
      */
     std::pair<ResultVal<std::shared_ptr<File>>, std::chrono::nanoseconds> OpenFileFromArchive(
         ArchiveHandle archive_handle, const FileSys::Path& path, FileSys::Mode mode);
@@ -103,7 +103,7 @@ public:
      * Delete a File from an Archive
      * @param archive_handle Handle to an open Archive object
      * @param path Path to the File inside of the Archive
-     * @return Whether deletion succeeded
+     * @returns Whether deletion succeeded
      */
     ResultCode DeleteFileFromArchive(ArchiveHandle archive_handle, const FileSys::Path& path);
 
@@ -113,7 +113,7 @@ public:
      * @param src_path Path to the File inside of the source Archive
      * @param dest_archive_handle Handle to the destination Archive object
      * @param dest_path Path to the File inside of the destination Archive
-     * @return Whether rename succeeded
+     * @returns Whether rename succeeded
      */
     ResultCode RenameFileBetweenArchives(ArchiveHandle src_archive_handle,
                                          const FileSys::Path& src_path,
@@ -124,7 +124,7 @@ public:
      * Delete a Directory from an Archive
      * @param archive_handle Handle to an open Archive object
      * @param path Path to the Directory inside of the Archive
-     * @return Whether deletion succeeded
+     * @returns Whether deletion succeeded
      */
     ResultCode DeleteDirectoryFromArchive(ArchiveHandle archive_handle, const FileSys::Path& path);
 
@@ -132,7 +132,7 @@ public:
      * Delete a Directory and anything under it from an Archive
      * @param archive_handle Handle to an open Archive object
      * @param path Path to the Directory inside of the Archive
-     * @return Whether deletion succeeded
+     * @returns Whether deletion succeeded
      */
     ResultCode DeleteDirectoryRecursivelyFromArchive(ArchiveHandle archive_handle,
                                                      const FileSys::Path& path);
@@ -142,7 +142,7 @@ public:
      * @param archive_handle Handle to an open Archive object
      * @param path Path to the File inside of the Archive
      * @param file_size The size of the new file, filled with zeroes
-     * @return File creation result code
+     * @returns File creation result code
      */
     ResultCode CreateFileInArchive(ArchiveHandle archive_handle, const FileSys::Path& path,
                                    u64 file_size);
@@ -151,7 +151,7 @@ public:
      * Create a Directory from an Archive
      * @param archive_handle Handle to an open Archive object
      * @param path Path to the Directory inside of the Archive
-     * @return Whether creation of directory succeeded
+     * @returns Whether creation of directory succeeded
      */
     ResultCode CreateDirectoryFromArchive(ArchiveHandle archive_handle, const FileSys::Path& path);
 
@@ -161,7 +161,7 @@ public:
      * @param src_path Path to the Directory inside of the source Archive
      * @param dest_archive_handle Handle to the destination Archive object
      * @param dest_path Path to the Directory inside of the destination Archive
-     * @return Whether rename succeeded
+     * @returns Whether rename succeeded
      */
     ResultCode RenameDirectoryBetweenArchives(ArchiveHandle src_archive_handle,
                                               const FileSys::Path& src_path,
@@ -172,7 +172,7 @@ public:
      * Open a Directory from an Archive
      * @param archive_handle Handle to an open Archive object
      * @param path Path to the Directory inside of the Archive
-     * @return The opened Directory object
+     * @returns The opened Directory object
      */
     ResultVal<std::shared_ptr<Directory>> OpenDirectoryFromArchive(ArchiveHandle archive_handle,
                                                                    const FileSys::Path& path);
@@ -180,7 +180,7 @@ public:
     /**
      * Get the free space in an Archive
      * @param archive_handle Handle to an open Archive object
-     * @return The number of free bytes in the archive
+     * @returns The number of free bytes in the archive
      */
     ResultVal<u64> GetFreeBytesInArchive(ArchiveHandle archive_handle);
 
@@ -191,7 +191,7 @@ public:
      * @param format_info Format information about the new archive
      * @param path The path to the archive, if relevant.
      * @param program_id the program ID of the client that requests the operation
-     * @return ResultCode 0 on success or the corresponding code on error
+     * @returns ResultCode 0 on success or the corresponding code on error
      */
     ResultCode FormatArchive(ArchiveIdCode id_code, const FileSys::ArchiveFormatInfo& format_info,
                              const FileSys::Path& path, u64 program_id);
@@ -202,7 +202,7 @@ public:
      * @param id_code The id of the archive
      * @param archive_path The path of the archive, if relevant
      * @param program_id the program ID of the client that requests the operation
-     * @return The format info of the archive, or the corresponding error code if failed.
+     * @returns The format info of the archive, or the corresponding error code if failed.
      */
     ResultVal<FileSys::ArchiveFormatInfo> GetArchiveFormatInfo(ArchiveIdCode id_code,
                                                                const FileSys::Path& archive_path,
@@ -216,7 +216,7 @@ public:
      * @param smdh_icon the SMDH icon for this ExtSaveData
      * @param format_info Format information about the new archive
      * @param program_id the program ID of the client that requests the operation
-     * @return ResultCode 0 on success or the corresponding code on error
+     * @returns ResultCode 0 on success or the corresponding code on error
      */
     ResultCode CreateExtSaveData(MediaType media_type, u32 high, u32 low,
                                  const std::vector<u8>& smdh_icon,
@@ -227,7 +227,7 @@ public:
      * @param media_type The media type of the archive to delete (NAND / SDMC)
      * @param high The high word of the extdata id to delete
      * @param low The low word of the extdata id to delete
-     * @return ResultCode 0 on success or the corresponding code on error
+     * @returns ResultCode 0 on success or the corresponding code on error
      */
     ResultCode DeleteExtSaveData(MediaType media_type, u32 high, u32 low);
 
@@ -235,7 +235,7 @@ public:
      * Deletes the SystemSaveData archive folder for the specified save data id
      * @param high The high word of the SystemSaveData archive to delete
      * @param low The low word of the SystemSaveData archive to delete
-     * @return ResultCode 0 on success or the corresponding code on error
+     * @returns ResultCode 0 on success or the corresponding code on error
      */
     ResultCode DeleteSystemSaveData(u32 high, u32 low);
 
@@ -243,14 +243,14 @@ public:
      * Creates the SystemSaveData archive folder for the specified save data id
      * @param high The high word of the SystemSaveData archive to create
      * @param low The low word of the SystemSaveData archive to create
-     * @return ResultCode 0 on success or the corresponding code on error
+     * @returns ResultCode 0 on success or the corresponding code on error
      */
     ResultCode CreateSystemSaveData(u32 high, u32 low);
 
     /**
      * Returns capacity and free space information about the given media type.
      * @param media_type The media type to obtain the information about.
-     * @return The capacity information of the media type, or an error code if failed.
+     * @returns The capacity information of the media type, or an error code if failed.
      */
     ResultVal<ArchiveResource> GetArchiveResource(MediaType media_type) const;
 

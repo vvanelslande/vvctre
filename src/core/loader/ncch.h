@@ -22,7 +22,7 @@ public:
     /**
      * Returns the type of the file
      * @param file FileUtil::IOFile open file
-     * @return FileType found, or FileType::Unknown if this loader doesn't know it
+     * @returns FileType found, or FileType::Unknown if this loader doesn't know it
      */
     static FileType IdentifyType(FileUtil::IOFile& file);
 
@@ -64,7 +64,7 @@ private:
     /**
      * Loads .code section into memory for booting
      * @param process The newly created process
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     ResultStatus LoadExec(std::shared_ptr<Kernel::Process>& process);
 

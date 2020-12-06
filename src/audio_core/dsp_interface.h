@@ -68,7 +68,7 @@ public:
     /**
      * How much data is left in pipe
      * @param pipe_number The Pipe ID
-     * @return The amount of data remaning in the pipe. This is the maximum length PipeRead will
+     * @returns The amount of data remaning in the pipe. This is the maximum length PipeRead will
      * return.
      */
     virtual std::size_t GetPipeReadableSize(DspPipe pipe_number) const = 0;

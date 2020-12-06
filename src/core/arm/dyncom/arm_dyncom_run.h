@@ -27,7 +27,7 @@
  * @param cpu The ARM CPU state instance.
  * @param Rn   The register being read.
  *
- * @return If the PC is being read, then the word-aligned PC value is returned.
+ * @returns If the PC is being read, then the word-aligned PC value is returned.
  *         If the PC is not being read, then the value stored in the register is returned.
  */
 inline u32 CHECK_READ_REG15_WA(const ARMul_State* cpu, int Rn) {
@@ -40,7 +40,7 @@ inline u32 CHECK_READ_REG15_WA(const ARMul_State* cpu, int Rn) {
  * @param cpu The ARM CPU state instance.
  * @param Rn   The register being read.
  *
- * @return If the PC is being read, then the incremented PC value is returned.
+ * @returns If the PC is being read, then the incremented PC value is returned.
  *         If the PC is not being read, then the values stored in the register is returned.
  */
 inline u32 CHECK_READ_REG15(const ARMul_State* cpu, int Rn) {

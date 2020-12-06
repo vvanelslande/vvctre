@@ -26,7 +26,7 @@ private:
  * Gets a RomFSFile class to a file in a RomFS image.
  * @param romfs The pointer to the RomFS image
  * @param path A vector containing the directory names and file name of the path to the file
- * @return the RomFSFile to the file
+ * @returns the RomFSFile to the file
  * @todo reimplement this with a full RomFS manager
  */
 const RomFSFile GetFile(const u8* romfs, const std::vector<std::u16string>& path);

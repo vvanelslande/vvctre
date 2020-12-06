@@ -147,7 +147,7 @@ public:
 
     /**
      * Gets the thread's current priority
-     * @return The current thread's priority
+     * @returns The current thread's priority
      */
     u32 GetPriority() const {
         return current_priority;
@@ -173,7 +173,7 @@ public:
 
     /**
      * Gets the thread's thread ID
-     * @return The thread's ID
+     * @returns The thread's ID
      */
     u32 GetThreadId() const {
         return thread_id;
@@ -291,7 +291,7 @@ private:
  * @param entry_point The address at which the thread should start execution
  * @param priority The priority to give the main thread
  * @param owner_process The parent process for the main thread
- * @return A shared pointer to the main thread
+ * @returns A shared pointer to the main thread
  */
 std::shared_ptr<Thread> SetupMainThread(KernelSystem& kernel, u32 entry_point, u32 priority,
                                         std::shared_ptr<Process> owner_process);

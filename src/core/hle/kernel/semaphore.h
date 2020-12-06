@@ -40,7 +40,7 @@ public:
     /**
      * Releases a certain number of slots from a semaphore.
      * @param release_count The number of slots to release
-     * @return The number of free slots the semaphore had before this call
+     * @returns The number of free slots the semaphore had before this call
      */
     ResultVal<s32> Release(s32 release_count);
 };

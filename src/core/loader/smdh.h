@@ -15,7 +15,7 @@ namespace Loader {
 /**
  * Tests if data is a valid SMDH by its length and magic number.
  * @param smdh_data data buffer to test
- * @return bool test result
+ * @returns bool test result
  */
 bool IsValidSMDH(const std::vector<u8>& smdh_data);
 
@@ -75,7 +75,7 @@ struct SMDH {
     /**
      * Gets the short title from SMDH
      * @param language title language
-     * @return UTF-16 array of the short title
+     * @returns UTF-16 array of the short title
      */
     std::array<u16, 0x40> GetShortTitle(Loader::SMDH::TitleLanguage language) const;
 };

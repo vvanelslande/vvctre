@@ -113,7 +113,7 @@ public:
 
     /**
      * Checks whether the surface has been changed.
-     * @return false if the surface content has been changed since last Validate() call or has been
+     * @returns false if the surface content has been changed since last Validate() call or has been
      * destroyed; otherwise true
      */
     bool IsValid() const {

@@ -42,7 +42,7 @@ union Header {
  * @param command_id            ID of the command to create a header for.
  * @param normal_params_size         Size of the normal parameters in words. Up to 63.
  * @param translate_params_size Size of the translate parameters in words. Up to 63.
- * @return The created IPC header.
+ * @returns The created IPC header.
  *
  * Normal parameters are sent directly to the process while the translate parameters might go
  * through modifications and checks by the kernel.
@@ -101,7 +101,7 @@ inline u32 StaticBufferDesc(std::size_t size, u8 buffer_id) {
  * @param buffer_id    The Id of the buffer. Max 0xF.
  * @param is_read_only true if the buffer is read-only. If false, the buffer is considered to have
  * read-write access.
- * @return The created PXI buffer header.
+ * @returns The created PXI buffer header.
  *
  * The next value is a phys-address of a table located in the BASE memregion.
  */

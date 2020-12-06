@@ -55,7 +55,7 @@ constexpr u8 Convert8To6(u8 value) {
 /**
  * Decode a color stored in RGBA8 format
  * @param bytes Pointer to encoded source color
- * @return Result color decoded as Common::Vec4<u8>
+ * @returns Result color decoded as Common::Vec4<u8>
  */
 inline Common::Vec4<u8> DecodeRGBA8(const u8* bytes) {
     return {bytes[3], bytes[2], bytes[1], bytes[0]};
@@ -64,7 +64,7 @@ inline Common::Vec4<u8> DecodeRGBA8(const u8* bytes) {
 /**
  * Decode a color stored in RGB8 format
  * @param bytes Pointer to encoded source color
- * @return Result color decoded as Common::Vec4<u8>
+ * @returns Result color decoded as Common::Vec4<u8>
  */
 inline Common::Vec4<u8> DecodeRGB8(const u8* bytes) {
     return {bytes[2], bytes[1], bytes[0], 255};
@@ -73,7 +73,7 @@ inline Common::Vec4<u8> DecodeRGB8(const u8* bytes) {
 /**
  * Decode a color stored in RG8 (aka HILO8) format
  * @param bytes Pointer to encoded source color
- * @return Result color decoded as Common::Vec4<u8>
+ * @returns Result color decoded as Common::Vec4<u8>
  */
 inline Common::Vec4<u8> DecodeRG8(const u8* bytes) {
     return {bytes[1], bytes[0], 0, 255};
@@ -82,7 +82,7 @@ inline Common::Vec4<u8> DecodeRG8(const u8* bytes) {
 /**
  * Decode a color stored in RGB565 format
  * @param bytes Pointer to encoded source color
- * @return Result color decoded as Common::Vec4<u8>
+ * @returns Result color decoded as Common::Vec4<u8>
  */
 inline Common::Vec4<u8> DecodeRGB565(const u8* bytes) {
     u16_le pixel;
@@ -94,7 +94,7 @@ inline Common::Vec4<u8> DecodeRGB565(const u8* bytes) {
 /**
  * Decode a color stored in RGB5A1 format
  * @param bytes Pointer to encoded source color
- * @return Result color decoded as Common::Vec4<u8>
+ * @returns Result color decoded as Common::Vec4<u8>
  */
 inline Common::Vec4<u8> DecodeRGB5A1(const u8* bytes) {
     u16_le pixel;
@@ -106,7 +106,7 @@ inline Common::Vec4<u8> DecodeRGB5A1(const u8* bytes) {
 /**
  * Decode a color stored in RGBA4 format
  * @param bytes Pointer to encoded source color
- * @return Result color decoded as Common::Vec4<u8>
+ * @returns Result color decoded as Common::Vec4<u8>
  */
 inline Common::Vec4<u8> DecodeRGBA4(const u8* bytes) {
     u16_le pixel;
@@ -118,7 +118,7 @@ inline Common::Vec4<u8> DecodeRGBA4(const u8* bytes) {
 /**
  * Decode a depth value stored in D16 format
  * @param bytes Pointer to encoded source value
- * @return Depth value as an u32
+ * @returns Depth value as an u32
  */
 inline u32 DecodeD16(const u8* bytes) {
     u16_le data;
@@ -129,7 +129,7 @@ inline u32 DecodeD16(const u8* bytes) {
 /**
  * Decode a depth value stored in D24 format
  * @param bytes Pointer to encoded source value
- * @return Depth value as an u32
+ * @returns Depth value as an u32
  */
 inline u32 DecodeD24(const u8* bytes) {
     return (bytes[2] << 16) | (bytes[1] << 8) | bytes[0];
@@ -138,7 +138,7 @@ inline u32 DecodeD24(const u8* bytes) {
 /**
  * Decode a depth value and a stencil value stored in D24S8 format
  * @param bytes Pointer to encoded source values
- * @return Resulting values stored as a Common::Vec2
+ * @returns Resulting values stored as a Common::Vec2
  */
 inline Common::Vec2<u32> DecodeD24S8(const u8* bytes) {
     return {static_cast<u32>((bytes[2] << 16) | (bytes[1] << 8) | bytes[0]), bytes[3]};

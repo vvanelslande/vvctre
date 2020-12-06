@@ -41,13 +41,13 @@ public:
      * List files contained in the directory
      * @param count Number of entries to return at once in entries
      * @param entries Buffer to read data into
-     * @return Number of entries listed
+     * @returns Number of entries listed
      */
     virtual u32 Read(const u32 count, Entry* entries) = 0;
 
     /**
      * Close the directory
-     * @return true if the directory closed correctly
+     * @returns true if the directory closed correctly
      */
     virtual bool Close() const = 0;
 };

@@ -420,7 +420,7 @@ private:
     /**
      * Compiles a single instruction from PICA to GLSL.
      * @param offset the offset of the PICA shader instruction.
-     * @return the offset of the next instruction to execute. Usually it is the current offset + 1.
+     * @returns the offset of the next instruction to execute. Usually it is the current offset + 1.
      * If the current instruction is IF or LOOP, the next instruction is after the IF or LOOP block.
      * If the current instruction always terminates the program, returns PROGRAM_END.
      */
@@ -794,7 +794,8 @@ private:
      * Compiles a range of instructions from PICA to GLSL.
      * @param begin the offset of the starting instruction.
      * @param end the offset where the compilation should stop (exclusive).
-     * @return the offset of the next instruction to compile. PROGRAM_END if the program terminates.
+     * @returns the offset of the next instruction to compile. PROGRAM_END if the program
+     * terminates.
      */
     u32 CompileRange(u32 begin, u32 end) {
         u32 program_counter;

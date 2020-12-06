@@ -92,7 +92,7 @@ static const char* GetFileTypeString(FileType type) {
  * @param type The type of the file
  * @param filename the file name (without path)
  * @param filepath the file full path (with name)
- * @return std::unique_ptr<AppLoader> a pointer to a loader object;  nullptr for unsupported type
+ * @returns std::unique_ptr<AppLoader> a pointer to a loader object;  nullptr for unsupported type
  */
 static std::unique_ptr<AppLoader> GetFileLoader(FileUtil::IOFile&& file, FileType type,
                                                 const std::string& filename,

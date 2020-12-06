@@ -60,7 +60,7 @@ public:
     virtual void Stop() = 0;
     /**
      * Every call to this function returns the next input recorded since calling Start
-     * @return A ParamPackage of the recorded input, which can be used to create an InputDevice.
+     * @returns A ParamPackage of the recorded input, which can be used to create an InputDevice.
      *         If there has been no input, the package is empty
      */
     virtual Common::ParamPackage GetNextInput() = 0;

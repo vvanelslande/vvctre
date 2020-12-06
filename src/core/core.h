@@ -94,7 +94,7 @@ public:
      * This function runs the core for the specified number of CPU instructions before trying to
      * update hardware. NOTE: the number of instructions requested is not guaranteed to run, as this
      * will be interrupted preemptively if a hardware update is requested (e.g. on a thread switch).
-     * @return Result status, indicating whethor or not the operation succeeded.
+     * @returns Result status, indicating whethor or not the operation succeeded.
      */
     ResultStatus Run();
 
@@ -237,7 +237,7 @@ private:
      * @param emu_window Reference to the host-system window used for video output and keyboard
      *                   input.
      * @param system_mode The system mode.
-     * @return ResultStatus code, indicating if the operation succeeded.
+     * @returns ResultStatus code, indicating if the operation succeeded.
      */
     ResultStatus Init(Frontend::EmuWindow& emu_window, u32 system_mode);
 

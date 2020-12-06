@@ -30,7 +30,7 @@ struct FramebufferLayout {
  * @param width Window framebuffer width in pixels
  * @param height Window framebuffer height in pixels
  * @param is_swapped if true, the bottom screen will be displayed above the top screen
- * @return Newly created FramebufferLayout object with default screen regions initialized
+ * @returns Newly created FramebufferLayout object with default screen regions initialized
  */
 FramebufferLayout DefaultFrameLayout(u32 width, u32 height, bool is_swapped, bool upright);
 
@@ -39,7 +39,7 @@ FramebufferLayout DefaultFrameLayout(u32 width, u32 height, bool is_swapped, boo
  * @param width Window framebuffer width in pixels
  * @param height Window framebuffer height in pixels
  * @param is_swapped if true, the bottom screen will be displayed (and the top won't be displayed)
- * @return Newly created FramebufferLayout object with default screen regions initialized
+ * @returns Newly created FramebufferLayout object with default screen regions initialized
  */
 FramebufferLayout SingleFrameLayout(u32 width, u32 height, bool is_swapped, bool upright);
 
@@ -50,7 +50,7 @@ FramebufferLayout SingleFrameLayout(u32 width, u32 height, bool is_swapped, bool
  * @param width Window framebuffer width in pixels
  * @param height Window framebuffer height in pixels
  * @param is_swapped if true, the bottom screen will be the large display
- * @return Newly created FramebufferLayout object with default screen regions initialized
+ * @returns Newly created FramebufferLayout object with default screen regions initialized
  */
 FramebufferLayout LargeFrameLayout(u32 width, u32 height, bool is_swapped, bool upright);
 
@@ -61,7 +61,7 @@ FramebufferLayout LargeFrameLayout(u32 width, u32 height, bool is_swapped, bool 
  * @param width Window framebuffer width in pixels
  * @param height Window framebuffer height in pixels
  * @param is_swapped if true, the bottom screen will be the left display
- * @return Newly created FramebufferLayout object with default screen regions initialized
+ * @returns Newly created FramebufferLayout object with default screen regions initialized
  */
 FramebufferLayout SideFrameLayout(u32 width, u32 height, bool is_swapped, bool upright);
 
@@ -69,7 +69,7 @@ FramebufferLayout SideFrameLayout(u32 width, u32 height, bool is_swapped, bool u
  * @param width Window framebuffer width in pixels
  * @param height Window framebuffer height in pixels
  * @param is_swapped if true, the bottom screen will be the left display
- * @return Newly created FramebufferLayout object with default screen regions initialized
+ * @returns Newly created FramebufferLayout object with default screen regions initialized
  */
 FramebufferLayout MediumFrameLayout(u32 width, u32 height, bool is_swapped, bool upright);
 
@@ -77,7 +77,7 @@ FramebufferLayout MediumFrameLayout(u32 width, u32 height, bool is_swapped, bool
  * Factory method for constructing a custom FramebufferLayout
  * @param width Window framebuffer width in pixels
  * @param height Window framebuffer height in pixels
- * @return Newly created FramebufferLayout object with default screen regions initialized
+ * @returns Newly created FramebufferLayout object with default screen regions initialized
  */
 FramebufferLayout CustomFrameLayout(u32 width, u32 height);
 

@@ -90,7 +90,7 @@ bool CreateEmptyFile(const std::string& filename);
  * entries, never null
  * @param directory the path to the enclosing directory
  * @param virtual_name the entry name, without any preceding directory info
- * @return whether handling the entry succeeded
+ * @returns whether handling the entry succeeded
  */
 using DirectoryEntryCallable = std::function<bool(
     u64* num_entries_out, const std::string& directory, const std::string& virtual_name)>;
@@ -102,7 +102,7 @@ using DirectoryEntryCallable = std::function<bool(
  * can be null
  * @param directory the directory to scan
  * @param callback The callback which will be called for each entry
- * @return whether scanning the directory succeeded
+ * @returns whether scanning the directory succeeded
  */
 bool ForeachDirectoryEntry(u64* num_entries_out, const std::string& directory,
                            DirectoryEntryCallable callback);
@@ -112,7 +112,7 @@ bool ForeachDirectoryEntry(u64* num_entries_out, const std::string& directory,
  * @param directory the parent directory to start scanning from
  * @param parent_entry FSTEntry where the filesystem tree results will be stored.
  * @param recursion Number of children directories to read before giving up.
- * @return the total number of files/directories found
+ * @returns the total number of files/directories found
  */
 u64 ScanDirectoryTree(const std::string& directory, FSTEntry& parent_entry,
                       unsigned int recursion = 0);

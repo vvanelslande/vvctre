@@ -65,21 +65,21 @@ public:
      * Unmaps a shared memory block from the specified address in system memory
      * @param target_process Process from which to unmap the memory block.
      * @param address Address in system memory where the shared memory block is mapped
-     * @return Result code of the unmap operation
+     * @returns Result code of the unmap operation
      */
     ResultCode Unmap(Process& target_process, VAddr address);
 
     /**
      * Gets a pointer to the shared memory block
      * @param offset Offset from the start of the shared memory block to get pointer
-     * @return A pointer to the shared memory block from the specified offset
+     * @returns A pointer to the shared memory block from the specified offset
      */
     u8* GetPointer(u32 offset = 0);
 
     /**
      * Gets a constant pointer to the shared memory block
      * @param offset Offset from the start of the shared memory block to get pointer
-     * @return A constant pointer to the shared memory block from the specified offset
+     * @returns A constant pointer to the shared memory block from the specified offset
      */
     const u8* GetPointer(u32 offset = 0) const;
 

@@ -15,7 +15,7 @@ struct CPUCaps {
  * Gets the supported capabilities of the host CPU
  * Assumes the CPU supports the CPUID instruction
  * Those that don't would likely not support vvctre at all anyway
- * @return Reference to a CPUCaps struct with the detected host CPU capabilities
+ * @returns Reference to a CPUCaps struct with the detected host CPU capabilities
  */
 const CPUCaps& GetCPUCaps();
 

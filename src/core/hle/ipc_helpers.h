@@ -282,7 +282,7 @@ public:
 
     /**
      * @brief Pops a static buffer from the IPC request buffer.
-     * @return The buffer that was copied from the IPC request originator.
+     * @returns The buffer that was copied from the IPC request originator.
      *
      * In real services, static buffers must be set up before any IPC request using those is sent.
      * It is the duty of the process (usually services) to allocate and set up the receiving static

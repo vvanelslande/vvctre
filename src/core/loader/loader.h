@@ -99,7 +99,7 @@ public:
      * Get the RomFS of the application
      * Since the RomFS can be huge, we return a file reference instead of copying to a buffer
      * @param romfs_file The file containing the RomFS
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     virtual ResultStatus ReadRomFS(std::shared_ptr<FileSys::RomFSReader>& romfs_file) {
         return ResultStatus::ErrorNotImplemented;
@@ -113,7 +113,7 @@ public:
      * Get the update RomFS of the application
      * Since the RomFS can be huge, we return a file reference instead of copying to a buffer
      * @param romfs_file The file containing the RomFS
-     * @return ResultStatus result of function
+     * @returns ResultStatus result of function
      */
     virtual ResultStatus ReadUpdateRomFS(std::shared_ptr<FileSys::RomFSReader>& romfs_file) {
         return ResultStatus::ErrorNotImplemented;
@@ -135,7 +135,7 @@ protected:
 /**
  * Identifies a bootable file and return a suitable loader
  * @param filename String filename of bootable file
- * @return best loader for this file
+ * @returns best loader for this file
  */
 std::unique_ptr<AppLoader> GetLoader(const std::string& filename);
 

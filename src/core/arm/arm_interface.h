@@ -84,14 +84,14 @@ public:
 
     /*
      * Get the current Program Counter
-     * @return Returns current PC
+     * @returns Returns current PC
      */
     virtual u32 GetPC() const = 0;
 
     /**
      * Get an ARM register
      * @param index Register index (0-15)
-     * @return Returns the value in the register
+     * @returns Returns the value in the register
      */
     virtual u32 GetReg(int index) const = 0;
 
@@ -105,7 +105,7 @@ public:
     /**
      * Gets the value of a VFP register
      * @param index Register index (0-31)
-     * @return Returns the value in the register
+     * @returns Returns the value in the register
      */
     virtual u32 GetVFPReg(int index) const = 0;
 
@@ -119,7 +119,7 @@ public:
     /**
      * Gets the current value within a given VFP system register
      * @param reg The VFP system register
-     * @return The value within the VFP system register
+     * @returns The value within the VFP system register
      */
     virtual u32 GetVFPSystemReg(VFPSystemRegister reg) const = 0;
 
@@ -132,7 +132,7 @@ public:
 
     /**
      * Get the current CPSR register
-     * @return Returns the value of the CPSR register
+     * @returns Returns the value of the CPSR register
      */
     virtual u32 GetCPSR() const = 0;
 
@@ -145,7 +145,7 @@ public:
     /**
      * Gets the value stored in a CP15 register.
      * @param reg The CP15 register to retrieve the value from.
-     * @return the value stored in the given CP15 register.
+     * @returns the value stored in the given CP15 register.
      */
     virtual u32 GetCP15Register(CP15Register reg) = 0;
 
