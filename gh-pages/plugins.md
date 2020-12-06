@@ -158,7 +158,7 @@ Hotkeys:
 
 [Download](https://www.patreon.com/posts/light-theme-2-0-37869489)
 
-## Dear ImGui classic theme
+### Dear ImGui classic theme
 
 [Download](https://www.patreon.com/posts/dear-imgui-theme-37870192)
 
