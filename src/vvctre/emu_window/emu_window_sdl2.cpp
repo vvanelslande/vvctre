@@ -3927,6 +3927,13 @@ void EmuWindow_SDL2::SwapBuffers() {
                 ImGui::InputText("Luma3DS Mod code.bps##Files", &luma3ds_mod_code_bps_file[0],
                                  luma3ds_mod_code_bps_file.length(), ImGuiInputTextFlags_ReadOnly);
 
+                // Disk Shader Cache
+                std::string disk_shader_cache_file = FileUtil::SanitizePath(
+                    fmt::format("{}/{:016X}.vsc",
+                                FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir), program_id));
+                ImGui::InputText("Disk Shader Cache##Files", &disk_shader_cache_file[0],
+                                 disk_shader_cache_file.length(), ImGuiInputTextFlags_ReadOnly);
+
                 ImGui::NewLine();
 
                 ImGui::TextUnformatted("Folders");
