@@ -4454,7 +4454,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                 while (clipper.Step()) {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
                         IPCDebugger::RequestRecord& record = records[i];
-
                         std::string service_name;
 
                         if (record.client_port.id != -1) {
@@ -4507,6 +4506,11 @@ void EmuWindow_SDL2::SwapBuffers() {
                                     fmt::format("0x{:08X}", record.untranslated_request_cmdbuf[0]);
                                 ImGui::InputText("Function Header Code",
                                                  &function_header_code_string,
+                                                 ImGuiInputTextFlags_ReadOnly);
+                            }
+
+                            if (!service_name.empty()) {
+                                ImGui::InputText("Service Name", &service_name,
                                                  ImGuiInputTextFlags_ReadOnly);
                             }
 
