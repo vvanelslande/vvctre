@@ -4044,6 +4044,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                     if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
                         all_public_rooms = GetPublicCitraRooms();
                     }
+
                     multiplayer_menu_opened = true;
                 }
 
@@ -4051,6 +4052,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                 ImGui::InputScalar("Port", ImGuiDataType_U16, &Settings::values.multiplayer_port);
                 ImGui::InputText("Nickname", &Settings::values.multiplayer_nickname);
                 ImGui::InputText("Password", &Settings::values.multiplayer_password);
+
                 if (ImGui::Button("Connect")) {
                     ConnectToCitraRoom();
                 }
@@ -4077,7 +4079,9 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                     }
                 }
+
                 ImGui::SameLine();
+
                 if (ImGui::InputTextWithHint("##search", "Search", &public_rooms_search_text_,
                                              ImGuiInputTextFlags_EnterReturnsTrue)) {
                     public_rooms_search_text = public_rooms_search_text_;
@@ -4109,6 +4113,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         const CitraRoom& room = rooms[i];
                         const std::string popup_text = GetRoomPopupText(room);
                         const std::string id = fmt::format("{}##i={}", room.name, i);
+
                         if (room.has_password) {
                             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
                             ImGui::Selectable(id.c_str());
@@ -4116,9 +4121,11 @@ void EmuWindow_SDL2::SwapBuffers() {
                         } else {
                             ImGui::Selectable(id.c_str());
                         }
+
                         if (ImGui::IsItemClicked()) {
                             ImGui::OpenPopup(id.c_str());
                         }
+
                         if (ImGui::BeginPopup(id.c_str(), ImGuiWindowFlags_HorizontalScrollbar)) {
                             ImGui::TextUnformatted(popup_text.c_str());
                             if (ImGui::Button("Set IP And Port")) {
@@ -4126,10 +4133,13 @@ void EmuWindow_SDL2::SwapBuffers() {
                                 Settings::values.multiplayer_port = room.port;
                                 ImGui::CloseCurrentPopup();
                             }
+
                             ImGui::SameLine();
+
                             if (ImGui::Button("Close")) {
                                 ImGui::CloseCurrentPopup();
                             }
+
                             ImGui::EndPopup();
                         }
                     }
@@ -4147,15 +4157,18 @@ void EmuWindow_SDL2::SwapBuffers() {
                 request_reset = true;
                 play_coins_changed = false;
             }
+
             if (config_savegame_changed) {
                 Service::CFG::GetModule(system)->UpdateConfigNANDSavegame();
                 request_reset = true;
                 config_savegame_changed = false;
             }
+
             if (request_reset) {
                 system.RequestReset();
                 request_reset = false;
             }
+
             installed_menu_opened = false;
             all_installed.clear();
             installed_search_results.clear();
@@ -4174,6 +4187,7 @@ void EmuWindow_SDL2::SwapBuffers() {
             menu_open = false;
         }
     }
+
     ImGui::End();
 
     if (keyboard_data != nullptr) {
@@ -4207,22 +4221,27 @@ void EmuWindow_SDL2::SwapBuffers() {
                 const std::string cancel = keyboard_data->config.button_text[0].empty()
                                                ? Frontend::SWKBD_BUTTON_CANCEL
                                                : keyboard_data->config.button_text[0];
+
                 const std::string ok = keyboard_data->config.button_text[2].empty()
                                            ? Frontend::SWKBD_BUTTON_OKAY
                                            : keyboard_data->config.button_text[2];
+
                 if (ImGui::Button(cancel.c_str())) {
                     keyboard_data = nullptr;
                     break;
                 }
+
                 if (Frontend::SoftwareKeyboard::ValidateInput(keyboard_data->text,
                                                               keyboard_data->config) ==
                     Frontend::ValidationError::None) {
                     ImGui::SameLine();
+
                     if (ImGui::Button(ok.c_str())) {
                         keyboard_data->code = 1;
                         keyboard_data = nullptr;
                     }
                 }
+
                 break;
             }
 
@@ -4230,41 +4249,51 @@ void EmuWindow_SDL2::SwapBuffers() {
                 const std::string cancel = keyboard_data->config.button_text[0].empty()
                                                ? Frontend::SWKBD_BUTTON_CANCEL
                                                : keyboard_data->config.button_text[0];
+
                 const std::string forgot = keyboard_data->config.button_text[1].empty()
                                                ? Frontend::SWKBD_BUTTON_FORGOT
                                                : keyboard_data->config.button_text[1];
+
                 const std::string ok = keyboard_data->config.button_text[2].empty()
                                            ? Frontend::SWKBD_BUTTON_OKAY
                                            : keyboard_data->config.button_text[2];
+
                 if (ImGui::Button(cancel.c_str())) {
                     keyboard_data = nullptr;
                     break;
                 }
+
                 ImGui::SameLine();
+
                 if (ImGui::Button(forgot.c_str())) {
                     keyboard_data->code = 1;
                     keyboard_data = nullptr;
                     break;
                 }
+
                 if (Frontend::SoftwareKeyboard::ValidateInput(keyboard_data->text,
                                                               keyboard_data->config) ==
                     Frontend::ValidationError::None) {
                     ImGui::SameLine();
+
                     if (ImGui::Button(ok.c_str())) {
                         keyboard_data->code = 2;
                         keyboard_data = nullptr;
                     }
                 }
+
                 break;
             }
             }
         }
+
         ImGui::End();
     }
 
     if (mii_selector_data != nullptr) {
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
                                 ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
         if (ImGui::Begin((mii_selector_data->config.title.empty() ? "Mii Selector"
                                                                   : mii_selector_data->config.title)
                              .c_str(),
@@ -4299,6 +4328,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         }
                     }
                 }
+
                 ImGui::ListBoxFooter();
             }
 
@@ -4307,6 +4337,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                 mii_selector_data = nullptr;
             }
         }
+
         ImGui::End();
     }
 
@@ -4568,8 +4599,10 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
                 }
             }
+
             ImGui::EndChildFrame();
         }
+
         if (!show_ipc_recorder_window) {
             IPCDebugger::Recorder& r = system.Kernel().GetIPCRecorder();
 
@@ -4582,6 +4615,7 @@ void EmuWindow_SDL2::SwapBuffers() {
             ipc_recorder_search_text_.clear();
             ipc_recorder_callback = nullptr;
         }
+
         ImGui::End();
     }
 
@@ -4634,12 +4668,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
                         const std::shared_ptr<Cheats::CheatBase>& cheat = cheats[i];
                         bool enabled = cheat->IsEnabled();
+
                         if (ImGui::Checkbox(cheat->GetName().c_str(), &enabled)) {
                             cheat->SetEnabled(enabled);
                         }
                     }
                 }
             }
+
             ImGui::EndChildFrame();
         }
 
@@ -4722,6 +4758,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::Text("%s is playing %s", member.nickname.c_str(),
                                         member.game_info.name.c_str());
                         }
+
                         if (member.nickname != room_member.GetNickname()) {
                             if (ImGui::BeginPopupContextItem(member.nickname.c_str(),
                                                              ImGuiMouseButton_Right)) {
@@ -4741,6 +4778,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
                 }
             }
+
             ImGui::EndChildFrame();
 
             ImGui::NextColumn();
@@ -4784,12 +4822,15 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                             if (ImGui::MenuItem("Copy All")) {
                                 std::string all;
+
                                 for (std::size_t j = 0; j < multiplayer_messages.size(); ++j) {
                                     if (j > 0) {
                                         all += '\n';
                                     }
+
                                     all += multiplayer_messages[j];
                                 }
+
                                 ImGui::SetClipboardText(all.c_str());
                             }
 
@@ -4806,6 +4847,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::SetScrollHereY(1.0f);
                 }
             }
+
             ImGui::EndChildFrame();
 
             ImGui::PushItemWidth(-1.0f);
@@ -4821,6 +4863,7 @@ void EmuWindow_SDL2::SwapBuffers() {
 
             ImGui::EndPopup();
         }
+
         if (!open) {
             room_member.Leave();
         }
