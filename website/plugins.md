@@ -846,7 +846,7 @@ If the current item is hovered, sets the tooltip to `text`
 
 `ImGui::IsItemFocused` wrapper
 
-### `bool vvctre_gui_is_item_clicked(int button)`
+### `bool vvctre_gui_is_item_clicked(ImGuiMouseButton button)`
 
 `ImGui::IsItemClicked` wrapper
 
@@ -1584,11 +1584,11 @@ Creates a overlay with the specified name and initial position
 
 `ImGui::SetNextItemOpen` wrapper
 
-### `void vvctre_gui_set_color(int index, float r, float g, float b, float a)`
+### `void vvctre_gui_set_color(ImGuiCol index, float r, float g, float b, float a)`
 
 Sets a GUI color
 
-### `void vvctre_gui_get_color(int index, float color_out[4])`
+### `void vvctre_gui_get_color(ImGuiCol index, float color_out[4])`
 
 Get a GUI color
 

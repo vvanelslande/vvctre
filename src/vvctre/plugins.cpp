@@ -1016,7 +1016,7 @@ bool vvctre_gui_is_item_focused() {
     return ImGui::IsItemFocused();
 }
 
-bool vvctre_gui_is_item_clicked(int button) {
+bool vvctre_gui_is_item_clicked(ImGuiMouseButton button) {
     return ImGui::IsItemClicked(button);
 }
 
@@ -1959,11 +1959,11 @@ void vvctre_gui_set_next_item_open(bool is_open) {
     ImGui::SetNextItemOpen(is_open);
 }
 
-void vvctre_gui_set_color(int index, float r, float g, float b, float a) {
+void vvctre_gui_set_color(ImGuiCol index, float r, float g, float b, float a) {
     ImGui::GetStyle().Colors[index] = ImVec4(r, g, b, a);
 }
 
-void vvctre_gui_get_color(int index, float color_out[4]) {
+void vvctre_gui_get_color(ImGuiCol index, float color_out[4]) {
     const ImVec4 color = ImGui::GetStyle().Colors[index];
     color_out[0] = color.x;
     color_out[1] = color.y;
