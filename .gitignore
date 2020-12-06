@@ -21,4 +21,4 @@ Thumbs.db
 imgui.ini
 
 # Jekyll
-website/_site/
+gh-pages/_site/
