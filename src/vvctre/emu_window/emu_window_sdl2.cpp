@@ -1019,26 +1019,31 @@ void EmuWindow_SDL2::SwapBuffers() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
+
     ImGuiIO& io = ImGui::GetIO();
     ImGuiStyle& style = ImGui::GetStyle();
 
     plugin_manager.BeforeDrawingFPS();
 
     ImGui::SetNextWindowPos(ImVec2(), ImGuiCond_Once);
+
     if (ImGui::Begin("FPS and Menu", nullptr,
                      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings |
                          ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize |
                          ImGuiWindowFlags_NoFocusOnAppearing)) {
         ImGui::TextColored(fps_color, "%d FPS", static_cast<int>(io.Framerate));
+
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
             ImGui::OpenPopup("Menu");
             menu_open = true;
         }
+
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
             ImGui::OpenPopup("Menu");
             paused = true;
             menu_open = true;
         }
+
         if (ImGui::BeginPopup("Menu")) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Load File")) {
@@ -1204,9 +1209,11 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::NewFrame();
 
                         ImGui::OpenPopup("Installing CIA");
+
                         ImGui::SetNextWindowPos(
                             ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
                             ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
                         if (ImGui::BeginPopupModal("Installing CIA", nullptr,
                                                    ImGuiWindowFlags_NoSavedSettings |
                                                        ImGuiWindowFlags_NoMove |
@@ -1248,6 +1255,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         if (!result.empty()) {
                             FileUtil::IOFile file(result[0], "rb");
                             Service::NFC::AmiiboData data;
+
                             if (file.ReadArray(&data, 1) == 1) {
                                 std::shared_ptr<Service::NFC::Module::Interface> nfc =
                                     system.ServiceManager()
@@ -1277,6 +1285,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         if (!result.empty()) {
                             FileUtil::IOFile file(result[0], "rb");
                             std::array<u8, 540> array;
+
                             if (file.ReadBytes(array.data(), 540) == 540) {
                                 std::shared_ptr<Service::NFC::Module::Interface> nfc =
                                     system.ServiceManager()
@@ -1298,6 +1307,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         std::shared_ptr<Service::NFC::Module::Interface> nfc =
                             system.ServiceManager().GetService<Service::NFC::Module::Interface>(
                                 "nfc:u");
+
                         if (nfc != nullptr) {
                             nfc->RemoveAmiibo();
                         }
@@ -1314,6 +1324,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                             std::shared_ptr<Service::NFC::Module::Interface> nfc =
                                 system.ServiceManager().GetService<Service::NFC::Module::Interface>(
                                     "nfc:u");
+
                             if (nfc != nullptr) {
                                 file.WriteObject(nfc->GetAmiiboData());
                             }
@@ -1328,10 +1339,12 @@ void EmuWindow_SDL2::SwapBuffers() {
                             std::shared_ptr<Service::NFC::Module::Interface> nfc =
                                 system.ServiceManager().GetService<Service::NFC::Module::Interface>(
                                     "nfc:u");
+
                             if (nfc != nullptr) {
                                 try {
                                     const u64 id = Common::swap64(std::stoull(
                                         amiibo_generate_and_load_custom_id, nullptr, 0));
+
                                     Service::NFC::AmiiboData data{};
                                     CryptoPP::AutoSeededRandomPool rng;
                                     rng.GenerateBlock(
@@ -1339,6 +1352,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                         data.uuid.size());
                                     std::memcpy(&data.char_id, &id, sizeof(id));
                                     nfc->LoadAmiibo(data);
+
                                     ImGui::CloseCurrentPopup();
                                 } catch (const std::invalid_argument&) {
                                 }
@@ -1378,6 +1392,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                         while (clipper.Step()) {
                             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
                                 const auto [id, name] = v[i];
+
                                 const std::string menu_item_text =
                                     fmt::format("{} - {} (0x{:016X})",
                                                 amiibo_series.at((id >> 8) & 0xFF), name, id);
@@ -1386,6 +1401,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                                     std::shared_ptr<Service::NFC::Module::Interface> nfc =
                                         system.ServiceManager()
                                             .GetService<Service::NFC::Module::Interface>("nfc:u");
+
                                     if (nfc != nullptr) {
                                         Service::NFC::AmiiboData data{};
                                         CryptoPP::AutoSeededRandomPool rng;
