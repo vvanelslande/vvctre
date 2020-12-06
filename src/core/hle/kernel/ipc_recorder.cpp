@@ -6,7 +6,7 @@
 #include "common/logging/log.h"
 #include "core/hle/kernel/client_port.h"
 #include "core/hle/kernel/client_session.h"
-#include "core/hle/kernel/ipc_ipc_recorder.h"
+#include "core/hle/kernel/ipc_recorder.h"
 #include "core/hle/kernel/process.h"
 #include "core/hle/kernel/server_port.h"
 #include "core/hle/kernel/server_session.h"
