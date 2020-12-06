@@ -1931,6 +1931,72 @@ int vvctre_gui_get_columns_count() {
     return ImGui::GetColumnsCount();
 }
 
+bool vvctre_gui_begin_table(const char* id, int columns, ImGuiTableFlags flags, float outer_width,
+                            float outer_height, float inner_width) {
+    return ImGui::BeginTable(id, columns, flags, ImVec2(outer_width, outer_height), inner_width);
+}
+
+void vvctre_gui_end_table() {
+    ImGui::EndTable();
+}
+
+void vvctre_gui_table_next_row(ImGuiTableRowFlags flags, float minimum_row_height) {
+    ImGui::TableNextRow(flags, minimum_row_height);
+}
+
+bool vvctre_gui_table_next_column() {
+    return ImGui::TableNextColumn();
+}
+
+bool vvctre_gui_table_set_column_index(int index) {
+    return ImGui::TableSetColumnIndex(index);
+}
+
+int vvctre_gui_table_get_column_index() {
+    return ImGui::TableGetColumnIndex();
+}
+
+int vvctre_gui_table_get_row_index() {
+    return ImGui::TableGetRowIndex();
+}
+
+void vvctre_gui_table_setup_column(const char* label, ImGuiTableColumnFlags flags,
+                                   float initial_width_or_weight, ImU32 user_id) {
+    ImGui::TableSetupColumn(label, flags, initial_width_or_weight, user_id);
+}
+
+void vvctre_gui_table_setup_scroll_freeze(int columns, int rows) {
+    ImGui::TableSetupScrollFreeze(columns, rows);
+}
+
+void vvctre_gui_table_headers_row() {
+    ImGui::TableHeadersRow();
+}
+
+void vvctre_gui_table_header(const char* label) {
+    ImGui::TableHeader(label);
+}
+
+int vvctre_gui_table_get_column_count() {
+    return ImGui::TableGetColumnCount();
+}
+
+const char* vvctre_gui_table_get_column_name(int column) {
+    return ImGui::TableGetColumnName(column);
+}
+
+ImGuiTableColumnFlags vvctre_gui_table_get_column_flags(int column) {
+    return ImGui::TableGetColumnFlags(column);
+}
+
+ImGuiTableSortSpecs* vvctre_gui_table_get_sort_specs() {
+    return ImGui::TableGetSortSpecs();
+}
+
+void vvctre_gui_table_set_background_color(ImGuiTableBgTarget target, ImU32 color, int n) {
+    ImGui::TableSetBgColor(target, color, n);
+}
+
 bool vvctre_gui_tree_node_string(const char* label, ImGuiTreeNodeFlags flags) {
     return ImGui::TreeNodeEx(label, flags);
 }
@@ -2239,6 +2305,12 @@ void vvctre_gui_style_set_item_inner_spacing(float value[2]) {
     style.ItemInnerSpacing.y = value[1];
 }
 
+void vvctre_gui_style_set_cell_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.CellPadding.x = value[0];
+    style.CellPadding.y = value[1];
+}
+
 void vvctre_gui_style_set_touch_extra_padding(float value[2]) {
     ImGuiStyle& style = ImGui::GetStyle();
     style.TouchExtraPadding.x = value[0];
@@ -2411,6 +2483,12 @@ void vvctre_gui_style_get_item_inner_spacing(float value[2]) {
     ImGuiStyle& style = ImGui::GetStyle();
     value[0] = style.ItemInnerSpacing.x;
     value[1] = style.ItemInnerSpacing.y;
+}
+
+void vvctre_gui_style_get_cell_padding(float value[2]) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    value[0] = style.CellPadding.x;
+    value[1] = style.CellPadding.y;
 }
 
 void vvctre_gui_style_get_touch_extra_padding(float value[2]) {
@@ -4325,6 +4403,24 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_get_column_offset", (void*)&vvctre_gui_get_column_offset},
     {"vvctre_gui_set_column_offset", (void*)&vvctre_gui_set_column_offset},
     {"vvctre_gui_get_columns_count", (void*)&vvctre_gui_get_columns_count},
+    {"vvctre_gui_begin_table", (void*)&vvctre_gui_begin_table},
+    {"vvctre_gui_end_table", (void*)&vvctre_gui_end_table},
+    {"vvctre_gui_table_next_row", (void*)&vvctre_gui_table_next_row},
+    {"vvctre_gui_table_next_column", (void*)&vvctre_gui_table_next_column},
+    {"vvctre_gui_table_set_column_index", (void*)&vvctre_gui_table_set_column_index},
+    {"vvctre_gui_table_get_column_index", (void*)&vvctre_gui_table_get_column_index},
+    {"vvctre_gui_table_get_row_index", (void*)&vvctre_gui_table_get_row_index},
+    {"vvctre_gui_table_setup_column", (void*)&vvctre_gui_table_setup_column},
+    {"vvctre_gui_table_setup_scroll_freeze", (void*)&vvctre_gui_table_setup_scroll_freeze},
+    {"vvctre_gui_table_headers_row", (void*)&vvctre_gui_table_headers_row},
+    {"vvctre_gui_table_header", (void*)&vvctre_gui_table_header},
+    {"vvctre_gui_table_get_column_count", (void*)&vvctre_gui_table_get_column_count},
+    {"vvctre_gui_table_get_column_name", (void*)&vvctre_gui_table_get_column_name},
+    {"vvctre_gui_table_get_column_flags", (void*)&vvctre_gui_table_get_column_flags},
+    {"vvctre_gui_table_get_sort_specs", (void*)&vvctre_gui_table_get_sort_specs},
+    {"vvctre_gui_table_set_background_color", (void*)&vvctre_gui_table_set_background_color},
+    {"vvctre_gui_table_get_column_name", (void*)&vvctre_gui_table_get_column_name},
+    {"vvctre_gui_table_get_column_name", (void*)&vvctre_gui_table_get_column_name},
     {"vvctre_gui_tree_node_string", (void*)&vvctre_gui_tree_node_string},
     {"vvctre_gui_tree_push_string", (void*)&vvctre_gui_tree_push_string},
     {"vvctre_gui_tree_push_void", (void*)&vvctre_gui_tree_push_void},
@@ -4398,6 +4494,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_style_set_frame_border_size", (void*)&vvctre_gui_style_set_frame_border_size},
     {"vvctre_gui_style_set_item_spacing", (void*)&vvctre_gui_style_set_item_spacing},
     {"vvctre_gui_style_set_item_inner_spacing", (void*)&vvctre_gui_style_set_item_inner_spacing},
+    {"vvctre_gui_style_set_cell_padding", (void*)&vvctre_gui_style_set_cell_padding},
     {"vvctre_gui_style_set_touch_extra_padding", (void*)&vvctre_gui_style_set_touch_extra_padding},
     {"vvctre_gui_style_set_indent_spacing", (void*)&vvctre_gui_style_set_indent_spacing},
     {"vvctre_gui_style_set_columns_min_spacing", (void*)&vvctre_gui_style_set_columns_min_spacing},
@@ -4445,6 +4542,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_style_get_frame_border_size", (void*)&vvctre_gui_style_get_frame_border_size},
     {"vvctre_gui_style_get_item_spacing", (void*)&vvctre_gui_style_get_item_spacing},
     {"vvctre_gui_style_get_item_inner_spacing", (void*)&vvctre_gui_style_get_item_inner_spacing},
+    {"vvctre_gui_style_get_cell_padding", (void*)&vvctre_gui_style_get_cell_padding},
     {"vvctre_gui_style_get_touch_extra_padding", (void*)&vvctre_gui_style_get_touch_extra_padding},
     {"vvctre_gui_style_get_indent_spacing", (void*)&vvctre_gui_style_get_indent_spacing},
     {"vvctre_gui_style_get_columns_min_spacing", (void*)&vvctre_gui_style_get_columns_min_spacing},

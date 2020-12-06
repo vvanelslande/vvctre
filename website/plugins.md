@@ -1556,6 +1556,70 @@ Creates a overlay with the specified name and initial position
 
 `ImGui::GetColumnsCount` wrapper
 
+### `bool vvctre_gui_begin_table(const char* id, int columns, ImGuiTableFlags flags, float outer_width, float outer_height, float inner_width)`
+
+`ImGui::BeginTable` wrapper
+
+### `void vvctre_gui_end_table()`
+
+`ImGui::EndTable` wrapper
+
+### `void vvctre_gui_table_next_row(ImGuiTableRowFlags flags, float minimum_row_height)`
+
+`ImGui::TableNextRow` wrapper
+
+### `bool vvctre_gui_table_next_column()`
+
+`ImGui::TableNextColumn` wrapper
+
+### `bool vvctre_gui_table_set_column_index(int index)`
+
+`ImGui::TableSetColumnIndex` wrapper
+
+### `int vvctre_gui_table_get_column_index()`
+
+`ImGui::TableGetColumnIndex` wrapper
+
+### `int vvctre_gui_table_get_row_index()`
+
+`ImGui::TableGetRowIndex` wrapper
+
+### `void vvctre_gui_table_setup_column(const char* label, ImGuiTableColumnFlags flags, float initial_width_or_weight, ImU32 user_id)`
+
+`ImGui::TableSetupColumn` wrapper
+
+### `void vvctre_gui_table_setup_scroll_freeze(int columns, int rows)`
+
+`ImGui::TableSetupScrollFreeze` wrapper
+
+### `void vvctre_gui_table_headers_row()`
+
+`ImGui::TableHeadersRow` wrapper
+
+### `void vvctre_gui_table_header(const char* label)`
+
+`ImGui::TableHeader` wrapper
+
+### `int vvctre_gui_table_get_column_count()`
+
+`ImGui::TableGetColumnCount` wrapper
+
+### `const char* vvctre_gui_table_get_column_name(int column)`
+
+`ImGui::TableGetColumnName` wrapper
+
+### `ImGuiTableColumnFlags vvctre_gui_table_get_column_flags(int column)`
+
+`ImGui::TableGetColumnFlags` wrapper
+
+### `ImGuiTableSortSpecs* vvctre_gui_table_get_sort_specs()`
+
+`ImGui::TableGetSortSpecs` wrapper
+
+### `void vvctre_gui_table_set_background_color(ImGuiTableBgTarget target, ImU32 color, int n)`
+
+`ImGui::TableSetBgColor` wrapper
+
 ### `bool vvctre_gui_tree_node_string(const char* label, ImGuiTreeNodeFlags flags)`
 
 `ImGui::TreeNodeEx` wrapper
@@ -1842,6 +1906,10 @@ Sets item spacing
 
 Sets item inner spacing
 
+### `void vvctre_gui_style_set_cell_padding(float value[2])`
+
+Sets cell padding
+
 ### `void vvctre_gui_style_set_touch_extra_padding(float value[2])`
 
 Sets touch extra padding
@@ -1993,6 +2061,10 @@ Get item spacing
 ### `void vvctre_gui_style_get_item_inner_spacing(float value[2])`
 
 Get item inner spacing
+
+### `void vvctre_gui_style_get_cell_padding(float value[2])`
+
+Get cell padding
 
 ### `void vvctre_gui_style_get_touch_extra_padding(float value[2])`
 
