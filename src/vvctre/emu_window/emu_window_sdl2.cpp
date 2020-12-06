@@ -3883,154 +3883,156 @@ void EmuWindow_SDL2::SwapBuffers() {
             if (ImGui::BeginMenu("Paths")) {
                 const u64 program_id = system.Kernel().GetCurrentProcess()->codeset->program_id;
 
-                ImGui::TextUnformatted("Files");
-                ImGui::Separator();
-
-                // Cheats
-                std::string cheats_file = FileUtil::SanitizePath(
-                    fmt::format("{}{:016X}.txt",
-                                FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir), program_id),
-                    FileUtil::DirectorySeparator::PlatformDefault);
-                ImGui::InputText("Cheats##Files", &cheats_file[0], cheats_file.length(),
-                                 ImGuiInputTextFlags_ReadOnly);
-
-                // Luma3DS Mod exheader.bin
-                std::string luma3ds_mod_exheader_bin_file = FileUtil::SanitizePath(
-                    fmt::format("{}luma/titles/{:016X}/exheader.bin",
-                                FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
-                                FileSys::GetModId(program_id)));
-                ImGui::InputText(
-                    "Luma3DS Mod exheader.bin##Files", &luma3ds_mod_exheader_bin_file[0],
-                    luma3ds_mod_exheader_bin_file.length(), ImGuiInputTextFlags_ReadOnly);
-
-                // Luma3DS Mod code.bin
-                std::string luma3ds_mod_code_bin_file = FileUtil::SanitizePath(
-                    fmt::format("{}luma/titles/{:016X}/code.bin",
-                                FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
-                                FileSys::GetModId(program_id)));
-                ImGui::InputText("Luma3DS Mod code.bin##Files", &luma3ds_mod_code_bin_file[0],
-                                 luma3ds_mod_code_bin_file.length(), ImGuiInputTextFlags_ReadOnly);
-
-                // Luma3DS Mod code.ips
-                std::string luma3ds_mod_code_ips_file = FileUtil::SanitizePath(
-                    fmt::format("{}luma/titles/{:016X}/code.ips",
-                                FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
-                                FileSys::GetModId(program_id)));
-                ImGui::InputText("Luma3DS Mod code.ips##Files", &luma3ds_mod_code_ips_file[0],
-                                 luma3ds_mod_code_ips_file.length(), ImGuiInputTextFlags_ReadOnly);
-
-                // Luma3DS Mod code.bps
-                std::string luma3ds_mod_code_bps_file = FileUtil::SanitizePath(
-                    fmt::format("{}luma/titles/{:016X}/code.bin",
-                                FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
-                                FileSys::GetModId(program_id)));
-                ImGui::InputText("Luma3DS Mod code.bps##Files", &luma3ds_mod_code_bps_file[0],
-                                 luma3ds_mod_code_bps_file.length(), ImGuiInputTextFlags_ReadOnly);
-
-                // Disk Shader Cache
-                std::string disk_shader_cache_file = FileUtil::SanitizePath(
-                    fmt::format("{}/{:016X}.vsc",
-                                FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir), program_id));
-                ImGui::InputText("Disk Shader Cache##Files", &disk_shader_cache_file[0],
-                                 disk_shader_cache_file.length(), ImGuiInputTextFlags_ReadOnly);
-
-                ImGui::NewLine();
-
-                ImGui::TextUnformatted("Folders");
-                ImGui::Separator();
-
-                // Save Data
-                std::string save_data_folder = FileUtil::SanitizePath(
-                    FileSys::ArchiveSource_SDSaveData::GetSaveDataPathFor(
-                        FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
-                        system.Kernel().GetCurrentProcess()->codeset->program_id),
-                    FileUtil::DirectorySeparator::PlatformDefault);
-                ImGui::InputText("Save Data##Folders", &save_data_folder[0],
-                                 save_data_folder.length(), ImGuiInputTextFlags_ReadOnly);
-
-                // Extra Data
-                u64 extdata_id = 0;
-                system.GetAppLoader().ReadExtdataId(extdata_id);
-                std::string extra_data_folder = FileUtil::SanitizePath(
-                    FileSys::GetExtDataPathFromId(
-                        FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir), extdata_id),
-                    FileUtil::DirectorySeparator::PlatformDefault);
-                ImGui::InputText("Extra Data##Folders", &extra_data_folder[0],
-                                 extra_data_folder.length(), ImGuiInputTextFlags_ReadOnly);
-
-                // Title
-                std::string title_folder = FileUtil::SanitizePath(Service::AM::GetTitlePath(
-                    Service::AM::GetTitleMediaType(program_id), program_id));
-                ImGui::InputText("Title##Folders", &title_folder[0], title_folder.length(),
-                                 ImGuiInputTextFlags_ReadOnly);
-
-                // Update
-                const u16 category = static_cast<u16>((program_id >> 32) & 0xFFFF);
-                if (!(category & Service::AM::CATEGORY_DLP)) {
-                    std::string update_folder = FileUtil::SanitizePath(Service::AM::GetTitlePath(
-                        Service::FS::MediaType::SDMC,
-                        0x0004000e00000000 | static_cast<u32>(program_id)));
-                    ImGui::InputText("Update##Folders", &update_folder[0], update_folder.length(),
+                if (ImGui::CollapsingHeader("Files")) {
+                    // Cheats
+                    std::string cheats_file = FileUtil::SanitizePath(
+                        fmt::format("{}{:016X}.txt",
+                                    FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
+                                    program_id),
+                        FileUtil::DirectorySeparator::PlatformDefault);
+                    ImGui::InputText("Cheats##Files", &cheats_file[0], cheats_file.length(),
                                      ImGuiInputTextFlags_ReadOnly);
+
+                    // Luma3DS Mod exheader.bin
+                    std::string luma3ds_mod_exheader_bin_file = FileUtil::SanitizePath(
+                        fmt::format("{}luma/titles/{:016X}/exheader.bin",
+                                    FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                                    FileSys::GetModId(program_id)));
+                    ImGui::InputText(
+                        "Luma3DS Mod exheader.bin##Files", &luma3ds_mod_exheader_bin_file[0],
+                        luma3ds_mod_exheader_bin_file.length(), ImGuiInputTextFlags_ReadOnly);
+
+                    // Luma3DS Mod code.bin
+                    std::string luma3ds_mod_code_bin_file = FileUtil::SanitizePath(
+                        fmt::format("{}luma/titles/{:016X}/code.bin",
+                                    FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                                    FileSys::GetModId(program_id)));
+                    ImGui::InputText("Luma3DS Mod code.bin##Files", &luma3ds_mod_code_bin_file[0],
+                                     luma3ds_mod_code_bin_file.length(),
+                                     ImGuiInputTextFlags_ReadOnly);
+
+                    // Luma3DS Mod code.ips
+                    std::string luma3ds_mod_code_ips_file = FileUtil::SanitizePath(
+                        fmt::format("{}luma/titles/{:016X}/code.ips",
+                                    FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                                    FileSys::GetModId(program_id)));
+                    ImGui::InputText("Luma3DS Mod code.ips##Files", &luma3ds_mod_code_ips_file[0],
+                                     luma3ds_mod_code_ips_file.length(),
+                                     ImGuiInputTextFlags_ReadOnly);
+
+                    // Luma3DS Mod code.bps
+                    std::string luma3ds_mod_code_bps_file = FileUtil::SanitizePath(
+                        fmt::format("{}luma/titles/{:016X}/code.bin",
+                                    FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                                    FileSys::GetModId(program_id)));
+                    ImGui::InputText("Luma3DS Mod code.bps##Files", &luma3ds_mod_code_bps_file[0],
+                                     luma3ds_mod_code_bps_file.length(),
+                                     ImGuiInputTextFlags_ReadOnly);
+
+                    // Disk Shader Cache
+                    std::string disk_shader_cache_file = FileUtil::SanitizePath(fmt::format(
+                        "{}/{:016X}.vsc", FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir),
+                        program_id));
+                    ImGui::InputText("Disk Shader Cache##Files", &disk_shader_cache_file[0],
+                                     disk_shader_cache_file.length(), ImGuiInputTextFlags_ReadOnly);
                 }
 
-                // Luma3DS Mod
-                std::string luma3ds_mod_folder = FileUtil::SanitizePath(fmt::format(
-                    "{}luma/titles/{:016X}", FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
-                    FileSys::GetModId(program_id)));
-                ImGui::InputText("Luma3DS Mod##Folders", &luma3ds_mod_folder[0],
-                                 luma3ds_mod_folder.length(), ImGuiInputTextFlags_ReadOnly);
+                if (ImGui::CollapsingHeader("Folders")) {
+                    // Save Data
+                    std::string save_data_folder = FileUtil::SanitizePath(
+                        FileSys::ArchiveSource_SDSaveData::GetSaveDataPathFor(
+                            FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                            system.Kernel().GetCurrentProcess()->codeset->program_id),
+                        FileUtil::DirectorySeparator::PlatformDefault);
+                    ImGui::InputText("Save Data##Folders", &save_data_folder[0],
+                                     save_data_folder.length(), ImGuiInputTextFlags_ReadOnly);
 
-                // Luma3DS Mod RomFS
-                std::string luma3ds_mod_romfs_folder = FileUtil::SanitizePath(
-                    fmt::format("{}luma/titles/{:016X}/romfs",
-                                FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
-                                FileSys::GetModId(program_id)));
-                ImGui::InputText("Luma3DS Mod RomFS##Folders", &luma3ds_mod_romfs_folder[0],
-                                 luma3ds_mod_romfs_folder.length(), ImGuiInputTextFlags_ReadOnly);
+                    // Extra Data
+                    u64 extdata_id = 0;
+                    system.GetAppLoader().ReadExtdataId(extdata_id);
+                    std::string extra_data_folder = FileUtil::SanitizePath(
+                        FileSys::GetExtDataPathFromId(
+                            FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir), extdata_id),
+                        FileUtil::DirectorySeparator::PlatformDefault);
+                    ImGui::InputText("Extra Data##Folders", &extra_data_folder[0],
+                                     extra_data_folder.length(), ImGuiInputTextFlags_ReadOnly);
 
-                // Luma3DS Mod RomFS Patches & Stubs
-                std::string luma3ds_mod_romfs_patches_and_stubs_folder = FileUtil::SanitizePath(
-                    fmt::format("{}luma/titles/{:016X}/romfs_ext",
-                                FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
-                                FileSys::GetModId(program_id)));
-                ImGui::InputText("Luma3DS Mod RomFS Patches & Stubs##Folders",
-                                 &luma3ds_mod_romfs_patches_and_stubs_folder[0],
-                                 luma3ds_mod_romfs_patches_and_stubs_folder.length(),
-                                 ImGuiInputTextFlags_ReadOnly);
+                    // Title
+                    std::string title_folder = FileUtil::SanitizePath(Service::AM::GetTitlePath(
+                        Service::AM::GetTitleMediaType(program_id), program_id));
+                    ImGui::InputText("Title##Folders", &title_folder[0], title_folder.length(),
+                                     ImGuiInputTextFlags_ReadOnly);
 
-                // Cheats
-                std::string cheats_folder =
-                    FileUtil::SanitizePath(FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir));
-                ImGui::InputText("Cheats##Folders", &cheats_folder[0], cheats_folder.length(),
-                                 ImGuiInputTextFlags_ReadOnly);
+                    // Update
+                    const u16 category = static_cast<u16>((program_id >> 32) & 0xFFFF);
+                    if (!(category & Service::AM::CATEGORY_DLP)) {
+                        std::string update_folder =
+                            FileUtil::SanitizePath(Service::AM::GetTitlePath(
+                                Service::FS::MediaType::SDMC,
+                                0x0004000e00000000 | static_cast<u32>(program_id)));
+                        ImGui::InputText("Update##Folders", &update_folder[0],
+                                         update_folder.length(), ImGuiInputTextFlags_ReadOnly);
+                    }
 
-                // System Data
-                std::string system_data_folder =
-                    FileUtil::SanitizePath(FileUtil::GetUserPath(FileUtil::UserPath::SysDataDir));
-                ImGui::InputText("System Data##Folders", &system_data_folder[0],
-                                 system_data_folder.length(), ImGuiInputTextFlags_ReadOnly);
+                    // Luma3DS Mod
+                    std::string luma3ds_mod_folder = FileUtil::SanitizePath(fmt::format(
+                        "{}luma/titles/{:016X}", FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                        FileSys::GetModId(program_id)));
+                    ImGui::InputText("Luma3DS Mod##Folders", &luma3ds_mod_folder[0],
+                                     luma3ds_mod_folder.length(), ImGuiInputTextFlags_ReadOnly);
 
-                // Custom Textures
-                std::string custom_textures_folder = FileUtil::SanitizePath(
-                    fmt::format("{}textures/{:016X}",
-                                FileUtil::GetUserPath(FileUtil::UserPath::LoadDir), program_id));
-                ImGui::InputText("Custom Textures##Folders", &custom_textures_folder[0],
-                                 custom_textures_folder.length(), ImGuiInputTextFlags_ReadOnly);
+                    // Luma3DS Mod RomFS
+                    std::string luma3ds_mod_romfs_folder = FileUtil::SanitizePath(
+                        fmt::format("{}luma/titles/{:016X}/romfs",
+                                    FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                                    FileSys::GetModId(program_id)));
+                    ImGui::InputText("Luma3DS Mod RomFS##Folders", &luma3ds_mod_romfs_folder[0],
+                                     luma3ds_mod_romfs_folder.length(),
+                                     ImGuiInputTextFlags_ReadOnly);
 
-                // Dumped Textures
-                std::string dumped_textures_folder = FileUtil::SanitizePath(
-                    fmt::format("{}textures/{:016X}",
-                                FileUtil::GetUserPath(FileUtil::UserPath::DumpDir), program_id));
-                ImGui::InputText("Dumped Textures##Folders", &dumped_textures_folder[0],
-                                 dumped_textures_folder.length(), ImGuiInputTextFlags_ReadOnly);
+                    // Luma3DS Mod RomFS Patches & Stubs
+                    std::string luma3ds_mod_romfs_patches_and_stubs_folder = FileUtil::SanitizePath(
+                        fmt::format("{}luma/titles/{:016X}/romfs_ext",
+                                    FileUtil::GetUserPath(FileUtil::UserPath::SDMCDir),
+                                    FileSys::GetModId(program_id)));
+                    ImGui::InputText("Luma3DS Mod RomFS Patches & Stubs##Folders",
+                                     &luma3ds_mod_romfs_patches_and_stubs_folder[0],
+                                     luma3ds_mod_romfs_patches_and_stubs_folder.length(),
+                                     ImGuiInputTextFlags_ReadOnly);
 
-                // Post Processing Shaders
-                std::string post_processing_shaders_folder =
-                    FileUtil::SanitizePath(FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir));
-                ImGui::InputText(
-                    "Post Processing Shaders##Folders", &post_processing_shaders_folder[0],
-                    post_processing_shaders_folder.length(), ImGuiInputTextFlags_ReadOnly);
+                    // Cheats
+                    std::string cheats_folder = FileUtil::SanitizePath(
+                        FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir));
+                    ImGui::InputText("Cheats##Folders", &cheats_folder[0], cheats_folder.length(),
+                                     ImGuiInputTextFlags_ReadOnly);
+
+                    // System Data
+                    std::string system_data_folder = FileUtil::SanitizePath(
+                        FileUtil::GetUserPath(FileUtil::UserPath::SysDataDir));
+                    ImGui::InputText("System Data##Folders", &system_data_folder[0],
+                                     system_data_folder.length(), ImGuiInputTextFlags_ReadOnly);
+
+                    // Custom Textures
+                    std::string custom_textures_folder = FileUtil::SanitizePath(fmt::format(
+                        "{}textures/{:016X}", FileUtil::GetUserPath(FileUtil::UserPath::LoadDir),
+                        program_id));
+                    ImGui::InputText("Custom Textures##Folders", &custom_textures_folder[0],
+                                     custom_textures_folder.length(), ImGuiInputTextFlags_ReadOnly);
+
+                    // Dumped Textures
+                    std::string dumped_textures_folder = FileUtil::SanitizePath(fmt::format(
+                        "{}textures/{:016X}", FileUtil::GetUserPath(FileUtil::UserPath::DumpDir),
+                        program_id));
+                    ImGui::InputText("Dumped Textures##Folders", &dumped_textures_folder[0],
+                                     dumped_textures_folder.length(), ImGuiInputTextFlags_ReadOnly);
+
+                    // Post Processing Shaders
+                    std::string post_processing_shaders_folder = FileUtil::SanitizePath(
+                        FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir));
+                    ImGui::InputText(
+                        "Post Processing Shaders##Folders", &post_processing_shaders_folder[0],
+                        post_processing_shaders_folder.length(), ImGuiInputTextFlags_ReadOnly);
+                }
 
                 ImGui::EndMenu();
             }
