@@ -4026,12 +4026,14 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::InputText("Dumped Textures##Folders", &dumped_textures_folder[0],
                                      dumped_textures_folder.length(), ImGuiInputTextFlags_ReadOnly);
 
-                    // Post Processing Shaders
-                    std::string post_processing_shaders_folder = FileUtil::SanitizePath(
-                        FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir));
-                    ImGui::InputText(
-                        "Post Processing Shaders##Folders", &post_processing_shaders_folder[0],
-                        post_processing_shaders_folder.length(), ImGuiInputTextFlags_ReadOnly);
+                    // Post Processing Shaders And Disk Shader Caches
+                    std::string post_processing_shaders_and_disk_shader_caches_folder =
+                        FileUtil::SanitizePath(
+                            FileUtil::GetUserPath(FileUtil::UserPath::ShaderDir));
+                    ImGui::InputText("Post Processing Shaders And Disk Shader Caches##Folders",
+                                     &post_processing_shaders_and_disk_shader_caches_folder[0],
+                                     post_processing_shaders_and_disk_shader_caches_folder.length(),
+                                     ImGuiInputTextFlags_ReadOnly);
                 }
 
                 ImGui::EndMenu();
