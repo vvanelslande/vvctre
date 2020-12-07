@@ -75,7 +75,6 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       if (validLines.length === 0) {
         alert('All the lines are invalid or the lines input is empty')
         document.body.style.cursor = 'default'
-        makingPlugin = false
         return
       }
 

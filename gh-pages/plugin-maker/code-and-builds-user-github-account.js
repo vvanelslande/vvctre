@@ -35,7 +35,6 @@ if (url.searchParams.has('code')) {
     'https://github.com/login/oauth/authorize?client_id=1df52b4366a6b5d52011&scope=public_repo,workflow'
 }
 
-let makingPlugin = false
 const type = document.querySelector('#type')
 
 type.addEventListener('change', () => {
@@ -92,12 +91,8 @@ type.addEventListener('change', () => {
 })
 
 document.querySelector('#makePlugin').addEventListener('click', async () => {
-  if (makingPlugin) {
-    return
-  }
-
-  document.body.style.cursor = 'wait'
-  makingPlugin = true
+  document.querySelector('#makingPlugin').style.display = 'block'
+  document.querySelector('#everything').style.display = 'none'
 
   let code = ''
 
@@ -118,8 +113,8 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
 
       if (validLines.length === 0) {
         alert('All the lines are invalid or the lines input is empty')
-        document.body.style.cursor = 'default'
-        makingPlugin = false
+        document.querySelector('#makingPlugin').style.display = 'none'
+        document.querySelector('#everything').style.display = 'block'
         return
       }
 
@@ -441,8 +436,8 @@ VVCTRE_PLUGIN_EXPORT void EmulatorClosing() {
           document.querySelector('#repository_name').value
         } already exists or localStorage.code_and_builds_user_github_account_plugin_maker_github_token is invalid`
       )
-      document.body.style.cursor = 'default'
-      makingPlugin = false
+      document.querySelector('#makingPlugin').style.display = 'none'
+      document.querySelector('#everything').style.display = 'block'
       return
     }
 

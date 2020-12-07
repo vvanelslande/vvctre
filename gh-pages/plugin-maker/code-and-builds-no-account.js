@@ -59,12 +59,8 @@ type.addEventListener('change', () => {
 })
 
 document.querySelector('#makePlugin').addEventListener('click', async () => {
-  if (makingPlugin) {
-    return
-  }
-
-  document.body.style.cursor = 'wait'
-  makingPlugin = true
+  document.querySelector('#makingPlugin').style.display = 'block'
+  document.querySelector('#everything').style.display = 'none'
 
   let url = ''
   let body = ''
@@ -86,8 +82,8 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
 
       if (validLines.length === 0) {
         alert('All the lines are invalid or the lines input is empty')
-        document.body.style.cursor = 'default'
-        makingPlugin = false
+        document.querySelector('#makingPlugin').style.display = 'none'
+        document.querySelector('#everything').style.display = 'block'
         return
       }
 
@@ -152,6 +148,6 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
 
   saveAs(blob, 'plugin.zip')
 
-  document.body.style.cursor = 'default'
-  makingPlugin = false
+  document.querySelector('#makingPlugin').style.display = 'none'
+  document.querySelector('#everything').style.display = 'block'
 })
