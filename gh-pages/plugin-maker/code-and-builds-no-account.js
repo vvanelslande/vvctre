@@ -60,7 +60,7 @@ type.addEventListener('change', () => {
 
 document.querySelector('#makePlugin').addEventListener('click', async () => {
   document.querySelector('#makingPlugin').style.display = 'block'
-  document.querySelector('#everything').style.display = 'none'
+  document.querySelector('#notMakingPlugin').style.display = 'none'
 
   let url = ''
   let body = ''
@@ -83,7 +83,7 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       if (validLines.length === 0) {
         alert('All the lines are invalid or the lines input is empty')
         document.querySelector('#makingPlugin').style.display = 'none'
-        document.querySelector('#everything').style.display = 'block'
+        document.querySelector('#notMakingPlugin').style.display = 'block'
         return
       }
 
@@ -149,5 +149,5 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
   saveAs(blob, 'plugin.zip')
 
   document.querySelector('#makingPlugin').style.display = 'none'
-  document.querySelector('#everything').style.display = 'block'
+  document.querySelector('#notMakingPlugin').style.display = 'block'
 })

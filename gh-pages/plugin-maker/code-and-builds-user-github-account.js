@@ -92,7 +92,7 @@ type.addEventListener('change', () => {
 
 document.querySelector('#makePlugin').addEventListener('click', async () => {
   document.querySelector('#makingPlugin').style.display = 'block'
-  document.querySelector('#everything').style.display = 'none'
+  document.querySelector('#notMakingPlugin').style.display = 'none'
 
   let code = ''
 
@@ -114,7 +114,7 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       if (validLines.length === 0) {
         alert('All the lines are invalid or the lines input is empty')
         document.querySelector('#makingPlugin').style.display = 'none'
-        document.querySelector('#everything').style.display = 'block'
+        document.querySelector('#notMakingPlugin').style.display = 'block'
         return
       }
 
@@ -437,7 +437,7 @@ VVCTRE_PLUGIN_EXPORT void EmulatorClosing() {
         } already exists or localStorage.code_and_builds_user_github_account_plugin_maker_github_token is invalid`
       )
       document.querySelector('#makingPlugin').style.display = 'none'
-      document.querySelector('#everything').style.display = 'block'
+      document.querySelector('#notMakingPlugin').style.display = 'block'
       return
     }
 
