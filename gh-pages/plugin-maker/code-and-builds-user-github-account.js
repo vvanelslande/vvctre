@@ -525,6 +525,6 @@ VVCTRE_PLUGIN_EXPORT void EmulatorClosing() {
       } else {
         setTimeout(f, 5000)
       }
-    }, 60000)
+    }, 90000)
   }
 })
