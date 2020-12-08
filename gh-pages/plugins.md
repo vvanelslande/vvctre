@@ -143,16 +143,16 @@ Loads Layout, Swap Screens, and Upright Screens from default-layout-settings.jso
 
 ### Patreon hotkeys
 
-[Download](https://www.patreon.com/posts/patreon-hotkeys-42884191)
+[Download](https://www.patreon.com/posts/patreon-hotkeys-44818963)
 
 Hotkeys:
 
-- Load File (F1, Can't be changed)
-- Load Encrypted Amiibo (F2, Can't be changed)
-- Remove Amiibo (F3, Can't be changed)
-- Restart Emulation (F4, Can't be changed)
-- Install CIA (F5, Can't be changed)
-- Hold to remove speed limit (Space, Can't be changed)
+- Load File
+- Load Encrypted Amiibo
+- Remove Amiibo
+- Restart Emulation
+- Install CIA
+- Hold to remove speed limit
 
 ### Light theme
 

@@ -15,11 +15,11 @@ Put its files in vvctre's folder.
 
 ## How do I add cheats?
 
-1\. Right click/double left click FPS  
-2\. Click View -> Cheats  
-3\. Click Edit  
-4\. Add the cheat(s)  
-5\. Click File -> Save or File -> Load Cheats From Text
+1. Right click/double left click FPS
+2. Click View -> Cheats
+3. Click Edit
+4. Add the cheat(s)
+5. Click File -> Save or File -> Load Cheats From Text
 
 ## Will you add Android support?
 
