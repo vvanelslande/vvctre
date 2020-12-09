@@ -5,13 +5,16 @@
 const url = new URL(location.href)
 
 if (url.searchParams.has('code')) {
-  fetch('https://vvctre.dynv6.net:8831/pm11api/code-to-access-token', {
-    headers: {
-      'Content-Type': 'text/plain'
-    },
-    body: url.searchParams.get('code'),
-    method: 'POST'
-  })
+  fetch(
+    'https://vvctre.dynv6.net:1652/gh-pages-code-and-builds-user-github-account-plugin-maker-api/github-code-to-access-token',
+    {
+      headers: {
+        'Content-Type': 'text/plain'
+      },
+      body: url.searchParams.get('code'),
+      method: 'POST'
+    }
+  )
     .then(response => response.text())
     .then(token => {
       if (!token) {
