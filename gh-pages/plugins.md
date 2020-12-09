@@ -8,11 +8,9 @@ redirect_from:
 
 Code and builds:
 
+- [This]({{ site.baseurl }}/plugin-maker/code-and-builds-no-account/)
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-user-github-account/) (needs a GitHub account)
 - vvctre bot (it's in my Discord server)
-- [vvctre-pm13api](https://github.com/vvanelslande/vvctre-pm13api)
-  - [Web client]({{ site.baseurl }}/plugin-maker/code-and-builds-no-account/) (it uses my server)
-  - vvctre bot can make plugins using it (it uses my server)
 
 Code only:
 
