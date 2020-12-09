@@ -8,9 +8,15 @@ redirect_from:
 
 Code and builds:
 
-- [This]({{ site.baseurl }}/plugin-maker/code-and-builds-no-account/)
+- [This]({{ site.baseurl }}/plugin-maker/code-and-builds-no-account/) (doesn't need a account)
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-user-github-account/) (needs a GitHub account)
 - vvctre bot (it's in my Discord server)
+- vvctre.dynv6.net's API
+  - Custom default settings: POST [https://vvctre.dynv6.net:1652/make-custom-default-settings-plugin](https://vvctre.dynv6.net:1652/make-custom-default-settings-plugin)
+  - Button to touch: POST [https://vvctre.dynv6.net:1652/make-button-to-touch-plugin](https://vvctre.dynv6.net:1652/make-button-to-touch-plugin)
+  - Window size: POST [https://vvctre.dynv6.net:1652/make-window-size-plugin](https://vvctre.dynv6.net:1652/make-window-size-plugin)
+  - Window position: POST [https://vvctre.dynv6.net:1652/make-window-position-plugin](https://vvctre.dynv6.net:1652/make-window-position-plugin)
+  - Log file: POST [https://vvctre.dynv6.net:1652/make-log-file-plugin](https://vvctre.dynv6.net:1652/make-log-file-plugin)
 
 Code only:
 
