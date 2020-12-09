@@ -27,7 +27,7 @@ Code only:
 
 Adds a quick settings window
 
-[Download Windows 7z](https://github.com/vvanelslande/vvctre-plugin-quick-settings/releases/download/2.0.1/vvctre-plugin-quick-settings-2.0.1-windows.7z) \| [Download Windows zip](https://github.com/vvanelslande/vvctre-plugin-quick-settings/releases/download/2.0.1/vvctre-plugin-quick-settings-2.0.1-windows.zip) \| [Download Linux 7z](https://github.com/vvanelslande/vvctre-plugin-quick-settings/releases/download/2.0.1/vvctre-plugin-quick-settings-2.0.1-linux.7z) \| [Download Linux zip](https://github.com/vvanelslande/vvctre-plugin-quick-settings/releases/download/2.0.1/vvctre-plugin-quick-settings-2.0.1-linux.zip)
+[Download Windows 7z](https://github.com/vvanelslande/vvctre-plugin-quick-settings/releases/download/2.0.2/vvctre-plugin-quick-settings-2.0.2-windows.7z) \| [Download Windows zip](https://github.com/vvanelslande/vvctre-plugin-quick-settings/releases/download/2.0.2/vvctre-plugin-quick-settings-2.0.2-windows.zip) \| [Download Linux 7z](https://github.com/vvanelslande/vvctre-plugin-quick-settings/releases/download/2.0.2/vvctre-plugin-quick-settings-2.0.2-linux.7z) \| [Download Linux zip](https://github.com/vvanelslande/vvctre-plugin-quick-settings/releases/download/2.0.2/vvctre-plugin-quick-settings-2.0.2-linux.zip)
 
 ### [tbsp](https://github.com/tbsp) / [vvctre-plugin-pause](https://github.com/tbsp/vvctre-plugin-pause)
 
