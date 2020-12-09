@@ -55,7 +55,7 @@ private:
     u64 unique_identifier{};
     ProgramType type{};
     Pica::Regs registers{};
-    std::vector<u32> code{};
+    std::vector<u32> code;
 };
 
 class ShaderDiskCache {
