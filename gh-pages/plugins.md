@@ -13,10 +13,15 @@ Code and builds:
 - vvctre bot (it's in my Discord server)
 - vvctre.dynv6.net's API
   - Custom default settings: POST [https://vvctre.dynv6.net:1652/make-custom-default-settings-plugin](https://vvctre.dynv6.net:1652/make-custom-default-settings-plugin)
+    Body: Lines
   - Button to touch: POST [https://vvctre.dynv6.net:1652/make-button-to-touch-plugin](https://vvctre.dynv6.net:1652/make-button-to-touch-plugin)
+    Body: JSON with `x`, `y`, and `params`
   - Window size: POST [https://vvctre.dynv6.net:1652/make-window-size-plugin](https://vvctre.dynv6.net:1652/make-window-size-plugin)
+    Body: JSON with `width` and `height`
   - Window position: POST [https://vvctre.dynv6.net:1652/make-window-position-plugin](https://vvctre.dynv6.net:1652/make-window-position-plugin)
+    Body: JSON with `x` and `y`
   - Log file: POST [https://vvctre.dynv6.net:1652/make-log-file-plugin](https://vvctre.dynv6.net:1652/make-log-file-plugin)
+    Body: File path
 
 Code only:
 
