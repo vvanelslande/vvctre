@@ -11,7 +11,7 @@ Code and builds:
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-no-account/) (doesn't need a account)
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-user-github-account/) (needs a GitHub account)
 - vvctre bot (it's in my Discord server)
-- vvctre.dynv6.net's API
+- vvctre.dynv6.net's API (code: [https://github.com/vvanelslande/vvctre-discord-bot-and-vvctre.dynv6.net](https://github.com/vvanelslande/vvctre-discord-bot-and-vvctre.dynv6.net))
   - Custom default settings:  
      &nbsp;&nbsp;URL: [https://vvctre.dynv6.net:1652/make-custom-default-settings-plugin](https://vvctre.dynv6.net:1652/make-custom-default-settings-plugin)  
      &nbsp;&nbsp;Method: POST  
