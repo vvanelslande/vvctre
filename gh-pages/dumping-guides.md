@@ -28,4 +28,4 @@ System title list: [https://3dbrew.org/wiki/Title_list](https://3dbrew.org/wiki/
 
 The config savegame will be in `gm9/out/Citra/user/nand/data/00000000000000000000000000000000/sysdata/00010017/00000000` in your SD card
 
-The archives will be in `gm9/out/Citra/user/nand/00000000000000000000000000000000`
+The archives will be in `gm9/out/Citra/user/nand/00000000000000000000000000000000` in your SD card
