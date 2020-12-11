@@ -6,7 +6,7 @@ const url = new URL(location.href)
 
 if (url.searchParams.has('code')) {
   fetch(
-    'https://vvctre.dynv6.net:1652/gh-pages-code-and-builds-user-github-account-plugin-maker/github-code-to-access-token',
+    'https://vvctre.dynv6.net/gh-pages-code-and-builds-user-github-account-plugin-maker/github-code-to-access-token',
     {
       headers: {
         'Content-Type': 'text/plain'
