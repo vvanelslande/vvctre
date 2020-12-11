@@ -416,7 +416,7 @@ VVCTRE_PLUGIN_EXPORT void EmulatorClosing() {
     const userJson = await userResponse.json()
 
     const generateResponse = await fetch(
-      'https://api.github.com/repos/vvanelslande/vvctre-plugin-template-for-plugin-maker-1-1/generate',
+      'https://api.github.com/repos/vvanelslande/vvctre-plugin-template-for-gh-pages-code-and-builds-user-github-account-plugin-maker/generate',
       {
         headers: {
           Accept: 'application/vnd.github.baptiste-preview+json',
