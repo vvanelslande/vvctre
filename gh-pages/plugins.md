@@ -11,25 +11,25 @@ Code and builds:
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-no-account/) (doesn't need a account)
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-user-github-account/) (needs a GitHub account)
 - vvctre bot (it's in my Discord server)
-- vvctre.dynv6.net's API (code: [https://github.com/vvanelslande/vvctre-discord-bot-and-vvctre.dynv6.net](https://github.com/vvanelslande/vvctre-discord-bot-and-vvctre.dynv6.net))
+- vvctre API (my server: [https://vvctre.dynv6.net:1652](https://vvctre.dynv6.net:1652))
   - Custom default settings:  
-     &nbsp;&nbsp;URL: [https://vvctre.dynv6.net:1652/make-custom-default-settings-plugin](https://vvctre.dynv6.net:1652/make-custom-default-settings-plugin)  
-     &nbsp;&nbsp;Method: POST  
-     &nbsp;&nbsp;Body: Lines
+    &nbsp;&nbsp;Path: /make-custom-default-settings-plugin
+    &nbsp;&nbsp;Method: POST  
+    &nbsp;&nbsp;Body: Lines
   - Button to touch:  
-    &nbsp;&nbsp;URL: [https://vvctre.dynv6.net:1652/make-button-to-touch-plugin](https://vvctre.dynv6.net:1652/make-button-to-touch-plugin)  
+    &nbsp;&nbsp;Path: /make-button-to-touch-plugin  
     &nbsp;&nbsp;Method: POST  
     &nbsp;&nbsp;Body: JSON object with `x`, `y`, and `params`
   - Window size:  
-    &nbsp;&nbsp;URL: [https://vvctre.dynv6.net:1652/make-window-size-plugin](https://vvctre.dynv6.net:1652/make-window-size-plugin)  
+    &nbsp;&nbsp;Path: /make-window-size-plugin  
     &nbsp;&nbsp;Method: POST  
     &nbsp;&nbsp;Body: JSON object with `width` and `height`
   - Window position:  
-    &nbsp;&nbsp;URL: [https://vvctre.dynv6.net:1652/make-window-position-plugin](https://vvctre.dynv6.net:1652/make-window-position-plugin)  
+    &nbsp;&nbsp;Path: /make-window-position-plugin  
     &nbsp;&nbsp;Method: POST  
     &nbsp;&nbsp;Body: JSON object with `x` and `y`
   - Log file:  
-    &nbsp;&nbsp;URL: [https://vvctre.dynv6.net:1652/make-log-file-plugin](https://vvctre.dynv6.net:1652/make-log-file-plugin)  
+    &nbsp;&nbsp;Path: /make-log-file-plugin  
     &nbsp;&nbsp;Method: POST  
     &nbsp;&nbsp;Body: File path
 
