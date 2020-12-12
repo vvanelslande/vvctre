@@ -56,7 +56,7 @@ A pause button for vvctre (F8)
 
 ### [vvanelslande](https://github.com/vvanelslande) / [vvctre-plugin-default-multiplayer-settings-file](https://github.com/vvanelslande/vvctre-plugin-default-multiplayer-settings-file)
 
-Loads multiplayer settings from multiplayer-settings.json when vvctre starts (everything is optional) and joins the room when emulation is starting for the first time (it's disabled if default-multiplayer-settings.json doesn't have `join_room_when_emulation_is_starting_for_the_first_time`)
+Loads multiplayer settings from multiplayer-settings.json (it needs to be in vvctre's folder) when vvctre starts (everything is optional) and joins the room when emulation is starting for the first time (it's disabled if default-multiplayer-settings.json doesn't have `join_room_when_emulation_is_starting_for_the_first_time`)
 
 [Download Windows 7z](https://github.com/vvanelslande/vvctre-plugin-default-multiplayer-settings-file/releases/download/1.0.2/vvctre-plugin-default-multiplayer-settings-file-1.0.2-windows.7z) \| [Download Windows zip](https://github.com/vvanelslande/vvctre-plugin-default-multiplayer-settings-file/releases/download/1.0.2/vvctre-plugin-default-multiplayer-settings-file-1.0.2-windows.zip) \| [Download Linux 7z](https://github.com/vvanelslande/vvctre-plugin-default-multiplayer-settings-file/releases/download/1.0.2/vvctre-plugin-default-multiplayer-settings-file-1.0.2-linux.7z) \| [Download Linux zip](https://github.com/vvanelslande/vvctre-plugin-default-multiplayer-settings-file/releases/download/1.0.2/vvctre-plugin-default-multiplayer-settings-file-1.0.2-linux.zip)
 
@@ -68,7 +68,7 @@ Enables core 2 when vvctre starts
 
 ### [vvanelslande](https://github.com/vvanelslande) / [vvctre-plugin-default-start-paths-file](https://github.com/vvanelslande/vvctre-plugin-default-start-paths-file)
 
-Loads Start tab paths (file, play movie, and record movie) from default-start-paths.json when vvctre starts
+Loads Start tab paths (file, play movie, and record movie) from default-start-paths.json (it needs to be in vvctre's folder) when vvctre starts
 
 [Download Windows 7z](https://github.com/vvanelslande/vvctre-plugin-default-start-paths-file/releases/download/1.0.0/vvctre-plugin-default-start-paths-file-1.0.0-windows.7z) \| [Download Windows zip](https://github.com/vvanelslande/vvctre-plugin-default-start-paths-file/releases/download/1.0.0/vvctre-plugin-default-start-paths-file-1.0.0-windows.zip) \| [Download Linux 7z](https://github.com/vvanelslande/vvctre-plugin-default-start-paths-file/releases/download/1.0.0/vvctre-plugin-default-start-paths-file-1.0.0-linux.7z) \| [Download Linux zip](https://github.com/vvanelslande/vvctre-plugin-default-start-paths-file/releases/download/1.0.0/vvctre-plugin-default-start-paths-file-1.0.0-linux.zip)
 
@@ -80,7 +80,7 @@ Enables Graphics -> Use Hardware Renderer -> Use Hardware Shader -> Enable Disk 
 
 ### [vvanelslande](https://github.com/vvanelslande) / [vvctre-plugin-make-all-settings-in-quick-settings-persistent](https://github.com/vvanelslande/vvctre-plugin-make-all-settings-in-quick-settings-persistent)
 
-Loads all settings in Quick Settings from settings.json when vvctre is starting and saves all settings in Quick Settings to settings.json when vvctre is closing. Only loads and saves settings that are in settings.json.
+Loads all settings in Quick Settings from settings.json (it needs to be in vvctre's folder) when vvctre is starting and saves all settings in Quick Settings to settings.json when vvctre is closing. Only loads and saves settings that are in settings.json.
 
 [Download Windows 7z](https://github.com/vvanelslande/vvctre-plugin-make-all-settings-in-quick-settings-persistent/releases/download/1.0.0/vvctre-plugin-make-all-settings-in-quick-settings-persistent-1.0.0-windows.7z) \| [Download Windows zip](https://github.com/vvanelslande/vvctre-plugin-make-all-settings-in-quick-settings-persistent/releases/download/1.0.0/vvctre-plugin-make-all-settings-in-quick-settings-persistent-1.0.0-windows.zip) \| [Download Linux 7z](https://github.com/vvanelslande/vvctre-plugin-make-settings-persistent/releases/download/1.0.0/vvctre-plugin-make-all-settings-in-quick-settings-persistent-1.0.0-linux.7z) \| [Download Linux zip](https://github.com/vvanelslande/vvctre-plugin-make-settings-persistent/releases/download/1.0.0/vvctre-plugin-make-all-settings-in-quick-settings-persistent-1.0.0-linux.zip)
 
@@ -90,13 +90,13 @@ Loads all settings in Quick Settings from settings.json when vvctre is starting 
 
 ### [vvanelslande](https://github.com/vvanelslande) / [vvctre-plugin-default-window-size-and-position-file](https://github.com/vvanelslande/vvctre-plugin-default-window-size-and-position-file)
 
-Loads window size and position from default-window-size-and-position.json when vvctre starts (size and position can be disabled)
+Loads window size and position from default-window-size-and-position.json (it needs to be in vvctre's folder) (it needs to be in vvctre's folder) when vvctre starts (size and position can be disabled)
 
 [Download Windows 7z](https://github.com/vvanelslande/vvctre-plugin-default-window-size-and-position-file/releases/download/1.0.0/vvctre-plugin-default-window-size-and-position-file-1.0.0-windows.7z) \| [Download Windows zip](https://github.com/vvanelslande/vvctre-plugin-default-window-size-and-position-file/releases/download/1.0.0/vvctre-plugin-default-window-size-and-position-file-1.0.0-windows.zip) \| [Download Linux 7z](https://github.com/vvanelslande/vvctre-plugin-default-window-size-and-position-file/releases/download/1.0.0/vvctre-plugin-default-window-size-and-position-file-1.0.0-linux.7z) \| [Download Linux zip](https://github.com/vvanelslande/vvctre-plugin-default-window-size-and-position-file/releases/download/1.0.0/vvctre-plugin-default-window-size-and-position-file-1.0.0-linux.zip)
 
 ### [vvanelslande](https://github.com/vvanelslande) / [vvctre-plugin-auto-load-controls](https://github.com/vvanelslande/vvctre-plugin-auto-load-controls)
 
-Loads controls.json when vvctre starts
+Loads controls.json (it needs to be in vvctre's folder) when vvctre starts
 
 [Download Windows 7z](https://github.com/vvanelslande/vvctre-plugin-auto-load-controls/releases/download/1.0.2/vvctre-plugin-auto-load-controls-1.0.2-windows.7z) \| [Download Windows zip](https://github.com/vvanelslande/vvctre-plugin-auto-load-controls/releases/download/1.0.2/vvctre-plugin-auto-load-controls-1.0.2-windows.zip) \| [Download Linux 7z](https://github.com/vvanelslande/vvctre-plugin-auto-load-controls/releases/download/1.0.2/vvctre-plugin-auto-load-controls-1.0.2-linux.7z) \| [Download Linux zip](https://github.com/vvanelslande/vvctre-plugin-auto-load-controls/releases/download/1.0.2/vvctre-plugin-auto-load-controls-1.0.2-linux.zip)
 
@@ -136,7 +136,7 @@ Server that returns JPEGs from a MJPEG stream and a vvctre plugin that changes t
 
 ### [vvanelslande](https://github.com/vvanelslande) / [vvctre-plugin-enable-lle-modules-in-file-when-starting](https://github.com/vvanelslande/vvctre-plugin-enable-lle-modules-in-file-when-starting)
 
-Enables the LLE modules in `enable-lle-modules-in-file-when-starting.txt` when vvctre starts
+Enables the LLE modules in `enable-lle-modules-in-file-when-starting.txt` (it needs to be in vvctre's folder) when vvctre starts
 
 [Download Windows 7z](https://github.com/vvanelslande/vvctre-plugin-enable-lle-modules-in-file-when-starting/releases/download/2.0.1/vvctre-plugin-enable-lle-modules-in-file-when-starting-2.0.1-windows.7z) \| [Download Windows zip](https://github.com/vvanelslande/vvctre-plugin-enable-lle-modules-in-file-when-starting/releases/download/2.0.1/vvctre-plugin-enable-lle-modules-in-file-when-starting-2.0.1-windows.zip) \| [Download Linux 7z](https://github.com/vvanelslande/vvctre-plugin-enable-lle-modules-in-file-when-starting/releases/download/2.0.1/vvctre-plugin-enable-lle-modules-in-file-when-starting-2.0.1-linux.7z) \| [Download Linux zip](https://github.com/vvanelslande/vvctre-plugin-enable-lle-modules-in-file-when-starting/releases/download/2.0.1/vvctre-plugin-enable-lle-modules-in-file-when-starting-2.0.1-linux.zip)
 
@@ -154,7 +154,7 @@ Shows touch screen X and Y
 
 ### [vvanelslande](https://github.com/vvanelslande) / [vvctre-plugin-default-layout-settings-file](https://github.com/vvanelslande/vvctre-plugin-default-layout-settings-file)
 
-Loads Layout, Swap Screens, and Upright Screens from default-layout-settings.json when vvctre starts
+Loads Layout, Swap Screens, and Upright Screens from default-layout-settings.json (it needs to be in vvctre's folder) when vvctre starts
 
 [Download Windows 7z](https://github.com/vvanelslande/vvctre-plugin-default-layout-settings-file/releases/download/1.0.0/vvctre-plugin-default-layout-settings-file-1.0.0-windows.7z) \| [Download Windows zip](https://github.com/vvanelslande/vvctre-plugin-default-layout-settings-file/releases/download/1.0.0/vvctre-plugin-default-layout-settings-file-1.0.0-windows.zip) \| [Download Linux 7z](https://github.com/vvanelslande/vvctre-plugin-default-layout-settings-file/releases/download/1.0.0/vvctre-plugin-default-layout-settings-file-1.0.0-linux.7z) \| [Download Linux zip](https://github.com/vvanelslande/vvctre-plugin-default-layout-settings-file/releases/download/1.0.0/vvctre-plugin-default-layout-settings-file-1.0.0-linux.zip)
 
