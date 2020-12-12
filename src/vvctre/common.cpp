@@ -726,7 +726,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
         ImGui::TextUnformatted("Keyboard: Press the keys to use for Up, Down, "
-                               "Left, Right, and Modifier.\n\nReal stick: first move "
+                               "Left, Right, and Modifier.\n\nAnalog stick: first move "
                                "the stick to the right, and then to the bottom.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
@@ -749,7 +749,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         ImGui::BeginTooltip();
         ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
         ImGui::TextUnformatted("Keyboard: Press the keys to use for Up, Down, "
-                               "Left, Right, and Modifier.\n\nReal stick: first move "
+                               "Left, Right, and Modifier.\n\nAnalog stick: first move "
                                "the stick to the right, and then to the bottom.");
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
