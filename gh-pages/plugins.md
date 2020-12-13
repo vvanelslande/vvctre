@@ -42,6 +42,8 @@ Code only:
 
 ## GitHub
 
+This only has plugins with the `vvctre` and `vvctre-plugin` topics
+
 ### [vvanelslande](https://github.com/vvanelslande) / [vvctre-plugin-quick-settings](https://github.com/vvanelslande/vvctre-plugin-quick-settings)
 
 Adds a quick settings window
