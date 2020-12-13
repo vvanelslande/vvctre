@@ -42,7 +42,7 @@ Code only:
 
 ## GitHub
 
-This only has plugins that have the `vvctre` and `vvctre-plugin` topics
+This doesn't have archived plugins
 
 ### [vvanelslande](https://github.com/vvanelslande) / [vvctre-plugin-quick-settings](https://github.com/vvanelslande/vvctre-plugin-quick-settings)
 
