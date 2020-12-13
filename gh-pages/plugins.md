@@ -528,7 +528,7 @@ Adds a callback to the IPC recorder
 ## `const char* vvctre_get_service_name_by_port_id(void* core, u32 port)`
 
 Converts a port ID to a name and returns it  
-This uses `strdup`
+This uses strdup/\_strdup
 
 ## `int vvctre_cheat_count(void* core)`
 
@@ -537,27 +537,27 @@ Returns the number of cheats for the current game
 ## `const char* vvctre_get_cheat(void* core, int index)`
 
 Returns a cheat  
-This uses `strdup`
+This uses strdup/\_strdup
 
 ## `const char* vvctre_get_cheat_name(void* core, int index)`
 
 Returns the name of a cheat  
-This uses `strdup`
+This uses strdup/\_strdup
 
 ## `const char* vvctre_get_cheat_comments(void* core, int index)`
 
 Returns the comments of a cheat  
-This uses `strdup`
+This uses strdup/\_strdup
 
 ## `const char* vvctre_get_cheat_type(void* core, int index)`
 
 Returns the type of a cheat  
-This uses `strdup`
+This uses strdup/\_strdup
 
 ## `const char* vvctre_get_cheat_code(void* core, int index)`
 
 Returns the code of a cheat  
-This uses `strdup`
+This uses strdup/\_strdup
 
 ## `void vvctre_set_cheat_enabled(void* core, int index, bool enabled)`
 
@@ -2477,11 +2477,11 @@ Returns the speed limit
 
 ## `void vvctre_settings_set_use_custom_cpu_ticks(bool value)`
 
-Sets whether General -> Custom CPU Ticks is enabled
+Sets whether General -> Enable Custom CPU Ticks is enabled
 
 ## `bool vvctre_settings_get_use_custom_cpu_ticks()`
 
-Returns whether General -> Custom CPU Ticks is enabled
+Returns whether General -> Enable Custom CPU Ticks is enabled
 
 ## `void vvctre_settings_set_custom_cpu_ticks(u64 value)`
 
@@ -3427,9 +3427,10 @@ Returns the maximum slice length of core 1
 
 Returns the maximum slice length of core 2
 
-## `const char* vvctre_get_version()`
+## `char* vvctre_get_version()`
 
-Returns vvctre's version
+Returns vvctre's version  
+This uses strdup/\_strdup
 
 ## `u8 vvctre_get_version_major()`
 

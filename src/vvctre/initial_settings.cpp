@@ -426,7 +426,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                     if (Settings::values.enable_dsp_lle) {
                         ImGui::Indent();
-                        ImGui::Checkbox("Use multiple threads",
+                        ImGui::Checkbox("Use Multiple Threads",
                                         &Settings::values.enable_dsp_lle_multithread);
                         ImGui::Unindent();
                     }

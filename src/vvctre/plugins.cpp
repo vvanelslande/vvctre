@@ -3976,7 +3976,7 @@ s64 vvctre_coretiming_get_max_slice_length_core_2(void* core) {
     return static_cast<Core::System*>(core)->CoreTiming().GetTimer(1)->GetMaxSliceLength();
 }
 
-const char* vvctre_get_version() {
+char* vvctre_get_version() {
     return VVCTRE_STRDUP(
         fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor, vvctre_version_patch)
             .c_str());
