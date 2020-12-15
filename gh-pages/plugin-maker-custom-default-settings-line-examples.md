@@ -21,10 +21,10 @@ redirect_from:
 | Set General -> Speed Limit | `general.speed_limit 1000` |
 | Set General -> Custom CPU Ticks | `general.custom_cpu_ticks 21000` |
 | Set General -> CPU Clock Percentage | `general.cpu_clock_percentage 82` |
-| Set General -> Core::System::Run() -> Default Max Slice Length | `general.core_system_run_default_max_slice_value 20000` |
-| Set General -> Core::Timing::Timer::Timer() -> Set Slice Length To This | `general.set_slice_length_to_this_in_core_timing_timer_timer 20000` |
-| Set General -> Core::Timing::Timer::Timer() -> Set Downcount To This | `general.set_downcount_to_this_in_core_timing_timer_timer 20000` |
-| Set General -> Core::Timing::Timer::GetMaxSliceLength() -> Return this if the event queue is empty | `general.return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength 20000` |
+| Set General -> `Core::System::Run()` -> Default Max Slice Length | `general.core_system_run_default_max_slice_value 20000` |
+| Set General -> `Core::Timing::Timer::Timer()` -> Set Slice Length To This | `general.set_slice_length_to_this_in_core_timing_timer_timer 20000` |
+| Set General -> `Core::Timing::Timer::Timer()` -> Set Downcount To This | `general.set_downcount_to_this_in_core_timing_timer_timer 20000` |
+| Set General -> `Core::Timing::Timer::GetMaxSliceLength()` -> Return this if the event queue is empty | `general.return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength 20000` |
 | Enable Audio -> Enable DSP LLE | `audio.dsp_lle enable` |
 | Enable Audio -> Enable DSP LLE -> Use Multiple Threads | `audio.dsp_lle_multiple_threads enable` |
 | Disable Audio -> Output -> Enable Stretching | `audio.stretching disable` |
