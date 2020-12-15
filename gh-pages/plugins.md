@@ -2501,6 +2501,38 @@ Sets General -> CPU Clock Percentage
 
 Returns General -> CPU Clock Percentage
 
+## `void vvctre_settings_set_core_system_run_default_max_slice_value(s64 value)`
+
+Sets General -> Core::System::Run() -> Default Max Slice Length
+
+## `s64 vvctre_settings_get_core_system_run_default_max_slice_value()`
+
+Returns General -> Core::System::Run() -> Default Max Slice Length
+
+## `void vvctre_settings_set_set_slice_length_to_this_in_core_timing_timer_timer(s64 value)`
+
+Sets General -> Core::Timing::Timer::Timer() -> Set Slice Length To This
+
+## `s64 vvctre_settings_get_set_slice_length_to_this_in_core_timing_timer_timer()`
+
+Returns General -> Core::Timing::Timer::Timer() -> Set Slice Length To This
+
+## `void vvctre_settings_set_set_downcount_to_this_in_core_timing_timer_timer(s64 value)`
+
+Sets General -> Core::Timing::Timer::Timer() -> Set Downcount To This
+
+## `s64 vvctre_settings_get_set_downcount_to_this_in_core_timing_timer_timer()`
+
+Returns General -> Core::Timing::Timer::Timer() -> Set Downcount To This
+
+## `void vvctre_settings_set_return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength(s64 value)`
+
+Sets General -> Core::Timing::Timer::GetMaxSliceLength() -> Return this if the event queue is empty
+
+## `s64 vvctre_settings_get_return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength()`
+
+Returns General -> Core::Timing::Timer::GetMaxSliceLength() -> Return this if the event queue is empty
+
 ## `void vvctre_settings_set_enable_dsp_lle(bool value)`
 
 Sets Audio -> Enable DSP LLE

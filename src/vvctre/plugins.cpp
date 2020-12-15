@@ -3087,6 +3087,41 @@ u32 vvctre_settings_get_cpu_clock_percentage() {
     return Settings::values.cpu_clock_percentage;
 }
 
+void vvctre_settings_set_core_system_run_default_max_slice_value(s64 value) {
+    Settings::values.core_system_run_default_max_slice_value = value;
+}
+
+s64 vvctre_settings_get_core_system_run_default_max_slice_value() {
+    return Settings::values.core_system_run_default_max_slice_value;
+}
+
+void vvctre_settings_set_set_slice_length_to_this_in_core_timing_timer_timer(s64 value) {
+    Settings::values.set_slice_length_to_this_in_core_timing_timer_timer = value;
+}
+
+s64 vvctre_settings_get_set_slice_length_to_this_in_core_timing_timer_timer() {
+    return Settings::values.set_slice_length_to_this_in_core_timing_timer_timer;
+}
+
+void vvctre_settings_set_set_downcount_to_this_in_core_timing_timer_timer(s64 value) {
+    Settings::values.set_downcount_to_this_in_core_timing_timer_timer = value;
+}
+
+s64 vvctre_settings_get_set_downcount_to_this_in_core_timing_timer_timer() {
+    return Settings::values.set_downcount_to_this_in_core_timing_timer_timer;
+}
+
+void vvctre_settings_set_return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength(
+    s64 value) {
+    Settings::values
+        .return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength = value;
+}
+
+s64 vvctre_settings_get_return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength() {
+    return Settings::values
+        .return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength;
+}
+
 void vvctre_settings_set_enable_dsp_lle(bool value) {
     Settings::values.enable_dsp_lle = value;
 }
@@ -4618,6 +4653,24 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_settings_get_custom_cpu_ticks", (void*)&vvctre_settings_get_custom_cpu_ticks},
     {"vvctre_settings_set_cpu_clock_percentage", (void*)&vvctre_settings_set_cpu_clock_percentage},
     {"vvctre_settings_get_cpu_clock_percentage", (void*)&vvctre_settings_get_cpu_clock_percentage},
+    {"vvctre_settings_set_core_system_run_default_max_slice_value",
+     (void*)&vvctre_settings_set_core_system_run_default_max_slice_value},
+    {"vvctre_settings_get_core_system_run_default_max_slice_value",
+     (void*)&vvctre_settings_get_core_system_run_default_max_slice_value},
+    {"vvctre_settings_set_set_slice_length_to_this_in_core_timing_timer_timer",
+     (void*)&vvctre_settings_set_set_slice_length_to_this_in_core_timing_timer_timer},
+    {"vvctre_settings_get_set_slice_length_to_this_in_core_timing_timer_timer",
+     (void*)&vvctre_settings_get_set_slice_length_to_this_in_core_timing_timer_timer},
+    {"vvctre_settings_set_set_downcount_to_this_in_core_timing_timer_timer",
+     (void*)&vvctre_settings_set_set_downcount_to_this_in_core_timing_timer_timer},
+    {"vvctre_settings_get_set_downcount_to_this_in_core_timing_timer_timer",
+     (void*)&vvctre_settings_get_set_downcount_to_this_in_core_timing_timer_timer},
+    {"vvctre_settings_set_return_this_if_the_event_queue_is_empty_in_core_timing_timer_"
+     "getmaxslicelength",
+     (void*)&vvctre_settings_set_return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength},
+    {"vvctre_settings_get_return_this_if_the_event_queue_is_empty_in_core_timing_timer_"
+     "getmaxslicelength",
+     (void*)&vvctre_settings_get_return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength},
     {"vvctre_settings_set_enable_dsp_lle", (void*)&vvctre_settings_set_enable_dsp_lle},
     {"vvctre_settings_get_enable_dsp_lle", (void*)&vvctre_settings_get_enable_dsp_lle},
     {"vvctre_settings_set_enable_dsp_lle_multithread",

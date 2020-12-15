@@ -116,6 +116,11 @@ std::shared_ptr<Timing::Timer> Timing::GetTimer(std::size_t cpu_id) {
     return timers[cpu_id];
 }
 
+Timing::Timer::Timer() {
+    slice_length = Settings::values.set_slice_length_to_this_in_core_timing_timer_timer;
+    downcount = Settings::values.set_downcount_to_this_in_core_timing_timer_timer;
+}
+
 Timing::Timer::~Timer() {
     MoveEvents();
 }
@@ -160,7 +165,7 @@ s64 Timing::Timer::GetMaxSliceLength() const {
         ASSERT(next_event->time - executed_ticks > 0);
         return next_event->time - executed_ticks;
     }
-    return MAX_SLICE_LENGTH;
+    return Settings::values.return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength;
 }
 
 void Timing::Timer::Advance() {

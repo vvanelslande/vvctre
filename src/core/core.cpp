@@ -131,7 +131,7 @@ System::ResultStatus System::Run() {
         // Now all cores are at the same global time. So we will run them one after the other
         // with a max slice that is the minimum of all max slices of all cores
         // TODO: Make special check for idle since we can easily revert the time of idle cores
-        s64 max_slice = Timing::MAX_SLICE_LENGTH;
+        s64 max_slice = Settings::values.core_system_run_default_max_slice_value;
         for (const auto& cpu_core : cpu_cores) {
             kernel->SetRunningCPU(cpu_core.get());
             cpu_core->GetTimer().Advance();

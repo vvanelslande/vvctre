@@ -158,6 +158,54 @@ function getCdsRegexes(names, types, calls) {
       }
     },
     {
+      regex: /^general.core_system_run_default_max_slice_value (-?\d+)%?$/m,
+      call: matches => {
+        names.push(
+          'vvctre_settings_set_core_system_run_default_max_slice_value'
+        )
+        types.push(['void', 's64 value'])
+        calls.push(
+          `vvctre_settings_set_core_system_run_default_max_slice_value(${matches[1]});`
+        )
+      }
+    },
+    {
+      regex: /^general.set_slice_length_to_this_in_core_timing_timer_timer (-?\d+)%?$/m,
+      call: matches => {
+        names.push(
+          'vvctre_settings_set_set_slice_length_to_this_in_core_timing_timer_timer'
+        )
+        types.push(['void', 's64 value'])
+        calls.push(
+          `vvctre_settings_set_set_slice_length_to_this_in_core_timing_timer_timer(${matches[1]});`
+        )
+      }
+    },
+    {
+      regex: /^general.set_downcount_to_this_in_core_timing_timer_timer (-?\d+)%?$/m,
+      call: matches => {
+        names.push(
+          'vvctre_settings_set_set_downcount_to_this_in_core_timing_timer_timer'
+        )
+        types.push(['void', 's64 value'])
+        calls.push(
+          `vvctre_settings_set_set_downcount_to_this_in_core_timing_timer_timer(${matches[1]});`
+        )
+      }
+    },
+    {
+      regex: /^general.return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength (-?\d+)%?$/m,
+      call: matches => {
+        names.push(
+          'vvctre_settings_set_return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength'
+        )
+        types.push(['void', 's64 value'])
+        calls.push(
+          `vvctre_settings_set_return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength(${matches[1]});`
+        )
+      }
+    },
+    {
       regex: /^audio.dsp_lle enable$/m,
       call: () => {
         names.push('vvctre_settings_set_enable_dsp_lle')

@@ -418,6 +418,79 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     ImGui::SliderScalar("CPU Clock Percentage", ImGuiDataType_U32,
                                         &Settings::values.cpu_clock_percentage, &min, &max, "%d%%");
 
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Core::System::Run()");
+                    ImGui::Separator();
+
+                    ImGui::InputScalar("Default Max Slice Length", ImGuiDataType_S64,
+                                       &Settings::values.core_system_run_default_max_slice_value);
+
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted(fmt::format("Default value after 39.3.2: "
+                                                           "{}\nDefault value before 40.0.0: 20000",
+                                                           BASE_CLOCK_RATE_ARM11 / 234)
+                                                   .c_str());
+                        ImGui::EndTooltip();
+                    }
+
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Core::Timing::Timer::Timer()");
+                    ImGui::Separator();
+
+                    ImGui::InputScalar(
+                        "Set Slice Length To This", ImGuiDataType_S64,
+                        &Settings::values.set_slice_length_to_this_in_core_timing_timer_timer);
+
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted(fmt::format("Default value after 39.3.2: "
+                                                           "{}\nDefault value before 40.0.0: 20000",
+                                                           BASE_CLOCK_RATE_ARM11 / 234)
+                                                   .c_str());
+                        ImGui::EndTooltip();
+                    }
+
+                    ImGui::InputScalar(
+                        "Set Downcount To This", ImGuiDataType_S64,
+                        &Settings::values.set_downcount_to_this_in_core_timing_timer_timer);
+
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted(fmt::format("Default value after 39.3.2: "
+                                                           "{}\nDefault value before 40.0.0: 20000",
+                                                           BASE_CLOCK_RATE_ARM11 / 234)
+                                                   .c_str());
+                        ImGui::EndTooltip();
+                    }
+
+                    ImGui::NewLine();
+
+                    ImGui::TextUnformatted("Core::Timing::Timer::GetMaxSliceLength()");
+                    ImGui::Separator();
+
+                    ImGui::PushTextWrapPos();
+                    ImGui::TextUnformatted("Return this if the event queue is empty:");
+                    ImGui::PopTextWrapPos();
+
+                    ImGui::InputScalar(
+                        "##return_this_if_the_event_queue_is_empty_in_core_timing_timer_"
+                        "getmaxslicelength",
+                        ImGuiDataType_S64,
+                        &Settings::values
+                             .return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength);
+
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::TextUnformatted(fmt::format("Default value after 39.3.2: "
+                                                           "{}\nDefault value before 40.0.0: 20000",
+                                                           BASE_CLOCK_RATE_ARM11 / 234)
+                                                   .c_str());
+                        ImGui::EndTooltip();
+                    }
+
                     ImGui::EndTabItem();
                 }
 

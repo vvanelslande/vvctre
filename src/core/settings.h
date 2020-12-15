@@ -136,6 +136,11 @@ struct Values {
     bool use_custom_cpu_ticks = false;
     u64 custom_cpu_ticks = 77;
     u32 cpu_clock_percentage = 100;
+    s64 core_system_run_default_max_slice_value = BASE_CLOCK_RATE_ARM11 / 234;
+    s64 set_slice_length_to_this_in_core_timing_timer_timer = BASE_CLOCK_RATE_ARM11 / 234;
+    s64 set_downcount_to_this_in_core_timing_timer_timer = BASE_CLOCK_RATE_ARM11 / 234;
+    s64 return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength =
+        BASE_CLOCK_RATE_ARM11 / 234;
 
     // Audio
     bool enable_dsp_lle = false;

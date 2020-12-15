@@ -131,23 +131,16 @@ public:
         bool operator<(const Event& right) const;
     };
 
-    // Currently Service::HID::pad_update_ticks is the smallest interval for an event that gets
-    // always scheduled. Therefore we use this as orientation for the MAX_SLICE_LENGTH
-    // For performance bigger slice length are desired, though this will lead to cores desync
-    // But we never want to schedule events into the current slice, because then cores might to
-    // run small slices to sync up again. This is especially important for events that are always
-    // scheduled and repated.
-    static constexpr int MAX_SLICE_LENGTH = BASE_CLOCK_RATE_ARM11 / 234;
-
     class Timer {
     public:
+        Timer();
         ~Timer();
 
         s64 GetMaxSliceLength() const;
 
         void Advance();
 
-        void SetNextSlice(s64 max_slice_length = MAX_SLICE_LENGTH);
+        void SetNextSlice(s64 max_slice_length);
 
         void Idle();
 
@@ -184,8 +177,8 @@ public:
         // downcount for that slice.
         bool is_timer_sane = true;
 
-        s64 slice_length = MAX_SLICE_LENGTH;
-        s64 downcount = MAX_SLICE_LENGTH;
+        s64 slice_length;
+        s64 downcount;
         s64 executed_ticks = 0;
         u64 idled_cycles = 0;
     };
