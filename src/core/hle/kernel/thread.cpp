@@ -295,7 +295,7 @@ ResultVal<std::shared_ptr<Thread>> KernelSystem::CreateThread(std::string name, 
 
     if (processor_id == ThreadProcessorId2) {
         if (!Settings::values.enable_core_2) {
-            LOG_WARNING(Kernel, "Thread will run on core 1 because the core 2 is "
+            LOG_WARNING(Kernel, "Thread will run on core 1 because core 2 is "
                                 "disabled");
             processor_id = 0;
         }

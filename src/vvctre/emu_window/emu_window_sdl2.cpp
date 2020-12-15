@@ -1456,7 +1456,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
 
                     ImGui::PushTextWrapPos();
-                    ImGui::TextUnformatted("If you enable or disable the core 2, emulation will "
+                    ImGui::TextUnformatted("If you enable or disable core 2, emulation will "
                                            "restart when the menu is closed.");
                     ImGui::PopTextWrapPos();
 
