@@ -53,7 +53,7 @@ redirect_from:
 | Disable Graphics -> Enable Linear Filtering | `graphics.linear_filtering disable` |
 | Enable Graphics -> Sharper Distant Objects | `graphics.sharper_distant_objects enable` |
 | Set Graphics -> Background Color | `graphics.background_color #001122` |
-| Set Graphics -> Resolution | 1\. `graphics.resolution 2`<br>2\. `graphics.resolution Window Size` |
+| Set Graphics -> Resolution | Positive Integer: `graphics.resolution 2`<br>Window Size: `graphics.resolution Window Size` |
 | Set Graphics -> Post Processing Shader | `graphics.post_processing_shader shader` |
 | Set Graphics -> Texture Filter | `graphics.texture_filter xBRZ freescale` |
 | Set Graphics -> 3D Mode | `graphics.3d_mode Side by Side` |
