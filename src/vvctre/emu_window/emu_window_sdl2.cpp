@@ -4755,6 +4755,12 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                         if (ImGui::Checkbox(cheat->GetName().c_str(), &enabled)) {
                             cheat->SetEnabled(enabled);
+
+                            if (show_cheats_text_editor) {
+                                std::ostringstream oss;
+                                system.CheatEngine().SaveCheatsToStream(oss);
+                                cheats_text_editor_text = oss.str();
+                            }
                         }
                     }
                 }
