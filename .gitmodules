@@ -28,7 +28,7 @@ url = https://github.com/fmtlib/fmt.git
 
 [submodule "cubeb"]
 path = externals/cubeb
-url = https://github.com/kinetiknz/cubeb.git
+url = https://github.com/mozilla/cubeb.git
 
 [submodule "teakra"]
 path = externals/teakra

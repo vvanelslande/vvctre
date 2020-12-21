@@ -11,9 +11,9 @@ Code and builds:
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-no-account/) (doesn't need a account, uses my vvctre API server)
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-user-github-account/) (needs a GitHub account)
 - vvctre bot (it's in my Discord server)
-- vvctre API (my server: [https://vvctre.dynv6.net:8831](https://vvctre.dynv6.net:8831))
+- vvctre API (my server: [https://vvctre-api.dynv6.net:15141](https://vvctre-api.dynv6.net:15141))
   - Custom default settings:  
-    &nbsp;&nbsp;Path: /make-custom-default-settings-plugin
+    &nbsp;&nbsp;Path: /make-custom-default-settings-plugin  
     &nbsp;&nbsp;Method: POST  
     &nbsp;&nbsp;Body: Lines
   - Button to touch:  

@@ -1,47 +1,26 @@
 # CMake 3.8 required for 17 to be a valid value for CXX_STANDARD
 cmake_minimum_required(VERSION 3.8)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
-include(DownloadExternals)
 include(CMakeDependentOption)
 
 project(vvctre)
 
-# MSVC only: bundled SDL2
-CMAKE_DEPENDENT_OPTION(VVCTRE_USE_BUNDLED_SDL2 "Download bundled SDL2 binaries" ON "MSVC" OFF)
-
-option(ENABLE_CUBEB "Enables the cubeb audio backend" ON)
+option(ENABLE_CUBEB "Enable the Cubeb audio output sink and real device microphone backend" ON)
 CMAKE_DEPENDENT_OPTION(ENABLE_MF "Use Media Foundation AAC decoder" ON "WIN32" OFF)
 CMAKE_DEPENDENT_OPTION(ENABLE_FDK "Use FDK AAC decoder" OFF "NOT ENABLE_MF" OFF)
-
-# Sanity check : Check that all submodules are present
-# =======================================================================
-
-function(check_submodules_present)
-    file(READ "${PROJECT_SOURCE_DIR}/.gitmodules" gitmodules)
-    string(REGEX MATCHALL "path *= *[^ \t\r\n]*" gitmodules ${gitmodules})
-    foreach(module ${gitmodules})
-        string(REGEX REPLACE "path *= *" "" module ${module})
-        if (NOT EXISTS "${PROJECT_SOURCE_DIR}/${module}/.git")
-            message(SEND_ERROR "Git submodule ${module} not found."
-                    "Please run: git submodule update --init --recursive")
-        endif()
-    endforeach()
-endfunction()
-check_submodules_present()
 
 # Detect current compilation architecture and create standard definitions
 # =======================================================================
 
 include(CheckSymbolExists)
 function(detect_architecture symbol arch)
-    if (NOT DEFINED ARCHITECTURE)
+    if(NOT DEFINED ARCHITECTURE)
         set(CMAKE_REQUIRED_QUIET 1)
         check_symbol_exists("${symbol}" "" ARCHITECTURE_${arch})
         unset(CMAKE_REQUIRED_QUIET)
 
         # The output variable needs to be unique across invocations otherwise
         # CMake's crazy scope rules will keep it defined
-        if (ARCHITECTURE_${arch})
+        if(ARCHITECTURE_${arch})
             set(ARCHITECTURE "${arch}" PARENT_SCOPE)
             set(ARCHITECTURE_${arch} 1 PARENT_SCOPE)
             add_definitions(-DARCHITECTURE_${arch}=1)
@@ -49,8 +28,8 @@ function(detect_architecture symbol arch)
     endif()
 endfunction()
 
-if (NOT ENABLE_GENERIC)
-    if (MSVC)
+if(NOT ENABLE_GENERIC)
+    if(MSVC)
         detect_architecture("_M_AMD64" x86_64)
         detect_architecture("_M_IX86" x86)
         detect_architecture("_M_ARM" ARM)
@@ -62,13 +41,11 @@ if (NOT ENABLE_GENERIC)
         detect_architecture("__aarch64__" ARM64)
     endif()
 endif()
-if (NOT DEFINED ARCHITECTURE)
+if(NOT DEFINED ARCHITECTURE)
     set(ARCHITECTURE "GENERIC")
     set(ARCHITECTURE_GENERIC 1)
     add_definitions(-DARCHITECTURE_GENERIC=1)
 endif()
-message(STATUS "Target architecture: ${ARCHITECTURE}")
-
 
 # Configure C++ standard
 # ===========================
@@ -88,52 +65,57 @@ find_package(Boost QUIET REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-if (VVCTRE_USE_BUNDLED_SDL2)
-    # Detect toolchain and platform
-    if ((MSVC_VERSION GREATER_EQUAL 1910 AND MSVC_VERSION LESS 1930) AND ARCHITECTURE_x86_64)
-        set(SDL2_VER "SDL2-2.0.12")
+# SDL2
+
+find_package(SDL2)
+
+if(NOT SDL2_FOUND)
+    if(MSVC AND (MSVC_VERSION GREATER_EQUAL 1910 AND MSVC_VERSION LESS 1930) AND (ARCHITECTURE_x86 OR ARCHITECTURE_x86_64))
+        set(SDL_PREFIX "${PROJECT_BINARY_DIR}/externals/SDL2-2.0.14")
+
+        if(NOT EXISTS "${SDL_PREFIX}")
+            message(STATUS "Downloading SDL...")
+            file(DOWNLOAD
+                https://www.libsdl.org/release/SDL2-devel-2.0.14-VC.zip
+                "${PROJECT_BINARY_DIR}/externals/sdl.zip" SHOW_PROGRESS)
+            execute_process(COMMAND ${CMAKE_COMMAND} -E tar xf "${PROJECT_BINARY_DIR}/externals/sdl.zip"
+                            WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/externals")
+        endif()
+
+        set(SDL2_FOUND YES)
+        set(SDL2_INCLUDE_DIRS "${SDL_PREFIX}/include")
+        set(SDL2_LIBRARIES "${SDL_PREFIX}/lib/x64/SDL2.lib")
+        set(SDL2_DLL_DIR "${SDL_PREFIX}/lib/x64")
     else()
-        message(FATAL_ERROR "No bundled SDL2 binaries for your toolchain. Disable VVCTRE_USE_BUNDLED_SDL2 and provide your own.")
+        message(FATAL_ERROR "Install SDL2")
     endif()
-
-    download_bundled_external("sdl2/" ${SDL2_VER} SDL2_PREFIX)
-
-    set(SDL2_FOUND YES)
-    set(SDL2_INCLUDE_DIR "${SDL2_PREFIX}/include")
-    set(SDL2_LIBRARY "${SDL2_PREFIX}/lib/x64/SDL2.lib")
-    set(SDL2_DLL_DIR "${SDL2_PREFIX}/lib/x64/")
-    add_library(SDL2 INTERFACE)
-    target_link_libraries(SDL2 INTERFACE "${SDL2_LIBRARY}")
-    target_include_directories(SDL2 INTERFACE "${SDL2_INCLUDE_DIR}")
-else()
-    find_package(SDL2 REQUIRED)
-
-    # Some installations don't set SDL2_LIBRARIES
-    if("${SDL2_LIBRARIES}" STREQUAL "")
-        message(WARNING "SDL2_LIBRARIES wasn't set, manually setting to SDL2::SDL2")
-        set(SDL2_LIBRARIES "SDL2::SDL2")
-    endif()
-
-    add_library(SDL2 INTERFACE)
-    target_include_directories(SDL2 INTERFACE "${SDL2_INCLUDE_DIRS}")
-    target_link_libraries(SDL2 INTERFACE "${SDL2_LIBRARIES}")
 endif()
 
-if (ENABLE_FDK)
+# Some installations don't set SDL2_LIBRARIES
+if("${SDL2_LIBRARIES}" STREQUAL "")
+    set(SDL2_LIBRARIES "SDL2::SDL2")
+endif()
+
+add_library(SDL2 INTERFACE)
+target_include_directories(SDL2 INTERFACE "${SDL2_INCLUDE_DIRS}")
+target_link_libraries(SDL2 INTERFACE "${SDL2_LIBRARIES}")
+
+# FDK
+if(ENABLE_FDK)
     find_library(FDK_AAC fdk-aac DOC "The path to fdk_aac library")
     if(FDK_AAC STREQUAL "FDK_AAC-NOTFOUND")
         message(FATAL_ERROR "fdk_aac library not found.")
     endif()
 endif()
 
-# Platform-specific library requirements
+# Platform-specific requirements
 # ======================================
 
-if (WIN32)
-    # WSAPoll and SHGetKnownFolderPath (AppData/Roaming) didn't exist before WinNT 6.x (Vista)
+if(WIN32)
+    # WSAPoll didn't exist before WinNT 6.x (Vista)
     add_definitions(-D_WIN32_WINNT=0x0600 -DWINVER=0x0600)
     set(PLATFORM_LIBRARIES winmm ws2_32)
-elseif (CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU|SunOS)$")
+elseif(CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU|SunOS)$")
     set(PLATFORM_LIBRARIES rt)
 endif()
 
@@ -169,5 +151,4 @@ add_definitions(
 add_subdirectory(externals)
 add_subdirectory(src)
 
-# Set vvctre project as default StartUp Project in Visual Studio
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT vvctre)
