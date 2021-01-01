@@ -8,28 +8,28 @@ redirect_from:
 
 Code and builds:
 
+- There's a bot that can make plugins in my Discord server
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-no-account/) (doesn't need a account, uses my vvctre API server)
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-user-github-account/) (needs a GitHub account)
-- vvctre bot (it's in my Discord server)
-- vvctre API (my server: [https://vvctre-api.dynv6.net:4724](https://vvctre-api.dynv6.net:4724))
+- [vvctre plugins as a service](https://github.com/vvanelslande/vvctre-plugins-as-a-service) (my server: [https://d42fcfc3.vvanelslande.dynv6.net:30317](https://d42fcfc3.vvanelslande.dynv6.net:30317))
   - Custom default settings:  
-    &nbsp;&nbsp;Path: /make-custom-default-settings-plugin  
+    &nbsp;&nbsp;Path: /custom-default-settings  
     &nbsp;&nbsp;Method: POST  
     &nbsp;&nbsp;Body: Lines
   - Button to touch:  
-    &nbsp;&nbsp;Path: /make-button-to-touch-plugin  
+    &nbsp;&nbsp;Path: /button-to-touch  
     &nbsp;&nbsp;Method: POST  
     &nbsp;&nbsp;Body: JSON object with `x`, `y`, and `params`
   - Window size:  
-    &nbsp;&nbsp;Path: /make-window-size-plugin  
+    &nbsp;&nbsp;Path: /window-size  
     &nbsp;&nbsp;Method: POST  
     &nbsp;&nbsp;Body: JSON object with `width` and `height`
   - Window position:  
-    &nbsp;&nbsp;Path: /make-window-position-plugin  
+    &nbsp;&nbsp;Path: /window-position  
     &nbsp;&nbsp;Method: POST  
     &nbsp;&nbsp;Body: JSON object with `x` and `y`
   - Log file:  
-    &nbsp;&nbsp;Path: /make-log-file-plugin  
+    &nbsp;&nbsp;Path: /log-file  
     &nbsp;&nbsp;Method: POST  
     &nbsp;&nbsp;Body: File path
 
