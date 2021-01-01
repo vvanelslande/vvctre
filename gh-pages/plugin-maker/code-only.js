@@ -15,6 +15,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'button_to_touch': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -24,6 +25,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'window_size': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -33,6 +35,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'window_position': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -42,6 +45,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'log_file': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -51,6 +55,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'block'
       break
     }
+
     default: {
       break
     }
@@ -63,10 +68,6 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
 
   switch (type.options[type.selectedIndex].value) {
     case 'custom_default_settings': {
-      const names = []
-      const types = []
-      const calls = []
-
       const customDefaultSettingsLines = document.querySelector(
         '#customDefaultSettingsLines'
       )
@@ -86,6 +87,10 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       const validLinesJoined = validLines.join('\n')
 
       customDefaultSettingsLines.value = validLinesJoined
+
+      customDefaultSettingsNames = []
+      customDefaultSettingsTypes = []
+      customDefaultSettingsCalls = []
 
       for (const v of customDefaultSettingsRegexesAndFunctions) {
         if (v.regex.test(validLinesJoined)) {
@@ -145,6 +150,10 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 ${calls.map(call => `    ${call}`).join('\n')}
 }
 `
+
+      customDefaultSettingsNames = []
+      customDefaultSettingsTypes = []
+      customDefaultSettingsCalls = []
 
       usesCommonTypes = true
 

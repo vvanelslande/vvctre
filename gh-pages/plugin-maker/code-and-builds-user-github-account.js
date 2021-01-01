@@ -22,10 +22,12 @@ if (url.searchParams.has('code')) {
           'https://github.com/login/oauth/authorize?client_id=1df52b4366a6b5d52011&scope=public_repo,workflow'
         return
       }
+
       localStorage.setItem(
         'code_and_builds_user_github_account_plugin_maker_github_token',
         token
       )
+
       location.href =
         '/vvctre/plugin-maker/code-and-builds-user-github-account/'
     })
@@ -51,6 +53,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'button_to_touch': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -60,6 +63,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'window_size': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -69,6 +73,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'window_position': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -78,6 +83,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'log_file': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -87,6 +93,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'block'
       break
     }
+
     default: {
       break
     }
@@ -101,10 +108,6 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
 
   switch (type.options[type.selectedIndex].value) {
     case 'custom_default_settings': {
-      const names = []
-      const types = []
-      const calls = []
-
       const customDefaultSettingsLines = document.querySelector(
         '#custom_default_settings_lines'
       )
@@ -126,10 +129,14 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
 
       customDefaultSettingsLines.value = validLinesJoined
 
+      customDefaultSettingsNames = []
+      customDefaultSettingsTypes = []
+      customDefaultSettingsCalls = []
+
       for (const v of customDefaultSettingsRegexesAndFunctions) {
         if (v.regex.test(validLinesJoined)) {
           const matches = validLinesJoined.match(v.regex)
-          v.f(names, types, calls, matches)
+          v.f(matches)
         }
       }
 
@@ -184,6 +191,10 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 ${calls.map(call => `    ${call}`).join('\n')}
 }
 `
+
+      customDefaultSettingsNames = []
+      customDefaultSettingsTypes = []
+      customDefaultSettingsCalls = []
 
       break
     }

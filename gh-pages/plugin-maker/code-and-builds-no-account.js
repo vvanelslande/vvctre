@@ -16,6 +16,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'button_to_touch': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -25,6 +26,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'window_size': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -34,6 +36,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'window_position': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -43,6 +46,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'none'
       break
     }
+
     case 'log_file': {
       document.querySelector('#custom_default_settings_div').style.display =
         'none'
@@ -52,6 +56,7 @@ type.addEventListener('change', () => {
       document.querySelector('#log_file_div').style.display = 'block'
       break
     }
+
     default: {
       break
     }
