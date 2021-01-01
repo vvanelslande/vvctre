@@ -6,7 +6,7 @@ const url = new URL(location.href)
 
 if (url.searchParams.has('code')) {
   fetch(
-    'https://270926.falixnodes.vvanelslande.dynv6.net:32851/github-code-to-access-token',
+    'https://d42fcfc3-and-611c56b1.falixnodes.vvanelslande.dynv6.net:32851/github-code-to-access-token',
     {
       headers: {
         'Content-Type': 'text/plain'

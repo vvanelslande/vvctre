@@ -92,14 +92,15 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       custom_default_settings_lines.value = validLinesJoined
 
       url =
-        'https://vvctre-api.dynv6.net:4724/make-custom-default-settings-plugin'
+        'https://d42fcfc3-and-611c56b1.vvanelslande.dynv6.net:30317/make-custom-default-settings-plugin'
 
       body = validLinesJoined
 
       break
     }
     case 'button_to_touch': {
-      url = 'https://vvctre-api.dynv6.net:4724/make-button-to-touch-plugin'
+      url =
+        'https://d42fcfc3-and-611c56b1.vvanelslande.dynv6.net:30317/make-button-to-touch-plugin'
 
       body = JSON.stringify({
         x: Number(document.querySelector('#button_to_touch_x').value),
@@ -110,7 +111,8 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       break
     }
     case 'window_size': {
-      url = 'https://vvctre-api.dynv6.net:4724/make-window-size-plugin'
+      url =
+        'https://d42fcfc3-and-611c56b1.vvanelslande.dynv6.net:30317/make-window-size-plugin'
 
       body = JSON.stringify({
         width: Number(document.querySelector('#window_size_width').value),
@@ -120,7 +122,8 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       break
     }
     case 'window_position': {
-      url = 'https://vvctre-api.dynv6.net:4724/make-window-position-plugin'
+      url =
+        'https://d42fcfc3-and-611c56b1.vvanelslande.dynv6.net:30317/make-window-position-plugin'
 
       body = JSON.stringify({
         x: Number(document.querySelector('#window_position_x').value),
@@ -130,7 +133,8 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       break
     }
     case 'log_file': {
-      url = 'https://vvctre-api.dynv6.net:4724/make-log-file-plugin'
+      url =
+        'https://d42fcfc3-and-611c56b1.vvanelslande.dynv6.net:30317/make-log-file-plugin'
       body = document.querySelector('#log_file_file_path').value
 
       break
