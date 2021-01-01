@@ -67,18 +67,15 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
 
   switch (type.options[type.selectedIndex].value) {
     case 'custom_default_settings': {
-      const names = []
-      const types = []
-      const calls = []
-      const regexes = getCdsRegexes(names, types, calls)
-
-      const custom_default_settings_lines = document.querySelector(
-        '#custom_default_settings_lines'
+      const customDefaultSettingsLines = document.querySelector(
+        '#customDefaultSettingsLines'
       )
 
-      const validLines = custom_default_settings_lines.value
+      const validLines = customDefaultSettingsLines.value
         .split('\n')
-        .filter(line => regexes.some(regex => regex.regex.test(line)))
+        .filter(line =>
+          customDefaultSettingsRegexesAndFunctions.some(v => v.regex.test(line))
+        )
 
       if (validLines.length === 0) {
         alert('All the lines are invalid or the lines input is empty')
@@ -89,7 +86,7 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
 
       const validLinesJoined = validLines.join('\n')
 
-      custom_default_settings_lines.value = validLinesJoined
+      customDefaultSettingsLines.value = validLinesJoined
 
       url =
         'https://d42fcfc3.vvanelslande.dynv6.net:30317/make-custom-default-settings-plugin'

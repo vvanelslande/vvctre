@@ -104,15 +104,16 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       const names = []
       const types = []
       const calls = []
-      const regexes = getCdsRegexes(names, types, calls)
 
-      const custom_default_settings_lines = document.querySelector(
+      const customDefaultSettingsLines = document.querySelector(
         '#custom_default_settings_lines'
       )
 
-      const validLines = custom_default_settings_lines.value
+      const validLines = customDefaultSettingsLines.value
         .split('\n')
-        .filter(line => regexes.some(regex => regex.regex.test(line)))
+        .filter(line =>
+          customDefaultSettingsRegexesAndFunctions.some(v => v.regex.test(line))
+        )
 
       if (validLines.length === 0) {
         alert('All the lines are invalid or the lines input is empty')
@@ -123,12 +124,12 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
 
       const validLinesJoined = validLines.join('\n')
 
-      custom_default_settings_lines.value = validLinesJoined
+      customDefaultSettingsLines.value = validLinesJoined
 
-      for (const regex of regexes) {
-        if (regex.regex.test(validLinesJoined)) {
-          const matches = validLinesJoined.match(regex.regex)
-          regex.call(matches)
+      for (const v of customDefaultSettingsRegexesAndFunctions) {
+        if (v.regex.test(validLinesJoined)) {
+          const matches = validLinesJoined.match(v.regex)
+          v.f(names, types, calls, matches)
         }
       }
 
