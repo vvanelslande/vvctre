@@ -8,7 +8,7 @@ let customDefaultSettingsCalls = []
 
 const customDefaultSettingsRegexesAndFunctions = [
   {
-    regex: /^start.file (.+)$/m,
+    regex: /^start\.file (.+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_file_path')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
@@ -18,7 +18,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^start.play_movie (.+)$/m,
+    regex: /^start\.play_movie (.+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_play_movie')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
@@ -31,7 +31,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^start.record_movie (.+)$/m,
+    regex: /^start\.record_movie (.+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_record_movie')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
@@ -44,7 +44,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^start.region (Japan|USA|Europe|Australia|China|Korea|Taiwan)$/m,
+    regex: /^start\.region (Japan|USA|Europe|Australia|China|Korea|Taiwan)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_region_value')
       customDefaultSettingsTypes.push(['void', 'int value'])
@@ -64,7 +64,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^start.log_filter (.+)$/m,
+    regex: /^start\.log_filter (.+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_log_filter')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
@@ -74,7 +74,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^start.initial_time Unix Timestamp$/m,
+    regex: /^start\.initial_time Unix Timestamp$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_initial_clock')
       customDefaultSettingsTypes.push(['void', 'int value'])
@@ -82,7 +82,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^start.unix_timestamp (\d+)$/m,
+    regex: /^start\.unix_timestamp (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_unix_timestamp')
       customDefaultSettingsTypes.push('void', 'u64 value')
@@ -92,7 +92,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^start.use_virtual_sd_card disable$/m,
+    regex: /^start\.use_virtual_sd_card disable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_use_virtual_sd')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -102,7 +102,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^start.record_frame_times enable$/m,
+    regex: /^start\.record_frame_times enable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_record_frame_times')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -112,7 +112,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^start.gdb_stub enable (\d+)$/m,
+    regex: /^start\.gdb_stub enable (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_enable_gdbstub')
       customDefaultSettingsTypes.push(['void', 'u16 port'])
@@ -122,7 +122,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.cpu_jit disable$/m,
+    regex: /^general\.cpu_jit disable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_use_cpu_jit')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -130,7 +130,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.core_2 enable$/m,
+    regex: /^general\.core_2 enable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_enable_core_2')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -140,7 +140,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.limit_speed disable$/m,
+    regex: /^general\.limit_speed disable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_limit_speed')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -148,7 +148,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.enable_custom_cpu_ticks enable$/m,
+    regex: /^general\.enable_custom_cpu_ticks enable$/m,
     f() {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_use_custom_cpu_ticks'
@@ -160,7 +160,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.speed_limit (\d+)%?$/m,
+    regex: /^general\.speed_limit (\d+)%?$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_speed_limit')
       customDefaultSettingsTypes.push(['void', 'u16 value'])
@@ -170,7 +170,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.custom_cpu_ticks (\d+)$/m,
+    regex: /^general\.custom_cpu_ticks (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_custom_cpu_ticks')
       customDefaultSettingsTypes.push(['void', 'u64 value'])
@@ -180,7 +180,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.cpu_clock_percentage (\d+)%?$/m,
+    regex: /^general\.cpu_clock_percentage (\d+)%?$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_cpu_clock_percentage'
@@ -192,7 +192,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.core_system_run_default_max_slice_value (-?\d+)%?$/m,
+    regex: /^general\.core_system_run_default_max_slice_value (-?\d+)%?$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_core_system_run_default_max_slice_value'
@@ -204,7 +204,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.set_slice_length_to_this_in_core_timing_timer_timer (-?\d+)%?$/m,
+    regex: /^general\.set_slice_length_to_this_in_core_timing_timer_timer (-?\d+)%?$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_set_slice_length_to_this_in_core_timing_timer_timer'
@@ -216,7 +216,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.set_downcount_to_this_in_core_timing_timer_timer (-?\d+)%?$/m,
+    regex: /^general\.set_downcount_to_this_in_core_timing_timer_timer (-?\d+)%?$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_set_downcount_to_this_in_core_timing_timer_timer'
@@ -228,7 +228,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^general.return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength (-?\d+)%?$/m,
+    regex: /^general\.return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength (-?\d+)%?$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength'
@@ -240,7 +240,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^audio.dsp_lle enable$/m,
+    regex: /^audio\.dsp_lle enable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_enable_dsp_lle')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -250,7 +250,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^audio.dsp_lle_multiple_threads enable$/m,
+    regex: /^audio\.dsp_lle_multiple_threads enable$/m,
     f() {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_enable_dsp_lle_multithread'
@@ -262,7 +262,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^audio.stretching disable$/m,
+    regex: /^audio\.stretching disable$/m,
     f() {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_enable_audio_stretching'
@@ -274,7 +274,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^audio.volume (\d*\.?\d+f?)$/m,
+    regex: /^audio\.volume (\d*\.?\d+f?)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_audio_volume')
       customDefaultSettingsTypes.push(['void', 'float value'])
@@ -284,7 +284,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^audio.sink (cubeb|sdl2|null)$/m,
+    regex: /^audio\.sink (cubeb|sdl2|null)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_audio_sink_id')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
@@ -294,7 +294,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^audio.device (.+)$/m,
+    regex: /^audio\.device (.+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_audio_device_id')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
@@ -304,7 +304,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^audio.microphone_input_type (Real Device|Static Noise)$/m,
+    regex: /^audio\.microphone_input_type (Real Device|Static Noise)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_microphone_input_type'
@@ -318,7 +318,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^audio.microphone_real_device_backend (Cubeb|SDL2|Null)$/m,
+    regex: /^audio\.microphone_real_device_backend (Cubeb|SDL2|Null)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_microphone_real_device_backend'
@@ -332,7 +332,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^audio.microphone_device (.+)$/m,
+    regex: /^audio\.microphone_device (.+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_microphone_device')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
@@ -342,7 +342,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^camera.inner_engine image$/m,
+    regex: /^camera\.inner_engine image$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -361,7 +361,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^camera.inner_parameter (.+)$/m,
+    regex: /^camera\.inner_parameter (.+)$/m,
     f(matches) {
       if (
         !customDefaultSettingsNames.includes(
@@ -380,7 +380,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^camera.outer_left_engine image$/m,
+    regex: /^camera\.outer_left_engine image$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -399,7 +399,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^camera.outer_left_parameter (.+)$/m,
+    regex: /^camera\.outer_left_parameter (.+)$/m,
     f(matches) {
       if (
         !customDefaultSettingsNames.includes(
@@ -418,7 +418,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^camera.outer_right_engine image$/m,
+    regex: /^camera\.outer_right_engine image$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -437,7 +437,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^camera.outer_right_parameter (.+)$/m,
+    regex: /^camera\.outer_right_parameter (.+)$/m,
     f(matches) {
       if (
         !customDefaultSettingsNames.includes(
@@ -456,7 +456,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^system.play_coins (\d+)$/m,
+    regex: /^system\.play_coins (\d+)$/m,
     f(matches) {
       if (!customDefaultSettingsNames.includes('vvctre_set_play_coins')) {
         customDefaultSettingsNames.push('vvctre_set_play_coins')
@@ -466,7 +466,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.hardware_renderer disable$/m,
+    regex: /^graphics\.hardware_renderer disable$/m,
     f() {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_use_hardware_renderer'
@@ -478,7 +478,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.hardware_shader disable$/m,
+    regex: /^graphics\.hardware_shader disable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_use_hardware_shader')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -488,7 +488,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.hardware_shader_accurate_multiplication enable$/m,
+    regex: /^graphics\.hardware_shader_accurate_multiplication enable$/m,
     f() {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_hardware_shader_accurate_multiplication'
@@ -500,7 +500,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.enable_disk_shader_cache enable$/m,
+    regex: /^graphics\.enable_disk_shader_cache enable$/m,
     f() {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_enable_disk_shader_cache'
@@ -512,7 +512,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.shader_jit disable$/m,
+    regex: /^graphics\.shader_jit disable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_use_shader_jit')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -522,7 +522,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.vsync enable$/m,
+    regex: /^graphics\.vsync enable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_enable_vsync')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -530,7 +530,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.dump_textures enable$/m,
+    regex: /^graphics\.dump_textures enable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_dump_textures')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -540,7 +540,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.custom_textures enable$/m,
+    regex: /^graphics\.custom_textures enable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_custom_textures')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -550,7 +550,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.preload_custom_textures enable$/m,
+    regex: /^graphics\.preload_custom_textures enable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_preload_textures')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -560,7 +560,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.linear_filtering disable$/m,
+    regex: /^graphics\.linear_filtering disable$/m,
     f() {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_enable_linear_filtering'
@@ -572,7 +572,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.sharper_distant_objects enable$/m,
+    regex: /^graphics\.sharper_distant_objects enable$/m,
     f() {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_sharper_distant_objects'
@@ -584,7 +584,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.background_color (?:#)(\S\S\S\S\S\S)$/m,
+    regex: /^graphics\.background_color (?:#)(\S\S\S\S\S\S)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_background_color_red'
@@ -616,7 +616,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.resolution (\d+|Window Size)$/m,
+    regex: /^graphics\.resolution (\d+|Window Size)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_resolution')
       customDefaultSettingsTypes.push(['void', 'u16 value'])
@@ -628,7 +628,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.post_processing_shader (.+)$/m,
+    regex: /^graphics\.post_processing_shader (.+)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_post_processing_shader'
@@ -640,7 +640,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.texture_filter (Anime4K Ultrafast|Bicubic|ScaleForce|xBRZ freescale)$/m,
+    regex: /^graphics\.texture_filter (Anime4K Ultrafast|Bicubic|ScaleForce|xBRZ freescale)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_texture_filter')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
@@ -650,7 +650,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.3d_mode (Side by Side|Anaglyph|Interlaced)$/m,
+    regex: /^graphics\.3d_mode (Side by Side|Anaglyph|Interlaced)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_render_3d')
       customDefaultSettingsTypes.push(['void', 'int value'])
@@ -667,7 +667,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^graphics.3d_factor (\d+)%?$/m,
+    regex: /^graphics\.3d_factor (\d+)%?$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_factor_3d')
       customDefaultSettingsTypes.push(['void', 'u8 value'])
@@ -677,7 +677,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.layout (Single Screen|Large Screen|Side by Side|Medium Screen)$/m,
+    regex: /^layout\.layout (Single Screen|Large Screen|Side by Side|Medium Screen)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_layout')
       customDefaultSettingsTypes.push(['void', 'int value'])
@@ -694,7 +694,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.use_custom_layout enable$/m,
+    regex: /^layout\.use_custom_layout enable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_use_custom_layout')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -704,7 +704,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.swap_screens enable$/m,
+    regex: /^layout\.swap_screens enable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_swap_screens')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -712,7 +712,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.upright_screens enable$/m,
+    regex: /^layout\.upright_screens enable$/m,
     f() {
       customDefaultSettingsNames.push('vvctre_settings_set_upright_screens')
       customDefaultSettingsTypes.push(['void', 'bool value'])
@@ -722,7 +722,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.top_left (\d+)$/m,
+    regex: /^layout\.top_left (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_custom_layout_top_left'
@@ -734,7 +734,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.top_top (\d+)$/m,
+    regex: /^layout\.top_top (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_custom_layout_top_top'
@@ -746,7 +746,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.top_right (\d+)$/m,
+    regex: /^layout\.top_right (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_custom_layout_top_right'
@@ -758,7 +758,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.top_bottom (\d+)$/m,
+    regex: /^layout\.top_bottom (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_custom_layout_top_bottom'
@@ -770,7 +770,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.bottom_left (\d+)$/m,
+    regex: /^layout\.bottom_left (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_custom_layout_bottom_left'
@@ -782,7 +782,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.bottom_top (\d+)$/m,
+    regex: /^layout\.bottom_top (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_custom_layout_bottom_top'
@@ -794,7 +794,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.bottom_right (\d+)$/m,
+    regex: /^layout\.bottom_right (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_custom_layout_bottom_right'
@@ -806,7 +806,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^layout.bottom_bottom (\d+)$/m,
+    regex: /^layout\.bottom_bottom (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push(
         'vvctre_settings_set_custom_layout_bottom_bottom'
@@ -818,7 +818,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^multiplayer.ip (.+)$/m,
+    regex: /^multiplayer\.ip (.+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_multiplayer_ip')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
@@ -828,7 +828,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^multiplayer.port (\d+)$/m,
+    regex: /^multiplayer\.port (\d+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_multiplayer_port')
       customDefaultSettingsTypes.push(['void', 'u16 value'])
@@ -838,7 +838,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^multiplayer.nickname (.+)$/m,
+    regex: /^multiplayer\.nickname (.+)$/m,
     f(matches) {
       customDefaultSettingsNames.push('vvctre_settings_set_nickname')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
@@ -848,7 +848,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.spi enable$/m,
+    regex: /^lle\.spi enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -867,7 +867,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.gpio enable$/m,
+    regex: /^lle\.gpio enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -886,7 +886,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.mp enable$/m,
+    regex: /^lle\.mp enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -905,7 +905,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.cdc enable$/m,
+    regex: /^lle\.cdc enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -924,7 +924,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.http enable$/m,
+    regex: /^lle\.http enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -943,7 +943,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.csnd enable$/m,
+    regex: /^lle\.csnd enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -962,7 +962,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.ns enable$/m,
+    regex: /^lle\.ns enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -981,7 +981,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.nfc enable$/m,
+    regex: /^lle\.nfc enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1000,7 +1000,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.ptm enable$/m,
+    regex: /^lle\.ptm enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1019,7 +1019,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.news enable$/m,
+    regex: /^lle\.news enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1038,7 +1038,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.ndm enable$/m,
+    regex: /^lle\.ndm enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1057,7 +1057,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.mic enable$/m,
+    regex: /^lle\.mic enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1076,7 +1076,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.i2c enable$/m,
+    regex: /^lle\.i2c enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1095,7 +1095,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.ir enable$/m,
+    regex: /^lle\.ir enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1114,7 +1114,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.pdn enable$/m,
+    regex: /^lle\.pdn enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1133,7 +1133,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.nim enable$/m,
+    regex: /^lle\.nim enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1152,7 +1152,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.hid enable$/m,
+    regex: /^lle\.hid enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1171,7 +1171,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.gsp enable$/m,
+    regex: /^lle\.gsp enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1190,7 +1190,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.frd enable$/m,
+    regex: /^lle\.frd enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1209,7 +1209,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.cfg enable$/m,
+    regex: /^lle\.cfg enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1228,7 +1228,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.ps enable$/m,
+    regex: /^lle\.ps enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1247,7 +1247,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.cecd enable$/m,
+    regex: /^lle\.cecd enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1266,7 +1266,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.dsp enable$/m,
+    regex: /^lle\.dsp enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1285,7 +1285,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.cam enable$/m,
+    regex: /^lle\.cam enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1304,7 +1304,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.mcu enable$/m,
+    regex: /^lle\.mcu enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1323,7 +1323,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.ssl enable$/m,
+    regex: /^lle\.ssl enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1342,7 +1342,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.boss enable$/m,
+    regex: /^lle\.boss enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1361,7 +1361,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.act enable$/m,
+    regex: /^lle\.act enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1380,7 +1380,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.ac enable$/m,
+    regex: /^lle\.ac enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1399,7 +1399,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.am enable$/m,
+    regex: /^lle\.am enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1418,7 +1418,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.err enable$/m,
+    regex: /^lle\.err enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1437,7 +1437,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.pxi enable$/m,
+    regex: /^lle\.pxi enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1456,7 +1456,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.nwm enable$/m,
+    regex: /^lle\.nwm enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1475,7 +1475,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.dlp enable$/m,
+    regex: /^lle\.dlp enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1494,7 +1494,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.ldr enable$/m,
+    regex: /^lle\.ldr enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1513,7 +1513,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.pm enable$/m,
+    regex: /^lle\.pm enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1532,7 +1532,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.soc enable$/m,
+    regex: /^lle\.soc enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
@@ -1551,7 +1551,7 @@ const customDefaultSettingsRegexesAndFunctions = [
     }
   },
   {
-    regex: /^lle.fs enable$/m,
+    regex: /^lle\.fs enable$/m,
     f() {
       if (
         !customDefaultSettingsNames.includes(
