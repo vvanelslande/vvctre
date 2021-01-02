@@ -657,7 +657,6 @@ const customDefaultSettingsRegexesAndFunctions = [
       customDefaultSettingsCalls.push(
         `vvctre_settings_set_render_3d(${
           {
-            Off: 0,
             'Side by Side': 1,
             Anaglyph: 2,
             Interlaced: 3
