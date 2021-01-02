@@ -23,7 +23,10 @@ const customDefaultSettingsRegexesAndFunctions = [
       customDefaultSettingsNames.push('vvctre_settings_set_play_movie')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
       customDefaultSettingsCalls.push(
-        `vvctre_settings_set_play_movie("${matches[1]}");`
+        `vvctre_settings_set_play_movie("${matches[1].replace(
+          /\\/g,
+          '\\\\'
+        )}}");`
       )
     }
   },
@@ -33,7 +36,10 @@ const customDefaultSettingsRegexesAndFunctions = [
       customDefaultSettingsNames.push('vvctre_settings_set_record_movie')
       customDefaultSettingsTypes.push(['void', 'const char* value'])
       customDefaultSettingsCalls.push(
-        `vvctre_settings_set_record_movie("${matches[1]}");`
+        `vvctre_settings_set_record_movie("${matches[1].replace(
+          /\\/g,
+          '\\\\'
+        )}}");`
       )
     }
   },
