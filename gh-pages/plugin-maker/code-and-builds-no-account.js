@@ -94,15 +94,14 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       customDefaultSettingsLines.value = validLinesJoined
 
       url =
-        'https://d42fcfc3.vvanelslande.dynv6.net:30317/make-custom-default-settings-plugin'
+        'https://d42fcfc3.vvanelslande.dynv6.net:30317/custom-default-settings'
 
       body = validLinesJoined
 
       break
     }
     case 'button_to_touch': {
-      url =
-        'https://d42fcfc3.vvanelslande.dynv6.net:30317/make-button-to-touch-plugin'
+      url = 'https://d42fcfc3.vvanelslande.dynv6.net:30317/button-to-touch'
 
       body = JSON.stringify({
         x: Number(document.querySelector('#button_to_touch_x').value),
@@ -113,8 +112,7 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       break
     }
     case 'window_size': {
-      url =
-        'https://d42fcfc3.vvanelslande.dynv6.net:30317/make-window-size-plugin'
+      url = 'https://d42fcfc3.vvanelslande.dynv6.net:30317/window-size'
 
       body = JSON.stringify({
         width: Number(document.querySelector('#window_size_width').value),
@@ -124,8 +122,7 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       break
     }
     case 'window_position': {
-      url =
-        'https://d42fcfc3.vvanelslande.dynv6.net:30317/make-window-position-plugin'
+      url = 'https://d42fcfc3.vvanelslande.dynv6.net:30317/window-position'
 
       body = JSON.stringify({
         x: Number(document.querySelector('#window_position_x').value),
@@ -135,7 +132,7 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
       break
     }
     case 'log_file': {
-      url = 'https://d42fcfc3.vvanelslande.dynv6.net:30317/make-log-file-plugin'
+      url = 'https://d42fcfc3.vvanelslande.dynv6.net:30317/log-file'
       body = document.querySelector('#log_file_file_path').value
 
       break
