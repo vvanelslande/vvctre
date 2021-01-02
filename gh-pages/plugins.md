@@ -8,7 +8,7 @@ redirect_from:
 
 Code and builds:
 
-- There's a bot that can make plugins in my Discord server
+- There's a bot that makes plugins in my Discord server
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-no-account/) (doesn't need a account, uses my [vvctre plugins as a service](https://github.com/vvanelslande/vvctre-plugins-as-a-service) server)
 - [This]({{ site.baseurl }}/plugin-maker/code-and-builds-user-github-account/) (needs a GitHub account)
 - [vvctre plugins as a service](https://github.com/vvanelslande/vvctre-plugins-as-a-service) (my server: [https://d42fcfc3.vvanelslande.dynv6.net:30317](https://d42fcfc3.vvanelslande.dynv6.net:30317))
