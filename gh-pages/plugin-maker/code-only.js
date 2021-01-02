@@ -69,7 +69,7 @@ document.querySelector('#makePlugin').addEventListener('click', async () => {
   switch (type.options[type.selectedIndex].value) {
     case 'custom_default_settings': {
       const customDefaultSettingsLines = document.querySelector(
-        '#customDefaultSettingsLines'
+        '#custom_default_settings_lines'
       )
 
       const validLines = customDefaultSettingsLines.value
