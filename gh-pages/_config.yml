@@ -1,5 +1,0 @@
-theme: jekyll-theme-midnight
-permalink: pretty
-
-plugins:
-  - jekyll-redirect-from
