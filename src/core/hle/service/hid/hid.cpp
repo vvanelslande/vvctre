@@ -194,6 +194,7 @@ void Module::UpdatePadCallback(std::uintptr_t user_data, s64 cycles_late) {
 
     // TODO(xperia64): How the 3D Slider is updated by the HID module needs to be RE'd
     // and possibly moved to its own Core::Timing event.
+    mem->pad.sliderstate_3d = (Settings::values.factor_3d / 100.0f);
     system.Kernel().GetSharedPageHandler().GetSharedPage().sliderstate_3d =
         static_cast<float_le>(Settings::values.factor_3d / 100.0f);
 
