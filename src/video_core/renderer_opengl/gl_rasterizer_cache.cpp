@@ -733,11 +733,11 @@ void CachedSurface::UploadGLTexture(Common::Rectangle<u32> rect, GLuint read_fb_
 
     u64 tex_hash = 0;
 
-    if (Settings::values.dump_textures || Settings::values.custom_textures) {
+    if (Settings::values.dump_textures || Settings::values.use_custom_textures) {
         tex_hash = Common::ComputeHash64(gl_buffer.data(), gl_buffer.size());
     }
 
-    if (Settings::values.custom_textures) {
+    if (Settings::values.use_custom_textures) {
         is_custom = LoadCustomTexture(tex_hash);
     }
 

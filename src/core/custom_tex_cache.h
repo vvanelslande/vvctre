@@ -10,8 +10,10 @@
 #include <unordered_set>
 #include <vector>
 #include "common/common_types.h"
+#include "core/settings.h"
 
 namespace Core {
+
 struct CustomTexInfo {
     u32 width;
     u32 height;
@@ -22,22 +24,22 @@ struct CustomTexInfo {
 struct CustomTexPathInfo {
     std::string path;
     u64 hash;
+    Settings::PreloadCustomTexturesFolder folder;
 };
 
-// TODO: think of a better name for this class...
 class CustomTexCache {
 public:
-    explicit CustomTexCache();
+    CustomTexCache();
     ~CustomTexCache();
 
-    bool IsTextureDumped(u64 hash) const;
-    void SetTextureDumped(u64 hash);
-
-    bool IsTextureCached(u64 hash) const;
-    const CustomTexInfo& LookupTexture(u64 hash) const;
-    void CacheTexture(u64 hash, const std::vector<u8>& tex, u32 width, u32 height);
-
-    void AddTexturePath(u64 hash, const std::string& path);
+    bool IsTextureDumped(const u64 hash) const;
+    void SetTextureDumped(const u64 hash);
+    bool IsTextureCached(const u64 hash) const;
+    const CustomTexInfo& LookupTexture(const u64 hash) const;
+    void CacheTexture(const u64 hash, const std::vector<u8>& tex, const u32 width,
+                      const u32 height);
+    void AddTexturePath(const u64 hash, const std::string& path,
+                        const Settings::PreloadCustomTexturesFolder folder);
     void FindCustomTextures();
     void PreloadTextures(std::function<void(std::size_t current, std::size_t total)> callback);
     bool CustomTextureExists(u64 hash) const;

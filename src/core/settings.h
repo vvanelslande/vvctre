@@ -52,6 +52,11 @@ enum class StereoRenderOption {
     ReverseInterlaced,
 };
 
+enum class PreloadCustomTexturesFolder {
+    Load,
+    Preload,
+};
+
 namespace NativeButton {
 
 enum Values {
@@ -170,8 +175,9 @@ struct Values {
     bool use_shader_jit = true;
     bool enable_vsync = false;
     bool dump_textures = false;
-    bool custom_textures = false;
-    bool preload_textures = false;
+    bool use_custom_textures = false;
+    bool preload_custom_textures = false;
+    PreloadCustomTexturesFolder preload_custom_textures_folder = PreloadCustomTexturesFolder::Load;
     bool enable_linear_filtering = true;
     bool sharper_distant_objects = false;
     u16 resolution = 1;

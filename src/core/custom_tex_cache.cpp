@@ -15,7 +15,7 @@ CustomTexCache::CustomTexCache() = default;
 
 CustomTexCache::~CustomTexCache() = default;
 
-bool CustomTexCache::IsTextureDumped(u64 hash) const {
+bool CustomTexCache::IsTextureDumped(const u64 hash) const {
     return dumped_textures.count(hash);
 }
 
@@ -23,23 +23,25 @@ void CustomTexCache::SetTextureDumped(const u64 hash) {
     dumped_textures.insert(hash);
 }
 
-bool CustomTexCache::IsTextureCached(u64 hash) const {
+bool CustomTexCache::IsTextureCached(const u64 hash) const {
     return custom_textures.count(hash);
 }
 
-const CustomTexInfo& CustomTexCache::LookupTexture(u64 hash) const {
+const CustomTexInfo& CustomTexCache::LookupTexture(const u64 hash) const {
     return custom_textures.at(hash);
 }
 
-void CustomTexCache::CacheTexture(u64 hash, const std::vector<u8>& tex, u32 width, u32 height) {
+void CustomTexCache::CacheTexture(const u64 hash, const std::vector<u8>& tex, const u32 width,
+                                  const u32 height) {
     custom_textures[hash] = {width, height, tex};
 }
 
-void CustomTexCache::AddTexturePath(u64 hash, const std::string& path) {
+void CustomTexCache::AddTexturePath(const u64 hash, const std::string& path,
+                                    const Settings::PreloadCustomTexturesFolder folder) {
     if (custom_texture_paths.count(hash)) {
         LOG_ERROR(Core, "Textures {} and {} conflict!", custom_texture_paths[hash].path, path);
     } else {
-        custom_texture_paths[hash] = {path, hash};
+        custom_texture_paths[hash] = {path, hash, folder};
     }
 }
 
@@ -47,36 +49,41 @@ void CustomTexCache::FindCustomTextures() {
     // Custom textures are currently stored as
     // [TitleID]/tex1_[width]x[height]_[64-bit hash]_[format].[extension]
 
-    const std::string load_path =
-        fmt::format("{}textures/{:016X}/", FileUtil::GetUserPath(FileUtil::UserPath::LoadDir),
-                    Core::System::GetInstance().Kernel().GetCurrentProcess()->codeset->program_id);
+    const auto f = [this](Settings::PreloadCustomTexturesFolder folder) {
+        const std::string path = fmt::format(
+            "{}textures/{:016X}/",
+            FileUtil::GetUserPath(folder == Settings::PreloadCustomTexturesFolder::Load
+                                      ? FileUtil::UserPath::LoadDir
+                                      : FileUtil::UserPath::PreloadDir),
+            Core::System::GetInstance().Kernel().GetCurrentProcess()->codeset->program_id);
 
-    if (FileUtil::Exists(load_path)) {
-        FileUtil::FSTEntry texture_dir;
-        std::vector<FileUtil::FSTEntry> textures;
-        // 64 nested folders should be plenty for most cases
-        FileUtil::ScanDirectoryTree(load_path, texture_dir, 64);
-        FileUtil::GetAllFilesFromNestedEntries(texture_dir, textures);
+        if (FileUtil::Exists(path)) {
+            FileUtil::FSTEntry texture_dir;
+            std::vector<FileUtil::FSTEntry> textures;
+            FileUtil::ScanDirectoryTree(path, texture_dir, 64);
+            FileUtil::GetAllFilesFromNestedEntries(texture_dir, textures);
 
-        for (const auto& file : textures) {
-            if (file.is_directory) {
-                continue;
-            }
-            if (file.virtual_name.substr(0, 5) != "tex1_") {
-                continue;
-            }
+            for (const auto& file : textures) {
+                if (file.is_directory || (file.virtual_name.substr(0, 5) != "tex1_")) {
+                    continue;
+                }
 
-            u32 width;
-            u32 height;
-            u64 hash;
-            u32 format; // unused
+                u32 width;
+                u32 height;
+                u64 hash;
 
-            // TODO: more modern way of doing this
-            if (std::sscanf(file.virtual_name.c_str(), "tex1_%ux%u_%llX_%u.%*s", &width, &height,
-                            &hash, &format) == 4) {
-                AddTexturePath(hash, file.physical_name);
+                if (std::sscanf(file.virtual_name.c_str(), "tex1_%ux%u_%llX%*s", &width, &height,
+                                &hash) == 4) {
+                    AddTexturePath(hash, file.physical_name, folder);
+                }
             }
         }
+    };
+
+    f(Settings::PreloadCustomTexturesFolder::Load);
+
+    if (Settings::values.preload_custom_textures) {
+        f(Settings::PreloadCustomTexturesFolder::Preload);
     }
 }
 
@@ -84,29 +91,31 @@ void CustomTexCache::PreloadTextures(
     std::function<void(std::size_t current, std::size_t total)> callback) {
     std::size_t current = 1;
     for (const auto& path : custom_texture_paths) {
-        const auto& path_info = path.second;
-        Core::CustomTexInfo tex_info;
-        unsigned char* image =
-            stbi_load(path_info.path.c_str(), reinterpret_cast<int*>(&tex_info.width),
-                      reinterpret_cast<int*>(&tex_info.height), nullptr, 4);
-        if (image != nullptr) {
-            tex_info.tex.resize(tex_info.width * tex_info.height * 4);
-            std::memcpy(tex_info.tex.data(), image, tex_info.tex.size());
-            free(image);
+        if (path.second.folder == Settings::values.preload_custom_textures_folder) {
+            Core::CustomTexInfo tex_info;
+            unsigned char* image =
+                stbi_load(path.second.path.c_str(), reinterpret_cast<int*>(&tex_info.width),
+                          reinterpret_cast<int*>(&tex_info.height), nullptr, 4);
+            if (image != nullptr) {
+                tex_info.tex.resize(tex_info.width * tex_info.height * 4);
+                std::memcpy(tex_info.tex.data(), image, tex_info.tex.size());
+                free(image);
 
-            // Make sure the texture size is a power of 2
-            std::bitset<32> width_bits(tex_info.width);
-            std::bitset<32> height_bits(tex_info.height);
-            if (width_bits.count() == 1 && height_bits.count() == 1) {
-                LOG_DEBUG(Render_OpenGL, "Loaded custom texture from {}", path_info.path);
-                Common::FlipRGBA8Texture(tex_info.tex, tex_info.width, tex_info.height);
-                CacheTexture(path_info.hash, tex_info.tex, tex_info.width, tex_info.height);
-                callback(current++, custom_texture_paths.size());
+                // Make sure the texture size is a power of 2
+                std::bitset<32> width_bits(tex_info.width);
+                std::bitset<32> height_bits(tex_info.height);
+                if (width_bits.count() == 1 && height_bits.count() == 1) {
+                    LOG_DEBUG(Render_OpenGL, "Loaded custom texture from {}", path.second.path);
+                    Common::FlipRGBA8Texture(tex_info.tex, tex_info.width, tex_info.height);
+                    CacheTexture(path.second.hash, tex_info.tex, tex_info.width, tex_info.height);
+                    callback(current++, custom_texture_paths.size());
+                } else {
+                    LOG_ERROR(Render_OpenGL, "Texture {} size is not a power of 2",
+                              path.second.path);
+                }
             } else {
-                LOG_ERROR(Render_OpenGL, "Texture {} size is not a power of 2", path_info.path);
+                LOG_ERROR(Render_OpenGL, "Failed to load custom texture {}", path.second.path);
             }
-        } else {
-            LOG_ERROR(Render_OpenGL, "Failed to load custom texture {}", path_info.path);
         }
     }
 }

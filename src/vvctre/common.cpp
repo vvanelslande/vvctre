@@ -29,9 +29,9 @@
 #include "vvctre/emu_window/emu_window_sdl2.h"
 #include "vvctre/plugins.h"
 
-const u8 vvctre_version_major = 42;
-const u8 vvctre_version_minor = 1;
-const u8 vvctre_version_patch = 3;
+const u8 vvctre_version_major = 43;
+const u8 vvctre_version_minor = 0;
+const u8 vvctre_version_patch = 0;
 
 void vvctreShutdown(PluginManager* plugin_manager) {
     if (plugin_manager != nullptr) {

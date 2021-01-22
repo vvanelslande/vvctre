@@ -255,13 +255,16 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
     cheat_engine = std::make_shared<Cheats::CheatEngine>(*this);
     perf_stats = std::make_unique<PerfStats>();
     custom_tex_cache = std::make_unique<Core::CustomTexCache>();
-    if (Settings::values.custom_textures) {
+    if (Settings::values.use_custom_textures) {
         FileUtil::CreateFullPath(fmt::format("{}textures/{:016X}/",
                                              FileUtil::GetUserPath(FileUtil::UserPath::LoadDir),
                                              Kernel().GetCurrentProcess()->codeset->program_id));
+        FileUtil::CreateFullPath(fmt::format("{}textures/{:016X}/",
+                                             FileUtil::GetUserPath(FileUtil::UserPath::PreloadDir),
+                                             Kernel().GetCurrentProcess()->codeset->program_id));
         custom_tex_cache->FindCustomTextures();
     }
-    if (Settings::values.preload_textures) {
+    if (Settings::values.preload_custom_textures) {
         preload_custom_textures_function();
     }
     if (Settings::values.use_hardware_renderer && Settings::values.use_hardware_shader &&

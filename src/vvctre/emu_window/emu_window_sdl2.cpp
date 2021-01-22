@@ -3281,8 +3281,28 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
 
                     ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
-                    ImGui::Checkbox("Use Custom Textures", &Settings::values.custom_textures);
-                    ImGui::Checkbox("Preload Custom Textures", &Settings::values.preload_textures);
+                    ImGui::Checkbox("Use Custom Textures", &Settings::values.use_custom_textures);
+                    ImGui::Checkbox("Preload Custom Textures",
+                                    &Settings::values.preload_custom_textures);
+                    if (Settings::values.preload_custom_textures) {
+                        ImGui::Indent();
+                        if (ImGui::BeginCombo("Folder",
+                                              Settings::values.preload_custom_textures_folder ==
+                                                      Settings::PreloadCustomTexturesFolder::Load
+                                                  ? "load"
+                                                  : "preload")) {
+                            if (ImGui::Selectable("load")) {
+                                Settings::values.preload_custom_textures_folder =
+                                    Settings::PreloadCustomTexturesFolder::Load;
+                            }
+                            if (ImGui::Selectable("preload")) {
+                                Settings::values.preload_custom_textures_folder =
+                                    Settings::PreloadCustomTexturesFolder::Preload;
+                            }
+                            ImGui::EndCombo();
+                        }
+                        ImGui::Unindent();
+                    }
 
                     if (ImGui::ColorEdit3("Background Color",
                                           &Settings::values.background_color_red,

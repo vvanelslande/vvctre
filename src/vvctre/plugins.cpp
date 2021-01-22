@@ -3360,19 +3360,28 @@ bool vvctre_settings_get_dump_textures() {
 }
 
 void vvctre_settings_set_custom_textures(bool value) {
-    Settings::values.custom_textures = value;
+    Settings::values.use_custom_textures = value;
 }
 
 bool vvctre_settings_get_custom_textures() {
-    return Settings::values.custom_textures;
+    return Settings::values.use_custom_textures;
 }
 
 void vvctre_settings_set_preload_textures(bool value) {
-    Settings::values.preload_textures = value;
+    Settings::values.preload_custom_textures = value;
 }
 
 bool vvctre_settings_get_preload_textures() {
-    return Settings::values.preload_textures;
+    return Settings::values.preload_custom_textures;
+}
+
+void vvctre_settings_set_preload_custom_textures_folder(
+    Settings::PreloadCustomTexturesFolder value) {
+    Settings::values.preload_custom_textures_folder = value;
+}
+
+Settings::PreloadCustomTexturesFolder vvctre_settings_get_preload_custom_textures_folder() {
+    return Settings::values.preload_custom_textures_folder;
 }
 
 void vvctre_settings_set_enable_linear_filtering(bool value) {
@@ -4746,6 +4755,10 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_settings_get_custom_textures", (void*)&vvctre_settings_get_custom_textures},
     {"vvctre_settings_set_preload_textures", (void*)&vvctre_settings_set_preload_textures},
     {"vvctre_settings_get_preload_textures", (void*)&vvctre_settings_get_preload_textures},
+    {"vvctre_settings_set_preload_custom_textures_folder",
+     (void*)&vvctre_settings_set_preload_custom_textures_folder},
+    {"vvctre_settings_get_preload_custom_textures_folder",
+     (void*)&vvctre_settings_get_preload_custom_textures_folder},
     {"vvctre_settings_set_enable_linear_filtering",
      (void*)&vvctre_settings_set_enable_linear_filtering},
     {"vvctre_settings_get_enable_linear_filtering",

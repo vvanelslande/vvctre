@@ -565,6 +565,7 @@ static void InitUserPaths() {
     g_paths[UserPath::ShaderDir] = user_path + "shaders/";
     g_paths[UserPath::DumpDir] = user_path + "dump/";
     g_paths[UserPath::LoadDir] = user_path + "load/";
+    g_paths[UserPath::PreloadDir] = user_path + "preload/";
 }
 
 const std::string& GetUserPath(UserPath path) {
