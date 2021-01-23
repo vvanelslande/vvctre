@@ -73,7 +73,7 @@ void CustomTexCache::FindCustomTextures() {
                 u64 hash;
 
                 if (std::sscanf(file.virtual_name.c_str(), "tex1_%ux%u_%llX%*s", &width, &height,
-                                &hash) == 4) {
+                                &hash) == 3) {
                     AddTexturePath(hash, file.physical_name, folder);
                 }
             }
@@ -82,7 +82,9 @@ void CustomTexCache::FindCustomTextures() {
 
     f(Settings::PreloadCustomTexturesFolder::Load);
 
-    if (Settings::values.preload_custom_textures&&Settings::values.preload_custom_textures_folder==Settings::PreloadCustomTexturesFolder::Preload) {
+    if (Settings::values.preload_custom_textures &&
+        Settings::values.preload_custom_textures_folder ==
+            Settings::PreloadCustomTexturesFolder::Preload) {
         f(Settings::PreloadCustomTexturesFolder::Preload);
     }
 }
