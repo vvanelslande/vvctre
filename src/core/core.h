@@ -284,8 +284,6 @@ private:
 
     static System s_instance;
 
-    bool powered_on = false;
-
     ResultStatus status = ResultStatus::Success;
 
     /// Saved variables for reset and application jump

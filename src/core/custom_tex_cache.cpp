@@ -82,7 +82,7 @@ void CustomTexCache::FindCustomTextures() {
 
     f(Settings::PreloadCustomTexturesFolder::Load);
 
-    if (Settings::values.preload_custom_textures) {
+    if (Settings::values.preload_custom_textures&&Settings::values.preload_custom_textures_folder==Settings::PreloadCustomTexturesFolder::Preload) {
         f(Settings::PreloadCustomTexturesFolder::Preload);
     }
 }

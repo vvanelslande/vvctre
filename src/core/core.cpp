@@ -125,7 +125,11 @@ System::ResultStatus System::Run() {
             current_core_to_execute->GetTimer().Idle();
             PrepareReschedule();
         } else {
-            current_core_to_execute->Run();
+            if (step) {
+                current_core_to_execute->Step();
+            } else {
+                current_core_to_execute->Run();
+            }
         }
     } else {
         // Now all cores are at the same global time. So we will run them one after the other
@@ -153,7 +157,11 @@ System::ResultStatus System::Run() {
                 cpu_core->GetTimer().Idle();
                 PrepareReschedule();
             } else {
-                cpu_core->Run();
+                if (step) {
+                    cpu_core->Step();
+                } else {
+                    cpu_core->Run();
+                }
             }
             max_slice = cpu_core->GetTimer().GetTicks() - start_ticks;
         }
@@ -454,8 +462,9 @@ void System::Shutdown() {
     timing.reset();
     app_loader.reset();
     exclusive_monitor.reset();
+    custom_tex_cache.reset();
+    running_core = nullptr;
     room_member->SendGameInfo(Network::GameInfo{});
-    powered_on = false;
 }
 
 void System::Reset() {
