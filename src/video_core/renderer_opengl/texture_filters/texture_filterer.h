@@ -17,8 +17,6 @@ namespace OpenGL {
 
 class TextureFilterer {
 public:
-    static constexpr std::string_view NONE = "none";
-
     explicit TextureFilterer(std::string_view filter_name, u16 scale_factor);
 
     // Returns true if the filter actually changed
@@ -35,7 +33,7 @@ public:
     static std::vector<std::string_view> GetFilterNames();
 
 private:
-    std::string_view filter_name = NONE;
+    std::string_view filter_name = "none";
     std::unique_ptr<TextureFilterBase> filter;
 };
 

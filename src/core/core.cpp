@@ -44,11 +44,10 @@ System System::s_instance;
 
 System::System() {
     if (enet_initialize() != 0) {
-        LOG_ERROR(Network, "Error initializing ENet");
         return;
     }
+
     room_member = std::make_shared<Network::RoomMember>();
-    LOG_DEBUG(Network, "initialized OK");
 }
 
 System::~System() {
@@ -57,27 +56,28 @@ System::~System() {
     }
 
     enet_deinitialize();
-    LOG_DEBUG(Network, "shutdown OK");
 }
 
 System::ResultStatus System::Run() {
     bool step = false;
 
     status = ResultStatus::Success;
+
     if (std::any_of(cpu_cores.begin(), cpu_cores.end(),
                     [](std::shared_ptr<ARM_Interface> ptr) { return ptr == nullptr; })) {
         return ResultStatus::ErrorNotInitialized;
     }
 
     if (GDBStub::IsServerEnabled()) {
-        Kernel::Thread* thread = kernel->GetCurrentThreadManager().GetCurrentThread();
-        if (thread != nullptr && running_core != nullptr) {
-            running_core->SaveContext(thread->context);
+        if (running_core != nullptr) {
+            if (Kernel::Thread* current_thread =
+                    kernel->GetCurrentThreadManager().GetCurrentThread()) {
+                running_core->SaveContext(current_thread->context);
+            }
         }
+
         GDBStub::HandlePacket();
 
-        // If the loop is halted and we want to step, use a tiny (1) number of instructions to
-        // execute. Otherwise, get out of the loop function.
         if (GDBStub::GetCpuHaltFlag()) {
             if (GDBStub::GetCpuStepFlag()) {
                 step = true;
@@ -87,20 +87,20 @@ System::ResultStatus System::Run() {
         }
     }
 
-    // All cores should have executed the same amount of ticks. If this is not the case an event was
-    // scheduled with a cycles_into_future smaller then the current downcount.
-    // So we have to get those cores to the same global time first
     u64 global_ticks = timing->GetGlobalTicks();
     s64 max_delay = 0;
     ARM_Interface* current_core_to_execute = nullptr;
+
     for (auto& cpu_core : cpu_cores) {
         if (cpu_core->GetTimer().GetTicks() < global_ticks) {
             s64 delay = global_ticks - cpu_core->GetTimer().GetTicks();
+
             kernel->SetRunningCPU(cpu_core.get());
             cpu_core->GetTimer().Advance();
             cpu_core->PrepareReschedule();
             kernel->GetThreadManager(cpu_core->GetID()).Reschedule();
             cpu_core->GetTimer().SetNextSlice(delay);
+
             if (max_delay < delay) {
                 max_delay = delay;
                 current_core_to_execute = cpu_core.get();
@@ -108,18 +108,19 @@ System::ResultStatus System::Run() {
         }
     }
 
-    // JIT sometimes overshoots by a few ticks which might lead to a minimal desync in the cores.
-    // This small difference shouldn't make it necessary to sync the cores and would only cost
-    // performance. Thus we don't sync delays below min_delay
     static constexpr s64 min_delay = 100;
+
     if (max_delay > min_delay) {
         LOG_TRACE(Core_ARM11, "Core {} running (delayed) for {} ticks",
                   current_core_to_execute->GetID(),
+
                   current_core_to_execute->GetTimer().GetDowncount());
+
         if (running_core != current_core_to_execute) {
             running_core = current_core_to_execute;
             kernel->SetRunningCPU(running_core);
         }
+
         if (kernel->GetCurrentThreadManager().GetCurrentThread() == nullptr) {
             LOG_TRACE(Core_ARM11, "Core {} idling", current_core_to_execute->GetID());
             current_core_to_execute->GetTimer().Idle();
@@ -132,10 +133,8 @@ System::ResultStatus System::Run() {
             }
         }
     } else {
-        // Now all cores are at the same global time. So we will run them one after the other
-        // with a max slice that is the minimum of all max slices of all cores
-        // TODO: Make special check for idle since we can easily revert the time of idle cores
         s64 max_slice = Settings::values.core_system_run_default_max_slice_value;
+
         for (const auto& cpu_core : cpu_cores) {
             kernel->SetRunningCPU(cpu_core.get());
             cpu_core->GetTimer().Advance();
@@ -143,15 +142,17 @@ System::ResultStatus System::Run() {
             kernel->GetThreadManager(cpu_core->GetID()).Reschedule();
             max_slice = std::min(max_slice, cpu_core->GetTimer().GetMaxSliceLength());
         }
-        for (auto& cpu_core : cpu_cores) {
+
+        for (std::shared_ptr<ARM_Interface>& cpu_core : cpu_cores) {
             cpu_core->GetTimer().SetNextSlice(max_slice);
-            auto start_ticks = cpu_core->GetTimer().GetTicks();
+            const u64 start_ticks = cpu_core->GetTimer().GetTicks();
+
             LOG_TRACE(Core_ARM11, "Core {} running for {} ticks", cpu_core->GetID(),
                       cpu_core->GetTimer().GetDowncount());
+
             running_core = cpu_core.get();
             kernel->SetRunningCPU(running_core);
-            // If we don't have a currently active thread then don't execute instructions,
-            // instead advance to the next event and try to yield to the next thread
+
             if (kernel->GetCurrentThreadManager().GetCurrentThread() == nullptr) {
                 LOG_TRACE(Core_ARM11, "Core {} idling", cpu_core->GetID());
                 cpu_core->GetTimer().Idle();
@@ -163,6 +164,7 @@ System::ResultStatus System::Run() {
                     cpu_core->Run();
                 }
             }
+
             max_slice = cpu_core->GetTimer().GetTicks() - start_ticks;
         }
     }
@@ -185,20 +187,26 @@ System::ResultStatus System::Run() {
 System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::string& filepath) {
     if (!FileUtil::Exists(filepath)) {
         LOG_CRITICAL(Core, "File not found");
+
         if (on_load_failed) {
             on_load_failed(ResultStatus::ErrorFileNotFound);
         }
+
         return ResultStatus::ErrorFileNotFound;
     }
 
     app_loader = Loader::GetLoader(filepath);
+
     if (app_loader == nullptr) {
         LOG_CRITICAL(Core, "Unsupported file format");
+
         if (on_load_failed) {
             on_load_failed(ResultStatus::ErrorLoader_ErrorUnsupportedFormat);
         }
+
         return ResultStatus::ErrorLoader_ErrorUnsupportedFormat;
     }
+
     std::pair<std::optional<u32>, Loader::ResultStatus> system_mode =
         app_loader->LoadKernelSystemMode();
 
@@ -211,37 +219,45 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
             if (on_load_failed) {
                 on_load_failed(ResultStatus::ErrorLoader_ErrorEncrypted);
             }
+
             return ResultStatus::ErrorLoader_ErrorEncrypted;
         case Loader::ResultStatus::ErrorInvalidFormat:
             if (on_load_failed) {
                 on_load_failed(ResultStatus::ErrorLoader_ErrorUnsupportedFormat);
             }
+
             return ResultStatus::ErrorLoader_ErrorUnsupportedFormat;
         default:
             if (on_load_failed) {
                 on_load_failed(ResultStatus::ErrorSystemMode);
             }
+
             return ResultStatus::ErrorSystemMode;
         }
     }
 
     ASSERT(system_mode.first);
 
-    ResultStatus init_result{Init(emu_window, *system_mode.first)};
+    const ResultStatus init_result = Init(emu_window, *system_mode.first);
+
     if (init_result != ResultStatus::Success) {
         LOG_CRITICAL(Core, "Failed to initialize system (Error {})!",
                      static_cast<u32>(init_result));
+
         System::Shutdown();
+
         if (on_load_failed) {
             on_load_failed(init_result);
         }
+
         return init_result;
     }
 
     std::shared_ptr<Kernel::Process> process;
-    const Loader::ResultStatus load_result{app_loader->Load(process)};
+    const Loader::ResultStatus load_result = app_loader->Load(process);
     kernel->SetCurrentProcess(process);
-    if (Loader::ResultStatus::Success != load_result) {
+
+    if (load_result != Loader::ResultStatus::Success) {
         LOG_CRITICAL(Core, "Failed to load ROM (Error {})!", static_cast<u32>(load_result));
         System::Shutdown();
 
@@ -250,40 +266,48 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
             if (on_load_failed) {
                 on_load_failed(ResultStatus::ErrorLoader_ErrorEncrypted);
             }
+
             return ResultStatus::ErrorLoader_ErrorEncrypted;
         case Loader::ResultStatus::ErrorInvalidFormat:
             if (on_load_failed) {
                 on_load_failed(ResultStatus::ErrorLoader_ErrorUnsupportedFormat);
             }
+
             return ResultStatus::ErrorLoader_ErrorUnsupportedFormat;
         default:
             UNREACHABLE();
         }
     }
+
     cheat_engine = std::make_shared<Cheats::CheatEngine>(*this);
     perf_stats = std::make_unique<PerfStats>();
     custom_tex_cache = std::make_unique<Core::CustomTexCache>();
+
     if (Settings::values.use_custom_textures) {
         FileUtil::CreateFullPath(fmt::format("{}textures/{:016X}/",
                                              FileUtil::GetUserPath(FileUtil::UserPath::LoadDir),
                                              Kernel().GetCurrentProcess()->codeset->program_id));
+
         FileUtil::CreateFullPath(fmt::format("{}textures/{:016X}/",
                                              FileUtil::GetUserPath(FileUtil::UserPath::PreloadDir),
                                              Kernel().GetCurrentProcess()->codeset->program_id));
+
         custom_tex_cache->FindCustomTextures();
     }
-    if (Settings::values.preload_custom_textures) {
+
+    if (Settings::values.use_hardware_renderer && Settings::values.preload_custom_textures) {
         preload_custom_textures_function();
     }
+
     if (Settings::values.use_hardware_renderer && Settings::values.use_hardware_shader &&
         Settings::values.enable_disk_shader_cache) {
         VideoCore::g_renderer->Rasterizer()->LoadDiskShaderCache();
     }
+
     status = ResultStatus::Success;
     m_emu_window = &emu_window;
     m_filepath = filepath;
 
-    // Reset counters and set time origin to current frame
     perf_stats->BeginSystemFrame();
 
     return status;
@@ -323,27 +347,33 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window, u32 system_mo
 #ifdef ARCHITECTURE_x86_64
         exclusive_monitor =
             std::make_shared<Dynarmic::ExclusiveMonitor>(Settings::values.enable_core_2 ? 2 : 1);
+
         cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(this, *memory, 0, timing->GetTimer(0),
                                                            exclusive_monitor.get()));
+
         if (Settings::values.enable_core_2) {
             cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(
                 this, *memory, 1, timing->GetTimer(1), exclusive_monitor.get()));
         }
 #else
         cpu_cores.push_back(std::make_shared<ARM_DynCom>(this, *memory, 0, timing->GetTimer(0)));
+
         if (Settings::values.enable_core_2) {
             cpu_cores.push_back(
                 std::make_shared<ARM_DynCom>(this, *memory, 1, timing->GetTimer(1)));
         }
+
         LOG_WARNING(Core, "CPU JIT requested, but Dynarmic not available");
 #endif
     } else {
         cpu_cores.push_back(std::make_shared<ARM_DynCom>(this, *memory, 0, timing->GetTimer(0)));
+
         if (Settings::values.enable_core_2) {
             cpu_cores.push_back(
                 std::make_shared<ARM_DynCom>(this, *memory, 1, timing->GetTimer(1)));
         }
     }
+
     running_core = cpu_cores[0].get();
 
     kernel->SetCPUs(cpu_cores);

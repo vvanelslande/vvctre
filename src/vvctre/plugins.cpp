@@ -1312,6 +1312,11 @@ bool vvctre_gui_selectable_with_selected(const char* label, bool* selected) {
     return ImGui::Selectable(label, selected);
 }
 
+bool vvctre_gui_selectable_ex(const char* label, bool* selected, ImGuiSelectableFlags flags,
+                              const float width, const float height) {
+    return ImGui::Selectable(label, selected, flags, ImVec2(width, height));
+}
+
 bool vvctre_gui_text_input(const char* label, char* buffer, std::size_t buffer_size) {
     return ImGui::InputText(label, buffer, buffer_size);
 }
@@ -4302,6 +4307,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_end_combo_box", (void*)&vvctre_gui_end_combo_box},
     {"vvctre_gui_selectable", (void*)&vvctre_gui_selectable},
     {"vvctre_gui_selectable_with_selected", (void*)&vvctre_gui_selectable_with_selected},
+    {"vvctre_gui_selectable_ex", (void*)&vvctre_gui_selectable_ex},
     {"vvctre_gui_text_input", (void*)&vvctre_gui_text_input},
     {"vvctre_gui_text_input_multiline", (void*)&vvctre_gui_text_input_multiline},
     {"vvctre_gui_text_input_with_hint", (void*)&vvctre_gui_text_input_with_hint},

@@ -133,175 +133,31 @@ public:
 
 private:
     ResultVal<void*> GetConfigInfoBlockPointer(u32 block_id, u32 size, u32 flag);
-
-    /**
-     * Reads a block with the specified id and flag from the Config savegame buffer
-     * and writes the output to output. The input size must match exactly the size of the requested
-     * block.
-     *
-     * @param block_id The id of the block we want to read
-     * @param size The size of the block we want to read
-     * @param flag The requested block must have this flag set
-     * @param output A pointer where we will write the read data
-     * @returns ResultCode indicating the result of the operation, 0 on success
-     */
     ResultCode GetConfigInfoBlock(u32 block_id, u32 size, u32 flag, void* output);
-
-    /**
-     * Reads data from input and writes to a block with the specified id and flag
-     * in the Config savegame buffer. The input size must match exactly the size of the target
-     * block.
-     *
-     * @param block_id The id of the block we want to write
-     * @param size The size of the block we want to write
-     * @param flag The target block must have this flag set
-     * @param input A pointer where we will read data and write to Config savegame buffer
-     * @returns ResultCode indicating the result of the operation, 0 on success
-     */
     ResultCode SetConfigInfoBlock(u32 block_id, u32 size, u32 flag, const void* input);
-
-    /**
-     * Creates a block with the specified id and writes the input data to the cfg savegame buffer in
-     * memory. The config savegame file in the filesystem is not updated.
-     *
-     * @param block_id The id of the block we want to create
-     * @param size The size of the block we want to create
-     * @param flags The flags of the new block
-     * @param data A pointer containing the data we will write to the new block
-     * @returns ResultCode indicating the result of the operation, 0 on success
-     */
     ResultCode CreateConfigInfoBlk(u32 block_id, u16 size, u16 flags, const void* data);
-
-    /**
-     * Deletes the config savegame file from the filesystem, the buffer in memory is not affected
-     * @returns ResultCode indicating the result of the operation, 0 on success
-     */
     ResultCode DeleteConfigNANDSaveFile();
-
-    /**
-     * Re-creates the config savegame file in memory and the filesystem with the default blocks
-     * @returns ResultCode indicating the result of the operation, 0 on success
-     */
     ResultCode FormatConfig();
-
-    /**
-     * Open the config savegame file and load it to the memory buffer
-     * @returns ResultCode indicating the result of the operation, 0 on success
-     */
     ResultCode LoadConfigNANDSaveFile();
 
 public:
     u32 GetRegionValue();
-
-    /**
-     * Set the region codes preferred by the game/program so that CFG will adjust to it when the
-     * region setting is auto.
-     * @param region_codes the preferred region codes to set
-     */
     void SetPreferredRegionCodes(const std::vector<u32>& region_codes);
-
-    // Utilities for frontend and plugins to set config data.
-    // Note: UpdateConfigNANDSavegame should be called after making changes to config data.
-
-    /**
-     * Sets the username in config savegame.
-     * @param name the username to set. The maximum size is 10 in char16_t.
-     */
     void SetUsername(const std::u16string& name);
-
-    /**
-     * Gets the username from config savegame.
-     * @returns the username
-     */
     std::u16string GetUsername();
-
-    /**
-     * Sets the profile birthday in config savegame.
-     * @param month the month of birthday.
-     * @param day the day of the birthday.
-     */
     void SetBirthday(u8 month, u8 day);
-
-    /**
-     * Gets the profile birthday from the config savegame.
-     * @returns a tuple of (month, day) of birthday
-     */
     std::tuple<u8, u8> GetBirthday();
-
-    /**
-     * Sets the system language in config savegame.
-     * @param language the system language to set.
-     */
     void SetSystemLanguage(SystemLanguage language);
-
-    /**
-     * Gets the system language from config savegame.
-     * @returns the system language
-     */
     SystemLanguage GetSystemLanguage();
-
-    /**
-     * Sets the sound output mode in config savegame.
-     * @param mode the sound output mode to set
-     */
     void SetSoundOutputMode(SoundOutputMode mode);
-
-    /**
-     * Gets the sound output mode from config savegame.
-     * @returns the sound output mode
-     */
     SoundOutputMode GetSoundOutputMode();
-
-    /**
-     * Sets the country in config savegame.
-     * @param country_code the country to set
-     */
     void SetCountry(u8 country_code);
-
-    /**
-     * Gets the country code from config savegame.
-     * @returns the country code
-     */
     u8 GetCountryCode();
-
-    /**
-     * Generates a new random console unique id.
-     * @param random_number a random generated 16bit number stored at 0x90002, used for generating
-     * the
-     * console_id
-     * @param console_id the randomly created console id
-     */
     void GenerateConsoleUniqueId(u32& random_number, u64& console_id);
-
-    /**
-     * Sets the random_number and the  console unique id in the config savegame.
-     * @param random_number the random_number to set
-     * @param console_id the console id to set
-     */
     ResultCode SetConsoleUniqueId(u32 random_number, u64 console_id);
-
-    /**
-     * Gets the console unique id from config savegame.
-     * @returns the console unique id
-     */
     u64 GetConsoleUniqueId();
-
-    /**
-     * Sets the accepted EULA version in the config savegame.
-     * @param version the version to set
-     */
     void SetEULAVersion(const EULAVersion& version);
-
-    /**
-     * Gets the accepted EULA version from config savegame.
-     * @returns the EULA version
-     */
     EULAVersion GetEULAVersion();
-
-    /**
-     * Writes the config savegame memory buffer to the config savegame file in the filesystem
-     * @returns ResultCode indicating the result of the operation, 0 on success
-     */
     ResultCode UpdateConfigNANDSavegame();
 
 private:
@@ -315,7 +171,6 @@ std::shared_ptr<Module> GetModule(Core::System& system);
 
 void InstallInterfaces(Core::System& system);
 
-/// Convenience function for getting a SHA256 hash of the Console ID
 std::string GetConsoleIdHash(Core::System& system);
 
 } // namespace Service::CFG

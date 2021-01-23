@@ -30,8 +30,8 @@
 #include "vvctre/plugins.h"
 
 const u8 vvctre_version_major = 43;
-const u8 vvctre_version_minor = 0;
-const u8 vvctre_version_patch = 2;
+const u8 vvctre_version_minor = 1;
+const u8 vvctre_version_patch = 0;
 
 void vvctreShutdown(PluginManager* plugin_manager) {
     if (plugin_manager != nullptr) {
@@ -1424,41 +1424,43 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
     ImGui::TextUnformatted("Motion");
     ImGui::Separator();
 
-    if (ImGui::BeginCombo("Device##Motion", [] {
-            const std::string engine =
-                Common::ParamPackage(Settings::values.motion_device).Get("engine", "");
+    {
+        const std::string engine =
+            Common::ParamPackage(Settings::values.motion_device).Get("engine", "");
 
-            if (engine == "motion_emu") {
-                return "Right Click";
-            } else if (engine == "cemuhookudp") {
-                return "CemuhookUDP";
-            }
+        if (ImGui::BeginCombo("Device##Motion", [&] {
+                if (engine == "motion_emu") {
+                    return "Right Click";
+                } else if (engine == "cemuhookudp") {
+                    return "CemuhookUDP";
+                }
 
-            return "Invalid";
-        }())) {
-        if (ImGui::Selectable("Right Click")) {
-            Settings::values.motion_device = "engine:motion_emu";
+                return "Invalid";
+            }())) {
+            if (ImGui::Selectable("Right Click", engine == "motion_emu")) {
+                Settings::values.motion_device = "engine:motion_emu";
 
-            if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
-                    hid->ReloadInputDevices();
+                if (system != nullptr) {
+                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
+                    if (hid != nullptr) {
+                        hid->ReloadInputDevices();
+                    }
                 }
             }
-        }
 
-        if (ImGui::Selectable("CemuhookUDP")) {
-            Settings::values.motion_device = "engine:cemuhookudp";
+            if (ImGui::Selectable("CemuhookUDP", engine == "cemuhookudp")) {
+                Settings::values.motion_device = "engine:cemuhookudp";
 
-            if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
-                    hid->ReloadInputDevices();
+                if (system != nullptr) {
+                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
+                    if (hid != nullptr) {
+                        hid->ReloadInputDevices();
+                    }
                 }
             }
-        }
 
-        ImGui::EndCombo();
+            ImGui::EndCombo();
+        }
     }
 
     Common::ParamPackage motion_device(Settings::values.motion_device);
@@ -1513,41 +1515,43 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
     ImGui::TextUnformatted("Touch");
     ImGui::Separator();
 
-    if (ImGui::BeginCombo("Device##Touch", [] {
-            const std::string engine =
-                Common::ParamPackage(Settings::values.touch_device).Get("engine", "");
+    {
+        const std::string engine =
+            Common::ParamPackage(Settings::values.touch_device).Get("engine", "");
 
-            if (engine == "emu_window") {
-                return "Mouse";
-            } else if (engine == "cemuhookudp") {
-                return "CemuhookUDP";
-            }
+        if (ImGui::BeginCombo("Device##Touch", [&] {
+                if (engine == "emu_window") {
+                    return "Mouse";
+                } else if (engine == "cemuhookudp") {
+                    return "CemuhookUDP";
+                }
 
-            return "Invalid";
-        }())) {
-        if (ImGui::Selectable("Mouse")) {
-            Settings::values.touch_device = "engine:emu_window";
+                return "Invalid";
+            }())) {
+            if (ImGui::Selectable("Mouse", engine == "emu_window")) {
+                Settings::values.touch_device = "engine:emu_window";
 
-            if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
-                    hid->ReloadInputDevices();
+                if (system != nullptr) {
+                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
+                    if (hid != nullptr) {
+                        hid->ReloadInputDevices();
+                    }
                 }
             }
-        }
 
-        if (ImGui::Selectable("CemuhookUDP")) {
-            Settings::values.touch_device = "engine:cemuhookudp";
+            if (ImGui::Selectable("CemuhookUDP", engine == "cemuhookudp")) {
+                Settings::values.touch_device = "engine:cemuhookudp";
 
-            if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
-                    hid->ReloadInputDevices();
+                if (system != nullptr) {
+                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
+                    if (hid != nullptr) {
+                        hid->ReloadInputDevices();
+                    }
                 }
             }
-        }
 
-        ImGui::EndCombo();
+            ImGui::EndCombo();
+        }
     }
 
     Common::ParamPackage touch_device(Settings::values.touch_device);

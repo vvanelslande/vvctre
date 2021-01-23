@@ -168,7 +168,7 @@ std::shared_ptr<Module> Module::Interface::Interface::GetModule() const {
 
 void Module::Interface::GetCountryCodeID(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx, 0x0A, 1, 0);
-    u16 country_code = rp.Pop<u16>();
+    const u16 country_code = rp.Pop<u16>();
     u16 country_code_id = 0;
 
     // The following algorithm will fail if the first country code isn't 0.
@@ -182,7 +182,7 @@ void Module::Interface::GetCountryCodeID(Kernel::HLERequestContext& ctx) {
     }
 
     IPC::RequestBuilder rb = rp.MakeBuilder(2, 0);
-    if (0 == country_code_id) {
+    if (country_code_id == 0) {
         LOG_ERROR(Service_CFG, "requested country code name={}{} is invalid",
                   static_cast<char>(country_code & 0xff), static_cast<char>(country_code >> 8));
         rb.Push(ResultCode(ErrorDescription::NotFound, ErrorModule::Config,

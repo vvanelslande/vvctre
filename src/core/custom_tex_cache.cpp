@@ -46,9 +46,6 @@ void CustomTexCache::AddTexturePath(const u64 hash, const std::string& path,
 }
 
 void CustomTexCache::FindCustomTextures() {
-    // Custom textures are currently stored as
-    // [TitleID]/tex1_[width]x[height]_[64-bit hash]_[format].[extension]
-
     const auto f = [this](Settings::PreloadCustomTexturesFolder folder) {
         const std::string path = fmt::format(
             "{}textures/{:016X}/",
@@ -72,7 +69,7 @@ void CustomTexCache::FindCustomTextures() {
                 u32 height;
                 u64 hash;
 
-                if (std::sscanf(file.virtual_name.c_str(), "tex1_%ux%u_%llX%*s", &width, &height,
+                if (std::sscanf(file.virtual_name.c_str(), "tex1_%ux%u_%llX", &width, &height,
                                 &hash) == 3) {
                     AddTexturePath(hash, file.physical_name, folder);
                 }

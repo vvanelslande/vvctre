@@ -318,30 +318,46 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             return "Invalid";
                         }())) {
-                        if (ImGui::Selectable("Auto-select")) {
+                        if (ImGui::Selectable("Auto-select", Settings::values.region_value ==
+                                                                 Settings::Region::AutoSelect)) {
                             Settings::values.region_value = Settings::Region::AutoSelect;
                         }
-                        if (ImGui::Selectable("Japan")) {
+
+                        if (ImGui::Selectable("Japan", Settings::values.region_value ==
+                                                           Settings::Region::Japan)) {
                             Settings::values.region_value = Settings::Region::Japan;
                         }
-                        if (ImGui::Selectable("USA")) {
+
+                        if (ImGui::Selectable("USA", Settings::values.region_value ==
+                                                         Settings::Region::USA)) {
                             Settings::values.region_value = Settings::Region::USA;
                         }
-                        if (ImGui::Selectable("Europe")) {
+
+                        if (ImGui::Selectable("Europe", Settings::values.region_value ==
+                                                            Settings::Region::Europe)) {
                             Settings::values.region_value = Settings::Region::Europe;
                         }
-                        if (ImGui::Selectable("Australia")) {
+
+                        if (ImGui::Selectable("Australia", Settings::values.region_value ==
+                                                               Settings::Region::Australia)) {
                             Settings::values.region_value = Settings::Region::Australia;
                         }
-                        if (ImGui::Selectable("China")) {
+
+                        if (ImGui::Selectable("China", Settings::values.region_value ==
+                                                           Settings::Region::China)) {
                             Settings::values.region_value = Settings::Region::China;
                         }
-                        if (ImGui::Selectable("Korea")) {
+
+                        if (ImGui::Selectable("Korea", Settings::values.region_value ==
+                                                           Settings::Region::Korea)) {
                             Settings::values.region_value = Settings::Region::Korea;
                         }
-                        if (ImGui::Selectable("Taiwan")) {
+
+                        if (ImGui::Selectable("Taiwan", Settings::values.region_value ==
+                                                            Settings::Region::Taiwan)) {
                             Settings::values.region_value = Settings::Region::Taiwan;
                         }
+
                         ImGui::EndCombo();
                     }
 
@@ -359,11 +375,14 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             return "Invalid";
                         }())) {
-                        if (ImGui::Selectable("System")) {
+                        if (ImGui::Selectable("System", Settings::values.initial_clock ==
+                                                            Settings::InitialClock::System)) {
                             Settings::values.initial_clock = Settings::InitialClock::System;
                         }
 
-                        if (ImGui::Selectable("Unix Timestamp")) {
+                        if (ImGui::Selectable("Unix Timestamp",
+                                              Settings::values.initial_clock ==
+                                                  Settings::InitialClock::UnixTimestamp)) {
                             Settings::values.initial_clock = Settings::InitialClock::UnixTimestamp;
                         }
 
@@ -516,26 +535,29 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                        1.0f);
 
                     if (ImGui::BeginCombo("Sink##Output", Settings::values.audio_sink_id.c_str())) {
-                        if (ImGui::Selectable("auto")) {
+                        if (ImGui::Selectable("auto", Settings::values.audio_sink_id == "auto")) {
                             Settings::values.audio_sink_id = "auto";
                         }
+
                         for (const auto& sink : AudioCore::GetSinkIDs()) {
-                            if (ImGui::Selectable(sink)) {
+                            if (ImGui::Selectable(sink, Settings::values.audio_sink_id == sink)) {
                                 Settings::values.audio_sink_id = sink;
                             }
                         }
+
                         ImGui::EndCombo();
                     }
 
                     if (ImGui::BeginCombo("Device##Output",
                                           Settings::values.audio_device_id.c_str())) {
-                        if (ImGui::Selectable("auto")) {
+                        if (ImGui::Selectable("auto", Settings::values.audio_device_id == "auto")) {
                             Settings::values.audio_device_id = "auto";
                         }
 
-                        for (const auto& device :
+                        for (const std::string& device :
                              AudioCore::GetDeviceListForSink(Settings::values.audio_sink_id)) {
-                            if (ImGui::Selectable(device.c_str())) {
+                            if (ImGui::Selectable(device.c_str(),
+                                                  Settings::values.audio_device_id == device)) {
                                 Settings::values.audio_device_id = device;
                             }
                         }
@@ -562,18 +584,27 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             return "Invalid";
                         }())) {
-                        if (ImGui::Selectable("Disabled")) {
+                        if (ImGui::Selectable("Disabled",
+                                              Settings::values.microphone_input_type ==
+                                                  Settings::MicrophoneInputType::None)) {
                             Settings::values.microphone_input_type =
                                 Settings::MicrophoneInputType::None;
                         }
-                        if (ImGui::Selectable("Real Device")) {
+
+                        if (ImGui::Selectable("Real Device",
+                                              Settings::values.microphone_input_type ==
+                                                  Settings::MicrophoneInputType::Real)) {
                             Settings::values.microphone_input_type =
                                 Settings::MicrophoneInputType::Real;
                         }
-                        if (ImGui::Selectable("Static Noise")) {
+
+                        if (ImGui::Selectable("Static Noise",
+                                              Settings::values.microphone_input_type ==
+                                                  Settings::MicrophoneInputType::Static)) {
                             Settings::values.microphone_input_type =
                                 Settings::MicrophoneInputType::Static;
                         }
+
                         ImGui::EndCombo();
                     }
 
@@ -597,68 +628,97 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                                 return "Invalid";
                             }())) {
-                            if (ImGui::Selectable("Auto")) {
+                            if (ImGui::Selectable(
+                                    "Auto", Settings::values.microphone_real_device_backend ==
+                                                Settings::MicrophoneRealDeviceBackend::Auto)) {
                                 Settings::values.microphone_real_device_backend =
                                     Settings::MicrophoneRealDeviceBackend::Auto;
                             }
+
 #ifdef HAVE_CUBEB
-                            if (ImGui::Selectable("Cubeb")) {
+                            if (ImGui::Selectable(
+                                    "Cubeb", Settings::values.microphone_real_device_backend ==
+                                                 Settings::MicrophoneRealDeviceBackend::Cubeb)) {
                                 Settings::values.microphone_real_device_backend =
                                     Settings::MicrophoneRealDeviceBackend::Cubeb;
                             }
 #endif
-                            if (ImGui::Selectable("SDL2")) {
+
+                            if (ImGui::Selectable(
+                                    "SDL2", Settings::values.microphone_real_device_backend ==
+                                                Settings::MicrophoneRealDeviceBackend::SDL2)) {
                                 Settings::values.microphone_real_device_backend =
                                     Settings::MicrophoneRealDeviceBackend::SDL2;
                             }
-                            if (ImGui::Selectable("Null")) {
+
+                            if (ImGui::Selectable(
+                                    "Null", Settings::values.microphone_real_device_backend ==
+                                                Settings::MicrophoneRealDeviceBackend::Null)) {
                                 Settings::values.microphone_real_device_backend =
                                     Settings::MicrophoneRealDeviceBackend::Null;
                             }
+
                             ImGui::EndCombo();
                         }
 
                         if (ImGui::BeginCombo("Device##Microphone",
                                               Settings::values.microphone_device.c_str())) {
-                            if (ImGui::Selectable("auto")) {
+                            if (ImGui::Selectable("auto",
+                                                  Settings::values.microphone_device == "auto")) {
                                 Settings::values.microphone_device = "auto";
                             }
+
                             switch (Settings::values.microphone_real_device_backend) {
                             case Settings::MicrophoneRealDeviceBackend::Auto:
 #ifdef HAVE_CUBEB
-                                for (const auto& device : AudioCore::ListCubebInputDevices()) {
-                                    if (ImGui::Selectable(device.c_str())) {
+                                for (const std::string& device :
+                                     AudioCore::ListCubebInputDevices()) {
+                                    if (ImGui::Selectable(device.c_str(),
+                                                          Settings::values.microphone_device ==
+                                                              device)) {
                                         Settings::values.microphone_device = device;
                                     }
                                 }
 #else
-                                for (const auto& device : AudioCore::ListSDL2InputDevices()) {
-                                    if (ImGui::Selectable(device.c_str())) {
+                                for (const std::string& device :
+                                     AudioCore::ListSDL2InputDevices()) {
+                                    if (ImGui::Selectable(device.c_str(),
+                                                          Settings::values.microphone_device ==
+                                                              device)) {
                                         Settings::values.microphone_device = device;
                                     }
                                 }
 #endif
+
                                 break;
                             case Settings::MicrophoneRealDeviceBackend::Cubeb:
 #ifdef HAVE_CUBEB
                                 for (const auto& device : AudioCore::ListCubebInputDevices()) {
-                                    if (ImGui::Selectable(device.c_str())) {
+                                    if (ImGui::Selectable(device.c_str(),
+                                                          Settings::values.microphone_device ==
+                                                              device)) {
                                         Settings::values.microphone_device = device;
                                     }
                                 }
 #endif
+
                                 break;
                             case Settings::MicrophoneRealDeviceBackend::SDL2:
                                 for (const auto& device : AudioCore::ListSDL2InputDevices()) {
-                                    if (ImGui::Selectable(device.c_str())) {
+                                    if (ImGui::Selectable(device.c_str(),
+                                                          Settings::values.microphone_device ==
+                                                              device)) {
                                         Settings::values.microphone_device = device;
                                     }
                                 }
+
                                 break;
                             case Settings::MicrophoneRealDeviceBackend::Null:
-                                if (ImGui::Selectable("null")) {
+                                if (ImGui::Selectable("null", Settings::values.microphone_device ==
+                                                                  "null")) {
                                     Settings::values.microphone_device = "null";
                                 }
+
                                 break;
                             default:
                                 break;
@@ -680,14 +740,21 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::InnerCamera)]
                                               .c_str())) {
-                        if (ImGui::Selectable("blank")) {
+                        if (ImGui::Selectable(
+                                "blank", Settings::values.camera_engine[static_cast<std::size_t>(
+                                             Service::CAM::CameraIndex::InnerCamera)] == "blank")) {
                             Settings::values.camera_engine[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::InnerCamera)] = "blank";
                         }
-                        if (ImGui::Selectable("image (parameter: file path or URL)")) {
+
+                        if (ImGui::Selectable(
+                                "image (parameter: file path or URL)",
+                                Settings::values.camera_engine[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)] == "image")) {
                             Settings::values.camera_engine[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::InnerCamera)] = "image";
                         }
+
                         ImGui::EndCombo();
                     }
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
@@ -695,10 +762,12 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         GUI_CameraAddBrowse(
                             "...##Inner",
                             static_cast<std::size_t>(Service::CAM::CameraIndex::InnerCamera));
+
                         ImGui::InputText(
                             "Parameter##Inner",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::InnerCamera)]);
+
                         if (ImGui::BeginCombo("Flip##Inner", [] {
                                 switch (Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::InnerCamera)]) {
@@ -714,26 +783,45 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                     return "Invalid";
                                 }
                             }())) {
-                            if (ImGui::Selectable("None")) {
+                            if (ImGui::Selectable(
+                                    "None", Settings::values.camera_flip[static_cast<std::size_t>(
+                                                Service::CAM::CameraIndex::InnerCamera)] ==
+                                                Service::CAM::Flip::None)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::InnerCamera)] =
                                     Service::CAM::Flip::None;
                             }
-                            if (ImGui::Selectable("Horizontal")) {
+
+                            if (ImGui::Selectable(
+                                    "Horizontal",
+                                    Settings::values.camera_flip[static_cast<std::size_t>(
+                                        Service::CAM::CameraIndex::InnerCamera)] ==
+                                        Service::CAM::Flip::Horizontal)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::InnerCamera)] =
                                     Service::CAM::Flip::Horizontal;
                             }
-                            if (ImGui::Selectable("Vertical")) {
+
+                            if (ImGui::Selectable(
+                                    "Vertical",
+                                    Settings::values.camera_flip[static_cast<std::size_t>(
+                                        Service::CAM::CameraIndex::InnerCamera)] ==
+                                        Service::CAM::Flip::Vertical)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::InnerCamera)] =
                                     Service::CAM::Flip::Vertical;
                             }
-                            if (ImGui::Selectable("Reverse")) {
+
+                            if (ImGui::Selectable(
+                                    "Reverse",
+                                    Settings::values.camera_flip[static_cast<std::size_t>(
+                                        Service::CAM::CameraIndex::InnerCamera)] ==
+                                        Service::CAM::Flip::Reverse)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::InnerCamera)] =
                                     Service::CAM::Flip::Reverse;
                             }
+
                             ImGui::EndCombo();
                         }
                     }
@@ -748,25 +836,36 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::OuterLeftCamera)]
                                               .c_str())) {
-                        if (ImGui::Selectable("blank")) {
+                        if (ImGui::Selectable(
+                                "blank",
+                                Settings::values.camera_engine[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] == "blank")) {
                             Settings::values.camera_engine[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterLeftCamera)] = "blank";
                         }
-                        if (ImGui::Selectable("image (parameter: file path or URL)")) {
+
+                        if (ImGui::Selectable(
+                                "image (parameter: file path or URL)",
+                                Settings::values.camera_engine[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] == "image")) {
                             Settings::values.camera_engine[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterLeftCamera)] = "image";
                         }
+
                         ImGui::EndCombo();
                     }
+
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::OuterLeftCamera)] == "image") {
                         GUI_CameraAddBrowse(
                             "...##Outer Left",
                             static_cast<std::size_t>(Service::CAM::CameraIndex::OuterLeftCamera));
+
                         ImGui::InputText(
                             "Parameter##Outer Left",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterLeftCamera)]);
+
                         if (ImGui::BeginCombo("Flip##Outer Left", [] {
                                 switch (Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterLeftCamera)]) {
@@ -782,26 +881,45 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                     return "Invalid";
                                 }
                             }())) {
-                            if (ImGui::Selectable("None")) {
+                            if (ImGui::Selectable(
+                                    "None", Settings::values.camera_flip[static_cast<std::size_t>(
+                                                Service::CAM::CameraIndex::OuterLeftCamera)] ==
+                                                Service::CAM::Flip::None)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterLeftCamera)] =
                                     Service::CAM::Flip::None;
                             }
-                            if (ImGui::Selectable("Horizontal")) {
+
+                            if (ImGui::Selectable(
+                                    "Horizontal",
+                                    Settings::values.camera_flip[static_cast<std::size_t>(
+                                        Service::CAM::CameraIndex::OuterLeftCamera)] ==
+                                        Service::CAM::Flip::Horizontal)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterLeftCamera)] =
                                     Service::CAM::Flip::Horizontal;
                             }
-                            if (ImGui::Selectable("Vertical")) {
+
+                            if (ImGui::Selectable(
+                                    "Vertical",
+                                    Settings::values.camera_flip[static_cast<std::size_t>(
+                                        Service::CAM::CameraIndex::OuterLeftCamera)] ==
+                                        Service::CAM::Flip::Vertical)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterLeftCamera)] =
                                     Service::CAM::Flip::Vertical;
                             }
-                            if (ImGui::Selectable("Reverse")) {
+
+                            if (ImGui::Selectable(
+                                    "Reverse",
+                                    Settings::values.camera_flip[static_cast<std::size_t>(
+                                        Service::CAM::CameraIndex::OuterLeftCamera)] ==
+                                        Service::CAM::Flip::Reverse)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterLeftCamera)] =
                                     Service::CAM::Flip::Reverse;
                             }
+
                             ImGui::EndCombo();
                         }
                     }
@@ -816,25 +934,36 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                               .camera_engine[static_cast<std::size_t>(
                                                   Service::CAM::CameraIndex::OuterRightCamera)]
                                               .c_str())) {
-                        if (ImGui::Selectable("blank")) {
+                        if (ImGui::Selectable(
+                                "blank",
+                                Settings::values.camera_engine[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] == "blank")) {
                             Settings::values.camera_engine[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterRightCamera)] = "blank";
                         }
-                        if (ImGui::Selectable("image (parameter: file path or URL)")) {
+
+                        if (ImGui::Selectable(
+                                "image (parameter: file path or URL)",
+                                Settings::values.camera_engine[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] == "image")) {
                             Settings::values.camera_engine[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterRightCamera)] = "image";
                         }
+
                         ImGui::EndCombo();
                     }
+
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::OuterRightCamera)] == "image") {
                         GUI_CameraAddBrowse(
                             "...##Outer Right",
                             static_cast<std::size_t>(Service::CAM::CameraIndex::OuterRightCamera));
+
                         ImGui::InputText(
                             "Parameter##Outer Right",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterRightCamera)]);
+
                         if (ImGui::BeginCombo("Flip##Outer Right", [] {
                                 switch (Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterRightCamera)]) {
@@ -850,26 +979,45 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                     return "Invalid";
                                 }
                             }())) {
-                            if (ImGui::Selectable("None")) {
+                            if (ImGui::Selectable(
+                                    "None", Settings::values.camera_flip[static_cast<std::size_t>(
+                                                Service::CAM::CameraIndex::OuterRightCamera)] ==
+                                                Service::CAM::Flip::None)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterRightCamera)] =
                                     Service::CAM::Flip::None;
                             }
-                            if (ImGui::Selectable("Horizontal")) {
+
+                            if (ImGui::Selectable(
+                                    "Horizontal",
+                                    Settings::values.camera_flip[static_cast<std::size_t>(
+                                        Service::CAM::CameraIndex::OuterRightCamera)] ==
+                                        Service::CAM::Flip::Horizontal)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterRightCamera)] =
                                     Service::CAM::Flip::Horizontal;
                             }
-                            if (ImGui::Selectable("Vertical")) {
+
+                            if (ImGui::Selectable(
+                                    "Vertical",
+                                    Settings::values.camera_flip[static_cast<std::size_t>(
+                                        Service::CAM::CameraIndex::OuterRightCamera)] ==
+                                        Service::CAM::Flip::Vertical)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterRightCamera)] =
                                     Service::CAM::Flip::Vertical;
                             }
-                            if (ImGui::Selectable("Reverse")) {
+
+                            if (ImGui::Selectable(
+                                    "Reverse",
+                                    Settings::values.camera_flip[static_cast<std::size_t>(
+                                        Service::CAM::CameraIndex::OuterRightCamera)] ==
+                                        Service::CAM::Flip::Reverse)) {
                                 Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterRightCamera)] =
                                     Service::CAM::Flip::Reverse;
                             }
+
                             ImGui::EndCombo();
                         }
                     }
@@ -921,62 +1069,62 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             return "Invalid";
                         }())) {
-                        if (ImGui::Selectable("January")) {
+                        if (ImGui::Selectable("January", month == 1)) {
                             cfg.SetBirthday(1, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("February")) {
+                        if (ImGui::Selectable("February", month == 2)) {
                             cfg.SetBirthday(2, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("March")) {
+                        if (ImGui::Selectable("March", month == 3)) {
                             cfg.SetBirthday(3, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("April")) {
+                        if (ImGui::Selectable("April", month == 4)) {
                             cfg.SetBirthday(4, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("May")) {
+                        if (ImGui::Selectable("May", month == 5)) {
                             cfg.SetBirthday(5, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("June")) {
+                        if (ImGui::Selectable("June", month == 6)) {
                             cfg.SetBirthday(6, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("July")) {
+                        if (ImGui::Selectable("July", month == 7)) {
                             cfg.SetBirthday(7, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("August")) {
+                        if (ImGui::Selectable("August", month == 8)) {
                             cfg.SetBirthday(8, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("September")) {
+                        if (ImGui::Selectable("September", month == 9)) {
                             cfg.SetBirthday(9, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("October")) {
+                        if (ImGui::Selectable("October", month == 10)) {
                             cfg.SetBirthday(10, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("November")) {
+                        if (ImGui::Selectable("November", month == 11)) {
                             cfg.SetBirthday(11, day);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("December")) {
+                        if (ImGui::Selectable("December", month == 12)) {
                             cfg.SetBirthday(12, day);
                             config_savegame_changed = true;
                         }
@@ -989,8 +1137,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         config_savegame_changed = true;
                     }
 
+                    const Service::CFG::SystemLanguage language = cfg.GetSystemLanguage();
+
                     if (ImGui::BeginCombo("Language", [&] {
-                            switch (cfg.GetSystemLanguage()) {
+                            switch (language) {
                             case Service::CFG::SystemLanguage::LANGUAGE_JP:
                                 return "Japanese";
                             case Service::CFG::SystemLanguage::LANGUAGE_EN:
@@ -1021,62 +1171,78 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             return "Invalid language";
                         }())) {
-                        if (ImGui::Selectable("Japanese")) {
+                        if (ImGui::Selectable("Japanese",
+                                              language ==
+                                                  Service::CFG::SystemLanguage::LANGUAGE_JP)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_JP);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("English")) {
+                        if (ImGui::Selectable(
+                                "English", language == Service::CFG::SystemLanguage::LANGUAGE_EN)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_EN);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("French")) {
+                        if (ImGui::Selectable(
+                                "French", language == Service::CFG::SystemLanguage::LANGUAGE_FR)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_FR);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("German")) {
+                        if (ImGui::Selectable(
+                                "German", language == Service::CFG::SystemLanguage::LANGUAGE_DE)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_DE);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("Italian")) {
+                        if (ImGui::Selectable(
+                                "Italian", language == Service::CFG::SystemLanguage::LANGUAGE_IT)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_IT);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("Spanish")) {
+                        if (ImGui::Selectable(
+                                "Spanish", language == Service::CFG::SystemLanguage::LANGUAGE_ES)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_ES);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("Simplified Chinese")) {
+                        if (ImGui::Selectable("Simplified Chinese",
+                                              language ==
+                                                  Service::CFG::SystemLanguage::LANGUAGE_ZH)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_ZH);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("Korean")) {
+                        if (ImGui::Selectable(
+                                "Korean", language == Service::CFG::SystemLanguage::LANGUAGE_KO)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_KO);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("Dutch")) {
+                        if (ImGui::Selectable(
+                                "Dutch", language == Service::CFG::SystemLanguage::LANGUAGE_NL)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_NL);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("Portuguese")) {
+                        if (ImGui::Selectable("Portuguese",
+                                              language ==
+                                                  Service::CFG::SystemLanguage::LANGUAGE_PT)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_PT);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("Russian")) {
+                        if (ImGui::Selectable(
+                                "Russian", language == Service::CFG::SystemLanguage::LANGUAGE_RU)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_RU);
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::Selectable("Traditional Chinese")) {
+                        if (ImGui::Selectable("Traditional Chinese",
+                                              language ==
+                                                  Service::CFG::SystemLanguage::LANGUAGE_TW)) {
                             cfg.SetSystemLanguage(Service::CFG::SystemLanguage::LANGUAGE_TW);
                             config_savegame_changed = true;
                         }
@@ -1084,8 +1250,11 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::EndCombo();
                     }
 
+                    const Service::CFG::SoundOutputMode sound_output_mode =
+                        cfg.GetSoundOutputMode();
+
                     if (ImGui::BeginCombo("Sound Output Mode", [&] {
-                            switch (cfg.GetSoundOutputMode()) {
+                            switch (sound_output_mode) {
                             case Service::CFG::SoundOutputMode::SOUND_MONO:
                                 return "Mono";
                             case Service::CFG::SoundOutputMode::SOUND_STEREO:
@@ -1098,23 +1267,34 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             return "Invalid";
                         }())) {
-                        if (ImGui::Selectable("Mono")) {
+                        if (ImGui::Selectable("Mono",
+                                              sound_output_mode ==
+                                                  Service::CFG::SoundOutputMode::SOUND_MONO)) {
                             cfg.SetSoundOutputMode(Service::CFG::SoundOutputMode::SOUND_MONO);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Stereo")) {
+
+                        if (ImGui::Selectable("Stereo",
+                                              sound_output_mode ==
+                                                  Service::CFG::SoundOutputMode::SOUND_STEREO)) {
                             cfg.SetSoundOutputMode(Service::CFG::SoundOutputMode::SOUND_STEREO);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Surround")) {
+
+                        if (ImGui::Selectable("Surround",
+                                              sound_output_mode ==
+                                                  Service::CFG::SoundOutputMode::SOUND_SURROUND)) {
                             cfg.SetSoundOutputMode(Service::CFG::SoundOutputMode::SOUND_SURROUND);
                             config_savegame_changed = true;
                         }
+
                         ImGui::EndCombo();
                     }
 
+                    const u8 country_code = cfg.GetCountryCode();
+
                     if (ImGui::BeginCombo("Country", [&] {
-                            switch (cfg.GetCountryCode()) {
+                            switch (country_code) {
                             case 1:
                                 return "Japan";
                             case 8:
@@ -1387,538 +1567,672 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                             return "Invalid";
                         }())) {
-                        if (ImGui::Selectable("Japan")) {
+                        if (ImGui::Selectable("Japan", country_code == 1)) {
                             cfg.SetCountry(1);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Anguilla")) {
+
+                        if (ImGui::Selectable("Anguilla", country_code == 8)) {
                             cfg.SetCountry(8);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Antigua and Barbuda")) {
+
+                        if (ImGui::Selectable("Antigua and Barbuda", country_code == 9)) {
                             cfg.SetCountry(9);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Argentina")) {
+
+                        if (ImGui::Selectable("Argentina", country_code == 10)) {
                             cfg.SetCountry(10);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Aruba")) {
+
+                        if (ImGui::Selectable("Aruba", country_code == 11)) {
                             cfg.SetCountry(11);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Bahamas")) {
+
+                        if (ImGui::Selectable("Bahamas", country_code == 12)) {
                             cfg.SetCountry(12);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Barbados")) {
+
+                        if (ImGui::Selectable("Barbados", country_code == 13)) {
                             cfg.SetCountry(13);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Belize")) {
+
+                        if (ImGui::Selectable("Belize", country_code == 14)) {
                             cfg.SetCountry(14);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Bolivia")) {
+
+                        if (ImGui::Selectable("Bolivia", country_code == 15)) {
                             cfg.SetCountry(15);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Brazil")) {
+
+                        if (ImGui::Selectable("Brazil", country_code == 16)) {
                             cfg.SetCountry(16);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("British Virgin Islands")) {
+
+                        if (ImGui::Selectable("British Virgin Islands", country_code == 17)) {
                             cfg.SetCountry(17);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Canada")) {
+
+                        if (ImGui::Selectable("Canada", country_code == 18)) {
                             cfg.SetCountry(18);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Cayman Islands")) {
+
+                        if (ImGui::Selectable("Cayman Islands", country_code == 19)) {
                             cfg.SetCountry(19);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Chile")) {
+
+                        if (ImGui::Selectable("Chile", country_code == 20)) {
                             cfg.SetCountry(20);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Colombia")) {
+
+                        if (ImGui::Selectable("Colombia", country_code == 21)) {
                             cfg.SetCountry(21);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Costa Rica")) {
+
+                        if (ImGui::Selectable("Costa Rica", country_code == 22)) {
                             cfg.SetCountry(22);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Dominica")) {
+
+                        if (ImGui::Selectable("Dominica", country_code == 23)) {
                             cfg.SetCountry(23);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Dominican Republic")) {
+
+                        if (ImGui::Selectable("Dominican Republic", country_code == 24)) {
                             cfg.SetCountry(24);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Ecuador")) {
+
+                        if (ImGui::Selectable("Ecuador", country_code == 25)) {
                             cfg.SetCountry(25);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("El Salvador")) {
+
+                        if (ImGui::Selectable("El Salvador", country_code == 26)) {
                             cfg.SetCountry(26);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("French Guiana")) {
+
+                        if (ImGui::Selectable("French Guiana", country_code == 27)) {
                             cfg.SetCountry(27);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Grenada")) {
+
+                        if (ImGui::Selectable("Grenada", country_code == 28)) {
                             cfg.SetCountry(28);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Guadeloupe")) {
+
+                        if (ImGui::Selectable("Guadeloupe", country_code == 29)) {
                             cfg.SetCountry(29);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Guatemala")) {
+
+                        if (ImGui::Selectable("Guatemala", country_code == 30)) {
                             cfg.SetCountry(30);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Guyana")) {
+
+                        if (ImGui::Selectable("Guyana", country_code == 31)) {
                             cfg.SetCountry(31);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Haiti")) {
+
+                        if (ImGui::Selectable("Haiti", country_code == 32)) {
                             cfg.SetCountry(32);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Honduras")) {
+
+                        if (ImGui::Selectable("Honduras", country_code == 33)) {
                             cfg.SetCountry(33);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Jamaica")) {
+
+                        if (ImGui::Selectable("Jamaica", country_code == 34)) {
                             cfg.SetCountry(34);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Martinique")) {
+
+                        if (ImGui::Selectable("Martinique", country_code == 35)) {
                             cfg.SetCountry(35);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Mexico")) {
+
+                        if (ImGui::Selectable("Mexico", country_code == 36)) {
                             cfg.SetCountry(36);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Montserrat")) {
+
+                        if (ImGui::Selectable("Montserrat", country_code == 37)) {
                             cfg.SetCountry(37);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Netherlands Antilles")) {
+
+                        if (ImGui::Selectable("Netherlands Antilles", country_code == 38)) {
                             cfg.SetCountry(38);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Nicaragua")) {
+
+                        if (ImGui::Selectable("Nicaragua", country_code == 39)) {
                             cfg.SetCountry(39);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Panama")) {
+
+                        if (ImGui::Selectable("Panama", country_code == 40)) {
                             cfg.SetCountry(40);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Paraguay")) {
+
+                        if (ImGui::Selectable("Paraguay", country_code == 41)) {
                             cfg.SetCountry(41);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Peru")) {
+
+                        if (ImGui::Selectable("Peru", country_code == 42)) {
                             cfg.SetCountry(42);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Saint Kitts and Nevis")) {
+
+                        if (ImGui::Selectable("Saint Kitts and Nevis", country_code == 43)) {
                             cfg.SetCountry(43);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Saint Lucia")) {
+
+                        if (ImGui::Selectable("Saint Lucia", country_code == 44)) {
                             cfg.SetCountry(44);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Saint Vincent and the Grenadines")) {
+
+                        if (ImGui::Selectable("Saint Vincent and the Grenadines",
+                                              country_code == 45)) {
                             cfg.SetCountry(45);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Suriname")) {
+
+                        if (ImGui::Selectable("Suriname", country_code == 46)) {
                             cfg.SetCountry(46);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Trinidad and Tobago")) {
+
+                        if (ImGui::Selectable("Trinidad and Tobago", country_code == 47)) {
                             cfg.SetCountry(47);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Turks and Caicos Islands")) {
+
+                        if (ImGui::Selectable("Turks and Caicos Islands", country_code == 48)) {
                             cfg.SetCountry(48);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("United States")) {
+
+                        if (ImGui::Selectable("United States", country_code == 49)) {
                             cfg.SetCountry(49);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Uruguay")) {
+
+                        if (ImGui::Selectable("Uruguay", country_code == 50)) {
                             cfg.SetCountry(50);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("US Virgin Islands")) {
+
+                        if (ImGui::Selectable("US Virgin Islands", country_code == 51)) {
                             cfg.SetCountry(51);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Venezuela")) {
+
+                        if (ImGui::Selectable("Venezuela", country_code == 52)) {
                             cfg.SetCountry(52);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Albania")) {
+
+                        if (ImGui::Selectable("Albania", country_code == 64)) {
                             cfg.SetCountry(64);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Australia")) {
+
+                        if (ImGui::Selectable("Australia", country_code == 65)) {
                             cfg.SetCountry(65);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Austria")) {
+
+                        if (ImGui::Selectable("Austria", country_code == 66)) {
                             cfg.SetCountry(66);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Belgium")) {
+
+                        if (ImGui::Selectable("Belgium", country_code == 67)) {
                             cfg.SetCountry(67);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Bosnia and Herzegovina")) {
+
+                        if (ImGui::Selectable("Bosnia and Herzegovina", country_code == 68)) {
                             cfg.SetCountry(68);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Botswana")) {
+
+                        if (ImGui::Selectable("Botswana", country_code == 69)) {
                             cfg.SetCountry(69);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Bulgaria")) {
+
+                        if (ImGui::Selectable("Bulgaria", country_code == 70)) {
                             cfg.SetCountry(70);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Croatia")) {
+
+                        if (ImGui::Selectable("Croatia", country_code == 71)) {
                             cfg.SetCountry(71);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Cyprus")) {
+
+                        if (ImGui::Selectable("Cyprus", country_code == 72)) {
                             cfg.SetCountry(72);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Czech Republic")) {
+
+                        if (ImGui::Selectable("Czech Republic", country_code == 73)) {
                             cfg.SetCountry(73);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Denmark")) {
+
+                        if (ImGui::Selectable("Denmark", country_code == 74)) {
                             cfg.SetCountry(74);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Estonia")) {
+
+                        if (ImGui::Selectable("Estonia", country_code == 75)) {
                             cfg.SetCountry(75);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Finland")) {
+
+                        if (ImGui::Selectable("Finland", country_code == 76)) {
                             cfg.SetCountry(76);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("France")) {
+
+                        if (ImGui::Selectable("France", country_code == 77)) {
                             cfg.SetCountry(77);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Germany")) {
+
+                        if (ImGui::Selectable("Germany", country_code == 78)) {
                             cfg.SetCountry(78);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Greece")) {
+
+                        if (ImGui::Selectable("Greece", country_code == 79)) {
                             cfg.SetCountry(79);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Hungary")) {
+
+                        if (ImGui::Selectable("Hungary", country_code == 80)) {
                             cfg.SetCountry(80);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Iceland")) {
+
+                        if (ImGui::Selectable("Iceland", country_code == 81)) {
                             cfg.SetCountry(81);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Ireland")) {
+
+                        if (ImGui::Selectable("Ireland", country_code == 82)) {
                             cfg.SetCountry(82);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Italy")) {
+
+                        if (ImGui::Selectable("Italy", country_code == 83)) {
                             cfg.SetCountry(83);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Latvia")) {
+
+                        if (ImGui::Selectable("Latvia", country_code == 84)) {
                             cfg.SetCountry(84);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Lesotho")) {
+
+                        if (ImGui::Selectable("Lesotho", country_code == 85)) {
                             cfg.SetCountry(85);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Liechtenstein")) {
+
+                        if (ImGui::Selectable("Liechtenstein", country_code == 86)) {
                             cfg.SetCountry(86);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Lithuania")) {
+
+                        if (ImGui::Selectable("Lithuania", country_code == 87)) {
                             cfg.SetCountry(87);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Luxembourg")) {
+
+                        if (ImGui::Selectable("Luxembourg", country_code == 88)) {
                             cfg.SetCountry(88);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Macedonia")) {
+
+                        if (ImGui::Selectable("Macedonia", country_code == 89)) {
                             cfg.SetCountry(89);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Malta")) {
+
+                        if (ImGui::Selectable("Malta", country_code == 90)) {
                             cfg.SetCountry(90);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Montenegro")) {
+
+                        if (ImGui::Selectable("Montenegro", country_code == 91)) {
                             cfg.SetCountry(91);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Mozambique")) {
+
+                        if (ImGui::Selectable("Mozambique", country_code == 92)) {
                             cfg.SetCountry(92);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Namibia")) {
+
+                        if (ImGui::Selectable("Namibia", country_code == 93)) {
                             cfg.SetCountry(93);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Netherlands")) {
+
+                        if (ImGui::Selectable("Netherlands", country_code == 94)) {
                             cfg.SetCountry(94);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("New Zealand")) {
+
+                        if (ImGui::Selectable("New Zealand", country_code == 95)) {
                             cfg.SetCountry(95);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Norway")) {
+
+                        if (ImGui::Selectable("Norway", country_code == 96)) {
                             cfg.SetCountry(96);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Poland")) {
+
+                        if (ImGui::Selectable("Poland", country_code == 97)) {
                             cfg.SetCountry(97);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Portugal")) {
+
+                        if (ImGui::Selectable("Portugal", country_code == 98)) {
                             cfg.SetCountry(98);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Romania")) {
+
+                        if (ImGui::Selectable("Romania", country_code == 99)) {
                             cfg.SetCountry(99);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Russia")) {
+
+                        if (ImGui::Selectable("Russia", country_code == 100)) {
                             cfg.SetCountry(100);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Serbia")) {
+
+                        if (ImGui::Selectable("Serbia", country_code == 101)) {
                             cfg.SetCountry(101);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Slovakia")) {
+
+                        if (ImGui::Selectable("Slovakia", country_code == 102)) {
                             cfg.SetCountry(102);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Slovenia")) {
+
+                        if (ImGui::Selectable("Slovenia", country_code == 103)) {
                             cfg.SetCountry(103);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("South Africa")) {
+
+                        if (ImGui::Selectable("South Africa", country_code == 104)) {
                             cfg.SetCountry(104);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Spain")) {
+
+                        if (ImGui::Selectable("Spain", country_code == 105)) {
                             cfg.SetCountry(105);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Swaziland")) {
+
+                        if (ImGui::Selectable("Swaziland", country_code == 106)) {
                             cfg.SetCountry(106);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Sweden")) {
+
+                        if (ImGui::Selectable("Sweden", country_code == 107)) {
                             cfg.SetCountry(107);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Switzerland")) {
+
+                        if (ImGui::Selectable("Switzerland", country_code == 108)) {
                             cfg.SetCountry(108);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Turkey")) {
+
+                        if (ImGui::Selectable("Turkey", country_code == 109)) {
                             cfg.SetCountry(109);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("United Kingdom")) {
+
+                        if (ImGui::Selectable("United Kingdom", country_code == 110)) {
                             cfg.SetCountry(110);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Zambia")) {
+
+                        if (ImGui::Selectable("Zambia", country_code == 111)) {
                             cfg.SetCountry(111);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Zimbabwe")) {
+
+                        if (ImGui::Selectable("Zimbabwe", country_code == 112)) {
                             cfg.SetCountry(112);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Azerbaijan")) {
+
+                        if (ImGui::Selectable("Azerbaijan", country_code == 113)) {
                             cfg.SetCountry(113);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Mauritania")) {
+
+                        if (ImGui::Selectable("Mauritania", country_code == 114)) {
                             cfg.SetCountry(114);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Mali")) {
+
+                        if (ImGui::Selectable("Mali", country_code == 115)) {
                             cfg.SetCountry(115);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Niger")) {
+
+                        if (ImGui::Selectable("Niger", country_code == 116)) {
                             cfg.SetCountry(116);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Chad")) {
+
+                        if (ImGui::Selectable("Chad", country_code == 117)) {
                             cfg.SetCountry(117);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Sudan")) {
+
+                        if (ImGui::Selectable("Sudan", country_code == 118)) {
                             cfg.SetCountry(118);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Eritrea")) {
+
+                        if (ImGui::Selectable("Eritrea", country_code == 119)) {
                             cfg.SetCountry(119);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Djibouti")) {
+
+                        if (ImGui::Selectable("Djibouti", country_code == 120)) {
                             cfg.SetCountry(120);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Somalia")) {
+
+                        if (ImGui::Selectable("Somalia", country_code == 121)) {
                             cfg.SetCountry(121);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Andorra")) {
+
+                        if (ImGui::Selectable("Andorra", country_code == 122)) {
                             cfg.SetCountry(122);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Gibraltar")) {
+
+                        if (ImGui::Selectable("Gibraltar", country_code == 123)) {
                             cfg.SetCountry(123);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Guernsey")) {
+
+                        if (ImGui::Selectable("Guernsey", country_code == 124)) {
                             cfg.SetCountry(124);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Isle of Man")) {
+
+                        if (ImGui::Selectable("Isle of Man", country_code == 125)) {
                             cfg.SetCountry(125);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Jersey")) {
+
+                        if (ImGui::Selectable("Jersey", country_code == 126)) {
                             cfg.SetCountry(126);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Monaco")) {
+
+                        if (ImGui::Selectable("Monaco", country_code == 127)) {
                             cfg.SetCountry(127);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Taiwan")) {
+
+                        if (ImGui::Selectable("Taiwan", country_code == 128)) {
                             cfg.SetCountry(128);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("South Korea")) {
+
+                        if (ImGui::Selectable("South Korea", country_code == 136)) {
                             cfg.SetCountry(136);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Hong Kong")) {
+
+                        if (ImGui::Selectable("Hong Kong", country_code == 144)) {
                             cfg.SetCountry(144);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Macau")) {
+
+                        if (ImGui::Selectable("Macau", country_code == 145)) {
                             cfg.SetCountry(145);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Indonesia")) {
+
+                        if (ImGui::Selectable("Indonesia", country_code == 152)) {
                             cfg.SetCountry(152);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Singapore")) {
+
+                        if (ImGui::Selectable("Singapore", country_code == 153)) {
                             cfg.SetCountry(153);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Thailand")) {
+
+                        if (ImGui::Selectable("Thailand", country_code == 154)) {
                             cfg.SetCountry(154);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Philippines")) {
+
+                        if (ImGui::Selectable("Philippines", country_code == 155)) {
                             cfg.SetCountry(155);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Malaysia")) {
+
+                        if (ImGui::Selectable("Malaysia", country_code == 156)) {
                             cfg.SetCountry(156);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("China")) {
+
+                        if (ImGui::Selectable("China", country_code == 160)) {
                             cfg.SetCountry(160);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("United Arab Emirates")) {
+
+                        if (ImGui::Selectable("United Arab Emirates", country_code == 168)) {
                             cfg.SetCountry(168);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("India")) {
+
+                        if (ImGui::Selectable("India", country_code == 169)) {
                             cfg.SetCountry(169);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Egypt")) {
+
+                        if (ImGui::Selectable("Egypt", country_code == 170)) {
                             cfg.SetCountry(170);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Oman")) {
+
+                        if (ImGui::Selectable("Oman", country_code == 171)) {
                             cfg.SetCountry(171);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Qatar")) {
+
+                        if (ImGui::Selectable("Qatar", country_code == 172)) {
                             cfg.SetCountry(172);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Kuwait")) {
+
+                        if (ImGui::Selectable("Kuwait", country_code == 173)) {
                             cfg.SetCountry(173);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Saudi Arabia")) {
+
+                        if (ImGui::Selectable("Saudi Arabia", country_code == 174)) {
                             cfg.SetCountry(174);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Syria")) {
+
+                        if (ImGui::Selectable("Syria", country_code == 175)) {
                             cfg.SetCountry(175);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Bahrain")) {
+
+                        if (ImGui::Selectable("Bahrain", country_code == 176)) {
                             cfg.SetCountry(176);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Jordan")) {
+
+                        if (ImGui::Selectable("Jordan", country_code == 177)) {
                             cfg.SetCountry(177);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("San Marino")) {
+
+                        if (ImGui::Selectable("San Marino", country_code == 184)) {
                             cfg.SetCountry(184);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Vatican City")) {
+
+                        if (ImGui::Selectable("Vatican City", country_code == 185)) {
                             cfg.SetCountry(185);
                             config_savegame_changed = true;
                         }
-                        if (ImGui::Selectable("Bermuda")) {
+
+                        if (ImGui::Selectable("Bermuda", country_code == 186)) {
                             cfg.SetCountry(186);
                             config_savegame_changed = true;
                         }
+
                         ImGui::EndCombo();
                     }
 
@@ -1960,46 +2274,93 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                 if (ImGui::BeginTabItem("Graphics")) {
                     ImGui::Checkbox("Use Hardware Renderer",
                                     &Settings::values.use_hardware_renderer);
+
                     if (Settings::values.use_hardware_renderer) {
                         ImGui::Indent();
+
                         ImGui::Checkbox("Use Hardware Shader",
                                         &Settings::values.use_hardware_shader);
+
                         if (Settings::values.use_hardware_shader) {
                             ImGui::Indent();
+
                             ImGui::Checkbox(
                                 "Accurate Multiplication",
                                 &Settings::values.hardware_shader_accurate_multiplication);
+
                             ImGui::Checkbox("Enable Disk Shader Cache",
                                             &Settings::values.enable_disk_shader_cache);
+
                             ImGui::Unindent();
                         }
-                        ImGui::Unindent();
-                    }
-                    ImGui::Checkbox("Use Shader JIT", &Settings::values.use_shader_jit);
-                    ImGui::Checkbox("Enable VSync", &Settings::values.enable_vsync);
-                    ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
-                    ImGui::Checkbox("Use Custom Textures", &Settings::values.use_custom_textures);
-                    ImGui::Checkbox("Preload Custom Textures",
-                                    &Settings::values.preload_custom_textures);
-                    if (Settings::values.preload_custom_textures) {
-                        ImGui::Indent();
-                        if (ImGui::BeginCombo("Folder",
-                                              Settings::values.preload_custom_textures_folder ==
+
+                        ImGui::Checkbox("Sharper Distant Objects",
+                                        &Settings::values.sharper_distant_objects);
+
+                        ImGui::Checkbox("Use Custom Textures",
+                                        &Settings::values.use_custom_textures);
+
+                        ImGui::Checkbox("Preload Custom Textures",
+                                        &Settings::values.preload_custom_textures);
+
+                        if (Settings::values.preload_custom_textures) {
+                            ImGui::Indent();
+
+                            if (ImGui::BeginCombo(
+                                    "Folder", Settings::values.preload_custom_textures_folder ==
                                                       Settings::PreloadCustomTexturesFolder::Load
                                                   ? "load"
                                                   : "preload")) {
-                            if (ImGui::Selectable("load")) {
-                                Settings::values.preload_custom_textures_folder =
-                                    Settings::PreloadCustomTexturesFolder::Load;
+                                if (ImGui::Selectable(
+                                        "load", Settings::values.preload_custom_textures_folder ==
+                                                    Settings::PreloadCustomTexturesFolder::Load)) {
+                                    Settings::values.preload_custom_textures_folder =
+                                        Settings::PreloadCustomTexturesFolder::Load;
+                                }
+
+                                if (ImGui::Selectable(
+                                        "preload",
+                                        Settings::values.preload_custom_textures_folder ==
+                                            Settings::PreloadCustomTexturesFolder::Preload)) {
+                                    Settings::values.preload_custom_textures_folder =
+                                        Settings::PreloadCustomTexturesFolder::Preload;
+                                }
+
+                                ImGui::EndCombo();
                             }
-                            if (ImGui::Selectable("preload")) {
-                                Settings::values.preload_custom_textures_folder =
-                                    Settings::PreloadCustomTexturesFolder::Preload;
+
+                            ImGui::Unindent();
+                        }
+
+                        ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
+
+                        const u16 min = 0;
+                        const u16 max = 10;
+                        ImGui::SliderScalar(
+                            "Resolution", ImGuiDataType_U16, &Settings::values.resolution, &min,
+                            &max, Settings::values.resolution == 0 ? "Window Size" : "%d");
+
+                        if (ImGui::BeginCombo("Texture Filter",
+                                              Settings::values.texture_filter.c_str())) {
+                            const std::vector<std::string_view>& filters =
+                                OpenGL::TextureFilterer::GetFilterNames();
+
+                            for (const std::string_view& filter : filters) {
+                                if (ImGui::Selectable(std::string(filter).c_str(),
+                                                      Settings::values.texture_filter == filter)) {
+                                    Settings::values.texture_filter = filter;
+                                }
                             }
+
                             ImGui::EndCombo();
                         }
+
                         ImGui::Unindent();
                     }
+
+                    ImGui::Checkbox("Use Shader JIT", &Settings::values.use_shader_jit);
+                    ImGui::Checkbox("Enable VSync", &Settings::values.enable_vsync);
+
                     ImGui::Checkbox("Enable Linear Filtering",
                                     &Settings::values.enable_linear_filtering);
                     if (ImGui::IsItemHovered()) {
@@ -2008,43 +2369,35 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             "This is required for some shaders to work correctly");
                         ImGui::EndTooltip();
                     }
-                    ImGui::Checkbox("Sharper Distant Objects",
-                                    &Settings::values.sharper_distant_objects);
 
                     ImGui::ColorEdit3("Background Color", &Settings::values.background_color_red,
                                       ImGuiColorEditFlags_NoInputs);
 
-                    const u16 min = 0;
-                    const u16 max = 10;
-                    ImGui::SliderScalar("Resolution", ImGuiDataType_U16,
-                                        &Settings::values.resolution, &min, &max,
-                                        Settings::values.resolution == 0 ? "Window Size" : "%d");
-
                     ImGui::InputText("Post Processing Shader",
                                      &Settings::values.post_processing_shader);
+
                     if (ImGui::IsItemHovered()) {
                         ImGui::BeginTooltip();
                         ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
-                        ImGui::TextUnformatted(
-                            "This can be:\n- File name without extension and folder\n- none "
-                            "(builtin)\n- horizontal (builtin) (only if 3D Mode is Interlaced or "
-                            "Reverse Interlaced)\n- dubois (builtin) (only if 3D Mode is "
-                            "Anaglyph)");
-                        ImGui::PopTextWrapPos();
-                        ImGui::EndTooltip();
-                    }
 
-                    if (ImGui::BeginCombo("Texture Filter",
-                                          Settings::values.texture_filter.c_str())) {
-                        const auto& filters = OpenGL::TextureFilterer::GetFilterNames();
-
-                        for (const auto& filter : filters) {
-                            if (ImGui::Selectable(std::string(filter).c_str())) {
-                                Settings::values.texture_filter = filter;
-                            }
+                        if (Settings::values.render_3d == Settings::StereoRenderOption::Anaglyph) {
+                            ImGui::TextUnformatted(
+                                "This can be a file name without the extension and folder, none "
+                                "(builtin), or dubois (builtin)");
+                        } else if (Settings::values.render_3d ==
+                                       Settings::StereoRenderOption::Interlaced ||
+                                   Settings::values.render_3d ==
+                                       Settings::StereoRenderOption::ReverseInterlaced) {
+                            ImGui::TextUnformatted(
+                                "This can be a file name without the extension and folder, none "
+                                "(builtin), or horizontal (builtin)");
+                        } else {
+                            ImGui::TextUnformatted("This can be a file name without the extension "
+                                                   "and folder, or none (builtin)");
                         }
 
-                        ImGui::EndCombo();
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
                     }
 
                     if (ImGui::BeginCombo("3D Mode", [] {
@@ -2063,33 +2416,65 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                 break;
                             }
 
-                            return "Invalid value";
+                            return "Invalid";
                         }())) {
                         if (ImGui::Selectable("Off", Settings::values.render_3d ==
                                                          Settings::StereoRenderOption::Off)) {
+                            if (Settings::values.render_3d ==
+                                    Settings::StereoRenderOption::Anaglyph &&
+                                Settings::values.post_processing_shader == "dubois (builtin)") {
+                                Settings::values.post_processing_shader = "none (builtin)";
+                            }
+
+                            if ((Settings::values.render_3d ==
+                                     Settings::StereoRenderOption::Interlaced ||
+                                 Settings::values.render_3d ==
+                                     Settings::StereoRenderOption::ReverseInterlaced) &&
+                                Settings::values.post_processing_shader == "horizontal (builtin)") {
+                                Settings::values.post_processing_shader = "none (builtin)";
+                            }
+
                             Settings::values.render_3d = Settings::StereoRenderOption::Off;
-                            Settings::values.post_processing_shader = "none (builtin)";
                         }
 
                         if (ImGui::Selectable("Side by Side",
                                               Settings::values.render_3d ==
                                                   Settings::StereoRenderOption::SideBySide)) {
+                            if (Settings::values.render_3d ==
+                                    Settings::StereoRenderOption::Anaglyph &&
+                                Settings::values.post_processing_shader == "dubois (builtin)") {
+                                Settings::values.post_processing_shader = "none (builtin)";
+                            }
+
+                            if ((Settings::values.render_3d ==
+                                     Settings::StereoRenderOption::Interlaced ||
+                                 Settings::values.render_3d ==
+                                     Settings::StereoRenderOption::ReverseInterlaced) &&
+                                Settings::values.post_processing_shader == "horizontal (builtin)") {
+                                Settings::values.post_processing_shader = "none (builtin)";
+                            }
+
                             Settings::values.render_3d = Settings::StereoRenderOption::SideBySide;
-                            Settings::values.post_processing_shader = "none (builtin)";
                         }
 
                         if (ImGui::Selectable("Anaglyph",
                                               Settings::values.render_3d ==
                                                   Settings::StereoRenderOption::Anaglyph)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Anaglyph;
-                            Settings::values.post_processing_shader = "dubois (builtin)";
+
+                            if (Settings::values.post_processing_shader != "dubois (builtin)") {
+                                Settings::values.post_processing_shader = "dubois (builtin)";
+                            }
                         }
 
                         if (ImGui::Selectable("Interlaced",
                                               Settings::values.render_3d ==
                                                   Settings::StereoRenderOption::Interlaced)) {
                             Settings::values.render_3d = Settings::StereoRenderOption::Interlaced;
-                            Settings::values.post_processing_shader = "horizontal (builtin)";
+
+                            if (Settings::values.post_processing_shader != "horizontal (builtin)") {
+                                Settings::values.post_processing_shader = "horizontal (builtin)";
+                            }
                         }
 
                         if (ImGui::Selectable(
@@ -2098,7 +2483,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                     Settings::StereoRenderOption::ReverseInterlaced)) {
                             Settings::values.render_3d =
                                 Settings::StereoRenderOption::ReverseInterlaced;
-                            Settings::values.post_processing_shader = "horizontal (builtin)";
+
+                            if (Settings::values.post_processing_shader != "horizontal (builtin)") {
+                                Settings::values.post_processing_shader = "horizontal (builtin)";
+                            }
                         }
 
                         ImGui::EndCombo();
@@ -2141,21 +2529,35 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
 
                                 return "Invalid";
                             }())) {
-                            if (ImGui::Selectable("Default")) {
+                            if (ImGui::Selectable("Default", Settings::values.layout ==
+                                                                 Settings::Layout::Default)) {
                                 Settings::values.layout = Settings::Layout::Default;
                             }
-                            if (ImGui::Selectable("Single Screen")) {
+
+                            if (ImGui::Selectable("Single Screen",
+                                                  Settings::values.layout ==
+                                                      Settings::Layout::SingleScreen)) {
                                 Settings::values.layout = Settings::Layout::SingleScreen;
                             }
-                            if (ImGui::Selectable("Large Screen")) {
+
+                            if (ImGui::Selectable("Large Screen",
+                                                  Settings::values.layout ==
+                                                      Settings::Layout::LargeScreen)) {
                                 Settings::values.layout = Settings::Layout::LargeScreen;
                             }
-                            if (ImGui::Selectable("Side by Side")) {
+
+                            if (ImGui::Selectable("Side by Side",
+                                                  Settings::values.layout ==
+                                                      Settings::Layout::SideScreen)) {
                                 Settings::values.layout = Settings::Layout::SideScreen;
                             }
-                            if (ImGui::Selectable("Medium Screen")) {
+
+                            if (ImGui::Selectable("Medium Screen",
+                                                  Settings::values.layout ==
+                                                      Settings::Layout::MediumScreen)) {
                                 Settings::values.layout = Settings::Layout::MediumScreen;
                             }
+
                             ImGui::EndCombo();
                         }
                     }
@@ -2281,6 +2683,7 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                 const CitraRoom& room = rooms[i];
                                 const std::string popup_text = GetRoomPopupText(room);
                                 const std::string id = fmt::format("{}##i={}", room.name, i);
+
                                 if (room.has_password) {
                                     ImGui::PushStyleColor(ImGuiCol_Text,
                                                           ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
@@ -2289,21 +2692,27 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                                 } else {
                                     ImGui::Selectable(id.c_str());
                                 }
+
                                 if (ImGui::IsItemClicked()) {
                                     ImGui::OpenPopup(id.c_str());
                                 }
+
                                 if (ImGui::BeginPopup(id.c_str(),
                                                       ImGuiWindowFlags_HorizontalScrollbar)) {
                                     ImGui::TextUnformatted(popup_text.c_str());
+
                                     if (ImGui::Button("Set IP And Port")) {
                                         Settings::values.multiplayer_ip = room.ip;
                                         Settings::values.multiplayer_port = room.port;
                                         ImGui::CloseCurrentPopup();
                                     }
+
                                     ImGui::SameLine();
+
                                     if (ImGui::Button("Close")) {
                                         ImGui::CloseCurrentPopup();
                                     }
+
                                     ImGui::EndPopup();
                                 }
                             }
