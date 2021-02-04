@@ -1861,6 +1861,7 @@ Surface RasterizerCacheOpenGL::CreateSurface(const SurfaceParams& params) {
     surface->invalid_regions.insert(surface->GetInterval());
 
     auto recycled_texture = host_texture_recycler.find(params);
+
     if (recycled_texture == host_texture_recycler.end()) {
         surface->texture.Create();
         AllocateSurfaceTexture(surface->texture.handle, GetFormatTuple(surface->pixel_format),

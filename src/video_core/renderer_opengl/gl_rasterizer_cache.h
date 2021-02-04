@@ -52,7 +52,7 @@ struct HostTextureTag {
     u32 width;
     u32 height;
 
-    explicit HostTextureTag(const SurfaceParams& params) noexcept {
+    HostTextureTag(const SurfaceParams& params) noexcept {
         auto format_tuple = GetFormatTuple(params.pixel_format);
         internal_format = format_tuple.internal_format;
         format = format_tuple.format;
