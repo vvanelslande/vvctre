@@ -1289,11 +1289,11 @@ void vvctre_gui_plot_histogram_getter(const char* label,
 }
 
 bool vvctre_gui_begin_listbox(const char* label) {
-    return ImGui::ListBoxHeader(label);
+    return ImGui::BeginListBox(label);
 }
 
 void vvctre_gui_end_listbox() {
-    ImGui::ListBoxFooter();
+    ImGui::EndListBox();
 }
 
 bool vvctre_gui_begin_combo_box(const char* label, const char* preview) {

@@ -4818,7 +4818,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                              .c_str(),
                          nullptr,
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize)) {
-            if (ImGui::ListBoxHeader("##miis")) {
+            if (ImGui::BeginListBox("##miis")) {
                 ImGui::TextUnformatted("Standard Mii");
                 ImGui::Separator();
 
@@ -4849,7 +4849,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                     }
                 }
 
-                ImGui::ListBoxFooter();
+                ImGui::EndListBox();
             }
 
             if (mii_selector_data != nullptr && mii_selector_data->config.enable_cancel_button &&
