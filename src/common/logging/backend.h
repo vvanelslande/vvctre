@@ -36,16 +36,15 @@ struct Entry {
     Entry& operator=(const Entry& o) = default;
 };
 
-/**
- * Interface for logging backends. As loggers can be created and removed at runtime, this can be
- * used by a frontend for adding a custom logging backend as needed
- */
+/// Interface for logging backends
 class Backend {
 public:
     virtual ~Backend() = default;
+
     virtual void SetFilter(const Filter& new_filter) {
         filter = new_filter;
     }
+
     virtual const char* GetName() const = 0;
     virtual void Write(const Entry& entry) = 0;
 
@@ -53,23 +52,7 @@ private:
     Filter filter;
 };
 
-/**
- * Backend that writes to stderr without any color commands
- */
-class ConsoleBackend : public Backend {
-public:
-    static const char* Name() {
-        return "console";
-    }
-    const char* GetName() const override {
-        return Name();
-    }
-    void Write(const Entry& entry) override;
-};
-
-/**
- * Backend that writes to stderr and with color
- */
+/// Backend that writes to stderr with color
 class ColorConsoleBackend : public Backend {
 public:
     static const char* Name() {
@@ -79,6 +62,7 @@ public:
     const char* GetName() const override {
         return Name();
     }
+
     void Write(const Entry& entry) override;
 };
 

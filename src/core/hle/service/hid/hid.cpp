@@ -84,25 +84,7 @@ void Module::UpdatePadCallback(std::uintptr_t user_data, s64 cycles_late) {
     }
 
     if (home_button->GetStatus()) {
-        if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(system)) {
-            apt->GetAppletManager()->SetDeliverArg(std::nullopt);
-            apt->SetWirelessRebootInfo(std::vector<u8>{});
-        }
-        if (Settings::values.region_value == Settings::Region::AutoSelect) {
-            LOG_ERROR(Service_HID, "Can't open HOME Menu because region is Auto-select");
-        } else {
-            const u64 title_id = Service::APT::GetTitleIdForApplet(
-                Service::APT::AppletId::HomeMenu, static_cast<u32>(Settings::values.region_value));
-            const std::string path =
-                Service::AM::GetTitleContentPath(Service::FS::MediaType::NAND, title_id);
-            if (FileUtil::Exists(path)) {
-                system.SetResetFilePath(path);
-                system.RequestReset();
-                return;
-            } else {
-                LOG_ERROR(Service_HID, "HOME Menu not installed");
-            }
-        }
+        HomeButtonPressed();
     }
 
     SharedMem* mem = reinterpret_cast<SharedMem*>(shared_mem->GetPointer());
@@ -472,6 +454,28 @@ void Module::SetCustomMotionState(
 
 const std::tuple<Common::Vec3<float>, Common::Vec3<float>> Module::GetMotionState() const {
     return custom_motion_state.has_value() ? *custom_motion_state : motion_device->GetStatus();
+}
+
+void Module::HomeButtonPressed() {
+    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(system)) {
+        apt->GetAppletManager()->SetDeliverArg(std::nullopt);
+        apt->SetWirelessRebootInfo(std::vector<u8>{});
+    }
+    if (Settings::values.region_value == Settings::Region::AutoSelect) {
+        LOG_ERROR(Service_HID, "Can't open HOME Menu because region is Auto-select");
+    } else {
+        const u64 title_id = Service::APT::GetTitleIdForApplet(
+            Service::APT::AppletId::HomeMenu, static_cast<u32>(Settings::values.region_value));
+        const std::string path =
+            Service::AM::GetTitleContentPath(Service::FS::MediaType::NAND, title_id);
+        if (FileUtil::Exists(path)) {
+            system.SetResetFilePath(path);
+            system.RequestReset();
+            return;
+        } else {
+            LOG_ERROR(Service_HID, "HOME Menu not installed");
+        }
+    }
 }
 
 std::shared_ptr<Module> GetModule(Core::System& system) {

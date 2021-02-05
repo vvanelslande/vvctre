@@ -79,3 +79,7 @@ branch = release
 [submodule "utfcpp"]
 path = externals/utfcpp
 url = https://github.com/nemtrif/utfcpp.git
+
+[submodule "flags"]
+path = externals/flags
+url = https://github.com/sailormoon/flags.git

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include "flags.h"
 
 #ifdef _WIN32
 // windows.h needs to be included before shellapi.h
@@ -133,7 +134,8 @@ int main(int argc, char** argv) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
     Core::System& system = Core::System::GetInstance();
-    PluginManager plugin_manager(system, window);
+    const flags::args args(argc, argv);
+    PluginManager plugin_manager(system, window, args);
     system.SetEmulationStartingAfterFirstTime(
         [&plugin_manager] { plugin_manager.EmulationStartingAfterFirstTime(); });
     if (!system.IsOnLoadFailedSet()) {
@@ -172,7 +174,7 @@ int main(int argc, char** argv) {
     plugin_manager.InitialSettingsOpening();
     std::atomic<bool> update_found{false};
     bool ok_multiplayer = false;
-    if (argc < 2) {
+    if (args.positional().empty()) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
@@ -282,7 +284,7 @@ int main(int argc, char** argv) {
             return 0;
         }
     } else {
-        Settings::values.file_path = std::string(argv[1]);
+        Settings::values.file_path = std::string(args.positional()[0]);
         Settings::Apply();
     }
     plugin_manager.InitialSettingsOkPressed();
@@ -290,7 +292,9 @@ int main(int argc, char** argv) {
     Log::Filter log_filter(Log::Level::Debug);
     log_filter.ParseFilterString(Settings::values.log_filter);
     Log::SetGlobalFilter(log_filter);
-    Log::AddBackend(std::make_unique<Log::ColorConsoleBackend>());
+    if (plugin_manager.built_in_logger_enabled) {
+        Log::AddBackend(std::make_unique<Log::ColorConsoleBackend>());
+    }
 
     if (!Settings::values.record_movie.empty()) {
         Core::Movie::GetInstance().PrepareForRecording();

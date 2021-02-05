@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <flags.h>
 #include <unordered_map>
 #include <vector>
 #include "common/common_types.h"
@@ -17,7 +18,7 @@ struct SDL_Window;
 
 class PluginManager {
 public:
-    explicit PluginManager(Core::System& core, SDL_Window* window);
+    explicit PluginManager(Core::System& core, SDL_Window* window, const flags::args& args);
     ~PluginManager();
 
     void InitialSettingsOpening();
@@ -36,11 +37,11 @@ public:
     void DeleteButtonDevice(void* device);
     void CallScreenshotCallbacks(void* data);
 
-    // For vvctre_*
     bool paused = false;
     SDL_Window* window = nullptr;
     void* cfg = nullptr;
     bool show_fatal_error_messages = true;
+    bool built_in_logger_enabled = true;
 
 private:
     struct Plugin {

@@ -233,6 +233,8 @@ public:
         std::optional<std::tuple<Common::Vec3<float>, Common::Vec3<float>>> state);
     const std::tuple<Common::Vec3<float>, Common::Vec3<float>> GetMotionState() const;
 
+    void HomeButtonPressed();
+
 private:
     void LoadInputDevices();
     void UpdatePadCallback(std::uintptr_t user_data, s64 cycles_late);

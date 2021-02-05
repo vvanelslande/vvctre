@@ -639,14 +639,14 @@ std::string_view GetFilename(std::string_view path) {
     return path.substr(name_index + 1);
 }
 
-std::string_view GetExtensionFromFilename(std::string_view name) {
-    const std::size_t index = name.rfind('.');
+std::string_view GetExtension(std::string_view f) {
+    const std::size_t index = f.rfind('.');
 
     if (index == std::string_view::npos) {
         return {};
     }
 
-    return name.substr(index + 1);
+    return f.substr(index + 1);
 }
 
 std::string_view RemoveTrailingSlash(std::string_view path) {

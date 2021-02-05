@@ -372,7 +372,7 @@ private:
     std::unordered_map<TextureCubeConfig, CachedTextureCube> texture_cube_cache;
 
 public:
-    // Textures from destroyed surfaces are stored here to be recyled to reduce allocation overhead
+    // Textures from destroyed surfaces are stored here to be recycled to reduce allocation overhead
     // in the driver
     std::unordered_multimap<HostTextureTag, OGLTexture> host_texture_recycler;
 

@@ -30,8 +30,8 @@
 #include "vvctre/plugins.h"
 
 const u8 vvctre_version_major = 43;
-const u8 vvctre_version_minor = 1;
-const u8 vvctre_version_patch = 1;
+const u8 vvctre_version_minor = 2;
+const u8 vvctre_version_patch = 0;
 
 void vvctreShutdown(PluginManager* plugin_manager) {
     if (plugin_manager != nullptr) {
@@ -560,17 +560,17 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             ImGui::SetClipboardText(Settings::values.buttons[Settings::NativeButton::ZR].c_str());
         }
 
-        if (ImGui::Selectable("Start##Buttons")) {
+        if (ImGui::Selectable("START##Buttons")) {
             ImGui::SetClipboardText(
                 Settings::values.buttons[Settings::NativeButton::Start].c_str());
         }
 
-        if (ImGui::Selectable("Select##Buttons")) {
+        if (ImGui::Selectable("SELECT##Buttons")) {
             ImGui::SetClipboardText(
                 Settings::values.buttons[Settings::NativeButton::Select].c_str());
         }
 
-        if (ImGui::Selectable("Debug##Buttons")) {
+        if (ImGui::Selectable("DEBUG##Buttons")) {
             ImGui::SetClipboardText(
                 Settings::values.buttons[Settings::NativeButton::Debug].c_str());
         }
@@ -896,7 +896,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
 
     if (ImGui::Button(
             (InputCommon::ButtonToText(Settings::values.buttons[Settings::NativeButton::Start]) +
-             "##Start")
+             "##START")
                 .c_str())) {
         Settings::values.buttons[Settings::NativeButton::Start] =
             GetInput(InputCommon::Polling::DeviceType::Button);
@@ -909,11 +909,11 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         }
     }
     ImGui::SameLine();
-    ImGui::TextUnformatted("Start");
+    ImGui::TextUnformatted("START");
 
     if (ImGui::Button(
             (InputCommon::ButtonToText(Settings::values.buttons[Settings::NativeButton::Select]) +
-             "##Select")
+             "##SELECT")
                 .c_str())) {
         Settings::values.buttons[Settings::NativeButton::Select] =
             GetInput(InputCommon::Polling::DeviceType::Button);
@@ -926,11 +926,11 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         }
     }
     ImGui::SameLine();
-    ImGui::TextUnformatted("Select");
+    ImGui::TextUnformatted("SELECT");
 
     if (ImGui::Button(
             (InputCommon::ButtonToText(Settings::values.buttons[Settings::NativeButton::Debug]) +
-             "##Debug")
+             "##DEBUG")
                 .c_str())) {
         Settings::values.buttons[Settings::NativeButton::Debug] =
             GetInput(InputCommon::Polling::DeviceType::Button);
@@ -943,7 +943,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         }
     }
     ImGui::SameLine();
-    ImGui::TextUnformatted("Debug");
+    ImGui::TextUnformatted("DEBUG");
 
     if (ImGui::Button(
             (InputCommon::ButtonToText(Settings::values.buttons[Settings::NativeButton::Gpio14]) +

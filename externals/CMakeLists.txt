@@ -134,6 +134,10 @@ set(JSON_Install OFF CACHE BOOL "" FORCE)
 set(JSON_ImplicitConversions OFF CACHE BOOL "" FORCE)
 add_subdirectory(json EXCLUDE_FROM_ALL)
 
+# flags
+add_library(flags INTERFACE)
+target_include_directories(flags INTERFACE flags/include)
+
 add_subdirectory(cryptopp EXCLUDE_FROM_ALL)
 add_subdirectory(teakra EXCLUDE_FROM_ALL)
 add_subdirectory(imgui EXCLUDE_FROM_ALL)

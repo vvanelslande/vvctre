@@ -30,11 +30,6 @@ std::string FormatLogMessage(const Entry& entry) {
                        entry.message);
 }
 
-void PrintMessage(const Entry& entry) {
-    const std::string str = FormatLogMessage(entry).append(1, '\n');
-    fputs(str.c_str(), stderr);
-}
-
 void PrintColoredMessage(const Entry& entry) {
 #ifdef _WIN32
     HANDLE console_handle = GetStdHandle(STD_ERROR_HANDLE);
@@ -99,10 +94,15 @@ void PrintColoredMessage(const Entry& entry) {
     fputs(color, stderr);
 #endif
 
-    PrintMessage(entry);
+    const std::string str = FormatLogMessage(entry).append(1, '\n');
+    fputs(str.c_str(), stderr);
 
 #ifdef _WIN32
     SetConsoleTextAttribute(console_handle, original_info.wAttributes);
+#else
+    fputs(ESC "[0m", stderr);
+#undef ESC
 #endif
 }
+
 } // namespace Log

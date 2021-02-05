@@ -128,10 +128,6 @@ private:
     std::chrono::steady_clock::time_point time_origin{std::chrono::steady_clock::now()};
 };
 
-void ConsoleBackend::Write(const Entry& entry) {
-    PrintMessage(entry);
-}
-
 void ColorConsoleBackend::Write(const Entry& entry) {
     PrintColoredMessage(entry);
 }

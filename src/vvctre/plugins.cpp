@@ -3,7 +3,9 @@
 // Refer to the license.txt file included.
 
 #include <cstdlib>
+#include <string_view>
 #include <utility>
+#include "flags.h"
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <fmt/format.h>
@@ -50,38 +52,17 @@
 #define VVCTRE_STRDUP strdup
 #endif
 
-PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(window) {
+PluginManager::PluginManager(Core::System& core, SDL_Window* window, const flags::args& args)
+    : window(window) {
     int length = wai_getExecutablePath(nullptr, 0, nullptr);
     std::string vvctre_folder(length, '\0');
     int dirname_length = 0;
     wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
     vvctre_folder = vvctre_folder.substr(0, dirname_length);
 
-    FileUtil::FSTEntry entries;
-    FileUtil::ScanDirectoryTree(vvctre_folder, entries);
-    for (const FileUtil::FSTEntry& entry : entries.children) {
-        if (entry.is_directory) {
-            continue;
-        }
-
-#ifdef _WIN32
-        if (entry.virtual_name == "SDL2.dll") {
-            continue;
-        }
-
-        if (FileUtil::GetExtensionFromFilename(entry.physical_name) != "dll") {
-            continue;
-        }
-#else
-        if (FileUtil::GetExtensionFromFilename(entry.physical_name) != "so") {
-            continue;
-        }
-#endif
-
-        void* handle = SDL_LoadObject(entry.physical_name.c_str());
-        if (handle == NULL) {
-            fmt::print("Plugin {} failed to load: {}\n", entry.virtual_name, SDL_GetError());
-        } else {
+    const auto load = [this, &core](const std::string& path) {
+        void* handle = SDL_LoadObject(path.c_str());
+        if (handle != NULL) {
             void* get_required_function_count =
                 SDL_LoadFunction(handle, "GetRequiredFunctionCount");
             void* get_required_function_names =
@@ -89,7 +70,6 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
             void* plugin_loaded = SDL_LoadFunction(handle, "PluginLoaded");
             if (get_required_function_count == nullptr || get_required_function_names == nullptr ||
                 plugin_loaded == nullptr) {
-                fmt::print("Plugin {} failed to load: {}\n", entry.virtual_name, SDL_GetError());
                 SDL_UnloadObject(handle);
             } else {
                 Plugin plugin;
@@ -107,7 +87,7 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
                 if (log != nullptr) {
                     Log::AddBackend(std::make_unique<Log::FunctionLogger>(
                         (decltype(Log::FunctionLogger::function))log,
-                        fmt::format("Plugin {}", entry.virtual_name)));
+                        fmt::format("Plugin {}", FileUtil::GetFilename(path))));
                 }
                 void* override_wlan_comm_id_check =
                     SDL_LoadFunction(handle, "OverrideWlanCommIdCheck");
@@ -135,8 +115,41 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window) : window(wi
                     static_cast<void*>(&core), static_cast<void*>(this), required_functions.data());
 
                 plugins.push_back(std::move(plugin));
-                fmt::print("Plugin {} loaded\n", entry.virtual_name);
             }
+        }
+    };
+
+    if (std::optional<std::string> o = args.get<std::string>("plugins")) {
+        const std::vector<std::string> v =
+            nlohmann::json::parse(*o).get<std::vector<std::string>>();
+
+        for (const std::string& file_name : v) {
+#ifdef _WIN32
+            load(fmt::format("{}\\{}", vvctre_folder, file_name));
+#else
+            load(fmt::format("{}/{}", vvctre_folder, file_name));
+#endif
+        }
+    } else {
+        FileUtil::FSTEntry entries;
+        FileUtil::ScanDirectoryTree(vvctre_folder, entries);
+        for (const FileUtil::FSTEntry& entry : entries.children) {
+            if (entry.is_directory) {
+                continue;
+            }
+
+#ifdef _WIN32
+            if (entry.virtual_name == "SDL2.dll" ||
+                FileUtil::GetExtension(entry.virtual_name) != "dll") {
+                continue;
+            }
+#else
+            if (FileUtil::GetExtension(entry.virtual_name) != "so") {
+                continue;
+            }
+#endif
+
+            load(entry.physical_name);
         }
     }
 }
@@ -1097,6 +1110,10 @@ void vvctre_gui_text_colored(float red, float green, float blue, float alpha, co
 
 bool vvctre_gui_button(const char* label) {
     return ImGui::Button(label);
+}
+
+bool vvctre_gui_button_ex(const char* label, const float width, const float height) {
+    return ImGui::Button(label, ImVec2(width, height));
 }
 
 bool vvctre_gui_small_button(const char* label) {
@@ -2069,11 +2086,11 @@ void vvctre_gui_get_window_size(float out[2]) {
     out[1] = size.y;
 }
 
-void vvctre_gui_set_next_window_pos(float x, float y, int condition, float pivot[2]) {
+void vvctre_gui_set_next_window_pos(float x, float y, ImGuiCond condition, float pivot[2]) {
     ImGui::SetNextWindowPos(ImVec2(x, y), condition, ImVec2(pivot[0], pivot[1]));
 }
 
-void vvctre_gui_set_next_window_size(float width, float height, int condition) {
+void vvctre_gui_set_next_window_size(float width, float height, ImGuiCond condition) {
     ImGui::SetNextWindowSize(ImVec2(width, height), condition);
 }
 
@@ -2085,7 +2102,7 @@ void vvctre_gui_set_next_window_content_size(float width, float height) {
     ImGui::SetNextWindowContentSize(ImVec2(width, height));
 }
 
-void vvctre_gui_set_next_window_collapsed(bool collapsed, int condition) {
+void vvctre_gui_set_next_window_collapsed(bool collapsed, ImGuiCond condition) {
     ImGui::SetNextWindowCollapsed(collapsed, condition);
 }
 
@@ -2808,6 +2825,13 @@ void vvctre_get_motion_state(void* core, float accelerometer_out[3], float gyros
     gyroscope_out[0] = gyroscope.x;
     gyroscope_out[1] = gyroscope.y;
     gyroscope_out[2] = gyroscope.z;
+}
+
+void vvctre_press_home_button(void* core) {
+    std::shared_ptr<Service::HID::Module> hid =
+        Service::HID::GetModule(*static_cast<Core::System*>(core));
+
+    hid->HomeButtonPressed();
 }
 
 bool vvctre_screenshot(void* plugin_manager, void* data) {
@@ -4099,6 +4123,10 @@ bool vvctre_get_show_fatal_error_messages(void* plugin_manager) {
     return static_cast<PluginManager*>(plugin_manager)->show_fatal_error_messages;
 }
 
+void vvctre_disable_built_in_logger(void* plugin_manager) {
+    static_cast<PluginManager*>(plugin_manager)->built_in_logger_enabled = false;
+}
+
 std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_load_file", (void*)&vvctre_load_file},
     {"vvctre_install_cia", (void*)&vvctre_install_cia},
@@ -4261,6 +4289,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_text_ex", (void*)&vvctre_gui_text_ex},
     {"vvctre_gui_text_colored", (void*)&vvctre_gui_text_colored},
     {"vvctre_gui_button", (void*)&vvctre_gui_button},
+    {"vvctre_gui_button_ex", (void*)&vvctre_gui_button_ex},
     {"vvctre_gui_small_button", (void*)&vvctre_gui_small_button},
     {"vvctre_gui_color_button", (void*)&vvctre_gui_color_button},
     {"vvctre_gui_color_button_ex", (void*)&vvctre_gui_color_button_ex},
@@ -4628,6 +4657,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_set_custom_motion_state", (void*)&vvctre_set_custom_motion_state},
     {"vvctre_use_real_motion_state", (void*)&vvctre_use_real_motion_state},
     {"vvctre_get_motion_state", (void*)&vvctre_get_motion_state},
+    {"vvctre_press_home_button", (void*)&vvctre_press_home_button},
     {"vvctre_screenshot", (void*)&vvctre_screenshot},
     {"vvctre_screenshot_bottom_screen", (void*)&vvctre_screenshot_bottom_screen},
     {"vvctre_screenshot_default_layout", (void*)&vvctre_screenshot_default_layout},
@@ -4950,4 +4980,5 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_get_fatal_error", (void*)&vvctre_get_fatal_error},
     {"vvctre_set_show_fatal_error_messages", (void*)&vvctre_set_show_fatal_error_messages},
     {"vvctre_get_show_fatal_error_messages", (void*)&vvctre_get_show_fatal_error_messages},
+    {"vvctre_disable_built_in_logger", (void*)&vvctre_disable_built_in_logger},
 };
