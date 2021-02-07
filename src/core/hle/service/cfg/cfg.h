@@ -158,6 +158,7 @@ public:
     u64 GetConsoleUniqueId();
     void SetEULAVersion(const EULAVersion& version);
     EULAVersion GetEULAVersion();
+    bool IsParentalControlEnabled();
     ResultCode UpdateConfigNANDSavegame();
 
 private:

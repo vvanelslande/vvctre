@@ -620,14 +620,27 @@ void Module::Interface::ReadData(Kernel::HLERequestContext& ctx) {
         dest_buffer.Write(&version, 0, sizeof(version));
         break;
     }
-    case CecSystemInfoType::Eula:
-        buffer = {0x01}; // Eula agreed
+    case CecSystemInfoType::Eula: {
+        auto cfg = Service::CFG::GetModule(cecd->system);
+        Service::CFG::EULAVersion version = cfg->GetEULAVersion();
+        if (version.major == 0 && version.minor == 0) {
+            buffer = {0x00};
+        } else {
+            buffer = {0x01};
+        }
         dest_buffer.Write(buffer.data(), 0, buffer.size());
         break;
-    case CecSystemInfoType::ParentControl:
-        buffer = {0x00}; // No parent control
+    }
+    case CecSystemInfoType::ParentControl: {
+        auto cfg = Service::CFG::GetModule(cecd->system);
+        if (cfg->IsParentalControlEnabled()) {
+            buffer = {0x01};
+        } else {
+            buffer = {0x00};
+        }
         dest_buffer.Write(buffer.data(), 0, buffer.size());
         break;
+    }
     default:
         LOG_ERROR(Service_CECD, "Unknown system info type={:#x}", static_cast<u32>(info_type));
     }

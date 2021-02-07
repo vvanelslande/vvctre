@@ -549,19 +549,19 @@ ResultCode Module::FormatConfig() {
         return res;
     }
 
-    // 0x000B0003 - Unknown, related to country/address (zip code?)
+    // 0x000B0003
     res = CreateConfigInfoBlk(0x000B0003, 0x4, 0xE, zero_buffer);
     if (!res.IsSuccess()) {
         return res;
     }
 
-    // 0x000C0000 - Unknown
+    // 0x000C0000
     res = CreateConfigInfoBlk(0x000C0000, 0xC0, 0xE, zero_buffer);
     if (!res.IsSuccess()) {
         return res;
     }
 
-    // 0x000C0001 - Unknown
+    // 0x000C0001
     res = CreateConfigInfoBlk(0x000C0001, 0x14, 0xE, zero_buffer);
     if (!res.IsSuccess()) {
         return res;
@@ -589,7 +589,7 @@ ResultCode Module::FormatConfig() {
         return res;
     }
 
-    // 0x00F0006 - Unknown
+    // 0x00F0006
     res = CreateConfigInfoBlk(0x00F0006, 0x28, 0xC, zero_buffer);
     if (!res.IsSuccess()) {
         return res;
@@ -612,7 +612,7 @@ ResultCode Module::FormatConfig() {
         return res;
     }
 
-    // 0x00170000 - Unknown
+    // 0x00170000
     res = CreateConfigInfoBlk(0x00170000, 0x4, 0xE, zero_buffer);
     if (!res.IsSuccess()) {
         return res;
@@ -666,15 +666,6 @@ ResultCode Module::LoadConfigNANDSaveFile() {
 
 Module::Module() {
     LoadConfigNANDSaveFile();
-    // Check the config savegame EULA Version and update it to 0x7F7F if necessary
-    // so users will never get a promt to accept EULA
-    EULAVersion version = GetEULAVersion();
-    if (version.major != MAX_EULA_VERSION.major || version.minor != MAX_EULA_VERSION.minor) {
-        LOG_INFO(Service_CFG, "Updating accepted EULA version to {}.{}", MAX_EULA_VERSION.major,
-                 MAX_EULA_VERSION.minor);
-        SetEULAVersion(Service::CFG::MAX_EULA_VERSION);
-        UpdateConfigNANDSavegame();
-    }
 }
 
 Module::~Module() = default;
@@ -855,6 +846,12 @@ EULAVersion Module::GetEULAVersion() {
 void Module::SetEULAVersion(const EULAVersion& version) {
     u32_le data = version.minor + (version.major << 8);
     SetConfigInfoBlock(EULAVersionBlockID, sizeof(data), 0xE, &data);
+}
+
+bool Module::IsParentalControlEnabled() {
+    u32_le data;
+    GetConfigInfoBlock(0x000C0000, sizeof(data), 0xE, &data);
+    return data != 0;
 }
 
 std::shared_ptr<Module> GetModule(Core::System& system) {
