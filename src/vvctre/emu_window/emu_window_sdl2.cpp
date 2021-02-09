@@ -5215,29 +5215,22 @@ void EmuWindow_SDL2::SwapBuffers() {
             ImGui::SetNextWindowSize(ImVec2(640.0f, 480.0f), ImGuiCond_Appearing);
 
             if (ImGui::Begin("Cheats Text Editor", &show_cheats_text_editor,
-                             ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar)) {
-                if (ImGui::BeginMenuBar()) {
-                    if (ImGui::BeginMenu("File")) {
-                        if (ImGui::MenuItem("Save")) {
-                            const std::string filepath = fmt::format(
-                                "{}{:016X}.txt",
-                                FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
-                                system.Kernel().GetCurrentProcess()->codeset->program_id);
+                             ImGuiWindowFlags_NoSavedSettings)) {
+                if (ImGui::Button("Save")) {
+                    const std::string filepath = fmt::format(
+                        "{}{:016X}.txt", FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
+                        system.Kernel().GetCurrentProcess()->codeset->program_id);
 
-                            FileUtil::WriteStringToFile(true, filepath, cheats_text_editor_text);
+                    FileUtil::WriteStringToFile(true, filepath, cheats_text_editor_text);
 
-                            system.CheatEngine().LoadCheatsFromFile();
-                        }
+                    system.CheatEngine().LoadCheatsFromFile();
+                }
 
-                        if (ImGui::MenuItem("Load Cheats From Text")) {
-                            std::istringstream iss(cheats_text_editor_text);
-                            system.CheatEngine().LoadCheatsFromStream(iss);
-                        }
+                ImGui::SameLine();
 
-                        ImGui::EndMenu();
-                    }
-
-                    ImGui::EndMenuBar();
+                if (ImGui::Button("Load Cheats From Text")) {
+                    std::istringstream iss(cheats_text_editor_text);
+                    system.CheatEngine().LoadCheatsFromStream(iss);
                 }
 
                 ImGui::InputTextMultiline("##cheats_text_editor_text", &cheats_text_editor_text,
