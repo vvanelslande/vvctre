@@ -1309,11 +1309,19 @@ bool vvctre_gui_begin_listbox(const char* label) {
     return ImGui::BeginListBox(label);
 }
 
+bool vvctre_gui_begin_listbox_ex(const char* label, const float width, const float height) {
+    return ImGui::BeginListBox(label, ImVec2(width, height));
+}
+
 void vvctre_gui_end_listbox() {
     ImGui::EndListBox();
 }
 
 bool vvctre_gui_begin_combo_box(const char* label, const char* preview) {
+    return ImGui::BeginCombo(label, preview);
+}
+
+bool vvctre_gui_begin_combo_box_ex(const char* label, const char* preview, ImGuiComboFlags flags) {
     return ImGui::BeginCombo(label, preview);
 }
 
@@ -4331,8 +4339,10 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_plot_histogram", (void*)&vvctre_gui_plot_histogram},
     {"vvctre_gui_plot_histogram_getter", (void*)&vvctre_gui_plot_histogram_getter},
     {"vvctre_gui_begin_listbox", (void*)&vvctre_gui_begin_listbox},
+    {"vvctre_gui_begin_listbox_ex", (void*)&vvctre_gui_begin_listbox_ex},
     {"vvctre_gui_end_listbox", (void*)&vvctre_gui_end_listbox},
     {"vvctre_gui_begin_combo_box", (void*)&vvctre_gui_begin_combo_box},
+    {"vvctre_gui_begin_combo_box_ex", (void*)&vvctre_gui_begin_combo_box_ex},
     {"vvctre_gui_end_combo_box", (void*)&vvctre_gui_end_combo_box},
     {"vvctre_gui_selectable", (void*)&vvctre_gui_selectable},
     {"vvctre_gui_selectable_with_selected", (void*)&vvctre_gui_selectable_with_selected},
