@@ -3248,13 +3248,12 @@ const char* vvctre_settings_get_camera_parameter(Service::CAM::CameraIndex index
     return Settings::values.camera_parameter[static_cast<std::size_t>(index)].c_str();
 }
 
-void vvctre_settings_set_camera_flip(Service::CAM::CameraIndex index, int value) {
-    Settings::values.camera_flip[static_cast<std::size_t>(index)] =
-        static_cast<Service::CAM::Flip>(value);
+void vvctre_settings_set_camera_flip(Service::CAM::CameraIndex index, Service::CAM::Flip value) {
+    Settings::values.camera_flip[static_cast<std::size_t>(index)] = value;
 }
 
-int vvctre_settings_get_camera_flip(Service::CAM::CameraIndex index) {
-    return static_cast<int>(Settings::values.camera_flip[static_cast<std::size_t>(index)]);
+Service::CAM::Flip vvctre_settings_get_camera_flip(Service::CAM::CameraIndex index) {
+    return Settings::values.camera_flip[static_cast<std::size_t>(index)];
 }
 
 void vvctre_set_play_coins(u16 value) {
