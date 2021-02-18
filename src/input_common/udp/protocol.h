@@ -114,9 +114,8 @@ namespace Response {
 struct Version {
     u16_le version{};
 };
-static_assert(sizeof(Version) == 2, "UDP Response Version struct has wrong size");
-static_assert(std::is_trivially_copyable_v<Version>,
-              "UDP Response Version is not trivially copyable");
+static_assert(sizeof(Version) == 2, "Version has wrong size");
+static_assert(std::is_trivially_copyable_v<Version>, "Version isn't trivially copyable");
 
 struct PortInfo {
     u8 id{};
@@ -127,9 +126,8 @@ struct PortInfo {
     u8 battery{};
     u8 is_pad_active{};
 };
-static_assert(sizeof(PortInfo) == 12, "UDP Response PortInfo struct has wrong size");
-static_assert(std::is_trivially_copyable_v<PortInfo>,
-              "UDP Response PortInfo is not trivially copyable");
+static_assert(sizeof(PortInfo) == 12, "PortInfo has wrong size");
+static_assert(std::is_trivially_copyable_v<PortInfo>, "PortInfo isn't trivially copyable");
 
 #pragma pack(push, 1)
 struct PadData {
@@ -204,19 +202,16 @@ struct PadData {
 };
 #pragma pack(pop)
 
-static_assert(sizeof(PadData) == 80, "UDP Response PadData struct has wrong size ");
-static_assert(std::is_trivially_copyable_v<PadData>,
-              "UDP Response PadData is not trivially copyable");
+static_assert(sizeof(PadData) == 80, "PadData has wrong size");
+static_assert(std::is_trivially_copyable_v<PadData>, "PadData isn't trivially copyable");
 
 static_assert(sizeof(Message<PadData>) == MAX_PACKET_SIZE,
-              "UDP MAX_PACKET_SIZE is no longer larger than Message<PadData>");
+              "MAX_PACKET_SIZE is no longer larger than Message<PadData>");
 
-static_assert(sizeof(PadData::AnalogButton) == 12,
-              "UDP Response AnalogButton struct has wrong size ");
-static_assert(sizeof(PadData::TouchPad) == 6, "UDP Response TouchPad struct has wrong size ");
-static_assert(sizeof(PadData::Accelerometer) == 12,
-              "UDP Response Accelerometer struct has wrong size ");
-static_assert(sizeof(PadData::Gyroscope) == 12, "UDP Response Gyroscope struct has wrong size ");
+static_assert(sizeof(PadData::AnalogButton) == 12, "AnalogButton has wrong size");
+static_assert(sizeof(PadData::TouchPad) == 6, "TouchPad has wrong size");
+static_assert(sizeof(PadData::Accelerometer) == 12, "Accelerometer has wrong size");
+static_assert(sizeof(PadData::Gyroscope) == 12, "Gyroscope has wrong size");
 
 /**
  * Create a Response Message from the data
