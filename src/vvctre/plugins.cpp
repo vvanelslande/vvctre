@@ -2426,8 +2426,8 @@ void vvctre_gui_style_set_curve_tessellation_tol(float value) {
     ImGui::GetStyle().CurveTessellationTol = value;
 }
 
-void vvctre_gui_style_set_circle_segment_max_error(float value) {
-    ImGui::GetStyle().CircleSegmentMaxError = value;
+void vvctre_gui_style_set_circle_tessellation_max_error(float value) {
+    ImGui::GetStyle().CircleTessellationMaxError = value;
 }
 
 float vvctre_gui_style_get_alpha() {
@@ -2606,8 +2606,8 @@ float vvctre_gui_style_get_curve_tessellation_tol() {
     return ImGui::GetStyle().CurveTessellationTol;
 }
 
-float vvctre_gui_style_get_circle_segment_max_error() {
-    return ImGui::GetStyle().CircleSegmentMaxError;
+float vvctre_gui_style_get_circle_tessellation_max_error() {
+    return ImGui::GetStyle().CircleTessellationMaxError;
 }
 
 u64 vvctre_get_dear_imgui_version() {
@@ -4577,8 +4577,8 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_style_set_anti_aliased_fill", (void*)&vvctre_gui_style_set_anti_aliased_fill},
     {"vvctre_gui_style_set_curve_tessellation_tol",
      (void*)&vvctre_gui_style_set_curve_tessellation_tol},
-    {"vvctre_gui_style_set_circle_segment_max_error",
-     (void*)&vvctre_gui_style_set_circle_segment_max_error},
+    {"vvctre_gui_style_set_circle_tessellation_max_error",
+     (void*)&vvctre_gui_style_set_circle_tessellation_max_error},
     {"vvctre_gui_style_get_alpha", (void*)&vvctre_gui_style_get_alpha},
     {"vvctre_gui_style_get_window_padding", (void*)&vvctre_gui_style_get_window_padding},
     {"vvctre_gui_style_get_window_rounding", (void*)&vvctre_gui_style_get_window_rounding},
@@ -4625,8 +4625,8 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_style_get_anti_aliased_fill", (void*)&vvctre_gui_style_get_anti_aliased_fill},
     {"vvctre_gui_style_get_curve_tessellation_tol",
      (void*)&vvctre_gui_style_get_curve_tessellation_tol},
-    {"vvctre_gui_style_get_circle_segment_max_error",
-     (void*)&vvctre_gui_style_get_circle_segment_max_error},
+    {"vvctre_gui_style_get_circle_tessellation_max_error",
+     (void*)&vvctre_gui_style_get_circle_tessellation_max_error},
     {"vvctre_get_dear_imgui_version", (void*)&vvctre_get_dear_imgui_version},
     {"vvctre_set_os_window_size", (void*)&vvctre_set_os_window_size},
     {"vvctre_get_os_window_size", (void*)&vvctre_get_os_window_size},
