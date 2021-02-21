@@ -9,7 +9,13 @@
 
 namespace Camera {
 
-std::vector<u16> convert_rgb888_to_yuyv(const std::vector<unsigned char>& source, int width,
-                                        int height);
+std::vector<u16> ConvertRgb24ToYuv422(const std::vector<unsigned char>& source, int width,
+                                      int height);
+
+std::vector<unsigned char> FlipRgb24ImageHorizontally(const int width, const int height,
+                                                      const std::vector<unsigned char>& image);
+
+std::vector<unsigned char> FlipRgb24ImageVertically(const int width, const int height,
+                                                    const std::vector<unsigned char>& image);
 
 } // namespace Camera

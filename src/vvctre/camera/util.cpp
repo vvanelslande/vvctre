@@ -169,8 +169,8 @@ static constexpr int V(int r, int g, int b) {
 }
 } // namespace YuvTable
 
-std::vector<u16> convert_rgb888_to_yuyv(const std::vector<unsigned char>& source, int width,
-                                        int height) {
+std::vector<u16> ConvertRgb24ToYuv422(const std::vector<unsigned char>& source, int width,
+                                      int height) {
     std::vector<u16> buffer(width * height, 0);
     auto dest = buffer.begin();
     bool write = false;
@@ -204,6 +204,36 @@ std::vector<u16> convert_rgb888_to_yuyv(const std::vector<unsigned char>& source
     }
 
     return buffer;
+}
+
+std::vector<unsigned char> FlipRgb24ImageHorizontally(int width, int height,
+                                                      const std::vector<unsigned char>& image) {
+    std::vector<unsigned char> flipped = image;
+
+    for (int i = 0; i < width; ++i) {
+        for (int j = 0; j < height; ++j) {
+            for (int k = 0; k < 3; ++k) {
+                flipped[(i + j * width) * 3 + k] = image[(j * width - i) * 3 + k];
+            }
+        }
+    }
+
+    return flipped;
+}
+
+std::vector<unsigned char> FlipRgb24ImageVertically(const int width, const int height,
+                                                    const std::vector<unsigned char>& image) {
+    std::vector<unsigned char> flipped = image;
+
+    for (int i = 0; i < width; ++i) {
+        for (int j = 0; j < height; ++j) {
+            for (int k = 0; k < 3; ++k) {
+                flipped[(i + j * width) * 3 + k] = image[(i + (height - 1 - j) * width) * 3 + k];
+            }
+        }
+    }
+
+    return flipped;
 }
 
 } // namespace Camera

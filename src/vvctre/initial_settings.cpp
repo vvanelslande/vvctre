@@ -748,15 +748,25 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
 
                         if (ImGui::Selectable(
-                                "image (parameter: file path or URL)",
-                                Settings::values.camera_engine[static_cast<std::size_t>(
-                                    Service::CAM::CameraIndex::InnerCamera)] == "image")) {
+                                "image", Settings::values.camera_engine[static_cast<std::size_t>(
+                                             Service::CAM::CameraIndex::InnerCamera)] == "image")) {
                             Settings::values.camera_engine[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::InnerCamera)] = "image";
                         }
 
+                        if (ImGui::Selectable(
+                                "tcp_client_rgb24_640x480",
+                                Settings::values.camera_engine[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::InnerCamera)] ==
+                                    "tcp_client_rgb24_640x480")) {
+                            Settings::values.camera_engine[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::InnerCamera)] =
+                                "tcp_client_rgb24_640x480";
+                        }
+
                         ImGui::EndCombo();
                     }
+
                     if (Settings::values.camera_engine[static_cast<std::size_t>(
                             Service::CAM::CameraIndex::InnerCamera)] == "image") {
                         GUI_CameraAddBrowse(
@@ -764,10 +774,36 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             static_cast<std::size_t>(Service::CAM::CameraIndex::InnerCamera));
 
                         ImGui::InputText(
-                            "Parameter##Inner",
+                            "File Path/URL##Inner",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::InnerCamera)]);
+                    } else if (Settings::values.camera_engine[static_cast<std::size_t>(
+                                   Service::CAM::CameraIndex::InnerCamera)] ==
+                               "tcp_client_rgb24_640x480") {
+                        Common::ParamPackage params(
+                            Settings::values.camera_parameter[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::InnerCamera)]);
 
+                        std::string ip = params.Get("ip", "127.0.0.1");
+                        u16 port = static_cast<u16>(params.Get("port", 8000));
+
+                        if (ImGui::InputText("IP##Inner", &ip)) {
+                            params.Set("ip", ip);
+
+                            Settings::values.camera_parameter[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::InnerCamera)] = params.Serialize();
+                        }
+
+                        if (ImGui::InputScalar("Port##Inner", ImGuiDataType_U16, &port, 0, 0)) {
+                            params.Set("port", static_cast<int>(port));
+
+                            Settings::values.camera_parameter[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::InnerCamera)] = params.Serialize();
+                        }
+                    }
+
+                    if (Settings::values.camera_engine[static_cast<std::size_t>(
+                            Service::CAM::CameraIndex::InnerCamera)] != "blank") {
                         if (ImGui::BeginCombo("Flip##Inner", [] {
                                 switch (Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::InnerCamera)]) {
@@ -845,11 +881,21 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
 
                         if (ImGui::Selectable(
-                                "image (parameter: file path or URL)",
+                                "image",
                                 Settings::values.camera_engine[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterLeftCamera)] == "image")) {
                             Settings::values.camera_engine[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterLeftCamera)] = "image";
+                        }
+
+                        if (ImGui::Selectable(
+                                "tcp_client_rgb24_640x480",
+                                Settings::values.camera_engine[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterLeftCamera)] ==
+                                    "tcp_client_rgb24_640x480")) {
+                            Settings::values.camera_engine[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::OuterLeftCamera)] =
+                                "tcp_client_rgb24_640x480";
                         }
 
                         ImGui::EndCombo();
@@ -862,10 +908,37 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             static_cast<std::size_t>(Service::CAM::CameraIndex::OuterLeftCamera));
 
                         ImGui::InputText(
-                            "Parameter##Outer Left",
+                            "File Path/URL##Outer Left",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterLeftCamera)]);
+                    } else if (Settings::values.camera_engine[static_cast<std::size_t>(
+                                   Service::CAM::CameraIndex::OuterLeftCamera)] ==
+                               "tcp_client_rgb24_640x480") {
+                        Common::ParamPackage params(
+                            Settings::values.camera_parameter[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::OuterLeftCamera)]);
 
+                        std::string ip = params.Get("ip", "127.0.0.1");
+                        u16 port = static_cast<u16>(params.Get("port", 8000));
+
+                        if (ImGui::InputText("IP##Outer Left", &ip)) {
+                            params.Set("ip", ip);
+
+                            Settings::values.camera_parameter[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::OuterLeftCamera)] = params.Serialize();
+                        }
+
+                        if (ImGui::InputScalar("Port##Outer Left", ImGuiDataType_U16, &port, 0,
+                                               0)) {
+                            params.Set("port", static_cast<int>(port));
+
+                            Settings::values.camera_parameter[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::OuterLeftCamera)] = params.Serialize();
+                        }
+                    }
+
+                    if (Settings::values.camera_engine[static_cast<std::size_t>(
+                            Service::CAM::CameraIndex::OuterLeftCamera)] != "blank") {
                         if (ImGui::BeginCombo("Flip##Outer Left", [] {
                                 switch (Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterLeftCamera)]) {
@@ -943,11 +1016,21 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
 
                         if (ImGui::Selectable(
-                                "image (parameter: file path or URL)",
+                                "image",
                                 Settings::values.camera_engine[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterRightCamera)] == "image")) {
                             Settings::values.camera_engine[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterRightCamera)] = "image";
+                        }
+
+                        if (ImGui::Selectable(
+                                "tcp_client_rgb24_640x480",
+                                Settings::values.camera_engine[static_cast<std::size_t>(
+                                    Service::CAM::CameraIndex::OuterRightCamera)] ==
+                                    "tcp_client_rgb24_640x480")) {
+                            Settings::values.camera_engine[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::OuterRightCamera)] =
+                                "tcp_client_rgb24_640x480";
                         }
 
                         ImGui::EndCombo();
@@ -960,10 +1043,37 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                             static_cast<std::size_t>(Service::CAM::CameraIndex::OuterRightCamera));
 
                         ImGui::InputText(
-                            "Parameter##Outer Right",
+                            "File Path/URL##Outer Right",
                             &Settings::values.camera_parameter[static_cast<std::size_t>(
                                 Service::CAM::CameraIndex::OuterRightCamera)]);
+                    } else if (Settings::values.camera_engine[static_cast<std::size_t>(
+                                   Service::CAM::CameraIndex::OuterRightCamera)] ==
+                               "tcp_client_rgb24_640x480") {
+                        Common::ParamPackage params(
+                            Settings::values.camera_parameter[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::OuterRightCamera)]);
 
+                        std::string ip = params.Get("ip", "127.0.0.1");
+                        u16 port = static_cast<u16>(params.Get("port", 8000));
+
+                        if (ImGui::InputText("IP##Outer Right", &ip)) {
+                            params.Set("ip", ip);
+
+                            Settings::values.camera_parameter[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::OuterRightCamera)] = params.Serialize();
+                        }
+
+                        if (ImGui::InputScalar("Port##Outer Right", ImGuiDataType_U16, &port, 0,
+                                               0)) {
+                            params.Set("port", static_cast<int>(port));
+
+                            Settings::values.camera_parameter[static_cast<std::size_t>(
+                                Service::CAM::CameraIndex::OuterRightCamera)] = params.Serialize();
+                        }
+                    }
+
+                    if (Settings::values.camera_engine[static_cast<std::size_t>(
+                            Service::CAM::CameraIndex::OuterRightCamera)] != "blank") {
                         if (ImGui::BeginCombo("Flip##Outer Right", [] {
                                 switch (Settings::values.camera_flip[static_cast<std::size_t>(
                                     Service::CAM::CameraIndex::OuterRightCamera)]) {

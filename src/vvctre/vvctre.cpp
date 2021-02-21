@@ -48,6 +48,7 @@
 #include "vvctre/applets/mii_selector.h"
 #include "vvctre/applets/swkbd.h"
 #include "vvctre/camera/image.h"
+#include "vvctre/camera/tcp_client_rgb24_640x480.h"
 #include "vvctre/common.h"
 #include "vvctre/emu_window/emu_window_sdl2.h"
 #include "vvctre/initial_settings.h"
@@ -454,6 +455,8 @@ int main(int argc, char** argv) {
     system.RegisterSoftwareKeyboard(std::make_shared<Frontend::SDL2_SoftwareKeyboard>(*emu_window));
     system.RegisterMiiSelector(std::make_shared<Frontend::SDL2_MiiSelector>(*emu_window));
     Camera::RegisterFactory("image", std::make_unique<Camera::ImageCameraFactory>());
+    Camera::RegisterFactory("tcp_client_rgb24_640x480",
+                            std::make_unique<Camera::TCP_Client_RGB24_640x480_Camera_Factory>());
 
     plugin_manager.BeforeLoading();
     cfg.reset();

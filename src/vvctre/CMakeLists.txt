@@ -14,6 +14,8 @@ add_executable(vvctre
     applets/mii_selector.h
     camera/image.cpp
     camera/image.h
+    camera/tcp_client_rgb24_640x480.cpp
+    camera/tcp_client_rgb24_640x480.h
     camera/util.cpp
     camera/util.h
     function_logger.cpp

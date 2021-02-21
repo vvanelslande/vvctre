@@ -27,20 +27,7 @@ std::unique_ptr<CameraInterface> CreateCamera(const std::string& name, const std
     if (name != "blank") {
         LOG_ERROR(Service_CAM, "Unknown camera {}", name);
     }
-    return std::make_unique<BlankCamera>();
-}
 
-std::unique_ptr<CameraInterface> CreateCameraPreview(const std::string& name,
-                                                     const std::string& parameter, int width,
-                                                     int height, const Service::CAM::Flip& flip) {
-    auto pair = factories.find(name);
-    if (pair != factories.end()) {
-        return pair->second->CreatePreview(parameter, width, height, flip);
-    }
-
-    if (name != "blank") {
-        LOG_ERROR(Service_CAM, "Unknown camera {}", name);
-    }
     return std::make_unique<BlankCamera>();
 }
 

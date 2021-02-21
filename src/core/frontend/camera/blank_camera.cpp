@@ -31,8 +31,4 @@ std::vector<u16> BlankCamera::ReceiveFrame() {
     return std::vector<u16>(width * height, output_rgb ? 0 : 0x8000);
 }
 
-bool BlankCamera::IsPreviewAvailable() {
-    return true;
-}
-
 } // namespace Camera

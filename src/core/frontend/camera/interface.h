@@ -56,14 +56,6 @@ public:
      *     where width and height are set by a call to SetResolution.
      */
     virtual std::vector<u16> ReceiveFrame() = 0;
-
-    /**
-     * Test if the camera is opened successfully and can receive a preview frame. Only used for
-     * preview. This function should be only called between a StartCapture call and a StopCapture
-     * call.
-     * @returns true if the camera is opened successfully and false otherwise
-     */
-    virtual bool IsPreviewAvailable() = 0;
 };
 
 } // namespace Camera

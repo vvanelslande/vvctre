@@ -11,8 +11,9 @@ namespace Camera {
 
 class ImageCamera : public CameraInterface {
 public:
-    ImageCamera(const std::string& file, const Service::CAM::Flip& flip);
+    explicit ImageCamera(const std::string& file, const Service::CAM::Flip& flip);
     ~ImageCamera();
+
     void StartCapture() override;
     void StopCapture() override;
     void SetResolution(const Service::CAM::Resolution& resolution) override;
@@ -20,11 +21,10 @@ public:
     void SetEffect(Service::CAM::Effect effect) override;
     void SetFormat(Service::CAM::OutputFormat format) override;
     std::vector<u16> ReceiveFrame() override;
-    bool IsPreviewAvailable() override;
 
 private:
-    int file_width{};
-    int file_height{};
+    int width{};
+    int height{};
     int requested_width{};
     int requested_height{};
     Service::CAM::OutputFormat format{};

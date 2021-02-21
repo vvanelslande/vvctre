@@ -18,7 +18,6 @@ public:
     void SetEffect(Service::CAM::Effect) override;
     void SetFormat(Service::CAM::OutputFormat) override;
     std::vector<u16> ReceiveFrame() override;
-    bool IsPreviewAvailable() override;
 
 private:
     int width = 0;

@@ -23,22 +23,6 @@ public:
      */
     virtual std::unique_ptr<CameraInterface> Create(const std::string& parameter,
                                                     const Service::CAM::Flip& flip) = 0;
-
-    /**
-     * Creates a camera object for preview.
-     * @param parameter Parameter to create the camera.
-     *                  The implementation can decide the meaning of this string.
-     * @param flip The image flip to apply
-     * @returns a unique_ptr to the created camera object.
-     * Note: The default implementation for this is to call Create().
-     *   Derived classes may have other implementations.
-     *   For example, A dialog may be used instead of LOG_ERROR when error occurs.
-     */
-    virtual std::unique_ptr<CameraInterface> CreatePreview(const std::string& parameter, int width,
-                                                           int height,
-                                                           const Service::CAM::Flip& flip) {
-        return Create(parameter, flip);
-    }
 };
 
 /**
@@ -56,15 +40,5 @@ void RegisterFactory(const std::string& name, std::unique_ptr<CameraFactory> fac
  */
 std::unique_ptr<CameraInterface> CreateCamera(const std::string& name, const std::string& parameter,
                                               const Service::CAM::Flip& flip);
-
-/**
- * Creates a camera from the factory for previewing.
- * @param name Identifier of the camera factory.
- * @param parameter Parameter to create the camera.
- *                  The meaning of this string is defined by the factory.
- */
-std::unique_ptr<CameraInterface> CreateCameraPreview(const std::string& name,
-                                                     const std::string& parameter, int width,
-                                                     int height, const Service::CAM::Flip& flip);
 
 } // namespace Camera
