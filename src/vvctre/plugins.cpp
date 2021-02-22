@@ -4134,6 +4134,10 @@ void vvctre_disable_built_in_logger(void* plugin_manager) {
     static_cast<PluginManager*>(plugin_manager)->built_in_logger_enabled = false;
 }
 
+void vvctre_free(void* p) {
+    std::free(p);
+}
+
 std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_load_file", (void*)&vvctre_load_file},
     {"vvctre_install_cia", (void*)&vvctre_install_cia},
@@ -4990,4 +4994,5 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_set_show_fatal_error_messages", (void*)&vvctre_set_show_fatal_error_messages},
     {"vvctre_get_show_fatal_error_messages", (void*)&vvctre_get_show_fatal_error_messages},
     {"vvctre_disable_built_in_logger", (void*)&vvctre_disable_built_in_logger},
+    {"vvctre_free", (void*)&vvctre_free},
 };
