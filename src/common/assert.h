@@ -8,15 +8,8 @@
 #include "common/common_funcs.h"
 #include "common/logging/log.h"
 
-// For asserts we'd like to keep all the junk executed when an assert happens away from the
-// important code in the function. One way of doing this is to put all the relevant code inside a
-// lambda and force the compiler to not inline it. Unfortunately, MSVC seems to have no syntax to
-// specify __declspec on lambda functions, so what we do instead is define a noinline wrapper
-// template that calls the lambda. This seems to generate an extra instruction at the call-site
-// compared to the ideal implementation (which wouldn't support ASSERT_MSG parameters), but is good
-// enough for our purposes.
 template <typename Fn>
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 __declspec(noinline, noreturn)
 #elif defined(__GNUC__)
     __attribute__((noinline, noreturn, cold))
@@ -24,7 +17,7 @@ __declspec(noinline, noreturn)
     static void assert_noinline_call(const Fn& fn) {
     fn();
     Crash();
-    exit(1); // Keeps GCC's mouth shut about this actually returning
+    std::exit(1);
 }
 
 #define ASSERT(_a_)                                                                                \
@@ -48,7 +41,7 @@ __declspec(noinline, noreturn)
 #ifdef _DEBUG
 #define DEBUG_ASSERT(_a_) ASSERT(_a_)
 #define DEBUG_ASSERT_MSG(_a_, ...) ASSERT_MSG(_a_, __VA_ARGS__)
-#else // not debug
+#else
 #define DEBUG_ASSERT(_a_)
 #define DEBUG_ASSERT_MSG(_a_, _desc_, ...)
 #endif

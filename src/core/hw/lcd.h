@@ -53,10 +53,7 @@ struct Regs {
 };
 static_assert(std::is_standard_layout<Regs>::value, "Structure does not use standard layout");
 
-// TODO: MSVC does not support using offsetof() on non-static data members even though this
-//       is technically allowed since C++11. This macro should be enabled once MSVC adds
-//       support for that.
-#ifndef _MSC_VER
+#ifndef _WIN32
 #define ASSERT_REG_POSITION(field_name, position)                                                  \
     static_assert(offsetof(Regs, field_name) == position * 4,                                      \
                   "Field " #field_name " has invalid position")
@@ -67,7 +64,7 @@ ASSERT_REG_POSITION(color_fill_bottom, 0x281);
 ASSERT_REG_POSITION(backlight_bottom, 0x290);
 
 #undef ASSERT_REG_POSITION
-#endif // !defined(_MSC_VER)
+#endif
 
 extern Regs g_regs;
 

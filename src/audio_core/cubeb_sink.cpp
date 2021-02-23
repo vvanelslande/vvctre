@@ -153,7 +153,7 @@ void CubebSink::Impl::LogCallback(char const* format, ...) {
     std::array<char, 512> buffer;
     std::va_list args;
     va_start(args, format);
-#ifdef _MSC_VER
+#ifdef _WIN32
     vsprintf_s(buffer.data(), buffer.size(), format, args);
 #else
     vsnprintf(buffer.data(), buffer.size(), format, args);

@@ -1,4 +1,8 @@
 add_library(common STATIC
+    x64/cpu_detect.cpp
+    x64/cpu_detect.h
+    x64/xbyak_abi.h
+    x64/xbyak_util.h
     alignment.h
     assert.h
     bit_field.h
@@ -45,23 +49,9 @@ else()
     target_sources(common PRIVATE fastmem_mapper_generic.cpp)
 endif()
 
-if(ARCHITECTURE_x86_64)
-    target_sources(common
-        PRIVATE
-            x64/cpu_detect.cpp
-            x64/cpu_detect.h
-            x64/xbyak_abi.h
-            x64/xbyak_util.h
-    )
-endif()
-
-target_link_libraries(common PUBLIC fmt ${PLATFORM_LIBRARIES} PRIVATE mbedtls whereami utf8cpp)
+target_link_libraries(common PUBLIC fmt ${PLATFORM_LIBRARIES} PRIVATE mbedtls whereami utf8cpp xbyak)
 target_include_directories(common PRIVATE ${PROJECT_SOURCE_DIR}/externals/mbedtls/include)
 
-if (MSVC)
+if(WIN32)
     target_link_libraries(common PRIVATE Crypt32.lib)
-endif()
-
-if (ARCHITECTURE_x86_64)
-    target_link_libraries(common PRIVATE xbyak)
 endif()

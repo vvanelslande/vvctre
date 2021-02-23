@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <string_view>
 #include <utility>
-#include "flags.h"
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <fmt/format.h>
@@ -47,13 +46,16 @@
 #include "vvctre/plugins.h"
 
 #ifdef _WIN32
+#define dlsym GetProcAddress
 #define VVCTRE_STRDUP _strdup
 #else
+#include <dlfcn.h>
+
 #define VVCTRE_STRDUP strdup
 #endif
 
 PluginManager::PluginManager(Core::System& core, SDL_Window* window, const flags::args& args)
-    : window(window) {
+    : window(window), args(args) {
     int length = wai_getExecutablePath(nullptr, 0, nullptr);
     std::string vvctre_folder(length, '\0');
     int dirname_length = 0;
@@ -61,43 +63,48 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window, const flags
     vvctre_folder = vvctre_folder.substr(0, dirname_length);
 
     const auto load = [this, &core](const std::string& path) {
-        void* handle = SDL_LoadObject(path.c_str());
-        if (handle != NULL) {
-            void* get_required_function_count =
-                SDL_LoadFunction(handle, "GetRequiredFunctionCount");
-            void* get_required_function_names =
-                SDL_LoadFunction(handle, "GetRequiredFunctionNames");
-            void* plugin_loaded = SDL_LoadFunction(handle, "PluginLoaded");
+#ifdef _WIN32
+        HMODULE handle = LoadLibraryA(path.c_str());
+#else
+        void* handle = dlopen(path.c_str(), RTLD_NOW | RTLD_GLOBAL);
+#endif
+
+        if (handle != nullptr) {
+            void* get_required_function_count = dlsym(handle, "GetRequiredFunctionCount");
+            void* get_required_function_names = dlsym(handle, "GetRequiredFunctionNames");
+            void* plugin_loaded = dlsym(handle, "PluginLoaded");
+
             if (get_required_function_count == nullptr || get_required_function_names == nullptr ||
                 plugin_loaded == nullptr) {
-                SDL_UnloadObject(handle);
+#ifdef _WIN32
+                FreeLibrary(handle);
+#else
+                dlclose(handle);
+#endif
             } else {
                 Plugin plugin;
                 plugin.handle = handle;
-                plugin.before_drawing_fps = (decltype(Plugin::before_drawing_fps))SDL_LoadFunction(
-                    handle, "BeforeDrawingFPS");
-                plugin.add_menu = (decltype(Plugin::add_menu))SDL_LoadFunction(handle, "AddMenu");
-                plugin.add_tab = (decltype(Plugin::add_tab))SDL_LoadFunction(handle, "AddTab");
-                plugin.after_swap_window = (decltype(Plugin::after_swap_window))SDL_LoadFunction(
-                    handle, "AfterSwapWindow");
+                plugin.before_drawing_fps =
+                    (decltype(Plugin::before_drawing_fps))dlsym(handle, "BeforeDrawingFPS");
+                plugin.add_menu = (decltype(Plugin::add_menu))dlsym(handle, "AddMenu");
+                plugin.add_tab = (decltype(Plugin::add_tab))dlsym(handle, "AddTab");
+                plugin.after_swap_window =
+                    (decltype(Plugin::after_swap_window))dlsym(handle, "AfterSwapWindow");
                 plugin.screenshot_callback =
-                    (decltype(Plugin::screenshot_callback))SDL_LoadFunction(handle,
-                                                                            "ScreenshotCallback");
-                void* log = SDL_LoadFunction(handle, "Log");
+                    (decltype(Plugin::screenshot_callback))dlsym(handle, "ScreenshotCallback");
+                void* log = dlsym(handle, "Log");
                 if (log != nullptr) {
                     Log::AddBackend(std::make_unique<Log::FunctionLogger>(
                         (decltype(Log::FunctionLogger::function))log,
                         fmt::format("Plugin {}", FileUtil::GetFilename(path))));
                 }
-                void* override_wlan_comm_id_check =
-                    SDL_LoadFunction(handle, "OverrideWlanCommIdCheck");
+                void* override_wlan_comm_id_check = dlsym(handle, "OverrideWlanCommIdCheck");
                 if (override_wlan_comm_id_check != nullptr) {
                     Service::NWM::OverrideWlanCommIdCheck =
                         [f = (bool (*)(u32, u32))override_wlan_comm_id_check](
                             u32 in_beacon, u32 requested) { return f(in_beacon, requested); };
                 }
-                void* override_on_load_failed_function =
-                    SDL_LoadFunction(handle, "OverrideOnLoadFailed");
+                void* override_on_load_failed_function = dlsym(handle, "OverrideOnLoadFailed");
                 if (override_on_load_failed_function != nullptr) {
                     core.SetOnLoadFailed([f = (void (*)(Core::System::ResultStatus))
                                               override_on_load_failed_function](
@@ -155,14 +162,18 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window, const flags
 }
 
 PluginManager::~PluginManager() {
-    for (const auto& plugin : plugins) {
-        SDL_UnloadObject(plugin.handle);
+    for (Plugin& plugin : plugins) {
+#ifdef _WIN32
+        FreeLibrary((HMODULE)plugin.handle);
+#else
+        dlclose(plugin.handle);
+#endif
     }
 }
 
 void PluginManager::InitialSettingsOpening() {
-    for (const auto& plugin : plugins) {
-        void* initial_settings_opening = SDL_LoadFunction(plugin.handle, "InitialSettingsOpening");
+    for (Plugin& plugin : plugins) {
+        void* initial_settings_opening = dlsym(plugin.handle, "InitialSettingsOpening");
         if (initial_settings_opening != nullptr) {
             ((void (*)())initial_settings_opening)();
         }
@@ -170,9 +181,8 @@ void PluginManager::InitialSettingsOpening() {
 }
 
 void PluginManager::InitialSettingsOkPressed() {
-    for (const auto& plugin : plugins) {
-        void* initial_settings_ok_pressed =
-            SDL_LoadFunction(plugin.handle, "InitialSettingsOkPressed");
+    for (Plugin& plugin : plugins) {
+        void* initial_settings_ok_pressed = dlsym(plugin.handle, "InitialSettingsOkPressed");
         if (initial_settings_ok_pressed != nullptr) {
             ((void (*)())initial_settings_ok_pressed)();
         }
@@ -180,8 +190,8 @@ void PluginManager::InitialSettingsOkPressed() {
 }
 
 void PluginManager::BeforeLoading() {
-    for (const auto& plugin : plugins) {
-        void* before_loading = SDL_LoadFunction(plugin.handle, "BeforeLoading");
+    for (Plugin& plugin : plugins) {
+        void* before_loading = dlsym(plugin.handle, "BeforeLoading");
         if (before_loading != nullptr) {
             ((void (*)())before_loading)();
         }
@@ -189,9 +199,8 @@ void PluginManager::BeforeLoading() {
 }
 
 void PluginManager::BeforeLoadingAfterFirstTime() {
-    for (const auto& plugin : plugins) {
-        void* before_loading_after_first_time =
-            SDL_LoadFunction(plugin.handle, "BeforeLoadingAfterFirstTime");
+    for (Plugin& plugin : plugins) {
+        void* before_loading_after_first_time = dlsym(plugin.handle, "BeforeLoadingAfterFirstTime");
         if (before_loading_after_first_time != nullptr) {
             ((void (*)())before_loading_after_first_time)();
         }
@@ -199,8 +208,8 @@ void PluginManager::BeforeLoadingAfterFirstTime() {
 }
 
 void PluginManager::EmulationStarting() {
-    for (const auto& plugin : plugins) {
-        void* emulation_starting = SDL_LoadFunction(plugin.handle, "EmulationStarting");
+    for (Plugin& plugin : plugins) {
+        void* emulation_starting = dlsym(plugin.handle, "EmulationStarting");
         if (emulation_starting != nullptr) {
             ((void (*)())emulation_starting)();
         }
@@ -208,9 +217,9 @@ void PluginManager::EmulationStarting() {
 }
 
 void PluginManager::EmulationStartingAfterFirstTime() {
-    for (const auto& plugin : plugins) {
+    for (Plugin& plugin : plugins) {
         void* emulation_starting_after_first_time =
-            SDL_LoadFunction(plugin.handle, "EmulationStartingAfterFirstTime");
+            dlsym(plugin.handle, "EmulationStartingAfterFirstTime");
         if (emulation_starting_after_first_time != nullptr) {
             ((void (*)())emulation_starting_after_first_time)();
         }
@@ -218,8 +227,8 @@ void PluginManager::EmulationStartingAfterFirstTime() {
 }
 
 void PluginManager::EmulatorClosing() {
-    for (const auto& plugin : plugins) {
-        void* emulator_closing = SDL_LoadFunction(plugin.handle, "EmulatorClosing");
+    for (Plugin& plugin : plugins) {
+        void* emulator_closing = dlsym(plugin.handle, "EmulatorClosing");
         if (emulator_closing != nullptr) {
             ((void (*)())emulator_closing)();
         }
@@ -227,8 +236,8 @@ void PluginManager::EmulatorClosing() {
 }
 
 void PluginManager::FatalError() {
-    for (const auto& plugin : plugins) {
-        void* fatal_error = SDL_LoadFunction(plugin.handle, "FatalError");
+    for (Plugin& plugin : plugins) {
+        void* fatal_error = dlsym(plugin.handle, "FatalError");
         if (fatal_error != nullptr) {
             ((void (*)())fatal_error)();
         }
@@ -236,7 +245,7 @@ void PluginManager::FatalError() {
 }
 
 void PluginManager::BeforeDrawingFPS() {
-    for (const auto& plugin : plugins) {
+    for (Plugin& plugin : plugins) {
         if (plugin.before_drawing_fps != nullptr) {
             plugin.before_drawing_fps();
         }
@@ -244,7 +253,7 @@ void PluginManager::BeforeDrawingFPS() {
 }
 
 void PluginManager::AddMenus() {
-    for (const auto& plugin : plugins) {
+    for (Plugin& plugin : plugins) {
         if (plugin.add_menu != nullptr) {
             plugin.add_menu();
         }
@@ -252,7 +261,7 @@ void PluginManager::AddMenus() {
 }
 
 void PluginManager::AddTabs() {
-    for (const auto& plugin : plugins) {
+    for (Plugin& plugin : plugins) {
         if (plugin.add_tab != nullptr) {
             plugin.add_tab();
         }
@@ -260,9 +269,17 @@ void PluginManager::AddTabs() {
 }
 
 void PluginManager::AfterSwapWindow() {
-    for (const auto& plugin : plugins) {
+    for (Plugin& plugin : plugins) {
         if (plugin.after_swap_window != nullptr) {
             plugin.after_swap_window();
+        }
+    }
+}
+
+void PluginManager::CallScreenshotCallbacks(void* data) {
+    for (Plugin& plugin : plugins) {
+        if (plugin.screenshot_callback != nullptr) {
+            plugin.screenshot_callback(data);
         }
     }
 }
@@ -277,14 +294,6 @@ void PluginManager::DeleteButtonDevice(void* device) {
                             [device](auto& b) { return b.get() == device; });
     if (itr != buttons.end()) {
         buttons.erase(itr);
-    }
-}
-
-void PluginManager::CallScreenshotCallbacks(void* data) {
-    for (const auto& plugin : plugins) {
-        if (plugin.screenshot_callback != nullptr) {
-            plugin.screenshot_callback(data);
-        }
     }
 }
 
@@ -4158,6 +4167,19 @@ const char* vvctre_get_file_path(void* core) {
     return static_cast<Core::System*>(core)->GetFilePath().c_str();
 }
 
+bool vvctre_get_option_bool(void* plugin_manager, const char* name, const bool default_value) {
+    bool default_value_ = default_value;
+
+    return static_cast<PluginManager*>(plugin_manager)
+        ->args.get<bool>(std::string(name), std::move(default_value_));
+}
+
+char* vvctre_get_option_string(void* plugin_manager, const char* name, const char* default_value) {
+    return VVCTRE_STRDUP(static_cast<PluginManager*>(plugin_manager)
+                             ->args.get<std::string>(std::string(name), std::string(default_value))
+                             .c_str());
+}
+
 std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_load_file", (void*)&vvctre_load_file},
     {"vvctre_install_cia", (void*)&vvctre_install_cia},
@@ -5018,4 +5040,6 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_request_shutdown", (void*)&vvctre_request_shutdown},
     {"vvctre_exit", (void*)&vvctre_exit},
     {"vvctre_get_file_path", (void*)&vvctre_get_file_path},
+    {"vvctre_get_option_bool", (void*)&vvctre_get_option_bool},
+    {"vvctre_get_option_string", (void*)&vvctre_get_option_string},
 };

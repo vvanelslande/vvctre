@@ -10,6 +10,10 @@
 #include "common/common_types.h"
 #include "core/frontend/input.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 namespace Core {
 class System;
 } // namespace Core
@@ -33,19 +37,25 @@ public:
     void AddMenus();
     void AddTabs();
     void AfterSwapWindow();
+    void CallScreenshotCallbacks(void* data);
     void* NewButtonDevice(const char* params);
     void DeleteButtonDevice(void* device);
-    void CallScreenshotCallbacks(void* data);
 
     bool paused = false;
     SDL_Window* window = nullptr;
     void* cfg = nullptr;
     bool show_fatal_error_messages = true;
     bool built_in_logger_enabled = true;
+    const flags::args& args;
 
 private:
     struct Plugin {
-        void* handle = nullptr;
+#ifdef _WIN32
+        HMODULE handle;
+#else
+        void* handle;
+#endif
+
         void (*before_drawing_fps)() = nullptr;
         void (*add_menu)() = nullptr;
         void (*add_tab)() = nullptr;

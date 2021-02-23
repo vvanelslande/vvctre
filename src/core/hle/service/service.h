@@ -118,9 +118,6 @@ class ServiceFramework : public ServiceFrameworkBase {
 protected:
     /// Contains information about a request type which is handled by the service.
     struct FunctionInfo : FunctionInfoBase {
-        // TODO(yuriks): This function could be constexpr, but clang is the only compiler that
-        // doesn't emit an ICE or a wrong diagnostic because of the static_cast.
-
         /**
          * Constructs a FunctionInfo for a function.
          *

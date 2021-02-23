@@ -32,13 +32,6 @@
 #include "common/cityhash.h"
 #include "common/swap.h"
 
-#ifdef __GNUC__
-#define HAVE_BUILTIN_EXPECT 1
-#endif
-#ifdef COMMON_BIG_ENDIAN
-#define WORDS_BIGENDIAN 1
-#endif
-
 namespace Common {
 
 static u64 UNALIGNED_LOAD64(const char* p) {
@@ -53,20 +46,12 @@ static u32 UNALIGNED_LOAD32(const char* p) {
     return result;
 }
 
-#ifdef WORDS_BIGENDIAN
+#ifdef COMMON_BIG_ENDIAN
 #define u32_in_expected_order(x) (swap32(x))
 #define u64_in_expected_order(x) (swap64(x))
 #else
 #define u32_in_expected_order(x) (x)
 #define u64_in_expected_order(x) (x)
-#endif
-
-#if !defined(LIKELY)
-#if HAVE_BUILTIN_EXPECT
-#define LIKELY(x) (__builtin_expect(!!(x), 1))
-#else
-#define LIKELY(x) (x)
-#endif
 #endif
 
 static u64 Fetch64(const char* p) {
@@ -139,7 +124,7 @@ static u64 HashLen17to32(const char* s, std::size_t len) {
     return HashLen16(Rotate(a + b, 43) + Rotate(c, 30) + d, a + Rotate(b + k2, 18) + c, mul);
 }
 
-// Return a 16-byte hash for 48 bytes.  Quick and dirty.
+// Return a 16-byte hash for 48 bytes. Quick and dirty.
 // Callers do best to use "random-looking" values for a and b.
 static std::pair<u64, u64> WeakHashLen32WithSeeds(u64 w, u64 x, u64 y, u64 z, u64 a, u64 b) {
     a += w;
@@ -151,7 +136,7 @@ static std::pair<u64, u64> WeakHashLen32WithSeeds(u64 w, u64 x, u64 y, u64 z, u6
     return std::make_pair(a + z, b + c);
 }
 
-// Return a 16-byte hash for s[0] ... s[31], a, and b.  Quick and dirty.
+// Return a 16-byte hash for s[0] ... s[31], a, and b. Quick and dirty.
 static std::pair<u64, u64> WeakHashLen32WithSeeds(const char* s, u64 a, u64 b) {
     return WeakHashLen32WithSeeds(Fetch64(s), Fetch64(s + 8), Fetch64(s + 16), Fetch64(s + 24), a,
                                   b);
@@ -213,6 +198,7 @@ u64 CityHash64(const char* s, std::size_t len) {
         s += 64;
         len -= 64;
     } while (len != 0);
+
     return HashLen16(HashLen16(v.first, w.first) + ShiftMix(y) * k1 + z,
                      HashLen16(v.second, w.second) + x);
 }

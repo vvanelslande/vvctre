@@ -27,6 +27,7 @@
 #include <mbedtls/ssl.h>
 #include <nlohmann/json.hpp>
 #include <portable-file-dialogs.h>
+#include <whereami.h>
 #include "common/common_funcs.h"
 #include "common/file_util.h"
 #include "common/logging/backend.h"
@@ -54,7 +55,7 @@
 #include "vvctre/initial_settings.h"
 #include "vvctre/plugins.h"
 
-#ifndef _MSC_VER
+#ifndef _WIN32
 #include <unistd.h>
 #endif
 
@@ -136,6 +137,19 @@ int main(int argc, char** argv) {
 
     Core::System& system = Core::System::GetInstance();
     const flags::args args(argc, argv);
+
+    if (std::optional<std::string> o = args.get<std::string>("user-folder-path")) {
+        FileUtil::InitUserPaths(fmt::format("{}/", *o));
+    } else {
+        int length = wai_getExecutablePath(nullptr, 0, nullptr);
+        std::string vvctre_folder(length, '\0');
+        int dirname_length = 0;
+        wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
+        vvctre_folder = vvctre_folder.substr(0, dirname_length);
+
+        FileUtil::InitUserPaths(fmt::format("{}/user/", vvctre_folder.substr(0, dirname_length)));
+    }
+
     PluginManager plugin_manager(system, window, args);
     system.SetEmulationStartingAfterFirstTime(
         [&plugin_manager] { plugin_manager.EmulationStartingAfterFirstTime(); });
@@ -176,107 +190,111 @@ int main(int argc, char** argv) {
     std::atomic<bool> update_found{false};
     bool ok_multiplayer = false;
     if (args.positional().empty()) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            ImGui_ImplSDL2_ProcessEvent(&event);
-        }
+        if (args.get<bool>("disable-update-check", false)) {
+            SDL_Event event;
+            while (SDL_PollEvent(&event)) {
+                ImGui_ImplSDL2_ProcessEvent(&event);
+            }
 
-        if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
-            std::thread([&] {
-                CURL* curl = curl_easy_init();
-                if (curl == nullptr) {
-                    return;
-                }
+            if (!ImGui::IsKeyDown(SDL_SCANCODE_LSHIFT)) {
+                std::thread([&] {
+                    CURL* curl = curl_easy_init();
+                    if (curl == nullptr) {
+                        return;
+                    }
 
-                CURLcode error = curl_easy_setopt(
-                    curl, CURLOPT_URL,
-                    "https://api.github.com/repos/vvanelslande/vvctre/releases/latest");
-                if (error != CURLE_OK) {
+                    CURLcode error = curl_easy_setopt(
+                        curl, CURLOPT_URL,
+                        "https://api.github.com/repos/vvanelslande/vvctre/releases/latest");
+                    if (error != CURLE_OK) {
+                        curl_easy_cleanup(curl);
+                        return;
+                    }
+
+                    error = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+                    if (error != CURLE_OK) {
+                        curl_easy_cleanup(curl);
+                        return;
+                    }
+
+                    error = curl_easy_setopt(curl, CURLOPT_USERAGENT,
+                                             fmt::format("vvctre/{}.{}.{}", vvctre_version_major,
+                                                         vvctre_version_minor, vvctre_version_patch)
+                                                 .c_str());
+                    if (error != CURLE_OK) {
+                        curl_easy_cleanup(curl);
+                        return;
+                    }
+
+                    std::string body;
+
+                    error = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
+                    if (error != CURLE_OK) {
+                        curl_easy_cleanup(curl);
+                        return;
+                    }
+
+                    error = curl_easy_setopt(
+                        curl, CURLOPT_WRITEFUNCTION,
+                        static_cast<curl_write_callback>(
+                            [](char* ptr, std::size_t size, std::size_t nmemb, void* userdata) {
+                                const std::size_t realsize = size * nmemb;
+                                static_cast<std::string*>(userdata)->append(ptr, realsize);
+                                return realsize;
+                            }));
+                    if (error != CURLE_OK) {
+                        curl_easy_cleanup(curl);
+                        return;
+                    }
+
+                    error = curl_easy_setopt(
+                        curl, CURLOPT_SSL_CTX_FUNCTION,
+                        static_cast<CURLcode (*)(CURL * curl, void* ssl_ctx, void* userptr)>(
+                            [](CURL* curl, void* ssl_ctx, void* userptr) {
+                                void* chain =
+                                    Common::CreateCertificateChainWithSystemCertificates();
+                                if (chain != nullptr) {
+                                    mbedtls_ssl_conf_ca_chain(
+                                        static_cast<mbedtls_ssl_config*>(ssl_ctx),
+                                        static_cast<mbedtls_x509_crt*>(chain), NULL);
+                                } else {
+                                    return curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+                                }
+                                return CURLE_OK;
+                            }));
+                    if (error != CURLE_OK) {
+                        curl_easy_cleanup(curl);
+                        return;
+                    }
+
+                    error = curl_easy_perform(curl);
+                    if (error != CURLE_OK) {
+                        curl_easy_cleanup(curl);
+                        return;
+                    }
+
+                    long status_code;
+                    error = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status_code);
+                    if (error != CURLE_OK) {
+                        curl_easy_cleanup(curl);
+                        return;
+                    }
+
                     curl_easy_cleanup(curl);
-                    return;
-                }
 
-                error = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-                if (error != CURLE_OK) {
-                    curl_easy_cleanup(curl);
-                    return;
-                }
+                    if (status_code != 200) {
+                        return;
+                    }
 
-                error = curl_easy_setopt(curl, CURLOPT_USERAGENT,
-                                         fmt::format("vvctre/{}.{}.{}", vvctre_version_major,
-                                                     vvctre_version_minor, vvctre_version_patch)
-                                             .c_str());
-                if (error != CURLE_OK) {
-                    curl_easy_cleanup(curl);
-                    return;
-                }
+                    const nlohmann::json json = nlohmann::json::parse(body);
 
-                std::string body;
-
-                error = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
-                if (error != CURLE_OK) {
-                    curl_easy_cleanup(curl);
-                    return;
-                }
-
-                error = curl_easy_setopt(
-                    curl, CURLOPT_WRITEFUNCTION,
-                    static_cast<curl_write_callback>(
-                        [](char* ptr, std::size_t size, std::size_t nmemb, void* userdata) {
-                            const std::size_t realsize = size * nmemb;
-                            static_cast<std::string*>(userdata)->append(ptr, realsize);
-                            return realsize;
-                        }));
-                if (error != CURLE_OK) {
-                    curl_easy_cleanup(curl);
-                    return;
-                }
-
-                error = curl_easy_setopt(
-                    curl, CURLOPT_SSL_CTX_FUNCTION,
-                    static_cast<CURLcode (*)(CURL * curl, void* ssl_ctx, void* userptr)>(
-                        [](CURL* curl, void* ssl_ctx, void* userptr) {
-                            void* chain = Common::CreateCertificateChainWithSystemCertificates();
-                            if (chain != nullptr) {
-                                mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx),
-                                                          static_cast<mbedtls_x509_crt*>(chain),
-                                                          NULL);
-                            } else {
-                                return curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-                            }
-                            return CURLE_OK;
-                        }));
-                if (error != CURLE_OK) {
-                    curl_easy_cleanup(curl);
-                    return;
-                }
-
-                error = curl_easy_perform(curl);
-                if (error != CURLE_OK) {
-                    curl_easy_cleanup(curl);
-                    return;
-                }
-
-                long status_code;
-                error = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status_code);
-                if (error != CURLE_OK) {
-                    curl_easy_cleanup(curl);
-                    return;
-                }
-
-                curl_easy_cleanup(curl);
-
-                if (status_code != 200) {
-                    return;
-                }
-
-                const nlohmann::json json = nlohmann::json::parse(body);
-
-                if (fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor,
-                                vvctre_version_patch) != json["tag_name"].get<std::string>()) {
-                    update_found = true;
-                }
-            }).detach();
+                    if (json["tag_name"].get<std::string>() !=
+                        fmt::format("{}.{}.{}", vvctre_version_major, vvctre_version_minor,
+                                    vvctre_version_patch)) {
+                        update_found = true;
+                    }
+                }).detach();
+            }
         }
 
         InitialSettings(plugin_manager, window, *cfg, update_found, ok_multiplayer);

@@ -4,14 +4,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMakeModules)
 include(ExternalProject)
 
 # Dynarmic
-if (ARCHITECTURE_x86_64)
-    # Dynarmic will skip defining xbyak if it's already defined, we then define it below
-    add_library(xbyak INTERFACE)
-    option(DYNARMIC_TESTS OFF)
-    set(DYNARMIC_NO_BUNDLED_FMT ON)
-    set(DYNARMIC_FRONTENDS "A32")
-    add_subdirectory(dynarmic)
-endif()
+# Dynarmic will skip defining xbyak if it's already defined, we then define it below
+add_library(xbyak INTERFACE)
+option(DYNARMIC_TESTS OFF)
+set(DYNARMIC_NO_BUNDLED_FMT ON)
+set(DYNARMIC_FRONTENDS "A32")
+add_subdirectory(dynarmic)
 
 # libfmt
 add_subdirectory(fmt)
@@ -27,12 +25,10 @@ add_subdirectory(soundtouch)
 target_include_directories(SoundTouch INTERFACE ./soundtouch/include)
 
 # Xbyak
-if (ARCHITECTURE_x86_64)
-    # Defined before "dynarmic" above
-    # add_library(xbyak INTERFACE)
-    target_include_directories(xbyak INTERFACE ./xbyak/xbyak)
-    target_compile_definitions(xbyak INTERFACE XBYAK_NO_OP_NAMES)
-endif()
+# Defined before "dynarmic" above
+# add_library(xbyak INTERFACE)
+target_include_directories(xbyak INTERFACE ./xbyak/xbyak)
+target_compile_definitions(xbyak INTERFACE XBYAK_NO_OP_NAMES)
 
 # ENet
 add_subdirectory(enet)
@@ -51,7 +47,7 @@ add_library(glad STATIC
     glad/include/KHR/khrplatform.h
     glad/include/glad/glad.h)
 target_include_directories(glad PUBLIC ./glad/include)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+if (NOT WIN32)
     target_link_libraries(glad PRIVATE dl)
 endif()
 

@@ -2,6 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <dynarmic/exclusive_monitor.h>
 #include <memory>
 #include <utility>
 #include "audio_core/dsp_interface.h"
@@ -10,11 +11,7 @@
 #include "common/logging/log.h"
 #include "common/texture.h"
 #include "core/arm/arm_interface.h"
-#include "enet/enet.h"
-#ifdef ARCHITECTURE_x86_64
-#include <dynarmic/exclusive_monitor.h>
 #include "core/arm/dynarmic/arm_dynarmic.h"
-#endif
 #include "core/arm/dyncom/arm_dyncom.h"
 #include "core/cheats/cheats.h"
 #include "core/core.h"
@@ -34,6 +31,7 @@
 #include "core/loader/loader.h"
 #include "core/movie.h"
 #include "core/settings.h"
+#include "enet/enet.h"
 #include "network/room_member.h"
 #include "video_core/renderer_base.h"
 #include "video_core/video_core.h"
@@ -344,7 +342,6 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window, u32 system_mo
         *memory, *timing, [this] { PrepareReschedule(); }, system_mode);
 
     if (Settings::values.use_cpu_jit) {
-#ifdef ARCHITECTURE_x86_64
         exclusive_monitor =
             std::make_shared<Dynarmic::ExclusiveMonitor>(Settings::values.enable_core_2 ? 2 : 1);
 
@@ -355,16 +352,6 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window, u32 system_mo
             cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(
                 this, *memory, 1, timing->GetTimer(1), exclusive_monitor.get()));
         }
-#else
-        cpu_cores.push_back(std::make_shared<ARM_DynCom>(this, *memory, 0, timing->GetTimer(0)));
-
-        if (Settings::values.enable_core_2) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_DynCom>(this, *memory, 1, timing->GetTimer(1)));
-        }
-
-        LOG_WARNING(Core, "CPU JIT requested, but Dynarmic not available");
-#endif
     } else {
         cpu_cores.push_back(std::make_shared<ARM_DynCom>(this, *memory, 0, timing->GetTimer(0)));
 

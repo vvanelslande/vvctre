@@ -32,8 +32,10 @@ target_link_libraries(vvctre PRIVATE common core input_common audio_core network
 target_link_libraries(vvctre PRIVATE stb glad clip portable_file_dialogs imgui cryptopp libcurl mbedtls whereami nlohmann_json flags ${PLATFORM_LIBRARIES} Threads::Threads)
 target_include_directories(vvctre PRIVATE ${PROJECT_SOURCE_DIR}/externals/mbedtls/include)
 
-if (MSVC)
+if(WIN32)
     add_custom_command(TARGET vvctre POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SDL2_DLL_DIR}/SDL2.dll ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     )
+else()
+    target_link_libraries(vvctre PRIVATE dl)
 endif()

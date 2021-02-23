@@ -6,7 +6,7 @@ set_property(DIRECTORY APPEND PROPERTY
     COMPILE_DEFINITIONS $<$<CONFIG:Debug>:_DEBUG> $<$<NOT:$<CONFIG:Debug>>:NDEBUG>)
 
 # Set compilation flags
-if (MSVC)
+if(WIN32)
     set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE STRING "" FORCE)
 
     # Silence "deprecation" warnings

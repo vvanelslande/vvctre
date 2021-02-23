@@ -252,9 +252,7 @@ private:
     /// ARM11 CPU cores
     std::vector<std::shared_ptr<ARM_Interface>> cpu_cores;
     ARM_Interface* running_core = nullptr;
-#ifdef ARCHITECTURE_x86_64
     std::shared_ptr<Dynarmic::ExclusiveMonitor> exclusive_monitor;
-#endif
 
     /// DSP core
     std::shared_ptr<AudioCore::DspInterface> dsp_core;

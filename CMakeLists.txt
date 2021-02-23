@@ -8,45 +8,6 @@ option(ENABLE_CUBEB "Enable the Cubeb audio output sink and real device micropho
 CMAKE_DEPENDENT_OPTION(ENABLE_MF "Use Media Foundation AAC decoder" ON "WIN32" OFF)
 CMAKE_DEPENDENT_OPTION(ENABLE_FDK "Use FDK AAC decoder" OFF "NOT ENABLE_MF" OFF)
 
-# Detect current compilation architecture and create standard definitions
-# =======================================================================
-
-include(CheckSymbolExists)
-function(detect_architecture symbol arch)
-    if(NOT DEFINED ARCHITECTURE)
-        set(CMAKE_REQUIRED_QUIET 1)
-        check_symbol_exists("${symbol}" "" ARCHITECTURE_${arch})
-        unset(CMAKE_REQUIRED_QUIET)
-
-        # The output variable needs to be unique across invocations otherwise
-        # CMake's crazy scope rules will keep it defined
-        if(ARCHITECTURE_${arch})
-            set(ARCHITECTURE "${arch}" PARENT_SCOPE)
-            set(ARCHITECTURE_${arch} 1 PARENT_SCOPE)
-            add_definitions(-DARCHITECTURE_${arch}=1)
-        endif()
-    endif()
-endfunction()
-
-if(NOT ENABLE_GENERIC)
-    if(MSVC)
-        detect_architecture("_M_AMD64" x86_64)
-        detect_architecture("_M_IX86" x86)
-        detect_architecture("_M_ARM" ARM)
-        detect_architecture("_M_ARM64" ARM64)
-    else()
-        detect_architecture("__x86_64__" x86_64)
-        detect_architecture("__i386__" x86)
-        detect_architecture("__arm__" ARM)
-        detect_architecture("__aarch64__" ARM64)
-    endif()
-endif()
-if(NOT DEFINED ARCHITECTURE)
-    set(ARCHITECTURE "GENERIC")
-    set(ARCHITECTURE_GENERIC 1)
-    add_definitions(-DARCHITECTURE_GENERIC=1)
-endif()
-
 # Configure C++ standard
 # ===========================
 set(CMAKE_CXX_STANDARD 17)
@@ -66,11 +27,10 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # SDL2
-
 find_package(SDL2)
 
 if(NOT SDL2_FOUND)
-    if(MSVC AND (MSVC_VERSION GREATER_EQUAL 1910 AND MSVC_VERSION LESS 1930) AND (ARCHITECTURE_x86 OR ARCHITECTURE_x86_64))
+    if(WIN32 AND (MSVC_VERSION GREATER_EQUAL 1910 AND MSVC_VERSION LESS 1930))
         set(SDL_PREFIX "${PROJECT_BINARY_DIR}/externals/SDL2-2.0.14")
 
         if(NOT EXISTS "${SDL_PREFIX}")
@@ -115,7 +75,7 @@ if(WIN32)
     # WSAPoll didn't exist before WinNT 6.x (Vista)
     add_definitions(-D_WIN32_WINNT=0x0600 -DWINVER=0x0600)
     set(PLATFORM_LIBRARIES winmm ws2_32)
-elseif(CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU|SunOS)$")
+else()
     set(PLATFORM_LIBRARIES rt)
 endif()
 

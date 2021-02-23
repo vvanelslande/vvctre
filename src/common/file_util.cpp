@@ -7,7 +7,6 @@
 #include <memory>
 #include <sstream>
 #include <unordered_map>
-#include <whereami.h>
 #include "common/assert.h"
 #include "common/common_funcs.h"
 #include "common/file_util.h"
@@ -23,17 +22,11 @@
 #include <tchar.h>
 #include "common/string_util.h"
 
-#ifdef _MSC_VER
-// 64 bit offsets for MSVC
 #define fseeko _fseeki64
 #define ftello _ftelli64
 #define fileno _fileno
-#endif
-
-// 64 bit offsets for MSVC
 #define stat _stat64
 #define fstat _fstat64
-
 #else
 #include <cctype>
 #include <cerrno>
@@ -547,16 +540,8 @@ namespace {
 std::unordered_map<UserPath, std::string> g_paths;
 }
 
-static void InitUserPaths() {
-    std::string& user_path = g_paths[UserPath::UserDir];
-
-    int length = wai_getExecutablePath(nullptr, 0, nullptr);
-    user_path.resize(length);
-    int dirname_length = 0;
-    wai_getExecutablePath(&user_path[0], length, &dirname_length);
-    user_path = user_path.substr(0, dirname_length);
-    user_path += "/user/";
-
+void InitUserPaths(const std::string& user_path) {
+    g_paths[UserPath::UserDir] = user_path;
     g_paths[UserPath::SDMCDir] = user_path + "sdmc/";
     g_paths[UserPath::NANDDir] = user_path + "nand/";
     g_paths[UserPath::SysDataDir] = user_path + "sysdata/";
@@ -569,10 +554,6 @@ static void InitUserPaths() {
 }
 
 const std::string& GetUserPath(UserPath path) {
-    // Set up all paths and files on the first run
-    if (g_paths.empty()) {
-        InitUserPaths();
-    }
     return g_paths[path];
 }
 

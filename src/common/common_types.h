@@ -26,7 +26,7 @@
 
 #include <cstdint>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #ifndef __func__
 #define __func__ __FUNCTION__
 #endif

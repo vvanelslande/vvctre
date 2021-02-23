@@ -15,7 +15,7 @@
 #include <type_traits>
 #include <vector>
 #include "common/common_types.h"
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include "common/string_util.h"
 #endif
 
@@ -130,6 +130,8 @@ bool DeleteDirRecursively(const std::string& directory, unsigned int recursion =
 
 // Create directory and copy contents (does not overwrite existing files)
 void CopyDir(const std::string& source_path, const std::string& dest_path);
+
+void InitUserPaths(const std::string& user_path);
 
 // Returns a pointer to a string with a vvctre data dir
 const std::string& GetUserPath(UserPath path);
@@ -264,10 +266,9 @@ private:
 
 } // namespace FileUtil
 
-// To deal with Windows being dumb at unicode:
 template <typename T>
 void OpenFStream(T& fstream, const std::string& filename, std::ios_base::openmode openmode) {
-#ifdef _MSC_VER
+#ifdef _WIN32
     fstream.open(Common::UTF8ToUTF16W(filename), openmode);
 #else
     fstream.open(filename, openmode);

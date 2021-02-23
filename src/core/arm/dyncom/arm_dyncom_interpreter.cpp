@@ -955,9 +955,7 @@ unsigned InterpreterMainLoop(ARMul_State* cpu) {
         }                                                                                          \
     }
 
-// GCC and Clang have a C++ extension to support a lookup table of labels. Otherwise, fallback to a
-// clunky switch statement.
-#if defined __GNUC__ || defined __clang__
+#ifndef _WIN32
 #define GOTO_NEXT_INST                                                                             \
     GDB_BP_CHECK;                                                                                  \
     if (num_instrs >= cpu->NumInstrsToExecute)                                                     \
@@ -1400,9 +1398,7 @@ unsigned InterpreterMainLoop(ARMul_State* cpu) {
 
 #define PC (cpu->Reg[15])
 
-// GCC and Clang have a C++ extension to support a lookup table of labels. Otherwise, fallback
-// to a clunky switch statement.
-#if defined __GNUC__ || defined __clang__
+#ifndef _WIN32
     void* InstLabel[] = {&&VMLA_INST,
                          &&VMLS_INST,
                          &&VNMLA_INST,

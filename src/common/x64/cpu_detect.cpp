@@ -5,35 +5,21 @@
 #include "common/common_types.h"
 #include "common/x64/cpu_detect.h"
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <intrin.h>
 #else
-
-#if defined(__DragonFly__) || defined(__FreeBSD__)
-// clang-format off
-#include <sys/types.h>
-#include <machine/cpufunc.h>
-// clang-format on
-#endif
-
 static inline void __cpuidex(int info[4], int function_id, int subfunction_id) {
-#if defined(__DragonFly__) || defined(__FreeBSD__)
-    // Despite the name, this is just do_cpuid() with ECX as second input.
-    cpuid_count((u_int)function_id, (u_int)subfunction_id, (u_int*)info);
-#else
     info[0] = function_id;    // eax
     info[2] = subfunction_id; // ecx
     __asm__("cpuid"
             : "=a"(info[0]), "=b"(info[1]), "=c"(info[2]), "=d"(info[3])
             : "a"(function_id), "c"(subfunction_id));
-#endif
 }
 
 static inline void __cpuid(int info[4], int function_id) {
     return __cpuidex(info, function_id, 0);
 }
-
-#endif // _MSC_VER
+#endif
 
 namespace Common {
 
