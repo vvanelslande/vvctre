@@ -289,8 +289,15 @@ void PluginManager::CallScreenshotCallbacks(void* data) {
 }
 
 void vvctre_load_file(void* core, const char* path) {
-    static_cast<Core::System*>(core)->SetResetFilePath(std::string(path));
-    static_cast<Core::System*>(core)->RequestReset();
+    Core::System* s = static_cast<Core::System*>(core);
+
+    s->SetResetFilePath(std::string(path));
+
+    if (s->IsInitialized()) {
+        s->RequestReset();
+    } else {
+        s->Reset();
+    }
 }
 
 bool vvctre_install_cia(const char* path) {

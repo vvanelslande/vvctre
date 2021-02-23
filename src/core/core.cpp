@@ -63,8 +63,7 @@ System::ResultStatus System::Run() {
 
     status = ResultStatus::Success;
 
-    if (std::any_of(cpu_cores.begin(), cpu_cores.end(),
-                    [](std::shared_ptr<ARM_Interface> ptr) { return ptr == nullptr; })) {
+    if (!IsInitialized()) {
         return ResultStatus::ErrorNotInitialized;
     }
 
@@ -185,6 +184,8 @@ System::ResultStatus System::Run() {
 }
 
 System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::string& filepath) {
+    m_emu_window = &emu_window;
+
     if (!FileUtil::Exists(filepath)) {
         LOG_CRITICAL(Core, "File not found");
 
@@ -305,7 +306,6 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
     }
 
     status = ResultStatus::Success;
-    m_emu_window = &emu_window;
     m_filepath = filepath;
 
     perf_stats->BeginSystemFrame();
@@ -498,39 +498,48 @@ void System::Shutdown() {
 }
 
 void System::Reset() {
-    std::optional<Service::APT::DeliverArg> deliver_arg;
-    std::vector<u8> wireless_reboot_info;
-    std::string current_gamecard_path;
-    std::unordered_map<u32, Service::FS::ProgramInfo> program_info_map;
+    if (IsInitialized()) {
+        std::optional<Service::APT::DeliverArg> deliver_arg;
+        std::vector<u8> wireless_reboot_info;
+        std::string current_gamecard_path;
+        std::unordered_map<u32, Service::FS::ProgramInfo> program_info_map;
 
-    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*this)) {
-        deliver_arg = apt->GetAppletManager()->ReceiveDeliverArg();
-        wireless_reboot_info = apt->GetWirelessRebootInfo();
+        if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*this)) {
+            deliver_arg = apt->GetAppletManager()->ReceiveDeliverArg();
+            wireless_reboot_info = apt->GetWirelessRebootInfo();
+        }
+
+        if (std::shared_ptr<Service::FS::FS_USER> fs_user =
+                service_manager->GetService<Service::FS::FS_USER>("fs:USER")) {
+            current_gamecard_path = fs_user->GetCurrentGamecardPath();
+            program_info_map = fs_user->GetProgramInfoMap();
+        }
+
+        Shutdown();
+
+        before_loading_after_first_time();
+
+        Load(*m_emu_window, m_filepath);
+
+        if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*this)) {
+            apt->GetAppletManager()->SetDeliverArg(std::move(deliver_arg));
+            apt->SetWirelessRebootInfo(wireless_reboot_info);
+        }
+
+        if (std::shared_ptr<Service::FS::FS_USER> fs_user =
+                service_manager->GetService<Service::FS::FS_USER>("fs:USER")) {
+            fs_user->SetCurrentGamecardPath(current_gamecard_path);
+            fs_user->SetProgramInfoMap(program_info_map);
+        }
+
+        emulation_starting_after_first_time();
+    } else {
+        before_loading_after_first_time();
+
+        Load(*m_emu_window, m_filepath);
+
+        emulation_starting_after_first_time();
     }
-
-    if (std::shared_ptr<Service::FS::FS_USER> fs_user =
-            service_manager->GetService<Service::FS::FS_USER>("fs:USER")) {
-        current_gamecard_path = fs_user->GetCurrentGamecardPath();
-        program_info_map = fs_user->GetProgramInfoMap();
-    }
-
-    Shutdown();
-    before_loading_after_first_time();
-
-    Load(*m_emu_window, m_filepath);
-
-    if (std::shared_ptr<Service::APT::Module> apt = Service::APT::GetModule(*this)) {
-        apt->GetAppletManager()->SetDeliverArg(std::move(deliver_arg));
-        apt->SetWirelessRebootInfo(wireless_reboot_info);
-    }
-
-    if (std::shared_ptr<Service::FS::FS_USER> fs_user =
-            service_manager->GetService<Service::FS::FS_USER>("fs:USER")) {
-        fs_user->SetCurrentGamecardPath(current_gamecard_path);
-        fs_user->SetProgramInfoMap(program_info_map);
-    }
-
-    emulation_starting_after_first_time();
 }
 
 void System::RequestReset() {
