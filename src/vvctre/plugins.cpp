@@ -4145,6 +4145,10 @@ void vvctre_free(void* p) {
     std::free(p);
 }
 
+void vvctre_request_shutdown(void* core) {
+    static_cast<Core::System*>(core)->RequestShutdown();
+}
+
 std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_load_file", (void*)&vvctre_load_file},
     {"vvctre_install_cia", (void*)&vvctre_install_cia},
@@ -5002,4 +5006,5 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_get_show_fatal_error_messages", (void*)&vvctre_get_show_fatal_error_messages},
     {"vvctre_disable_built_in_logger", (void*)&vvctre_disable_built_in_logger},
     {"vvctre_free", (void*)&vvctre_free},
+    {"vvctre_request_shutdown", (void*)&vvctre_request_shutdown},
 };
