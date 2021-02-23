@@ -674,7 +674,7 @@ void vvctre_ipc_recorder_bind_callback(void* core, void (*callback)(const char* 
         });
 }
 
-const char* vvctre_get_service_name_by_port_id(void* core, u32 port) {
+char* vvctre_get_service_name_by_port_id(void* core, u32 port) {
     return VVCTRE_STRDUP(
         static_cast<Core::System*>(core)->ServiceManager().GetServiceNameByPortId(port).c_str());
 }
@@ -683,27 +683,27 @@ int vvctre_cheat_count(void* core) {
     return static_cast<int>(static_cast<Core::System*>(core)->CheatEngine().GetCheats().size());
 }
 
-const char* vvctre_get_cheat(void* core, int index) {
+char* vvctre_get_cheat(void* core, int index) {
     return VVCTRE_STRDUP(
         static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->ToString().c_str());
 }
 
-const char* vvctre_get_cheat_name(void* core, int index) {
+char* vvctre_get_cheat_name(void* core, int index) {
     return VVCTRE_STRDUP(
         static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetName().c_str());
 }
 
-const char* vvctre_get_cheat_comments(void* core, int index) {
+char* vvctre_get_cheat_comments(void* core, int index) {
     return VVCTRE_STRDUP(
         static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetComments().c_str());
 }
 
-const char* vvctre_get_cheat_type(void* core, int index) {
+char* vvctre_get_cheat_type(void* core, int index) {
     return VVCTRE_STRDUP(
         static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetType().c_str());
 }
 
-const char* vvctre_get_cheat_code(void* core, int index) {
+char* vvctre_get_cheat_code(void* core, int index) {
     return VVCTRE_STRDUP(
         static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetCode().c_str());
 }
@@ -4149,6 +4149,15 @@ void vvctre_request_shutdown(void* core) {
     static_cast<Core::System*>(core)->RequestShutdown();
 }
 
+void vvctre_exit(void* plugin_manager, const int code) {
+    vvctreShutdown(static_cast<PluginManager*>(plugin_manager));
+    std::exit(code);
+}
+
+const char* vvctre_get_file_path(void* core) {
+    return static_cast<Core::System*>(core)->GetFilePath().c_str();
+}
+
 std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_load_file", (void*)&vvctre_load_file},
     {"vvctre_install_cia", (void*)&vvctre_install_cia},
@@ -5007,4 +5016,6 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_disable_built_in_logger", (void*)&vvctre_disable_built_in_logger},
     {"vvctre_free", (void*)&vvctre_free},
     {"vvctre_request_shutdown", (void*)&vvctre_request_shutdown},
+    {"vvctre_exit", (void*)&vvctre_exit},
+    {"vvctre_get_file_path", (void*)&vvctre_get_file_path},
 };

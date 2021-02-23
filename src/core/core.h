@@ -231,6 +231,8 @@ public:
     void DiskShaderCacheCallback(bool loading, std::size_t current, std::size_t total);
     const bool IsOnLoadFailedSet() const;
 
+    const std::string& GetFilePath() const;
+
 private:
     /**
      * Initialize the emulated system.
@@ -286,7 +288,6 @@ private:
 
     ResultStatus status = ResultStatus::Success;
 
-    /// Saved variables for reset and application jump
     Frontend::EmuWindow* m_emu_window = nullptr;
     std::string m_filepath;
 

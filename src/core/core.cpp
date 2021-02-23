@@ -583,4 +583,8 @@ const bool System::IsOnLoadFailedSet() const {
     return static_cast<bool>(on_load_failed);
 }
 
+const std::string& System::GetFilePath() const {
+    return m_filepath;
+}
+
 } // namespace Core
