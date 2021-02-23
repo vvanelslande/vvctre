@@ -185,6 +185,7 @@ System::ResultStatus System::Run() {
 
 System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::string& filepath) {
     m_emu_window = &emu_window;
+    m_filepath = filepath;
 
     if (!FileUtil::Exists(filepath)) {
         LOG_CRITICAL(Core, "File not found");
@@ -306,7 +307,6 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
     }
 
     status = ResultStatus::Success;
-    m_filepath = filepath;
 
     perf_stats->BeginSystemFrame();
 
