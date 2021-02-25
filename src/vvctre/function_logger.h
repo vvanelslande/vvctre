@@ -9,10 +9,10 @@
 namespace Log {
 
 struct FunctionLogger : Log::Backend {
-    void (*function)(const char* log);
     std::string name;
+    void (*function)(const char* log);
 
-    explicit FunctionLogger(decltype(FunctionLogger::function) function, std::string name);
+    explicit FunctionLogger(std::string name, decltype(FunctionLogger::function) function);
 
     const char* GetName() const override;
     void Write(const Entry& entry) override;

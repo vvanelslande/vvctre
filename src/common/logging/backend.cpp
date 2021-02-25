@@ -20,36 +20,35 @@
 
 namespace Log {
 
-/**
- * Static state as a singleton.
- */
 class Impl {
 public:
     static Impl& Instance() {
-        static Impl backend;
-        return backend;
+        static Impl instance;
+        return instance;
     }
 
     Impl(Impl const&) = delete;
     const Impl& operator=(Impl const&) = delete;
 
-    void PushEntry(Class log_class, Level log_level, const char* filename, unsigned int line_num,
-                   const char* function, std::string message) {
-        message_queue.Push(
-            CreateEntry(log_class, log_level, filename, line_num, function, std::move(message)));
+    void PushEntry(const Class log_class, const Level level, const char* file,
+                   const unsigned int line, const char* function, std::string message) {
+        queue.Push(CreateEntry(log_class, level, file, line, function, std::move(message)));
     }
 
     void AddBackend(std::unique_ptr<Backend> backend) {
-        std::lock_guard lock{writing_mutex};
+        std::lock_guard<std::mutex> lock(writing_mutex);
+
         backends.push_back(std::move(backend));
     }
 
-    void RemoveBackend(std::string_view backend_name) {
-        std::lock_guard lock{writing_mutex};
-        const auto it =
-            std::remove_if(backends.begin(), backends.end(),
-                           [&backend_name](const auto& i) { return backend_name == i->GetName(); });
-        backends.erase(it, backends.end());
+    void RemoveBackend(std::string_view name) {
+        std::lock_guard<std::mutex> lock(writing_mutex);
+
+        backends.erase(std::remove_if(backends.begin(), backends.end(),
+                                      [&name](const std::unique_ptr<Log::Backend>& backend) {
+                                          return name == backend->GetName();
+                                      }),
+                       backends.end());
     }
 
     const Filter& GetGlobalFilter() const {
@@ -60,40 +59,33 @@ public:
         filter = f;
     }
 
-    Backend* GetBackend(std::string_view backend_name) {
-        const auto it =
-            std::find_if(backends.begin(), backends.end(),
-                         [&backend_name](const auto& i) { return backend_name == i->GetName(); });
-        if (it == backends.end()) {
-            return nullptr;
-        }
-        return it->get();
-    }
-
 private:
     Impl() {
-        backend_thread = std::thread([&] {
+        backend_thread = std::thread([this] {
             Entry entry;
-            auto write_logs = [&](Entry& e) {
-                std::lock_guard lock{writing_mutex};
-                for (const auto& backend : backends) {
-                    backend->Write(e);
-                }
-            };
+
             for (;;) {
-                entry = message_queue.PopWait();
+                entry = queue.PopWait();
+
                 if (entry.final_entry) {
                     break;
                 }
-                write_logs(entry);
+
+                std::lock_guard<std::mutex> lock(writing_mutex);
+
+                for (std::unique_ptr<Backend>& backend : backends) {
+                    backend->Write(entry);
+                }
             }
 
-            // Drain the logging queue. Only writes out up to MAX_LOGS_TO_WRITE to prevent a case
-            // where a system is repeatedly spamming logs even on close.
-            constexpr int MAX_LOGS_TO_WRITE = 100;
             int logs_written = 0;
-            while (logs_written++ < MAX_LOGS_TO_WRITE && message_queue.Pop(entry)) {
-                write_logs(entry);
+
+            while (logs_written++ < 100 && queue.Pop(entry)) {
+                std::lock_guard<std::mutex> lock(writing_mutex);
+
+                for (std::unique_ptr<Backend>& backend : backends) {
+                    backend->Write(entry);
+                }
             }
         });
     }
@@ -101,31 +93,30 @@ private:
     ~Impl() {
         Entry entry;
         entry.final_entry = true;
-        message_queue.Push(entry);
+        queue.Push(entry);
         backend_thread.join();
     }
 
-    Entry CreateEntry(Class log_class, Level log_level, const char* filename, unsigned int line_nr,
-                      const char* function, std::string message) const {
+    Entry CreateEntry(const Class log_class, const Level level, const char* file,
+                      const unsigned int line, const char* function, std::string message) const {
         Entry entry;
         entry.timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::steady_clock::now() - time_origin);
         entry.log_class = log_class;
-        entry.log_level = log_level;
-        entry.filename = filename;
-        entry.line_num = line_nr;
+        entry.level = level;
+        entry.file = file;
+        entry.line = line;
         entry.function = function;
         entry.message = std::move(message);
-
         return entry;
     }
 
     std::mutex writing_mutex;
     std::thread backend_thread;
     std::vector<std::unique_ptr<Backend>> backends;
-    Common::MPSCQueue<Log::Entry> message_queue;
+    Common::MPSCQueue<Log::Entry> queue;
     Filter filter;
-    std::chrono::steady_clock::time_point time_origin{std::chrono::steady_clock::now()};
+    std::chrono::steady_clock::time_point time_origin = std::chrono::steady_clock::now();
 };
 
 void ColorConsoleBackend::Write(const Entry& entry) {
@@ -217,11 +208,11 @@ const char* GetLogClassName(Class log_class) {
     return "Invalid";
 }
 
-const char* GetLevelName(Level log_level) {
+const char* GetLevelName(Level level) {
 #define LVL(x)                                                                                     \
     case Level::x:                                                                                 \
         return #x
-    switch (log_level) {
+    switch (level) {
         LVL(Trace);
         LVL(Debug);
         LVL(Info);
@@ -244,23 +235,21 @@ void AddBackend(std::unique_ptr<Backend> backend) {
     Impl::Instance().AddBackend(std::move(backend));
 }
 
-void RemoveBackend(std::string_view backend_name) {
-    Impl::Instance().RemoveBackend(backend_name);
+void RemoveBackend(std::string_view name) {
+    Impl::Instance().RemoveBackend(name);
 }
 
-Backend* GetBackend(std::string_view backend_name) {
-    return Impl::Instance().GetBackend(backend_name);
-}
-
-void FmtLogMessageImpl(Class log_class, Level log_level, const char* filename,
-                       unsigned int line_num, const char* function, const char* format,
+void FmtLogMessageImpl(const Class log_class, const Level level, const char* file,
+                       const unsigned int line, const char* function, const char* format,
                        const fmt::format_args& args) {
-    auto& instance = Impl::Instance();
-    const auto& filter = instance.GetGlobalFilter();
-    if (!filter.CheckMessage(log_class, log_level))
-        return;
+    Impl& instance = Impl::Instance();
+    const Filter& filter = instance.GetGlobalFilter();
 
-    instance.PushEntry(log_class, log_level, filename, line_num, function,
-                       fmt::vformat(format, args));
+    if (!filter.CheckMessage(log_class, level)) {
+        return;
+    }
+
+    instance.PushEntry(log_class, level, file, line, function, fmt::vformat(format, args));
 }
+
 } // namespace Log

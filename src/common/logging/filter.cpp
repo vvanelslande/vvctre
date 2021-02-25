@@ -8,7 +8,9 @@
 #include "common/string_util.h"
 
 namespace Log {
+
 namespace {
+
 template <typename It>
 Level GetLevelByName(const It begin, const It end) {
     for (u8 i = 0; i < static_cast<u8>(Level::Count); ++i) {
@@ -17,6 +19,7 @@ Level GetLevelByName(const It begin, const It end) {
             return static_cast<Level>(i);
         }
     }
+
     return Level::Count;
 }
 
@@ -60,7 +63,8 @@ bool ParseFilterRule(Filter& instance, Iterator begin, Iterator end) {
     instance.SetClassLevel(log_class, level);
     return true;
 }
-} // Anonymous namespace
+
+} // namespace
 
 Filter::Filter(Level default_level) {
     ResetAll(default_level);
@@ -74,20 +78,22 @@ void Filter::SetClassLevel(Class log_class, Level level) {
     class_levels[static_cast<std::size_t>(log_class)] = level;
 }
 
-void Filter::ParseFilterString(std::string_view filter_view) {
-    auto clause_begin = filter_view.cbegin();
-    while (clause_begin != filter_view.cend()) {
-        auto clause_end = std::find(clause_begin, filter_view.cend(), ' ');
+void Filter::ParseFilterString(std::string_view filter) {
+    auto clause_begin = filter.cbegin();
+
+    while (clause_begin != filter.cend()) {
+        auto clause_end = std::find(clause_begin, filter.cend(), ' ');
 
         // If clause isn't empty
         if (clause_end != clause_begin) {
             ParseFilterRule(*this, clause_begin, clause_end);
         }
 
-        if (clause_end != filter_view.cend()) {
+        if (clause_end != filter.cend()) {
             // Skip over the whitespace
             ++clause_end;
         }
+
         clause_begin = clause_end;
     }
 }
@@ -96,4 +102,5 @@ bool Filter::CheckMessage(Class log_class, Level level) const {
     return static_cast<u8>(level) >=
            static_cast<u8>(class_levels[static_cast<std::size_t>(log_class)]);
 }
+
 } // namespace Log

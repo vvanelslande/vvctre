@@ -16,15 +16,15 @@ namespace Log {
 class Filter;
 
 /**
- * A log entry. Log entries are store in a structured format to permit more varied output
+ * A log entry. Log entries are stored in a structured format to permit more varied output
  * formatting on different frontends, as well as facilitating filtering and aggregation.
  */
 struct Entry {
     std::chrono::microseconds timestamp;
     Class log_class;
-    Level log_level;
-    const char* filename;
-    unsigned int line_num;
+    Level level;
+    const char* file;
+    unsigned int line;
     std::string function;
     std::string message;
     bool final_entry = false;
@@ -55,22 +55,15 @@ private:
 /// Backend that writes to stderr with color
 class ColorConsoleBackend : public Backend {
 public:
-    static const char* Name() {
-        return "color_console";
-    }
-
     const char* GetName() const override {
-        return Name();
+        return "color_console";
     }
 
     void Write(const Entry& entry) override;
 };
 
 void AddBackend(std::unique_ptr<Backend> backend);
-
-void RemoveBackend(std::string_view backend_name);
-
-Backend* GetBackend(std::string_view backend_name);
+void RemoveBackend(std::string_view name);
 
 /**
  * Returns the name of the passed log class as a C-string. Subclasses are separated by periods
@@ -81,7 +74,7 @@ const char* GetLogClassName(Class log_class);
 /**
  * Returns the name of the passed log level as a C-string.
  */
-const char* GetLevelName(Level log_level);
+const char* GetLevelName(Level level);
 
 /**
  * The global filter will prevent any messages from even being processed if they are filtered. Each

@@ -178,7 +178,7 @@ public:
     ResultCode ReprotectRange(VAddr target, u32 size, VMAPermission new_perms);
 
     /// Dumps the address space layout to the log
-    void LogLayout(Log::Level log_level) const;
+    void LogLayout(Log::Level level) const;
 
     /// Gets a list of backing memory blocks for the specified range
     ResultVal<std::vector<std::pair<u8*, u32>>> GetBackingBlocksForRange(VAddr address, u32 size);

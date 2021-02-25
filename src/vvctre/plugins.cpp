@@ -2,6 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <algorithm>
 #include <cstdlib>
 #include <string_view>
 #include <utility>
@@ -83,7 +84,23 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window, const flags
 #endif
             } else {
                 Plugin plugin;
-                plugin.handle = handle;
+                plugin.initial_settings_opening = (decltype(Plugin::initial_settings_opening))dlsym(
+                    handle, "InitialSettingsOpening");
+                plugin.initial_settings_ok_pressed = (decltype(
+                    Plugin::initial_settings_ok_pressed))dlsym(handle, "InitialSettingsOkPressed");
+                plugin.before_loading =
+                    (decltype(Plugin::before_loading))dlsym(handle, "BeforeLoading");
+                plugin.before_loading_after_first_time =
+                    (decltype(Plugin::before_loading_after_first_time))dlsym(
+                        handle, "BeforeLoadingAfterFirstTime");
+                plugin.emulation_starting =
+                    (decltype(Plugin::emulation_starting))dlsym(handle, "EmulationStarting");
+                plugin.emulation_starting_after_first_time =
+                    (decltype(Plugin::emulation_starting_after_first_time))dlsym(
+                        handle, "EmulationStartingAfterFirstTime");
+                plugin.emulator_closing =
+                    (decltype(Plugin::emulator_closing))dlsym(handle, "EmulatorClosing");
+                plugin.fatal_error = (decltype(Plugin::fatal_error))dlsym(handle, "FatalError");
                 plugin.before_drawing_fps =
                     (decltype(Plugin::before_drawing_fps))dlsym(handle, "BeforeDrawingFPS");
                 plugin.add_menu = (decltype(Plugin::add_menu))dlsym(handle, "AddMenu");
@@ -92,24 +109,25 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window, const flags
                     (decltype(Plugin::after_swap_window))dlsym(handle, "AfterSwapWindow");
                 plugin.screenshot_callback =
                     (decltype(Plugin::screenshot_callback))dlsym(handle, "ScreenshotCallback");
-                void* log = dlsym(handle, "Log");
-                if (log != nullptr) {
+                if (void* log = dlsym(handle, "Log")) {
                     Log::AddBackend(std::make_unique<Log::FunctionLogger>(
-                        (decltype(Log::FunctionLogger::function))log,
-                        fmt::format("Plugin {}", FileUtil::GetFilename(path))));
+                        fmt::format("Plugin {}", FileUtil::GetFilename(path)),
+                        (decltype(Log::FunctionLogger::function))log));
                 }
-                void* override_wlan_comm_id_check = dlsym(handle, "OverrideWlanCommIdCheck");
-                if (override_wlan_comm_id_check != nullptr) {
+                if (void* override_wlan_comm_id_check = dlsym(handle, "OverrideWlanCommIdCheck")) {
                     Service::NWM::OverrideWlanCommIdCheck =
-                        [f = (bool (*)(u32, u32))override_wlan_comm_id_check](
-                            u32 in_beacon, u32 requested) { return f(in_beacon, requested); };
+                        (bool (*)(u32, u32))override_wlan_comm_id_check;
                 }
-                void* override_on_load_failed_function = dlsym(handle, "OverrideOnLoadFailed");
-                if (override_on_load_failed_function != nullptr) {
-                    core.SetOnLoadFailed([f = (void (*)(Core::System::ResultStatus))
-                                              override_on_load_failed_function](
-                                             Core::System::ResultStatus result) { f(result); });
+                if (void* override_on_load_failed_function =
+                        dlsym(handle, "OverrideOnLoadFailed")) {
+                    core.SetOnLoadFailed(
+                        (void (*)(Core::System::ResultStatus))override_on_load_failed_function);
                 }
+                if (void* get_name = dlsym(handle, "GetName")) {
+                    plugin.name = std::string(((const char* (*)())get_name)());
+                }
+                plugin.handle = handle;
+                plugins.push_back(std::move(plugin));
 
                 int count = ((int (*)())get_required_function_count)();
                 const char** required_function_names =
@@ -120,8 +138,6 @@ PluginManager::PluginManager(Core::System& core, SDL_Window* window, const flags
                 }
                 ((void (*)(void* core, void* plugin_manager, void* functions[]))plugin_loaded)(
                     static_cast<void*>(&core), static_cast<void*>(this), required_functions.data());
-
-                plugins.push_back(std::move(plugin));
             }
         }
     };
@@ -173,73 +189,64 @@ PluginManager::~PluginManager() {
 
 void PluginManager::InitialSettingsOpening() {
     for (Plugin& plugin : plugins) {
-        void* initial_settings_opening = dlsym(plugin.handle, "InitialSettingsOpening");
-        if (initial_settings_opening != nullptr) {
-            ((void (*)())initial_settings_opening)();
+        if (plugin.initial_settings_opening != nullptr) {
+            plugin.initial_settings_opening();
         }
     }
 }
 
 void PluginManager::InitialSettingsOkPressed() {
     for (Plugin& plugin : plugins) {
-        void* initial_settings_ok_pressed = dlsym(plugin.handle, "InitialSettingsOkPressed");
-        if (initial_settings_ok_pressed != nullptr) {
-            ((void (*)())initial_settings_ok_pressed)();
+        if (plugin.initial_settings_ok_pressed != nullptr) {
+            plugin.initial_settings_ok_pressed();
         }
     }
 }
 
 void PluginManager::BeforeLoading() {
     for (Plugin& plugin : plugins) {
-        void* before_loading = dlsym(plugin.handle, "BeforeLoading");
-        if (before_loading != nullptr) {
-            ((void (*)())before_loading)();
+        if (plugin.before_loading != nullptr) {
+            plugin.before_loading();
         }
     }
 }
 
 void PluginManager::BeforeLoadingAfterFirstTime() {
     for (Plugin& plugin : plugins) {
-        void* before_loading_after_first_time = dlsym(plugin.handle, "BeforeLoadingAfterFirstTime");
-        if (before_loading_after_first_time != nullptr) {
-            ((void (*)())before_loading_after_first_time)();
+        if (plugin.before_loading_after_first_time != nullptr) {
+            plugin.before_loading_after_first_time();
         }
     }
 }
 
 void PluginManager::EmulationStarting() {
     for (Plugin& plugin : plugins) {
-        void* emulation_starting = dlsym(plugin.handle, "EmulationStarting");
-        if (emulation_starting != nullptr) {
-            ((void (*)())emulation_starting)();
+        if (plugin.emulation_starting != nullptr) {
+            plugin.emulation_starting();
         }
     }
 }
 
 void PluginManager::EmulationStartingAfterFirstTime() {
     for (Plugin& plugin : plugins) {
-        void* emulation_starting_after_first_time =
-            dlsym(plugin.handle, "EmulationStartingAfterFirstTime");
-        if (emulation_starting_after_first_time != nullptr) {
-            ((void (*)())emulation_starting_after_first_time)();
+        if (plugin.emulation_starting_after_first_time != nullptr) {
+            plugin.emulation_starting_after_first_time();
         }
     }
 }
 
 void PluginManager::EmulatorClosing() {
     for (Plugin& plugin : plugins) {
-        void* emulator_closing = dlsym(plugin.handle, "EmulatorClosing");
-        if (emulator_closing != nullptr) {
-            ((void (*)())emulator_closing)();
+        if (plugin.emulator_closing != nullptr) {
+            plugin.emulator_closing();
         }
     }
 }
 
 void PluginManager::FatalError() {
     for (Plugin& plugin : plugins) {
-        void* fatal_error = dlsym(plugin.handle, "FatalError");
-        if (fatal_error != nullptr) {
-            ((void (*)())fatal_error)();
+        if (plugin.fatal_error != nullptr) {
+            plugin.fatal_error();
         }
     }
 }
@@ -4180,6 +4187,146 @@ char* vvctre_get_option_string(void* plugin_manager, const char* name, const cha
                              .c_str());
 }
 
+void vvctre_set_initial_settings_opening_function(
+    void* plugin_manager, const char* plugin_name,
+    decltype(Plugin::initial_settings_opening) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->initial_settings_opening = function;
+}
+
+void vvctre_set_initial_settings_ok_pressed_function(
+    void* plugin_manager, const char* plugin_name,
+    decltype(Plugin::initial_settings_ok_pressed) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->initial_settings_ok_pressed = function;
+}
+
+void vvctre_set_before_loading_function(void* plugin_manager, const char* plugin_name,
+                                        decltype(Plugin::before_loading) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->before_loading = function;
+}
+
+void vvctre_set_before_loading_after_first_time_function(
+    void* plugin_manager, const char* plugin_name,
+    decltype(Plugin::before_loading_after_first_time) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->before_loading_after_first_time = function;
+}
+
+void vvctre_set_emulation_starting_function(void* plugin_manager, const char* plugin_name,
+                                            decltype(Plugin::emulation_starting) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->emulation_starting = function;
+}
+
+void vvctre_set_emulation_starting_after_first_time_function(
+    void* plugin_manager, const char* plugin_name,
+    decltype(Plugin::emulation_starting_after_first_time) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->emulation_starting_after_first_time = function;
+}
+
+void vvctre_set_emulator_closing_function(void* plugin_manager, const char* plugin_name,
+                                          decltype(Plugin::emulator_closing) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->emulator_closing = function;
+}
+
+void vvctre_set_fatal_error_function(void* plugin_manager, const char* plugin_name,
+                                     decltype(Plugin::fatal_error) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->fatal_error = function;
+}
+
+void vvctre_set_before_drawing_fps_function(void* plugin_manager, const char* plugin_name,
+                                            decltype(Plugin::before_drawing_fps) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->before_drawing_fps = function;
+}
+
+void vvctre_set_add_menu_function(void* plugin_manager, const char* plugin_name,
+                                  decltype(Plugin::add_menu) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->add_menu = function;
+}
+
+void vvctre_set_add_tab_function(void* plugin_manager, const char* plugin_name,
+                                 decltype(Plugin::add_tab) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->add_tab = function;
+}
+
+void vvctre_set_after_swap_window_function(void* plugin_manager, const char* plugin_name,
+                                           decltype(Plugin::after_swap_window) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->after_swap_window = function;
+}
+
+void vvctre_set_screenshot_callback(void* plugin_manager, const char* plugin_name,
+                                    decltype(Plugin::screenshot_callback) function) {
+    std::vector<Plugin>& plugins = static_cast<PluginManager*>(plugin_manager)->plugins;
+
+    std::find_if(plugins.begin(), plugins.end(), [&plugin_name](Plugin& p) {
+        return p.name == plugin_name;
+    })->screenshot_callback = function;
+}
+
+void vvctre_set_hle_nwm_wlan_comm_id_check_function(bool (*function)(u32 in_beacon,
+                                                                     u32 requested)) {
+    Service::NWM::OverrideWlanCommIdCheck = function;
+}
+
+void vvctre_set_load_failed_function(void* core,
+                                     void (*function)(Core::System::ResultStatus result)) {
+    static_cast<Core::System*>(core)->SetOnLoadFailed(function);
+}
+
+void vvctre_add_logging_backend(const char* name, void (*function)(const char* line)) {
+    Log::AddBackend(std::make_unique<Log::FunctionLogger>(
+        std::string(name), (decltype(Log::FunctionLogger::function))function));
+}
+
+void vvctre_remove_logging_backend(const char* name) {
+    Log::RemoveBackend(name);
+}
+
 std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_load_file", (void*)&vvctre_load_file},
     {"vvctre_install_cia", (void*)&vvctre_install_cia},
@@ -5042,4 +5189,26 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_get_file_path", (void*)&vvctre_get_file_path},
     {"vvctre_get_option_bool", (void*)&vvctre_get_option_bool},
     {"vvctre_get_option_string", (void*)&vvctre_get_option_string},
+    {"vvctre_set_initial_settings_opening_function",
+     (void*)&vvctre_set_initial_settings_opening_function},
+    {"vvctre_set_initial_settings_ok_pressed_function",
+     (void*)&vvctre_set_initial_settings_ok_pressed_function},
+    {"vvctre_set_before_loading_function", (void*)&vvctre_set_before_loading_function},
+    {"vvctre_set_before_loading_after_first_time_function",
+     (void*)&vvctre_set_before_loading_after_first_time_function},
+    {"vvctre_set_emulation_starting_function", (void*)&vvctre_set_emulation_starting_function},
+    {"vvctre_set_emulation_starting_after_first_time_function",
+     (void*)&vvctre_set_emulation_starting_after_first_time_function},
+    {"vvctre_set_emulator_closing_function", (void*)&vvctre_set_emulator_closing_function},
+    {"vvctre_set_fatal_error_function", (void*)&vvctre_set_fatal_error_function},
+    {"vvctre_set_before_drawing_fps_function", (void*)&vvctre_set_before_drawing_fps_function},
+    {"vvctre_set_add_menu_function", (void*)&vvctre_set_add_menu_function},
+    {"vvctre_set_add_tab_function", (void*)&vvctre_set_add_tab_function},
+    {"vvctre_set_after_swap_window_function", (void*)&vvctre_set_after_swap_window_function},
+    {"vvctre_set_screenshot_callback", (void*)&vvctre_set_screenshot_callback},
+    {"vvctre_set_load_failed_function", (void*)&vvctre_set_load_failed_function},
+    {"vvctre_set_hle_nwm_wlan_comm_id_check_function",
+     (void*)&vvctre_set_hle_nwm_wlan_comm_id_check_function},
+    {"vvctre_add_logging_backend", (void*)&vvctre_add_logging_backend},
+    {"vvctre_remove_logging_backend", (void*)&vvctre_remove_logging_backend},
 };

@@ -23,6 +23,7 @@ public:
 
     /// Resets the filter so that all classes have `level` as the minimum displayed level.
     void ResetAll(Level level);
+
     /// Sets the minimum level of `log_class` (and not of its subclasses) to `level`.
     void SetClassLevel(Class log_class, Level level);
 
@@ -40,7 +41,7 @@ public:
      *  - `Service:Info` -- Sets the level of Service to Info.
      *  - `Service.FS:Trace` -- Sets the level of the Service.FS class to Trace.
      */
-    void ParseFilterString(std::string_view filter_view);
+    void ParseFilterString(std::string_view filter);
 
     /// Matches class/level combination against the filter, returning true if it passed.
     bool CheckMessage(Class log_class, Level level) const;
@@ -48,4 +49,5 @@ public:
 private:
     std::array<Level, static_cast<std::size_t>(Class::Count)> class_levels;
 };
+
 } // namespace Log

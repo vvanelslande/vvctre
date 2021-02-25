@@ -10,13 +10,13 @@
 
 namespace Log {
 
-// trims up to and including the last of ../, ..\, src/, src\ in a string
+// Trims up to and including the last of ../, ..\, src/, src\ in a string
 constexpr const char* TrimSourcePath(std::string_view source) {
     const auto rfind = [source](const std::string_view match) {
         return source.rfind(match) == source.npos ? 0 : (source.rfind(match) + match.size());
     };
-    auto idx = std::max({rfind("src/"), rfind("src\\"), rfind("../"), rfind("..\\")});
-    return source.data() + idx;
+
+    return source.data() + std::max({rfind("src/"), rfind("src\\"), rfind("../"), rfind("..\\")});
 }
 
 /// Specifies the severity or level of detail of the log message.
@@ -30,8 +30,7 @@ enum class Level : u8 {
               ///< completed.
     Critical, ///< Major problems during execution that threaten the stability of the entire
               ///< application.
-
-    Count ///< Total number of logging levels
+    Count     ///< Total number of logging levels
 };
 
 typedef u8 ClassType;
@@ -111,24 +110,23 @@ enum class Class : ClassType {
     Count              ///< Total number of logging classes
 };
 
-/// Logs a message to the global logger, using fmt
-void FmtLogMessageImpl(Class log_class, Level log_level, const char* filename,
-                       unsigned int line_num, const char* function, const char* format,
+void FmtLogMessageImpl(const Class log_class, const Level level, const char* file,
+                       const unsigned int line, const char* function, const char* format,
                        const fmt::format_args& args);
 
 template <typename... Args>
-void FmtLogMessage(Class log_class, Level log_level, const char* filename, unsigned int line_num,
-                   const char* function, const char* format, const Args&... args) {
-    FmtLogMessageImpl(log_class, log_level, filename, line_num, function, format,
+void FmtLogMessage(const Class log_class, const Level level, const char* file,
+                   const unsigned int line, const char* function, const char* format,
+                   const Args&... args) {
+    FmtLogMessageImpl(log_class, level, file, line, function, format,
                       fmt::make_format_args(args...));
 }
 
 } // namespace Log
 
-// Define the fmt lib macros
-#define LOG_GENERIC(log_class, log_level, ...)                                                     \
-    ::Log::FmtLogMessage(log_class, log_level, ::Log::TrimSourcePath(__FILE__), __LINE__,          \
-                         __func__, __VA_ARGS__)
+#define LOG_GENERIC(log_class, level, ...)                                                         \
+    ::Log::FmtLogMessage(log_class, level, ::Log::TrimSourcePath(__FILE__), __LINE__, __func__,    \
+                         __VA_ARGS__)
 
 #ifdef _DEBUG
 #define LOG_TRACE(log_class, ...)                                                                  \

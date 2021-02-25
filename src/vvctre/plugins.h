@@ -20,6 +20,29 @@ class System;
 
 struct SDL_Window;
 
+struct Plugin {
+    std::string name;
+    void (*initial_settings_opening)() = nullptr;
+    void (*initial_settings_ok_pressed)() = nullptr;
+    void (*before_loading)() = nullptr;
+    void (*before_loading_after_first_time)() = nullptr;
+    void (*emulation_starting)() = nullptr;
+    void (*emulation_starting_after_first_time)() = nullptr;
+    void (*emulator_closing)() = nullptr;
+    void (*fatal_error)() = nullptr;
+    void (*before_drawing_fps)() = nullptr;
+    void (*add_menu)() = nullptr;
+    void (*add_tab)() = nullptr;
+    void (*after_swap_window)() = nullptr;
+    void (*screenshot_callback)(void* data) = nullptr;
+
+#ifdef _WIN32
+    HMODULE handle;
+#else
+    void* handle;
+#endif
+};
+
 class PluginManager {
 public:
     explicit PluginManager(Core::System& core, SDL_Window* window, const flags::args& args);
@@ -47,23 +70,9 @@ public:
     bool show_fatal_error_messages = true;
     bool built_in_logger_enabled = true;
     const flags::args& args;
+    std::vector<Plugin> plugins;
 
 private:
-    struct Plugin {
-#ifdef _WIN32
-        HMODULE handle;
-#else
-        void* handle;
-#endif
-
-        void (*before_drawing_fps)() = nullptr;
-        void (*add_menu)() = nullptr;
-        void (*add_tab)() = nullptr;
-        void (*after_swap_window)() = nullptr;
-        void (*screenshot_callback)(void* data) = nullptr;
-    };
-
-    std::vector<Plugin> plugins;
     std::vector<std::unique_ptr<Input::ButtonDevice>> buttons;
     static std::unordered_map<std::string, void*> function_map;
 };

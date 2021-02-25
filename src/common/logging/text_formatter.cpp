@@ -23,10 +23,10 @@ std::string FormatLogMessage(const Entry& entry) {
     unsigned int time_fractional = static_cast<unsigned int>(entry.timestamp.count() % 1000000);
 
     const char* class_name = GetLogClassName(entry.log_class);
-    const char* level_name = GetLevelName(entry.log_level);
+    const char* level_name = GetLevelName(entry.level);
 
     return fmt::format("[{:4d}.{:06d}] {} <{}> {}:{}:{}: {}", time_seconds, time_fractional,
-                       class_name, level_name, entry.filename, entry.function, entry.line_num,
+                       class_name, level_name, entry.file, entry.function, entry.line,
                        entry.message);
 }
 
@@ -41,7 +41,8 @@ void PrintColoredMessage(const Entry& entry) {
     GetConsoleScreenBufferInfo(console_handle, &original_info);
 
     WORD color = 0;
-    switch (entry.log_level) {
+
+    switch (entry.level) {
     case Level::Trace: // Grey
         color = FOREGROUND_INTENSITY;
         break;
@@ -68,7 +69,8 @@ void PrintColoredMessage(const Entry& entry) {
 #else
 #define ESC "\x1b"
     const char* color = "";
-    switch (entry.log_level) {
+
+    switch (entry.level) {
     case Level::Trace: // Grey
         color = ESC "[1;30m";
         break;

@@ -11,10 +11,7 @@ namespace Log {
 
 struct Entry;
 
-/// Formats a log entry into the provided text buffer.
 std::string FormatLogMessage(const Entry& entry);
-
-/// Formats and prints a log entry to stderr, colored according to the severity level.
 void PrintColoredMessage(const Entry& entry);
 
 } // namespace Log
