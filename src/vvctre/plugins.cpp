@@ -1301,6 +1301,11 @@ bool vvctre_gui_menu_item_with_check_mark(const char* label, bool* checked) {
     return ImGui::MenuItem(label, nullptr, checked);
 }
 
+bool vvctre_gui_menu_item_ex(const char* label, const char* shortcut, bool* selected,
+                             const bool enabled) {
+    return ImGui::MenuItem(label, shortcut, selected, enabled);
+}
+
 void vvctre_gui_plot_lines(const char* label, const float* values, int values_count,
                            int values_offset, const char* overlay_text, float scale_min,
                            float scale_max, float graph_width, float graph_height, int stride) {
@@ -4531,6 +4536,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_end_tab", (void*)&vvctre_gui_end_tab},
     {"vvctre_gui_menu_item", (void*)&vvctre_gui_menu_item},
     {"vvctre_gui_menu_item_with_check_mark", (void*)&vvctre_gui_menu_item_with_check_mark},
+    {"vvctre_gui_menu_item_ex", (void*)&vvctre_gui_menu_item_ex},
     {"vvctre_gui_plot_lines", (void*)&vvctre_gui_plot_lines},
     {"vvctre_gui_plot_lines_getter", (void*)&vvctre_gui_plot_lines_getter},
     {"vvctre_gui_plot_histogram", (void*)&vvctre_gui_plot_histogram},
