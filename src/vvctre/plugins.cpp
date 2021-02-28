@@ -1261,6 +1261,10 @@ bool vvctre_gui_begin_menu(const char* label) {
     return ImGui::BeginMenu(label);
 }
 
+bool vvctre_gui_begin_menu_ex(const char* label, const bool enabled) {
+    return ImGui::BeginMenu(label, enabled);
+}
+
 void vvctre_gui_end_menu() {
     ImGui::EndMenu();
 }
@@ -4517,6 +4521,7 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_gui_close_current_popup", (void*)&vvctre_gui_close_current_popup},
     {"vvctre_gui_is_popup_open", (void*)&vvctre_gui_is_popup_open},
     {"vvctre_gui_begin_menu", (void*)&vvctre_gui_begin_menu},
+    {"vvctre_gui_begin_menu_ex", (void*)&vvctre_gui_begin_menu_ex},
     {"vvctre_gui_end_menu", (void*)&vvctre_gui_end_menu},
     {"vvctre_gui_begin_tab", (void*)&vvctre_gui_begin_tab},
     {"vvctre_gui_begin_tab_ex", (void*)&vvctre_gui_begin_tab_ex},
