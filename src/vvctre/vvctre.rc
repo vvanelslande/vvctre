@@ -1,4 +1,0 @@
-#include "winresrc.h"
-
-VVCTRE_ICON              ICON                    "./vvctre.ico"
-1                        RT_MANIFEST             "./vvctre.manifest"

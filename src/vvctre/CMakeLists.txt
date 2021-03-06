@@ -2,12 +2,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMakeModules)
 
 add_executable(vvctre
     vvctre.cpp
-    vvctre.rc
     common.cpp
     common.h
     emu_window/emu_window_sdl2.cpp
     emu_window/emu_window_sdl2.h
-    resource.h
     applets/swkbd.cpp
     applets/swkbd.h
     applets/mii_selector.cpp
