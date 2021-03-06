@@ -4,8 +4,6 @@
 
 #include <array>
 #include "core/arm/dynarmic/arm_dynarmic_cp15.h"
-#include "core/arm/skyeye_common/arm_regformat.h"
-#include "core/arm/skyeye_common/armstate.h"
 
 using Callback = Dynarmic::A32::Coprocessor::Callback;
 using CallbackOrAccessOneWord = Dynarmic::A32::Coprocessor::CallbackOrAccessOneWord;

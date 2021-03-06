@@ -134,7 +134,6 @@ struct Values {
     u16 gdbstub_port = 24689;
 
     // General
-    bool use_cpu_jit = true;
     bool enable_core_2 = false;
     bool limit_speed = true;
     u16 speed_limit = 100;

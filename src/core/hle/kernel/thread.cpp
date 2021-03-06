@@ -11,7 +11,6 @@
 #include "common/logging/log.h"
 #include "common/math_util.h"
 #include "core/arm/arm_interface.h"
-#include "core/arm/skyeye_common/armstate.h"
 #include "core/core.h"
 #include "core/hle/kernel/errors.h"
 #include "core/hle/kernel/handle_table.h"
@@ -113,7 +112,7 @@ void ThreadManager::SwitchContext(Thread* new_thread) {
         }
 
         cpu->LoadContext(new_thread->context);
-        cpu->SetCP15Register(CP15_THREAD_URO, new_thread->GetTLSAddress());
+        cpu->SetCP15Register(70 /* URO */, new_thread->GetTLSAddress());
     } else {
         current_thread = nullptr;
         // Note: We do not reset the current process and current page table when idling because
@@ -280,7 +279,7 @@ static void ResetThreadContext(const std::unique_ptr<ARM_Interface::ThreadContex
     context->SetCpuRegister(0, arg);
     context->SetProgramCounter(entry_point);
     context->SetStackPointer(stack_top);
-    context->SetCpsr(USER32MODE | ((entry_point & 1) << 5)); // Usermode and THUMB mode
+    context->SetCpsr(16 | ((entry_point & 1) << 5)); // Usermode and THUMB mode
 }
 
 ResultVal<std::shared_ptr<Thread>> KernelSystem::CreateThread(std::string name, VAddr entry_point,
@@ -420,8 +419,7 @@ std::shared_ptr<Thread> SetupMainThread(KernelSystem& kernel, u32 entry_point, u
 
     std::shared_ptr<Thread> thread = std::move(thread_res).Unwrap();
 
-    thread->context->SetFpscr(FPSCR_DEFAULT_NAN | FPSCR_FLUSH_TO_ZERO | FPSCR_ROUND_TOZERO |
-                              FPSCR_IXC); // 0x03C00010
+    thread->context->SetFpscr(0x03C00010);
 
     // Note: The newly created thread will be run when the scheduler fires.
     return thread;

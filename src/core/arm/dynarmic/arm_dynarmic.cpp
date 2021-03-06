@@ -217,23 +217,23 @@ void ARM_Dynarmic::SetVFPReg(int index, u32 value) {
     jit->ExtRegs()[index] = value;
 }
 
-u32 ARM_Dynarmic::GetVFPSystemReg(VFPSystemRegister reg) const {
+u32 ARM_Dynarmic::GetVFPSystemReg(int reg) const {
     switch (reg) {
-    case VFP_FPSCR:
+    case 1: // FPSCR
         return jit->Fpscr();
-    case VFP_FPEXC:
+    case 2: // FPEXC
         return fpexc;
     default:
         UNREACHABLE_MSG("Unknown VFP system register: {}", static_cast<std::size_t>(reg));
     }
 }
 
-void ARM_Dynarmic::SetVFPSystemReg(VFPSystemRegister reg, u32 value) {
+void ARM_Dynarmic::SetVFPSystemReg(int reg, u32 value) {
     switch (reg) {
-    case VFP_FPSCR:
+    case 1: // FPSCR
         jit->SetFpscr(value);
         return;
-    case VFP_FPEXC:
+    case 2: // FPEXC
         fpexc = value;
         return;
     default:
@@ -249,23 +249,23 @@ void ARM_Dynarmic::SetCPSR(u32 cpsr) {
     jit->SetCpsr(cpsr);
 }
 
-u32 ARM_Dynarmic::GetCP15Register(CP15Register reg) {
+u32 ARM_Dynarmic::GetCP15Register(int reg) {
     switch (reg) {
-    case CP15_THREAD_UPRW:
+    case 69: // UPRW
         return cp15_state.cp15_thread_uprw;
-    case CP15_THREAD_URO:
+    case 70: // URO
         return cp15_state.cp15_thread_uro;
     default:
         UNREACHABLE_MSG("Unknown CP15 register: {}", static_cast<std::size_t>(reg));
     }
 }
 
-void ARM_Dynarmic::SetCP15Register(CP15Register reg, u32 value) {
+void ARM_Dynarmic::SetCP15Register(int reg, u32 value) {
     switch (reg) {
-    case CP15_THREAD_UPRW:
+    case 69: // UPRW
         cp15_state.cp15_thread_uprw = value;
         return;
-    case CP15_THREAD_URO:
+    case 70: // URO
         cp15_state.cp15_thread_uro = value;
         return;
     default:

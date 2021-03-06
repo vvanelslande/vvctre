@@ -12,7 +12,6 @@
 #include "common/texture.h"
 #include "core/arm/arm_interface.h"
 #include "core/arm/dynarmic/arm_dynarmic.h"
-#include "core/arm/dyncom/arm_dyncom.h"
 #include "core/cheats/cheats.h"
 #include "core/core.h"
 #include "core/core_timing.h"
@@ -341,24 +340,15 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window, u32 system_mo
     kernel = std::make_unique<Kernel::KernelSystem>(
         *memory, *timing, [this] { PrepareReschedule(); }, system_mode);
 
-    if (Settings::values.use_cpu_jit) {
-        exclusive_monitor =
-            std::make_shared<Dynarmic::ExclusiveMonitor>(Settings::values.enable_core_2 ? 2 : 1);
+    exclusive_monitor =
+        std::make_shared<Dynarmic::ExclusiveMonitor>(Settings::values.enable_core_2 ? 2 : 1);
 
-        cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(this, *memory, 0, timing->GetTimer(0),
+    cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(this, *memory, 0, timing->GetTimer(0),
+                                                       exclusive_monitor.get()));
+
+    if (Settings::values.enable_core_2) {
+        cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(this, *memory, 1, timing->GetTimer(1),
                                                            exclusive_monitor.get()));
-
-        if (Settings::values.enable_core_2) {
-            cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(
-                this, *memory, 1, timing->GetTimer(1), exclusive_monitor.get()));
-        }
-    } else {
-        cpu_cores.push_back(std::make_shared<ARM_DynCom>(this, *memory, 0, timing->GetTimer(0)));
-
-        if (Settings::values.enable_core_2) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_DynCom>(this, *memory, 1, timing->GetTimer(1)));
-        }
     }
 
     running_core = cpu_cores[0].get();

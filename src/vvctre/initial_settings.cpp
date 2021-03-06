@@ -407,7 +407,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                 }
 
                 if (ImGui::BeginTabItem("General")) {
-                    ImGui::Checkbox("Use CPU JIT", &Settings::values.use_cpu_jit);
                     ImGui::Checkbox("Enable Core 2", &Settings::values.enable_core_2);
                     if (ImGui::IsItemHovered()) {
                         ImGui::BeginTooltip();

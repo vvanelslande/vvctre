@@ -549,63 +549,51 @@ u32 vvctre_get_core_2_vfp_register(void* core, int index) {
 }
 
 void vvctre_set_vfp_system_register(void* core, int index, u32 value) {
-    static_cast<Core::System*>(core)->GetRunningCore().SetVFPSystemReg(
-        static_cast<VFPSystemRegister>(index), value);
+    static_cast<Core::System*>(core)->GetRunningCore().SetVFPSystemReg(index, value);
 }
 
 void vvctre_set_core_1_vfp_system_register(void* core, int index, u32 value) {
-    static_cast<Core::System*>(core)->GetCore(0).SetVFPSystemReg(
-        static_cast<VFPSystemRegister>(index), value);
+    static_cast<Core::System*>(core)->GetCore(0).SetVFPSystemReg(index, value);
 }
 
 void vvctre_set_core_2_vfp_system_register(void* core, int index, u32 value) {
-    static_cast<Core::System*>(core)->GetCore(1).SetVFPSystemReg(
-        static_cast<VFPSystemRegister>(index), value);
+    static_cast<Core::System*>(core)->GetCore(1).SetVFPSystemReg(index, value);
 }
 
 u32 vvctre_get_vfp_system_register(void* core, int index) {
-    return static_cast<Core::System*>(core)->GetRunningCore().GetVFPSystemReg(
-        static_cast<VFPSystemRegister>(index));
+    return static_cast<Core::System*>(core)->GetRunningCore().GetVFPSystemReg(index);
 }
 
 u32 vvctre_get_core_1_vfp_system_register(void* core, int index) {
-    return static_cast<Core::System*>(core)->GetCore(0).GetVFPSystemReg(
-        static_cast<VFPSystemRegister>(index));
+    return static_cast<Core::System*>(core)->GetCore(0).GetVFPSystemReg(index);
 }
 
 u32 vvctre_get_core_2_vfp_system_register(void* core, int index) {
-    return static_cast<Core::System*>(core)->GetCore(1).GetVFPSystemReg(
-        static_cast<VFPSystemRegister>(index));
+    return static_cast<Core::System*>(core)->GetCore(1).GetVFPSystemReg(index);
 }
 
 void vvctre_set_cp15_register(void* core, int index, u32 value) {
-    static_cast<Core::System*>(core)->GetRunningCore().SetCP15Register(
-        static_cast<CP15Register>(index), value);
+    static_cast<Core::System*>(core)->GetRunningCore().SetCP15Register(index, value);
 }
 
 void vvctre_set_core_1_cp15_register(void* core, int index, u32 value) {
-    static_cast<Core::System*>(core)->GetCore(0).SetCP15Register(static_cast<CP15Register>(index),
-                                                                 value);
+    static_cast<Core::System*>(core)->GetCore(0).SetCP15Register(index, value);
 }
 
 void vvctre_set_core_2_cp15_register(void* core, int index, u32 value) {
-    static_cast<Core::System*>(core)->GetCore(1).SetCP15Register(static_cast<CP15Register>(index),
-                                                                 value);
+    static_cast<Core::System*>(core)->GetCore(1).SetCP15Register(index, value);
 }
 
 u32 vvctre_get_cp15_register(void* core, int index) {
-    return static_cast<Core::System*>(core)->GetRunningCore().GetCP15Register(
-        static_cast<CP15Register>(index));
+    return static_cast<Core::System*>(core)->GetRunningCore().GetCP15Register(index);
 }
 
 u32 vvctre_get_core_1_cp15_register(void* core, int index) {
-    return static_cast<Core::System*>(core)->GetCore(0).GetCP15Register(
-        static_cast<CP15Register>(index));
+    return static_cast<Core::System*>(core)->GetCore(0).GetCP15Register(index);
 }
 
 u32 vvctre_get_core_2_cp15_register(void* core, int index) {
-    return static_cast<Core::System*>(core)->GetCore(1).GetCP15Register(
-        static_cast<CP15Register>(index));
+    return static_cast<Core::System*>(core)->GetCore(1).GetCP15Register(index);
 }
 
 void vvctre_ipc_recorder_set_enabled(void* core, bool enabled) {
@@ -3100,14 +3088,6 @@ u16 vvctre_settings_get_gdb_stub_port() {
     return Settings::values.use_gdbstub;
 }
 
-void vvctre_settings_set_use_cpu_jit(bool value) {
-    Settings::values.use_cpu_jit = value;
-}
-
-bool vvctre_settings_get_use_cpu_jit() {
-    return Settings::values.use_cpu_jit;
-}
-
 void vvctre_settings_set_enable_core_2(bool value) {
     Settings::values.enable_core_2 = value;
 }
@@ -4897,8 +4877,6 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_settings_disable_gdbstub", (void*)&vvctre_settings_disable_gdbstub},
     {"vvctre_settings_is_gdb_stub_enabled", (void*)&vvctre_settings_is_gdb_stub_enabled},
     {"vvctre_settings_get_gdb_stub_port", (void*)&vvctre_settings_get_gdb_stub_port},
-    {"vvctre_settings_set_use_cpu_jit", (void*)&vvctre_settings_set_use_cpu_jit},
-    {"vvctre_settings_get_use_cpu_jit", (void*)&vvctre_settings_get_use_cpu_jit},
     {"vvctre_settings_set_enable_core_2", (void*)&vvctre_settings_set_enable_core_2},
     {"vvctre_settings_get_enable_core_2", (void*)&vvctre_settings_get_enable_core_2},
     {"vvctre_settings_set_limit_speed", (void*)&vvctre_settings_set_limit_speed},

@@ -7,8 +7,6 @@
 #include <cstddef>
 #include <memory>
 #include "common/common_types.h"
-#include "core/arm/skyeye_common/arm_regformat.h"
-#include "core/arm/skyeye_common/vfp/asm_vfp.h"
 #include "core/core_timing.h"
 
 /// Generic ARM11 CPU interface
@@ -121,14 +119,14 @@ public:
      * @param reg The VFP system register
      * @returns The value within the VFP system register
      */
-    virtual u32 GetVFPSystemReg(VFPSystemRegister reg) const = 0;
+    virtual u32 GetVFPSystemReg(int reg) const = 0;
 
     /**
      * Sets the VFP system register to the given value
      * @param reg   The VFP system register
      * @param value Value to set the VFP system register to
      */
-    virtual void SetVFPSystemReg(VFPSystemRegister reg, u32 value) = 0;
+    virtual void SetVFPSystemReg(int reg, u32 value) = 0;
 
     /**
      * Get the current CPSR register
@@ -147,14 +145,14 @@ public:
      * @param reg The CP15 register to retrieve the value from.
      * @returns the value stored in the given CP15 register.
      */
-    virtual u32 GetCP15Register(CP15Register reg) = 0;
+    virtual u32 GetCP15Register(int reg) = 0;
 
     /**
      * Stores the given value into the indicated CP15 register.
      * @param reg   The CP15 register to store the value into.
      * @param value The value to store into the CP15 register.
      */
-    virtual void SetCP15Register(CP15Register reg, u32 value) = 0;
+    virtual void SetCP15Register(int reg, u32 value) = 0;
 
     /**
      * Creates a CPU context

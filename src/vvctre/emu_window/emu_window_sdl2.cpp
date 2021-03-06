@@ -1431,17 +1431,6 @@ void EmuWindow_SDL2::SwapBuffers() {
 
             if (ImGui::BeginMenu("Settings")) {
                 if (ImGui::BeginMenu("General")) {
-                    if (ImGui::Checkbox("Use CPU JIT", &Settings::values.use_cpu_jit)) {
-                        request_reset = true;
-                    }
-
-                    ImGui::PushTextWrapPos();
-                    ImGui::TextUnformatted("If you enable or disable the CPU JIT, emulation will "
-                                           "restart when the menu is closed.");
-                    ImGui::PopTextWrapPos();
-
-                    ImGui::NewLine();
-
                     if (ImGui::Checkbox("Enable Core 2", &Settings::values.enable_core_2)) {
                         request_reset = true;
                     }
