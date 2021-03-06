@@ -1137,6 +1137,21 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                     }
                 }
             }
+
+            float scale = params.Get("scale", 1.0f);
+            ImGui::SliderFloat("Scale##Circle Pad", &scale, 0.0f, 1.0f);
+
+            if (ImGui::IsItemDeactivatedAfterEdit()) {
+                params.Set("scale", scale);
+                Settings::values.analogs[Settings::NativeAnalog::CirclePad] = params.Serialize();
+
+                if (system != nullptr) {
+                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
+                    if (hid != nullptr) {
+                        hid->ReloadInputDevices();
+                    }
+                }
+            }
         } else if (params.Get("engine", "") == "analog_from_button") {
             float modifier_scale = params.Get("modifier_scale", 0.5f);
             ImGui::InputFloat("Modifier Scale##Circle Pad", &modifier_scale);
@@ -1323,6 +1338,21 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                         sm.GetService<Service::IR::IR_USER>("ir:USER");
                     if (ir_user != nullptr) {
                         ir_user->ReloadInputDevices();
+                    }
+                }
+            }
+
+            float scale = params.Get("scale", 1.0f);
+            ImGui::SliderFloat("Scale##Circle Pad", &scale, 0.0f, 1.0f);
+
+            if (ImGui::IsItemDeactivatedAfterEdit()) {
+                params.Set("scale", scale);
+                Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
+
+                if (system != nullptr) {
+                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
+                    if (hid != nullptr) {
+                        hid->ReloadInputDevices();
                     }
                 }
             }
