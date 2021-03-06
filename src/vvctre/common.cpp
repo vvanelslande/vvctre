@@ -31,7 +31,7 @@
 
 const u8 vvctre_version_major = 47;
 const u8 vvctre_version_minor = 0;
-const u8 vvctre_version_patch = 0;
+const u8 vvctre_version_patch = 1;
 
 void vvctreShutdown(PluginManager* plugin_manager) {
     if (plugin_manager != nullptr) {
@@ -1124,9 +1124,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Common::ParamPackage params(Settings::values.analogs[Settings::NativeAnalog::CirclePad]);
         if (params.Get("engine", "") == "sdl") {
             float deadzone = params.Get("deadzone", 0.0f);
-            ImGui::SliderFloat("Deadzone##Circle Pad", &deadzone, 0.0f, 1.0f);
-
-            if (ImGui::IsItemDeactivatedAfterEdit()) {
+            if (ImGui::SliderFloat("Deadzone##Circle Pad", &deadzone, 0.0f, .99f)) {
                 params.Set("deadzone", deadzone);
                 Settings::values.analogs[Settings::NativeAnalog::CirclePad] = params.Serialize();
 
@@ -1139,7 +1137,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             }
 
             float scale = params.Get("scale", 1.0f);
-            ImGui::SliderFloat("Scale##Circle Pad", &scale, 0.0f, 1.0f);
+            ImGui::InputFloat("Scale##Circle Pad", &scale);
 
             if (ImGui::IsItemDeactivatedAfterEdit()) {
                 params.Set("scale", scale);
@@ -1326,9 +1324,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Common::ParamPackage params(Settings::values.analogs[Settings::NativeAnalog::CirclePadPro]);
         if (params.Get("engine", "") == "sdl") {
             float deadzone = params.Get("deadzone", 0.0f);
-            ImGui::SliderFloat("Deadzone##Circle Pad Pro", &deadzone, 0.0f, 1.0f);
-
-            if (ImGui::IsItemDeactivatedAfterEdit()) {
+            if (ImGui::SliderFloat("Deadzone##Circle Pad Pro", &deadzone, 0.0f, .99f)) {
                 params.Set("deadzone", deadzone);
                 Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
 
@@ -1343,16 +1339,18 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             }
 
             float scale = params.Get("scale", 1.0f);
-            ImGui::SliderFloat("Scale##Circle Pad", &scale, 0.0f, 1.0f);
+            ImGui::InputFloat("Scale##Circle Pad Pro", &scale);
 
             if (ImGui::IsItemDeactivatedAfterEdit()) {
                 params.Set("scale", scale);
                 Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
 
                 if (system != nullptr) {
-                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                    if (hid != nullptr) {
-                        hid->ReloadInputDevices();
+                    Service::SM::ServiceManager& sm = system->ServiceManager();
+                    std::shared_ptr<Service::IR::IR_USER> ir_user =
+                        sm.GetService<Service::IR::IR_USER>("ir:USER");
+                    if (ir_user != nullptr) {
+                        ir_user->ReloadInputDevices();
                     }
                 }
             }
