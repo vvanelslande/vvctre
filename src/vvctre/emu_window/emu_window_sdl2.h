@@ -97,10 +97,7 @@ private:
     std::string installed_search_text_;
 
     // Amiibo
-    std::vector<std::tuple<u64, std::string>> amiibo_generate_and_load_search_results;
-    std::string amiibo_generate_and_load_search_text;
-    std::string amiibo_generate_and_load_search_text_;
-    std::string amiibo_generate_and_load_custom_id;
+    std::string amiibo_generate_and_load_id;
 
     // Cheats
     bool show_cheats_window = false;

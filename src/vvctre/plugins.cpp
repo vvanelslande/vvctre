@@ -8,8 +8,10 @@
 #include <utility>
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
+#include <curl/curl.h>
 #include <fmt/format.h>
 #include <imgui.h>
+#include <mbedtls/ssl.h>
 #include <nlohmann/json.hpp>
 #include <whereami.h>
 #include "common/common_funcs.h"
@@ -4316,6 +4318,76 @@ void vvctre_remove_logging_backend(const char* name) {
     Log::RemoveBackend(name);
 }
 
+char* vvctre_http_get(const char* url, const char* user_agent, long* status_code) {
+    CURL* curl = curl_easy_init();
+    if (curl == nullptr) {
+        return nullptr;
+    }
+
+    if (curl_easy_setopt(curl, CURLOPT_URL, url) != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return nullptr;
+    }
+
+    if (curl_easy_setopt(curl, CURLOPT_USERAGENT, user_agent) != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return nullptr;
+    }
+
+    if (curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L) != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return nullptr;
+    }
+
+    std::string body;
+
+    if (curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body) != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return nullptr;
+    }
+
+    if (curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                         static_cast<curl_write_callback>(
+                             [](char* ptr, std::size_t size, std::size_t nmemb, void* userdata) {
+                                 const std::size_t realsize = size * nmemb;
+                                 static_cast<std::string*>(userdata)->append(ptr, realsize);
+                                 return realsize;
+                             })) != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return nullptr;
+    }
+
+    if (curl_easy_setopt(
+            curl, CURLOPT_SSL_CTX_FUNCTION,
+            static_cast<CURLcode (*)(CURL * curl, void* ssl_ctx, void* userptr)>(
+                [](CURL* curl, void* ssl_ctx, void* userptr) {
+                    void* chain = Common::CreateCertificateChainWithSystemCertificates();
+                    if (chain != nullptr) {
+                        mbedtls_ssl_conf_ca_chain(static_cast<mbedtls_ssl_config*>(ssl_ctx),
+                                                  static_cast<mbedtls_x509_crt*>(chain), NULL);
+                    } else {
+                        return curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+                    }
+                    return CURLE_OK;
+                })) != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return nullptr;
+    }
+
+    if (curl_easy_perform(curl) != CURLE_OK) {
+        curl_easy_cleanup(curl);
+        return nullptr;
+    }
+
+    if (status_code != nullptr) {
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, status_code);
+    }
+
+    curl_easy_cleanup(curl);
+
+    return VVCTRE_STRDUP(body.c_str());
+}
+
 std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_load_file", (void*)&vvctre_load_file},
     {"vvctre_install_cia", (void*)&vvctre_install_cia},
@@ -5200,4 +5272,5 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
      (void*)&vvctre_set_hle_nwm_wlan_comm_id_check_function},
     {"vvctre_add_logging_backend", (void*)&vvctre_add_logging_backend},
     {"vvctre_remove_logging_backend", (void*)&vvctre_remove_logging_backend},
+    {"vvctre_http_get", (void*)&vvctre_http_get},
 };
