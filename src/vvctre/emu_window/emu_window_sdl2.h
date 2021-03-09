@@ -13,7 +13,6 @@
 #include "core/frontend/applets/mii_selector.h"
 #include "core/frontend/applets/swkbd.h"
 #include "core/frontend/emu_window.h"
-#include "core/hle/kernel/ipc_recorder.h"
 #include "vvctre/common.h"
 
 class PluginManager;
@@ -39,7 +38,6 @@ public:
     bool IsOpen() const;
 
     void Close();
-    void BeforeLoadingAfterFirstTime();
     void OnResize();
 
     struct KeyboardData {
@@ -80,15 +78,6 @@ private:
     // Default: Green
     ImVec4 fps_color{0.0f, 1.0f, 0.0f, 1.0f};
 
-    // IPC recorder
-    IPC::CallbackHandle ipc_recorder_callback;
-    std::vector<IPC::RequestRecord> all_ipc_records;
-    std::vector<IPC::RequestRecord> ipc_recorder_search_results;
-    int ipc_recorder_id_offset = 1;
-    std::string ipc_recorder_search_text;
-    std::string ipc_recorder_search_text_;
-    bool show_ipc_recorder_window = false;
-
     // Installed
     bool installed_menu_opened = false;
     std::vector<std::tuple<std::string, std::string>> all_installed;
@@ -101,8 +90,6 @@ private:
 
     // Cheats
     bool show_cheats_window = false;
-    bool show_cheats_text_editor = false;
-    std::string cheats_text_editor_text;
 
     // Play coins
     u16 play_coins = 0;

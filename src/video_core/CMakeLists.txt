@@ -9,7 +9,6 @@ add_library(video_core STATIC
     pica_types.h
     primitive_assembly.cpp
     primitive_assembly.h
-    rasterizer_interface.h
     regs.h
     regs_framebuffer.h
     regs_lighting.h
@@ -17,71 +16,53 @@ add_library(video_core STATIC
     regs_rasterizer.h
     regs_shader.h
     regs_texturing.h
-    renderer_base.cpp
-    renderer_base.h
-    renderer_opengl/gl_rasterizer.cpp
-    renderer_opengl/gl_rasterizer.h
-    renderer_opengl/gl_rasterizer_cache.cpp
-    renderer_opengl/gl_rasterizer_cache.h
-    renderer_opengl/gl_resource_manager.cpp
-    renderer_opengl/gl_resource_manager.h
-    renderer_opengl/gl_shader_decompiler.cpp
-    renderer_opengl/gl_shader_decompiler.h
-    renderer_opengl/gl_shader_disk_cache.cpp
-    renderer_opengl/gl_shader_disk_cache.h
-    renderer_opengl/gl_shader_gen.cpp
-    renderer_opengl/gl_shader_gen.h
-    renderer_opengl/gl_shader_manager.cpp
-    renderer_opengl/gl_shader_manager.h
-    renderer_opengl/gl_shader_util.cpp
-    renderer_opengl/gl_shader_util.h
-    renderer_opengl/gl_state.cpp
-    renderer_opengl/gl_state.h
-    renderer_opengl/gl_stream_buffer.cpp
-    renderer_opengl/gl_stream_buffer.h
-    renderer_opengl/gl_surface_params.cpp
-    renderer_opengl/gl_surface_params.h
-    renderer_opengl/pica_to_gl.h
-    renderer_opengl/post_processing_opengl.cpp
-    renderer_opengl/post_processing_opengl.h
-    renderer_opengl/renderer_opengl.cpp
-    renderer_opengl/renderer_opengl.h
-    renderer_opengl/texture_filters/anime4k_ultrafast.cpp
-    renderer_opengl/texture_filters/anime4k_ultrafast.h
-    renderer_opengl/texture_filters/bicubic.cpp
-    renderer_opengl/texture_filters/bicubic.h
-    renderer_opengl/texture_filters/scale_force.cpp
-    renderer_opengl/texture_filters/scale_force.h
-    renderer_opengl/texture_filters/texture_filter_base.h
-    renderer_opengl/texture_filters/texture_filterer.cpp
-    renderer_opengl/texture_filters/texture_filterer.h
-    renderer_opengl/texture_filters/xbrz_freescale.cpp
-    renderer_opengl/texture_filters/xbrz_freescale.h
-    renderer_opengl/texture_filters/tex_coord.h
-    renderer_opengl/gl_format_reinterpreter.cpp
-    renderer_opengl/gl_format_reinterpreter.h
+    renderer/rasterizer.cpp
+    renderer/rasterizer.h
+    renderer/rasterizer_cache.cpp
+    renderer/rasterizer_cache.h
+    renderer/resource_manager.cpp
+    renderer/resource_manager.h
+    renderer/shader_decompiler.cpp
+    renderer/shader_decompiler.h
+    renderer/shader_disk_cache.cpp
+    renderer/shader_disk_cache.h
+    renderer/shader_gen.cpp
+    renderer/shader_gen.h
+    renderer/shader_manager.cpp
+    renderer/shader_manager.h
+    renderer/shader_util.cpp
+    renderer/shader_util.h
+    renderer/state.cpp
+    renderer/state.h
+    renderer/stream_buffer.cpp
+    renderer/stream_buffer.h
+    renderer/surface_params.cpp
+    renderer/surface_params.h
+    renderer/pica_to_gl.h
+    renderer/post_processing.cpp
+    renderer/post_processing.h
+    renderer/renderer.cpp
+    renderer/renderer.h
+    renderer/texture_filters/anime4k_ultrafast.cpp
+    renderer/texture_filters/anime4k_ultrafast.h
+    renderer/texture_filters/bicubic.cpp
+    renderer/texture_filters/bicubic.h
+    renderer/texture_filters/scale_force.cpp
+    renderer/texture_filters/scale_force.h
+    renderer/texture_filters/texture_filter_base.h
+    renderer/texture_filters/texture_filterer.cpp
+    renderer/texture_filters/texture_filterer.h
+    renderer/texture_filters/xbrz_freescale.cpp
+    renderer/texture_filters/xbrz_freescale.h
+    renderer/texture_filters/tex_coord.h
+    renderer/format_reinterpreter.cpp
+    renderer/format_reinterpreter.h
     shader/shader.cpp
     shader/shader.h
-    shader/shader_interpreter.cpp
-    shader/shader_interpreter.h
-    shader/shader_jit_x64.cpp
-    shader/shader_jit_x64_compiler.cpp
-    shader/shader_jit_x64.h
-    shader/shader_jit_x64_compiler.h
-    swrasterizer/clipper.cpp
-    swrasterizer/clipper.h
-    swrasterizer/framebuffer.cpp
-    swrasterizer/framebuffer.h
-    swrasterizer/lighting.cpp
-    swrasterizer/lighting.h
-    swrasterizer/proctex.cpp
-    swrasterizer/proctex.h
-    swrasterizer/rasterizer.cpp
-    swrasterizer/rasterizer.h
-    swrasterizer/swrasterizer.cpp
-    swrasterizer/swrasterizer.h
-    swrasterizer/texturing.cpp
-    swrasterizer/texturing.h
+    shader/engine.cpp
+    shader/engine.h
+    shader/compiler.cpp
+    shader/compiler.h
     texture/etc1.cpp
     texture/etc1.h
     texture/texture_decode.cpp

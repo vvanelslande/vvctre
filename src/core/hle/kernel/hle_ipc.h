@@ -231,11 +231,9 @@ public:
 
     /// Populates this context with data from the requesting process/thread.
     ResultCode PopulateFromIncomingCommandBuffer(const u32_le* src_cmdbuf, Process& src_process);
+
     /// Writes data from this context back to the requesting process/thread.
     ResultCode WriteToOutgoingCommandBuffer(u32_le* dst_cmdbuf, Process& dst_process) const;
-
-    /// Reports an unimplemented function.
-    void ReportUnimplemented() const;
 
 private:
     KernelSystem& kernel;

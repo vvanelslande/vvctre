@@ -4,19 +4,15 @@
 
 #pragma once
 
-#include <array>
 #include <memory>
 #include <string>
-#include <vector>
 #include "common/common_types.h"
-#include "network/common.h"
 
 namespace Network {
 
 class Room {
 public:
-    explicit Room(const std::string& ip = "0.0.0.0", u16 port = DEFAULT_PORT,
-                  const u32 member_slots = DEFAULT_MEMBER_SLOTS);
+    explicit Room(const std::string& ip, const u16 port, const u32 member_slots);
     ~Room();
 
 private:

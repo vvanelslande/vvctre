@@ -8,7 +8,8 @@
 #include "core/file_sys/file_backend.h"
 #include "core/hle/service/ptm/ptm.h"
 #include "core/settings.h"
-#include "video_core/renderer_opengl/renderer_opengl.h"
+#include "video_core/renderer/renderer.h"
+#include "video_core/video_core.h"
 #include "vvctre/applets/mii_selector.h"
 
 namespace Frontend {

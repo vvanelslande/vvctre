@@ -15,11 +15,12 @@
 namespace Kernel {
 
 void ReleaseThreadMutexes(Thread* thread) {
-    for (auto& mtx : thread->held_mutexes) {
-        mtx->lock_count = 0;
-        mtx->holding_thread = nullptr;
-        mtx->WakeupAllWaitingThreads();
+    for (std::shared_ptr<Mutex>& m : thread->held_mutexes) {
+        m->lock_count = 0;
+        m->holding_thread = nullptr;
+        m->WakeupAllWaitingThreads();
     }
+
     thread->held_mutexes.clear();
 }
 
@@ -27,15 +28,16 @@ Mutex::Mutex(KernelSystem& kernel) : WaitObject(kernel), kernel(kernel) {}
 Mutex::~Mutex() {}
 
 std::shared_ptr<Mutex> KernelSystem::CreateMutex(bool initial_locked, std::string name) {
-    auto mutex{std::make_shared<Mutex>(*this)};
+    std::shared_ptr<Mutex> mutex = std::make_shared<Mutex>(*this);
 
     mutex->lock_count = 0;
     mutex->name = std::move(name);
     mutex->holding_thread = nullptr;
 
     // Acquire mutex with current thread if initialized as locked
-    if (initial_locked)
+    if (initial_locked) {
         mutex->Acquire(thread_managers[current_cpu->GetID()]->GetCurrentThread());
+    }
 
     return mutex;
 }

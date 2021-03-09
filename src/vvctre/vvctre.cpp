@@ -44,7 +44,7 @@
 #include "core/settings.h"
 #include "input_common/main.h"
 #include "network/room_member.h"
-#include "video_core/renderer_base.h"
+#include "video_core/renderer/renderer.h"
 #include "video_core/video_core.h"
 #include "vvctre/applets/mii_selector.h"
 #include "vvctre/applets/swkbd.h"
@@ -326,10 +326,8 @@ int main(int argc, char** argv) {
     std::unique_ptr<EmuWindow_SDL2> emu_window =
         std::make_unique<EmuWindow_SDL2>(system, plugin_manager, window, ok_multiplayer);
 
-    system.SetBeforeLoadingAfterFirstTime([&plugin_manager, &emu_window] {
-        emu_window->BeforeLoadingAfterFirstTime();
-        plugin_manager.BeforeLoadingAfterFirstTime();
-    });
+    system.SetBeforeLoadingAfterFirstTime(
+        [&plugin_manager, &emu_window] { plugin_manager.BeforeLoadingAfterFirstTime(); });
 
     system.SetPreloadCustomTexturesFunction([&] {
         std::atomic<bool> done = false;

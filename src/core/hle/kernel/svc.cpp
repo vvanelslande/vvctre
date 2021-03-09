@@ -9,7 +9,7 @@
 #include <map>
 #include "common/logging/log.h"
 #include "common/scope_exit.h"
-#include "core/arm/arm_interface.h"
+#include "core/arm/arm_dynarmic.h"
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "core/hle/kernel/address_arbiter.h"
@@ -19,7 +19,6 @@
 #include "core/hle/kernel/event.h"
 #include "core/hle/kernel/handle_table.h"
 #include "core/hle/kernel/ipc.h"
-#include "core/hle/kernel/ipc_recorder.h"
 #include "core/hle/kernel/memory.h"
 #include "core/hle/kernel/mutex.h"
 #include "core/hle/kernel/process.h"
@@ -393,6 +392,7 @@ ResultCode SVC::ConnectToPort(Handle* out_handle, VAddr port_name_address) {
 ResultCode SVC::SendSyncRequest(Handle handle) {
     std::shared_ptr<ClientSession> session =
         kernel.GetCurrentProcess()->handle_table.Get<ClientSession>(handle);
+
     if (session == nullptr) {
         return ERR_INVALID_HANDLE;
     }
@@ -401,13 +401,8 @@ ResultCode SVC::SendSyncRequest(Handle handle) {
 
     system.PrepareReschedule();
 
-    auto thread = SharedFrom(kernel.GetCurrentThreadManager().GetCurrentThread());
-
-    if (kernel.GetIPCRecorder().IsEnabled()) {
-        kernel.GetIPCRecorder().RegisterRequest(session, thread);
-    }
-
-    return session->SendSyncRequest(thread);
+    return session->SendSyncRequest(
+        SharedFrom(kernel.GetCurrentThreadManager().GetCurrentThread()));
 }
 
 /// Close a handle
@@ -421,16 +416,17 @@ ResultCode SVC::WaitSynchronization1(Handle handle, s64 nano_seconds) {
     auto object = kernel.GetCurrentProcess()->handle_table.Get<WaitObject>(handle);
     Thread* thread = kernel.GetCurrentThreadManager().GetCurrentThread();
 
-    if (object == nullptr)
+    if (object == nullptr) {
         return ERR_INVALID_HANDLE;
+    }
 
     LOG_TRACE(Kernel_SVC, "called handle=0x{:08X}({}:{}), nanoseconds={}", handle,
               object->GetTypeName(), object->GetName(), nano_seconds);
 
     if (object->ShouldWait(thread)) {
-
-        if (nano_seconds == 0)
+        if (nano_seconds == 0) {
             return RESULT_TIMEOUT;
+        }
 
         thread->wait_objects = {object};
         object->AddWaitingThread(SharedFrom(thread));

@@ -51,4 +51,5 @@ private:
     std::unordered_map<u64, CustomTexInfo> custom_textures;
     std::unordered_map<u64, CustomTexPathInfo> custom_texture_paths;
 };
+
 } // namespace Core

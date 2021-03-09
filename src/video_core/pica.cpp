@@ -7,7 +7,8 @@
 #include "video_core/geometry_pipeline.h"
 #include "video_core/pica.h"
 #include "video_core/pica_state.h"
-#include "video_core/renderer_base.h"
+#include "video_core/renderer/rasterizer.h"
+#include "video_core/renderer/renderer.h"
 #include "video_core/video_core.h"
 
 namespace Pica {

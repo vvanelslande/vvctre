@@ -10,13 +10,14 @@
 #include "common/fastmem_mapper.h"
 #include "common/logging/log.h"
 #include "common/swap.h"
-#include "core/arm/arm_interface.h"
+#include "core/arm/arm_dynarmic.h"
 #include "core/core.h"
 #include "core/hle/kernel/memory.h"
 #include "core/hle/kernel/process.h"
 #include "core/hle/lock.h"
 #include "core/memory.h"
-#include "video_core/renderer_base.h"
+#include "video_core/renderer/rasterizer.h"
+#include "video_core/renderer/renderer.h"
 #include "video_core/video_core.h"
 
 namespace Memory {
@@ -24,15 +25,16 @@ namespace Memory {
 class RasterizerCacheMarker {
 public:
     void Mark(VAddr addr, bool cached) {
-        bool* p = At(addr);
-        if (p)
+        if (bool* p = At(addr)) {
             *p = cached;
+        }
     }
 
     bool IsCached(VAddr addr) {
-        bool* p = At(addr);
-        if (p)
+        if (bool* p = At(addr)) {
             return *p;
+        }
+
         return false;
     }
 
@@ -41,12 +43,15 @@ private:
         if (addr >= VRAM_VADDR && addr < VRAM_VADDR_END) {
             return &vram[(addr - VRAM_VADDR) / PAGE_SIZE];
         }
+
         if (addr >= LINEAR_HEAP_VADDR && addr < LINEAR_HEAP_VADDR_END) {
             return &linear_heap[(addr - LINEAR_HEAP_VADDR) / PAGE_SIZE];
         }
+
         if (addr >= NEW_LINEAR_HEAP_VADDR && addr < NEW_LINEAR_HEAP_VADDR_END) {
             return &new_linear_heap[(addr - NEW_LINEAR_HEAP_VADDR) / PAGE_SIZE];
         }
+
         return nullptr;
     }
 
@@ -65,6 +70,7 @@ u8* PageTable::Get(VAddr vaddr) const {
 
 void PageTable::Set(PageType page_type, VAddr vaddr, u8* backing_memory) {
     attributes[vaddr >> PAGE_BITS] = page_type;
+
     if (backing_memory) {
         pointers[vaddr >> PAGE_BITS] = backing_memory - vaddr;
         DEBUG_ASSERT_MSG(pointers[vaddr >> PAGE_BITS], "Unintentional nullptr within pointers");
@@ -75,16 +81,13 @@ void PageTable::Set(PageType page_type, VAddr vaddr, u8* backing_memory) {
 
 class MemorySystem::Impl {
 public:
-    static constexpr size_t required_backing_memory = Memory::FCRAM_SIZE + Memory::VRAM_SIZE;
-    Common::FastmemMapper fastmem_mapper{required_backing_memory};
-
+    Common::FastmemMapper fastmem_mapper{Memory::FCRAM_SIZE + Memory::VRAM_SIZE};
     Common::BackingMemory fcram = fastmem_mapper.Allocate(Memory::FCRAM_SIZE);
     Common::BackingMemory vram = fastmem_mapper.Allocate(Memory::VRAM_SIZE);
 
     PageTable* current_page_table = nullptr;
     RasterizerCacheMarker cache_marker;
     std::vector<PageTable*> page_table_list;
-
     AudioCore::DspInterface* dsp = nullptr;
 };
 

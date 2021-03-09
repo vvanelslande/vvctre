@@ -49,23 +49,13 @@ public:
         return service_name;
     }
 
-    /**
-     * Returns the maximum number of sessions that can be connected to this service at the same
-     * time.
-     */
-    u32 GetMaxSessions() const {
-        return max_sessions;
-    }
-
     /// Creates a port pair and registers this service with the given ServiceManager.
     void InstallAsService(SM::ServiceManager& service_manager);
+
     /// Creates a port pair and registers it on the kernel's global port registry.
     void InstallAsNamedPort(Kernel::KernelSystem& kernel);
 
     void HandleSyncRequest(Kernel::HLERequestContext& context) override;
-
-    /// Retrieves name of a function based on the header code. For IPC Recorder.
-    std::string GetFunctionName(u32 header) const;
 
 protected:
     /// Member-function pointer type of SyncRequest handlers.

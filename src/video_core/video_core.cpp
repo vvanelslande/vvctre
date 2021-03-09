@@ -6,15 +6,12 @@
 #include "common/logging/log.h"
 #include "core/settings.h"
 #include "video_core/pica.h"
-#include "video_core/renderer_base.h"
-#include "video_core/renderer_opengl/renderer_opengl.h"
+#include "video_core/renderer/renderer.h"
 #include "video_core/video_core.h"
 
 namespace VideoCore {
 
-std::unique_ptr<RendererBase> g_renderer;
-std::atomic<bool> g_hardware_renderer_enabled;
-std::atomic<bool> g_shader_jit_enabled;
+std::unique_ptr<OpenGL::Renderer> g_renderer;
 std::atomic<bool> g_hardware_shader_enabled;
 std::atomic<bool> g_hardware_shader_accurate_multiplication;
 std::atomic<bool> g_renderer_background_color_update_requested;
@@ -30,8 +27,7 @@ Memory::MemorySystem* g_memory;
 void Init(Frontend::EmuWindow& emu_window, Memory::MemorySystem& memory) {
     g_memory = &memory;
     Pica::Init();
-    g_renderer = std::make_unique<OpenGL::RendererOpenGL>(emu_window);
-    g_renderer->RefreshRasterizerSetting();
+    g_renderer = std::make_unique<OpenGL::Renderer>(emu_window);
 }
 
 void Shutdown() {
@@ -54,14 +50,9 @@ bool RequestScreenshot(void* data, std::function<void()> callback,
 }
 
 u16 GetResolutionScaleFactor() {
-    if (g_hardware_renderer_enabled) {
-        return Settings::values.resolution
-                   ? Settings::values.resolution
-                   : g_renderer->GetRenderWindow().GetFramebufferLayout().GetScalingRatio();
-    } else {
-        // Software renderer always render at native resolution
-        return 1;
-    }
+    return Settings::values.resolution
+               ? Settings::values.resolution
+               : g_renderer->GetRenderWindow().GetFramebufferLayout().GetScalingRatio();
 }
 
 } // namespace VideoCore

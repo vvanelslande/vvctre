@@ -190,4 +190,5 @@ std::vector<std::string> ListCubebInputDevices() {
     cubeb_destroy(ctx);
     return device_list;
 }
+
 } // namespace AudioCore

@@ -22,11 +22,9 @@
 #include "common/string_util.h"
 #include "common/texture.h"
 #include "core/3ds.h"
-#include "core/cheats/cheat_base.h"
-#include "core/cheats/cheats.h"
-#include "core/cheats/gateway_cheat.h"
+#include "core/cheats/cheat.h"
+#include "core/cheats/engine.h"
 #include "core/core.h"
-#include "core/hle/kernel/ipc_recorder.h"
 #include "core/hle/service/am/am.h"
 #include "core/hle/service/cam/cam.h"
 #include "core/hle/service/cfg/cfg.h"
@@ -42,7 +40,7 @@
 #include "core/settings.h"
 #include "network/room.h"
 #include "network/room_member.h"
-#include "video_core/renderer_base.h"
+#include "video_core/renderer/renderer.h"
 #include "video_core/video_core.h"
 #include "vvctre/common.h"
 #include "vvctre/function_logger.h"
@@ -598,93 +596,6 @@ u32 vvctre_get_core_2_cp15_register(void* core, int index) {
     return static_cast<Core::System*>(core)->GetCore(1).GetCP15Register(index);
 }
 
-void vvctre_ipc_recorder_set_enabled(void* core, bool enabled) {
-    static_cast<Core::System*>(core)->Kernel().GetIPCRecorder().SetEnabled(enabled);
-}
-
-bool vvctre_ipc_recorder_get_enabled(void* core) {
-    return static_cast<Core::System*>(core)->Kernel().GetIPCRecorder().IsEnabled();
-}
-
-void vvctre_ipc_recorder_bind_callback(void* core, void (*callback)(const char* json)) {
-    static_cast<Core::System*>(core)->Kernel().GetIPCRecorder().BindCallback(
-        [callback](const IPC::RequestRecord& record) {
-            const nlohmann::json json = {
-                {"id", record.id},
-                {"status", static_cast<int>(record.status)},
-                {"function_name", record.function_name},
-                {"is_hle", record.is_hle},
-                {
-                    "client_process",
-                    {
-                        {"type", record.client_process.type},
-                        {"name", record.client_process.name},
-                        {"id", record.client_process.id},
-                    },
-                },
-                {
-                    "client_thread",
-                    {
-                        {"type", record.client_thread.type},
-                        {"name", record.client_thread.name},
-                        {"id", record.client_thread.id},
-                    },
-                },
-                {
-                    "client_session",
-                    {
-                        {"type", record.client_session.type},
-                        {"name", record.client_session.name},
-                        {"id", record.client_session.id},
-                    },
-                },
-                {
-                    "client_port",
-                    {
-                        {"type", record.client_port.type},
-                        {"name", record.client_port.name},
-                        {"id", record.client_port.id},
-                    },
-                },
-                {
-                    "server_process",
-                    {
-                        {"type", record.server_process.type},
-                        {"name", record.server_process.name},
-                        {"id", record.server_process.id},
-                    },
-                },
-                {
-                    "server_thread",
-                    {
-                        {"type", record.server_thread.type},
-                        {"name", record.server_thread.name},
-                        {"id", record.server_thread.id},
-                    },
-                },
-                {
-                    "server_session",
-                    {
-                        {"type", record.server_session.type},
-                        {"name", record.server_session.name},
-                        {"id", record.server_session.id},
-                    },
-                },
-                {"untranslated_request_cmdbuf", record.untranslated_request_cmdbuf},
-                {"translated_request_cmdbuf", record.translated_request_cmdbuf},
-                {"untranslated_reply_cmdbuf", record.untranslated_reply_cmdbuf},
-                {"translated_reply_cmdbuf", record.translated_reply_cmdbuf},
-            };
-
-            callback(json.dump().c_str());
-        });
-}
-
-char* vvctre_get_service_name_by_port_id(void* core, u32 port) {
-    return VVCTRE_STRDUP(
-        static_cast<Core::System*>(core)->ServiceManager().GetServiceNameByPortId(port).c_str());
-}
-
 int vvctre_cheat_count(void* core) {
     return static_cast<int>(static_cast<Core::System*>(core)->CheatEngine().GetCheats().size());
 }
@@ -704,11 +615,6 @@ char* vvctre_get_cheat_comments(void* core, int index) {
         static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetComments().c_str());
 }
 
-char* vvctre_get_cheat_type(void* core, int index) {
-    return VVCTRE_STRDUP(
-        static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetType().c_str());
-}
-
 char* vvctre_get_cheat_code(void* core, int index) {
     return VVCTRE_STRDUP(
         static_cast<Core::System*>(core)->CheatEngine().GetCheats()[index]->GetCode().c_str());
@@ -724,32 +630,32 @@ bool vvctre_get_cheat_enabled(void* core, int index) {
 
 void vvctre_add_gateway_cheat(void* core, const char* name, const char* code,
                               const char* comments) {
-    static_cast<Core::System*>(core)->CheatEngine().AddCheat(std::make_shared<Cheats::GatewayCheat>(
+    static_cast<Core::System*>(core)->CheatEngine().Add(std::make_shared<Cheats::Cheat>(
         std::string(name), std::string(code), std::string(comments)));
 }
 
 void vvctre_remove_cheat(void* core, int index) {
-    static_cast<Core::System*>(core)->CheatEngine().RemoveCheat(index);
+    static_cast<Core::System*>(core)->CheatEngine().Remove(index);
 }
 
 void vvctre_update_gateway_cheat(void* core, int index, const char* name, const char* code,
                                  const char* comments) {
-    static_cast<Core::System*>(core)->CheatEngine().UpdateCheat(
-        index, std::make_shared<Cheats::GatewayCheat>(std::string(name), std::string(code),
-                                                      std::string(comments)));
+    static_cast<Core::System*>(core)->CheatEngine().Update(
+        index, std::make_shared<Cheats::Cheat>(std::string(name), std::string(code),
+                                               std::string(comments)));
 }
 
 void vvctre_load_cheats_from_file(void* core) {
-    static_cast<Core::System*>(core)->CheatEngine().LoadCheatsFromFile();
+    static_cast<Core::System*>(core)->CheatEngine().Load();
 }
 
 void vvctre_save_cheats_to_file(void* core) {
-    static_cast<Core::System*>(core)->CheatEngine().SaveCheatsToFile();
+    static_cast<Core::System*>(core)->CheatEngine().Save();
 }
 
 void vvctre_reload_camera_images(void* core) {
-    auto cam = Service::CAM::GetModule(*static_cast<Core::System*>(core));
-    if (cam != nullptr) {
+    if (std::shared_ptr<Service::CAM::Module> cam =
+            Service::CAM::GetModule(*static_cast<Core::System*>(core))) {
         cam->ReloadCameraDevices();
     }
 }
@@ -3057,39 +2963,6 @@ u64 vvctre_settings_get_unix_timestamp() {
     return Settings::values.unix_timestamp;
 }
 
-void vvctre_settings_set_use_virtual_sd(bool value) {
-    Settings::values.use_virtual_sd = value;
-}
-
-bool vvctre_settings_get_use_virtual_sd() {
-    return Settings::values.use_virtual_sd;
-}
-
-void vvctre_settings_set_record_frame_times(bool value) {
-    Settings::values.record_frame_times = value;
-}
-
-bool vvctre_settings_get_record_frame_times() {
-    return Settings::values.record_frame_times;
-}
-
-void vvctre_settings_enable_gdbstub(u16 port) {
-    Settings::values.use_gdbstub = true;
-    Settings::values.gdbstub_port = port;
-}
-
-void vvctre_settings_disable_gdbstub() {
-    Settings::values.use_gdbstub = false;
-}
-
-bool vvctre_settings_is_gdb_stub_enabled() {
-    return Settings::values.use_gdbstub;
-}
-
-u16 vvctre_settings_get_gdb_stub_port() {
-    return Settings::values.use_gdbstub;
-}
-
 void vvctre_settings_set_enable_core_2(bool value) {
     Settings::values.enable_core_2 = value;
 }
@@ -3353,14 +3226,6 @@ void vvctre_settings_write_config_savegame(void* cfg) {
     static_cast<Service::CFG::Module*>(cfg)->UpdateConfigNANDSavegame();
 }
 
-void vvctre_settings_set_use_hardware_renderer(bool value) {
-    Settings::values.use_hardware_renderer = value;
-}
-
-bool vvctre_settings_get_use_hardware_renderer() {
-    return Settings::values.use_hardware_renderer;
-}
-
 void vvctre_settings_set_use_hardware_shader(bool value) {
     Settings::values.use_hardware_shader = value;
 }
@@ -3383,14 +3248,6 @@ void vvctre_settings_set_enable_disk_shader_cache(bool value) {
 
 bool vvctre_settings_get_enable_disk_shader_cache() {
     return Settings::values.enable_disk_shader_cache;
-}
-
-void vvctre_settings_set_use_shader_jit(bool value) {
-    Settings::values.use_shader_jit = value;
-}
-
-bool vvctre_settings_get_use_shader_jit() {
-    return Settings::values.use_shader_jit;
 }
 
 void vvctre_settings_set_enable_vsync(bool value) {
@@ -3902,7 +3759,7 @@ void vvctre_multiplayer_on_state_change(void* core, void (*callback)()) {
 }
 
 void vvctre_multiplayer_create_room(const char* ip, u16 port, u32 member_slots) {
-    new Network::Room(ip, port, member_slots);
+    Core::System::GetInstance().CreateRoom(ip, port, member_slots);
 }
 
 void* vvctre_coretiming_register_event(void* core, const char* name,
@@ -4444,15 +4301,10 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_get_cp15_register", (void*)&vvctre_get_cp15_register},
     {"vvctre_get_core_1_cp15_register", (void*)&vvctre_get_core_1_cp15_register},
     {"vvctre_get_core_2_cp15_register", (void*)&vvctre_get_core_2_cp15_register},
-    {"vvctre_ipc_recorder_set_enabled", (void*)&vvctre_ipc_recorder_set_enabled},
-    {"vvctre_ipc_recorder_get_enabled", (void*)&vvctre_ipc_recorder_get_enabled},
-    {"vvctre_ipc_recorder_bind_callback", (void*)&vvctre_ipc_recorder_bind_callback},
-    {"vvctre_get_service_name_by_port_id", (void*)&vvctre_get_service_name_by_port_id},
     {"vvctre_cheat_count", (void*)&vvctre_cheat_count},
     {"vvctre_get_cheat", (void*)&vvctre_get_cheat},
     {"vvctre_get_cheat_name", (void*)&vvctre_get_cheat_name},
     {"vvctre_get_cheat_comments", (void*)&vvctre_get_cheat_comments},
-    {"vvctre_get_cheat_type", (void*)&vvctre_get_cheat_type},
     {"vvctre_get_cheat_code", (void*)&vvctre_get_cheat_code},
     {"vvctre_set_cheat_enabled", (void*)&vvctre_set_cheat_enabled},
     {"vvctre_get_cheat_enabled", (void*)&vvctre_get_cheat_enabled},
@@ -4941,14 +4793,6 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_settings_get_initial_clock", (void*)&vvctre_settings_get_initial_clock},
     {"vvctre_settings_set_unix_timestamp", (void*)&vvctre_settings_set_unix_timestamp},
     {"vvctre_settings_get_unix_timestamp", (void*)&vvctre_settings_get_unix_timestamp},
-    {"vvctre_settings_set_use_virtual_sd", (void*)&vvctre_settings_set_use_virtual_sd},
-    {"vvctre_settings_get_use_virtual_sd", (void*)&vvctre_settings_get_use_virtual_sd},
-    {"vvctre_settings_set_record_frame_times", (void*)&vvctre_settings_set_record_frame_times},
-    {"vvctre_settings_get_record_frame_times", (void*)&vvctre_settings_get_record_frame_times},
-    {"vvctre_settings_enable_gdbstub", (void*)&vvctre_settings_enable_gdbstub},
-    {"vvctre_settings_disable_gdbstub", (void*)&vvctre_settings_disable_gdbstub},
-    {"vvctre_settings_is_gdb_stub_enabled", (void*)&vvctre_settings_is_gdb_stub_enabled},
-    {"vvctre_settings_get_gdb_stub_port", (void*)&vvctre_settings_get_gdb_stub_port},
     {"vvctre_settings_set_enable_core_2", (void*)&vvctre_settings_set_enable_core_2},
     {"vvctre_settings_get_enable_core_2", (void*)&vvctre_settings_get_enable_core_2},
     {"vvctre_settings_set_limit_speed", (void*)&vvctre_settings_set_limit_speed},
@@ -5030,10 +4874,6 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
     {"vvctre_settings_set_eula_version", (void*)&vvctre_settings_set_eula_version},
     {"vvctre_settings_get_eula_version", (void*)&vvctre_settings_get_eula_version},
     {"vvctre_settings_write_config_savegame", (void*)&vvctre_settings_write_config_savegame},
-    {"vvctre_settings_set_use_hardware_renderer",
-     (void*)&vvctre_settings_set_use_hardware_renderer},
-    {"vvctre_settings_get_use_hardware_renderer",
-     (void*)&vvctre_settings_get_use_hardware_renderer},
     {"vvctre_settings_set_use_hardware_shader", (void*)&vvctre_settings_set_use_hardware_shader},
     {"vvctre_settings_get_use_hardware_shader", (void*)&vvctre_settings_get_use_hardware_shader},
     {"vvctre_settings_set_hardware_shader_accurate_multiplication",
@@ -5044,8 +4884,6 @@ std::unordered_map<std::string, void*> PluginManager::function_map = {
      (void*)&vvctre_settings_set_enable_disk_shader_cache},
     {"vvctre_settings_get_enable_disk_shader_cache",
      (void*)&vvctre_settings_get_enable_disk_shader_cache},
-    {"vvctre_settings_set_use_shader_jit", (void*)&vvctre_settings_set_use_shader_jit},
-    {"vvctre_settings_get_use_shader_jit", (void*)&vvctre_settings_get_use_shader_jit},
     {"vvctre_settings_set_enable_vsync", (void*)&vvctre_settings_set_enable_vsync},
     {"vvctre_settings_get_enable_vsync", (void*)&vvctre_settings_get_enable_vsync},
     {"vvctre_settings_set_dump_textures", (void*)&vvctre_settings_set_dump_textures},

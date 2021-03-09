@@ -136,7 +136,6 @@ void ColorConsoleBackend::Write(const Entry& entry) {
     CLS(Settings)                                                                                  \
     CLS(Debug)                                                                                     \
     SUB(Debug, Emulated)                                                                           \
-    SUB(Debug, GDBStub)                                                                            \
     CLS(Kernel)                                                                                    \
     SUB(Kernel, SVC)                                                                               \
     CLS(Applet)                                                                                    \

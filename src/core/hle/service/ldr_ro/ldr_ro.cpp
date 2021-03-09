@@ -5,7 +5,7 @@
 #include "common/alignment.h"
 #include "common/common_types.h"
 #include "common/logging/log.h"
-#include "core/arm/arm_interface.h"
+#include "core/arm/arm_dynarmic.h"
 #include "core/core.h"
 #include "core/hle/ipc_helpers.h"
 #include "core/hle/kernel/process.h"
@@ -17,24 +17,31 @@ namespace Service::LDR {
 static const ResultCode ERROR_ALREADY_INITIALIZED = // 0xD9612FF9
     ResultCode(ErrorDescription::AlreadyInitialized, ErrorModule::RO, ErrorSummary::Internal,
                ErrorLevel::Permanent);
+
 static const ResultCode ERROR_NOT_INITIALIZED = // 0xD9612FF8
     ResultCode(ErrorDescription::NotInitialized, ErrorModule::RO, ErrorSummary::Internal,
                ErrorLevel::Permanent);
+
 static const ResultCode ERROR_BUFFER_TOO_SMALL = // 0xE0E12C1F
     ResultCode(static_cast<ErrorDescription>(31), ErrorModule::RO, ErrorSummary::InvalidArgument,
                ErrorLevel::Usage);
+
 static const ResultCode ERROR_MISALIGNED_ADDRESS = // 0xD9012FF1
     ResultCode(ErrorDescription::MisalignedAddress, ErrorModule::RO, ErrorSummary::WrongArgument,
                ErrorLevel::Permanent);
+
 static const ResultCode ERROR_MISALIGNED_SIZE = // 0xD9012FF2
     ResultCode(ErrorDescription::MisalignedSize, ErrorModule::RO, ErrorSummary::WrongArgument,
                ErrorLevel::Permanent);
+
 static const ResultCode ERROR_ILLEGAL_ADDRESS = // 0xE1612C0F
     ResultCode(static_cast<ErrorDescription>(15), ErrorModule::RO, ErrorSummary::Internal,
                ErrorLevel::Usage);
+
 static const ResultCode ERROR_INVALID_MEMORY_STATE = // 0xD8A12C08
     ResultCode(static_cast<ErrorDescription>(8), ErrorModule::RO, ErrorSummary::InvalidState,
                ErrorLevel::Permanent);
+
 static const ResultCode ERROR_NOT_LOADED = // 0xD8A12C0D
     ResultCode(static_cast<ErrorDescription>(13), ErrorModule::RO, ErrorSummary::InvalidState,
                ErrorLevel::Permanent);

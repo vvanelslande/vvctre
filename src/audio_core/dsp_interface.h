@@ -14,7 +14,7 @@
 
 namespace Service::DSP {
 class DSP_DSP;
-} // namespace Service::DSP
+}
 
 namespace AudioCore {
 

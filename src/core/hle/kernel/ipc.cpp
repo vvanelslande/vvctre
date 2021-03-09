@@ -8,7 +8,6 @@
 #include "core/hle/ipc.h"
 #include "core/hle/kernel/handle_table.h"
 #include "core/hle/kernel/ipc.h"
-#include "core/hle/kernel/ipc_recorder.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/memory.h"
 #include "core/hle/kernel/process.h"
@@ -27,7 +26,6 @@ ResultCode TranslateCommandBuffer(KernelSystem& kernel, Memory::MemorySystem& me
     auto& dst_process = dst_thread->owner_process;
 
     IPC::Header header;
-    // TODO(Subv): Replace by Memory::Read32 when possible.
     memory.ReadBlock(*src_process, src_address, &header.raw, sizeof(header.raw));
 
     std::size_t untranslated_size = 1u + header.normal_params_size;
@@ -38,13 +36,6 @@ ResultCode TranslateCommandBuffer(KernelSystem& kernel, Memory::MemorySystem& me
 
     std::array<u32, IPC::COMMAND_BUFFER_LENGTH> cmd_buf;
     memory.ReadBlock(*src_process, src_address, cmd_buf.data(), command_size * sizeof(u32));
-
-    const bool should_record = kernel.GetIPCRecorder().IsEnabled();
-
-    std::vector<u32> untranslated_cmdbuf;
-    if (should_record) {
-        untranslated_cmdbuf = std::vector<u32>{cmd_buf.begin(), cmd_buf.begin() + command_size};
-    }
 
     std::size_t i = untranslated_size;
     while (i < command_size) {
@@ -190,7 +181,7 @@ ResultCode TranslateCommandBuffer(KernelSystem& kernel, Memory::MemorySystem& me
 
             VAddr target_address = 0;
 
-            // TODO(Subv): Perform permission checks.
+            // TODO: Perform permission checks
 
             // Reserve a page of memory before the mapped buffer
             auto reserve_buffer = std::make_unique<u8[]>(Memory::PAGE_SIZE);
@@ -198,7 +189,7 @@ ResultCode TranslateCommandBuffer(KernelSystem& kernel, Memory::MemorySystem& me
                 Memory::IPC_MAPPING_VADDR, Memory::IPC_MAPPING_SIZE, reserve_buffer.get(),
                 Memory::PAGE_SIZE, MemoryState::Reserved);
 
-            auto buffer = std::make_unique<u8[]>(num_pages * Memory::PAGE_SIZE);
+            std::unique_ptr<u8[]> buffer = std::make_unique<u8[]>(num_pages * Memory::PAGE_SIZE);
             memory.ReadBlock(*src_process, source_address, buffer.get() + page_offset, size);
 
             // Map the page(s) into the target process' address space.
@@ -227,19 +218,9 @@ ResultCode TranslateCommandBuffer(KernelSystem& kernel, Memory::MemorySystem& me
         }
     }
 
-    if (should_record) {
-        std::vector<u32> translated_cmdbuf{cmd_buf.begin(), cmd_buf.begin() + command_size};
-        if (reply) {
-            kernel.GetIPCRecorder().SetReplyInfo(dst_thread, std::move(untranslated_cmdbuf),
-                                                 std::move(translated_cmdbuf));
-        } else {
-            kernel.GetIPCRecorder().SetRequestInfo(src_thread, std::move(untranslated_cmdbuf),
-                                                   std::move(translated_cmdbuf), dst_thread);
-        }
-    }
-
     memory.WriteBlock(*dst_process, dst_address, cmd_buf.data(), command_size * sizeof(u32));
 
     return RESULT_SUCCESS;
 }
+
 } // namespace Kernel

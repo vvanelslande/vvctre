@@ -38,8 +38,8 @@
 #include "common/string_util.h"
 #include "common/texture.h"
 #include "core/3ds.h"
-#include "core/cheats/cheat_base.h"
-#include "core/cheats/cheats.h"
+#include "core/cheats/cheat.h"
+#include "core/cheats/engine.h"
 #include "core/core.h"
 #include "core/file_sys/archive_extsavedata.h"
 #include "core/file_sys/archive_source_sd_savedata.h"
@@ -57,31 +57,14 @@
 #include "input_common/motion_emu.h"
 #include "input_common/sdl/sdl.h"
 #include "network/room_member.h"
-#include "video_core/renderer_base.h"
-#include "video_core/renderer_opengl/texture_filters/texture_filterer.h"
+#include "video_core/renderer/renderer.h"
+#include "video_core/renderer/texture_filters/texture_filterer.h"
 #include "video_core/video_core.h"
 #include "vvctre/common.h"
 #include "vvctre/emu_window/emu_window_sdl2.h"
 #include "vvctre/plugins.h"
 
 static bool is_open = true;
-
-static std::string IPC_Recorder_GetStatusString(IPC::RequestStatus status) {
-    switch (status) {
-    case IPC::RequestStatus::Sent:
-        return "Sent";
-    case IPC::RequestStatus::Handling:
-        return "Handling";
-    case IPC::RequestStatus::Handled:
-        return "Handled";
-    case IPC::RequestStatus::HLEUnimplemented:
-        return "HLEUnimplemented";
-    default:
-        break;
-    }
-
-    return "Invalid";
-}
 
 std::pair<unsigned, unsigned> EmuWindow_SDL2::TouchToPixelPos(float touch_x, float touch_y) const {
     int w, h;
@@ -100,16 +83,6 @@ bool EmuWindow_SDL2::IsOpen() const {
 
 void EmuWindow_SDL2::Close() {
     is_open = false;
-}
-
-void EmuWindow_SDL2::BeforeLoadingAfterFirstTime() {
-    show_cheats_text_editor = false;
-    cheats_text_editor_text.clear();
-    all_ipc_records.clear();
-    ipc_recorder_search_results.clear();
-    ipc_recorder_search_text.clear();
-    ipc_recorder_search_text_.clear();
-    ipc_recorder_callback = nullptr;
 }
 
 void EmuWindow_SDL2::OnResize() {
@@ -137,10 +110,10 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
     room_member.BindOnError([&](const Network::RoomMember::Error& error) {
         switch (error) {
         case Network::RoomMember::Error::LostConnection:
-            pfd::message("Error", "Connection to room lost.", pfd::choice::ok, pfd::icon::error);
+            pfd::message("Error", "Connection to room lost", pfd::choice::ok, pfd::icon::error);
             break;
         case Network::RoomMember::Error::HostKicked:
-            pfd::message("Error", "You have been kicked by the room host.", pfd::choice::ok,
+            pfd::message("Error", "You have been kicked by the room host", pfd::choice::ok,
                          pfd::icon::error);
             break;
         case Network::RoomMember::Error::UnknownError:
@@ -148,7 +121,7 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
                          pfd::icon::error);
             break;
         case Network::RoomMember::Error::NicknameCollisionOrNicknameInvalid:
-            pfd::message("Error", "Nickname is already in use or not valid.", pfd::choice::ok,
+            pfd::message("Error", "Nickname is already in use or not valid", pfd::choice::ok,
                          pfd::icon::error);
             break;
         case Network::RoomMember::Error::MacAddressCollision:
@@ -156,7 +129,7 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
                          pfd::choice::ok, pfd::icon::error);
             break;
         case Network::RoomMember::Error::ConsoleIdCollision:
-            pfd::message("Error", "Your console ID conflicted with someone else's in the room.",
+            pfd::message("Error", "Your console ID conflicted with someone else's in the room",
                          pfd::choice::ok, pfd::icon::error);
             break;
         case Network::RoomMember::Error::WrongVersion:
@@ -172,7 +145,7 @@ EmuWindow_SDL2::EmuWindow_SDL2(Core::System& system, PluginManager& plugin_manag
             pfd::message("Error", "Room is full", pfd::choice::ok, pfd::icon::error);
             break;
         case Network::RoomMember::Error::HostBanned:
-            pfd::message("Error", "The host of the room has banned you.", pfd::choice::ok,
+            pfd::message("Error", "The host of the room has banned you", pfd::choice::ok,
                          pfd::icon::error);
             break;
         default:
@@ -440,20 +413,26 @@ void EmuWindow_SDL2::SwapBuffers() {
                                                        ImGuiWindowFlags_NoMove |
                                                        ImGuiWindowFlags_AlwaysAutoResize)) {
                             std::lock_guard<std::mutex> lock(mutex);
+
                             ImGui::PushTextWrapPos(io.DisplaySize.x * 0.9f);
                             ImGui::Text("Installing %s", current_file.c_str());
                             ImGui::PopTextWrapPos();
+
                             ImGui::ProgressBar(static_cast<float>(current_file_current) /
                                                static_cast<float>(current_file_total));
+
                             ImGui::EndPopup();
                         }
 
                         glClearColor(Settings::values.background_color_red,
                                      Settings::values.background_color_green,
                                      Settings::values.background_color_blue, 0.0f);
+
                         glClear(GL_COLOR_BUFFER_BIT);
+
                         ImGui::Render();
                         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
                         SDL_GL_SwapWindow(window);
                     }
 
@@ -2801,12 +2780,13 @@ void EmuWindow_SDL2::SwapBuffers() {
                             config_savegame_changed = true;
                         }
 
-                        if (ImGui::BeginPopupContextItem("Console ID",
-                                                         ImGuiPopupFlags_MouseButtonRight)) {
+                        if (ImGui::BeginPopupContextItem("Console ID", ImGuiMouseButton_Right)) {
                             std::string console_id =
                                 fmt::format("0x{:016X}", cfg->GetConsoleUniqueId());
+
                             ImGui::InputText("##Console ID", &console_id[0], 18,
                                              ImGuiInputTextFlags_ReadOnly);
+
                             ImGui::EndPopup();
                         }
 
@@ -2829,50 +2809,23 @@ void EmuWindow_SDL2::SwapBuffers() {
                 }
 
                 if (ImGui::BeginMenu("Graphics")) {
-                    if (ImGui::Checkbox("Use Hardware Renderer",
-                                        &Settings::values.use_hardware_renderer)) {
-                        VideoCore::g_hardware_renderer_enabled =
-                            Settings::values.use_hardware_renderer;
+                    if (ImGui::Checkbox("Use Hardware Shader",
+                                        &Settings::values.use_hardware_shader)) {
+                        VideoCore::g_hardware_shader_enabled = Settings::values.use_hardware_shader;
                     }
 
-                    if (Settings::values.use_hardware_renderer) {
+                    if (Settings::values.use_hardware_shader) {
                         ImGui::Indent();
 
-                        if (ImGui::Checkbox("Use Hardware Shader",
-                                            &Settings::values.use_hardware_shader)) {
-                            VideoCore::g_hardware_shader_enabled =
-                                Settings::values.use_hardware_shader;
+                        if (ImGui::Checkbox(
+                                "Accurate Multiplication",
+                                &Settings::values.hardware_shader_accurate_multiplication)) {
+                            VideoCore::g_hardware_shader_accurate_multiplication =
+                                Settings::values.hardware_shader_accurate_multiplication;
                         }
 
-                        if (Settings::values.use_hardware_shader) {
-                            ImGui::Indent();
-
-                            if (ImGui::Checkbox(
-                                    "Accurate Multiplication",
-                                    &Settings::values.hardware_shader_accurate_multiplication)) {
-                                VideoCore::g_hardware_shader_accurate_multiplication =
-                                    Settings::values.hardware_shader_accurate_multiplication;
-                            }
-
-                            if (ImGui::Checkbox("Enable Disk Shader Cache",
-                                                &Settings::values.enable_disk_shader_cache)) {
-                                request_reset = true;
-                            }
-
-                            if (ImGui::IsItemHovered()) {
-                                ImGui::BeginTooltip();
-                                ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
-                                ImGui::TextUnformatted("If you change this, emulation will restart "
-                                                       "when the menu is closed");
-                                ImGui::PopTextWrapPos();
-                                ImGui::EndTooltip();
-                            }
-
-                            ImGui::Unindent();
-                        }
-
-                        if (ImGui::Checkbox("Sharper Distant Objects",
-                                            &Settings::values.sharper_distant_objects)) {
+                        if (ImGui::Checkbox("Enable Disk Shader Cache",
+                                            &Settings::values.enable_disk_shader_cache)) {
                             request_reset = true;
                         }
 
@@ -2885,60 +2838,49 @@ void EmuWindow_SDL2::SwapBuffers() {
                             ImGui::EndTooltip();
                         }
 
-                        ImGui::Checkbox("Use Custom Textures",
-                                        &Settings::values.use_custom_textures);
+                        ImGui::Unindent();
+                    }
 
-                        ImGui::Checkbox("Preload Custom Textures",
-                                        &Settings::values.preload_custom_textures);
+                    if (ImGui::Checkbox("Sharper Distant Objects",
+                                        &Settings::values.sharper_distant_objects)) {
+                        request_reset = true;
+                    }
 
-                        if (Settings::values.preload_custom_textures) {
-                            ImGui::Indent();
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::BeginTooltip();
+                        ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
+                        ImGui::TextUnformatted("If you change this, emulation will restart "
+                                               "when the menu is closed");
+                        ImGui::PopTextWrapPos();
+                        ImGui::EndTooltip();
+                    }
 
-                            if (ImGui::BeginCombo(
-                                    "Folder", Settings::values.preload_custom_textures_folder ==
+                    ImGui::Checkbox("Use Custom Textures", &Settings::values.use_custom_textures);
+
+                    ImGui::Checkbox("Preload Custom Textures",
+                                    &Settings::values.preload_custom_textures);
+
+                    if (Settings::values.preload_custom_textures) {
+                        ImGui::Indent();
+
+                        if (ImGui::BeginCombo("Folder",
+                                              Settings::values.preload_custom_textures_folder ==
                                                       Settings::PreloadCustomTexturesFolder::Load
                                                   ? "load"
                                                   : "preload")) {
-                                if (ImGui::Selectable(
-                                        "load", Settings::values.preload_custom_textures_folder ==
-                                                    Settings::PreloadCustomTexturesFolder::Load)) {
-                                    Settings::values.preload_custom_textures_folder =
-                                        Settings::PreloadCustomTexturesFolder::Load;
-                                }
-
-                                if (ImGui::Selectable(
-                                        "preload",
-                                        Settings::values.preload_custom_textures_folder ==
-                                            Settings::PreloadCustomTexturesFolder::Preload)) {
-                                    Settings::values.preload_custom_textures_folder =
-                                        Settings::PreloadCustomTexturesFolder::Preload;
-                                }
-
-                                ImGui::EndCombo();
+                            if (ImGui::Selectable(
+                                    "load", Settings::values.preload_custom_textures_folder ==
+                                                Settings::PreloadCustomTexturesFolder::Load)) {
+                                Settings::values.preload_custom_textures_folder =
+                                    Settings::PreloadCustomTexturesFolder::Load;
                             }
 
-                            ImGui::Unindent();
-                        }
-
-                        ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
-
-                        const u16 min = 0;
-                        const u16 max = 10;
-                        ImGui::SliderScalar(
-                            "Resolution", ImGuiDataType_U16, &Settings::values.resolution, &min,
-                            &max, Settings::values.resolution == 0 ? "Window Size" : "%d");
-
-                        if (ImGui::BeginCombo("Texture Filter",
-                                              Settings::values.texture_filter.c_str())) {
-                            const std::vector<std::string_view>& filters =
-                                OpenGL::TextureFilterer::GetFilterNames();
-
-                            for (const auto& filter : filters) {
-                                if (ImGui::Selectable(std::string(filter).c_str(),
-                                                      Settings::values.texture_filter == filter)) {
-                                    Settings::values.texture_filter = filter;
-                                    VideoCore::g_texture_filter_update_requested = true;
-                                }
+                            if (ImGui::Selectable(
+                                    "preload",
+                                    Settings::values.preload_custom_textures_folder ==
+                                        Settings::PreloadCustomTexturesFolder::Preload)) {
+                                Settings::values.preload_custom_textures_folder =
+                                    Settings::PreloadCustomTexturesFolder::Preload;
                             }
 
                             ImGui::EndCombo();
@@ -2947,9 +2889,30 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::Unindent();
                     }
 
-                    if (ImGui::Checkbox("Use Shader JIT", &Settings::values.use_shader_jit)) {
-                        VideoCore::g_shader_jit_enabled = Settings::values.use_shader_jit;
+                    ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
+
+                    const u16 min = 0;
+                    const u16 max = 10;
+                    ImGui::SliderScalar("Resolution", ImGuiDataType_U16,
+                                        &Settings::values.resolution, &min, &max,
+                                        Settings::values.resolution == 0 ? "Window Size" : "%d");
+
+                    if (ImGui::BeginCombo("Texture Filter",
+                                          Settings::values.texture_filter.c_str())) {
+                        const std::vector<std::string_view>& filters =
+                            OpenGL::TextureFilterer::GetFilterNames();
+
+                        for (const auto& filter : filters) {
+                            if (ImGui::Selectable(std::string(filter).c_str(),
+                                                  Settings::values.texture_filter == filter)) {
+                                Settings::values.texture_filter = filter;
+                                VideoCore::g_texture_filter_update_requested = true;
+                            }
+                        }
+
+                        ImGui::EndCombo();
                     }
+
                     if (ImGui::Checkbox("Enable VSync", &Settings::values.enable_vsync)) {
                         if (!paused) {
                             SDL_GL_SetSwapInterval(Settings::values.enable_vsync ? 1 : 0);
@@ -3113,21 +3076,6 @@ void EmuWindow_SDL2::SwapBuffers() {
                     ImGui::EndMenu();
                 }
 
-                if (ImGui::BeginMenu("LLE Modules")) {
-                    ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
-                    ImGui::TextUnformatted("If you enable or disable a LLE module, emulation will "
-                                           "restart when the menu is closed.");
-                    ImGui::PopTextWrapPos();
-
-                    for (auto& module : Settings::values.lle_modules) {
-                        if (ImGui::Checkbox(module.first.c_str(), &module.second)) {
-                            request_reset = true;
-                        }
-                    }
-
-                    ImGui::EndMenu();
-                }
-
                 if (ImGui::BeginMenu("GUI")) {
                     ImGui::ColorEdit4("FPS Color", &fps_color.x,
                                       ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar |
@@ -3267,21 +3215,6 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                 ImGui::Checkbox("Cheats", &show_cheats_window);
 
-                if (ImGui::Checkbox("IPC Recorder", &show_ipc_recorder_window)) {
-                    if (!show_ipc_recorder_window) {
-                        IPC::Recorder& r = system.Kernel().GetIPCRecorder();
-
-                        r.SetEnabled(false);
-                        r.UnbindCallback(ipc_recorder_callback);
-
-                        all_ipc_records.clear();
-                        ipc_recorder_search_results.clear();
-                        ipc_recorder_search_text.clear();
-                        ipc_recorder_search_text_.clear();
-                        ipc_recorder_callback = nullptr;
-                    }
-                }
-
                 ImGui::EndMenu();
             }
 
@@ -3292,8 +3225,8 @@ void EmuWindow_SDL2::SwapBuffers() {
 
                 if (ImGui::MenuItem("Restart With Different Log Filter")) {
                     SDL_Event event;
-                    std::string new_log_filter = Settings::values.log_filter;
-                    bool new_log_filter_window_open = true;
+                    std::string log_filter = Settings::values.log_filter;
+                    bool window_open = true;
 
                     while (is_open) {
                         while (SDL_PollEvent(&event)) {
@@ -3314,33 +3247,45 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::NewFrame();
 
                         ImGui::OpenPopup("New Log Filter");
+
                         ImGui::SetNextWindowPos(
                             ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
                             ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-                        if (ImGui::BeginPopupModal("New Log Filter", &new_log_filter_window_open,
+
+                        if (ImGui::BeginPopupModal("New Log Filter", &window_open,
                                                    ImGuiWindowFlags_NoSavedSettings |
                                                        ImGuiWindowFlags_NoMove |
                                                        ImGuiWindowFlags_AlwaysAutoResize)) {
-                            if (ImGui::InputText("##New Log Filter", &new_log_filter,
+                            if (ImGui::InputText("##New Log Filter", &log_filter,
                                                  ImGuiInputTextFlags_EnterReturnsTrue)) {
-                                Settings::values.log_filter = new_log_filter;
+                                Settings::values.log_filter = log_filter;
+
                                 Log::Filter log_filter(Log::Level::Debug);
                                 log_filter.ParseFilterString(Settings::values.log_filter);
+
                                 Log::SetGlobalFilter(log_filter);
+
                                 request_reset = true;
+
                                 return;
                             }
+
                             ImGui::EndPopup();
                         }
 
-                        if (!new_log_filter_window_open) {
+                        if (!window_open) {
                             return;
                         }
 
-                        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                        glClearColor(Settings::values.background_color_red,
+                                     Settings::values.background_color_green,
+                                     Settings::values.background_color_blue, 0.0f);
+
                         glClear(GL_COLOR_BUFFER_BIT);
+
                         ImGui::Render();
                         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
                         SDL_GL_SwapWindow(window);
                     }
                 }
@@ -3355,7 +3300,7 @@ void EmuWindow_SDL2::SwapBuffers() {
                 if (ImGui::MenuItem("Restart Using Unix Timestamp")) {
                     SDL_Event event;
                     u64 unix_timestamp = Settings::values.unix_timestamp;
-                    bool unix_timestamp_window_open = true;
+                    bool window_open = true;
 
                     while (is_open) {
                         while (SDL_PollEvent(&event)) {
@@ -3376,33 +3321,45 @@ void EmuWindow_SDL2::SwapBuffers() {
                         ImGui::NewFrame();
 
                         ImGui::OpenPopup("Unix Timestamp");
+
                         ImGui::SetNextWindowPos(
                             ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
                             ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-                        if (ImGui::BeginPopupModal("Unix Timestamp", &unix_timestamp_window_open,
+
+                        if (ImGui::BeginPopupModal("Unix Timestamp", &window_open,
                                                    ImGuiWindowFlags_NoSavedSettings |
                                                        ImGuiWindowFlags_NoMove |
                                                        ImGuiWindowFlags_AlwaysAutoResize)) {
                             ImGui::InputScalar("##Unix Timestamp", ImGuiDataType_U64,
                                                &unix_timestamp);
+
                             if (ImGui::Button("OK")) {
                                 Settings::values.initial_clock =
                                     Settings::InitialClock::UnixTimestamp;
+
                                 Settings::values.unix_timestamp = unix_timestamp;
+
                                 request_reset = true;
+
                                 return;
                             }
+
                             ImGui::EndPopup();
                         }
 
-                        if (!unix_timestamp_window_open) {
+                        if (!window_open) {
                             return;
                         }
 
-                        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                        glClearColor(Settings::values.background_color_red,
+                                     Settings::values.background_color_green,
+                                     Settings::values.background_color_blue, 0.0f);
+
                         glClear(GL_COLOR_BUFFER_BIT);
+
                         ImGui::Render();
                         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
                         SDL_GL_SwapWindow(window);
                     }
                 }
@@ -4145,341 +4102,226 @@ void EmuWindow_SDL2::SwapBuffers() {
         ImGui::End();
     }
 
-    if (show_ipc_recorder_window) {
-        ImGui::SetNextWindowSize(ImVec2(480, 640), ImGuiCond_Appearing);
+    if (show_cheats_window) {
+        ImGui::SetNextWindowSize(ImVec2(480.0f, 640.0f), ImGuiCond_Appearing);
 
-        if (ImGui::Begin("IPC Recorder", &show_ipc_recorder_window,
-                         ImGuiWindowFlags_NoSavedSettings)) {
-            IPC::Recorder& r = system.Kernel().GetIPCRecorder();
-            bool enabled = r.IsEnabled();
+        if (ImGui::Begin("Cheats", &show_cheats_window,
+                         ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar)) {
+            Cheats::Engine& engine = system.CheatEngine();
 
-            if (ImGui::Checkbox("Enabled", &enabled)) {
-                r.SetEnabled(enabled);
+            if (ImGui::BeginMenuBar()) {
+                if (ImGui::MenuItem("Add")) {
+                    SDL_Event event;
+                    std::string name = "Cheat";
+                    std::string code;
+                    std::string comments;
+                    bool enabled = false;
+                    bool window_open = true;
 
-                if (enabled) {
-                    ipc_recorder_callback = r.BindCallback([&](const IPC::RequestRecord& record) {
-                        const int index = record.id - ipc_recorder_id_offset;
-                        if (all_ipc_records.size() > index) {
-                            all_ipc_records[index] = record;
-                        } else {
-                            all_ipc_records.emplace_back(record);
-                        }
-                    });
-                } else {
-                    r.UnbindCallback(ipc_recorder_callback);
-                    ipc_recorder_callback = nullptr;
-                }
-            }
+                    while (is_open) {
+                        while (SDL_PollEvent(&event)) {
+                            ImGui_ImplSDL2_ProcessEvent(&event);
 
-            ImGui::SameLine();
-
-            if (ImGui::Button("Clear")) {
-                ipc_recorder_id_offset += all_ipc_records.size();
-                all_ipc_records.clear();
-                ipc_recorder_search_results.clear();
-                ipc_recorder_search_text.clear();
-                ipc_recorder_search_text_.clear();
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::InputTextWithHint("##search", "Search", &ipc_recorder_search_text_,
-                                         ImGuiInputTextFlags_EnterReturnsTrue)) {
-                ipc_recorder_search_text = ipc_recorder_search_text_;
-                ipc_recorder_search_results.clear();
-
-                if (!ipc_recorder_search_text.empty()) {
-                    for (const IPC::RequestRecord& record : all_ipc_records) {
-                        std::string service_name;
-
-                        if (record.client_port.id != -1) {
-                            service_name = system.ServiceManager().GetServiceNameByPortId(
-                                static_cast<u32>(record.client_port.id));
-                        }
-
-                        if (service_name.empty()) {
-                            service_name = record.server_session.name;
-                            service_name = Common::ReplaceAll(service_name, "_Server", "");
-                            service_name = Common::ReplaceAll(service_name, "_Client", "");
-                        }
-
-                        std::string label = fmt::format("#{} - {} - {}", record.id,
-                                                        IPC_Recorder_GetStatusString(record.status),
-                                                        record.is_hle ? "HLE" : "LLE");
-
-                        if (!service_name.empty()) {
-                            label += fmt::format(" - {}", service_name);
-                        }
-
-                        if (!record.function_name.empty()) {
-                            label += fmt::format(" - {}", record.function_name);
-                        }
-
-                        if (!record.untranslated_request_cmdbuf.empty()) {
-                            label +=
-                                fmt::format(" - 0x{:08X}", record.untranslated_request_cmdbuf[0]);
-                        }
-
-                        if (label.find(ipc_recorder_search_text) != std::string::npos) {
-                            ipc_recorder_search_results.push_back(record);
-                        }
-                    }
-                }
-            }
-
-            const float width = ImGui::GetWindowWidth();
-
-            if (ImGui::BeginChildFrame(ImGui::GetID("Records"), ImVec2(-1.0f, -1.0f),
-                                       ImGuiWindowFlags_HorizontalScrollbar)) {
-                std::vector<IPC::RequestRecord>& records = ipc_recorder_search_text.empty()
-                                                               ? all_ipc_records
-                                                               : ipc_recorder_search_results;
-
-                ImGuiListClipper clipper;
-                clipper.Begin(records.size());
-
-                while (clipper.Step()) {
-                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
-                        IPC::RequestRecord& record = records[i];
-                        std::string service_name;
-
-                        if (record.client_port.id != -1) {
-                            service_name = system.ServiceManager().GetServiceNameByPortId(
-                                static_cast<u32>(record.client_port.id));
-                        }
-
-                        if (service_name.empty()) {
-                            service_name = record.server_session.name;
-                            service_name = Common::ReplaceAll(service_name, "_Server", "");
-                            service_name = Common::ReplaceAll(service_name, "_Client", "");
-                        }
-
-                        std::string label = fmt::format("#{} - {} - {}", record.id,
-                                                        IPC_Recorder_GetStatusString(record.status),
-                                                        record.is_hle ? "HLE" : "LLE");
-
-                        if (!service_name.empty()) {
-                            label += fmt::format(" - {}", service_name);
-                        }
-
-                        if (!record.function_name.empty()) {
-                            label += fmt::format(" - {}", record.function_name);
-                        }
-
-                        if (!record.untranslated_request_cmdbuf.empty()) {
-                            label +=
-                                fmt::format(" - 0x{:08X}", record.untranslated_request_cmdbuf[0]);
-                        }
-
-                        if (ImGui::Selectable(label.c_str())) {
-                            ImGui::OpenPopup(label.c_str());
-                        }
-
-                        if (ImGui::BeginPopup(label.c_str(),
-                                              ImGuiWindowFlags_HorizontalScrollbar)) {
-                            ImGui::InputInt("ID", &record.id, 0, 0, ImGuiInputTextFlags_ReadOnly);
-
-                            std::string status_string = IPC_Recorder_GetStatusString(record.status);
-                            ImGui::InputText("Status", &status_string,
-                                             ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputText("Function Name", &record.function_name,
-                                             ImGuiInputTextFlags_ReadOnly);
-
-                            if (!record.untranslated_request_cmdbuf.empty()) {
-                                std::string function_header_code_string =
-                                    fmt::format("0x{:08X}", record.untranslated_request_cmdbuf[0]);
-                                ImGui::InputText("Function Header Code",
-                                                 &function_header_code_string,
-                                                 ImGuiInputTextFlags_ReadOnly);
-                            }
-
-                            ImGui::InputText("Service Name", &service_name,
-                                             ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputText("Client Process Name", &record.client_process.name,
-                                             ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputInt("Client Process ID", &record.client_process.id, 0, 0,
-                                            ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputText("Client Thread Name", &record.client_thread.name,
-                                             ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputInt("Client Thread ID", &record.client_thread.id, 0, 0,
-                                            ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputText("Client Session Name", &record.client_session.name,
-                                             ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputInt("Client Session ID", &record.client_session.id, 0, 0,
-                                            ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputText("Client Port Name", &record.client_port.name,
-                                             ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputInt("Client Port ID", &record.client_port.id, 0, 0,
-                                            ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputText("Server Process Name", &record.server_process.name,
-                                             ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputInt("Server Process ID", &record.server_process.id, 0, 0,
-                                            ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputText("Server Thread Name", &record.server_thread.name,
-                                             ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputInt("Server Thread ID", &record.server_thread.id, 0, 0,
-                                            ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputText("Server Session Name", &record.server_session.name,
-                                             ImGuiInputTextFlags_ReadOnly);
-
-                            ImGui::InputInt("Server Session ID", &record.server_session.id, 0, 0,
-                                            ImGuiInputTextFlags_ReadOnly);
-
-                            if (!record.untranslated_request_cmdbuf.empty()) {
-                                if (ImGui::CollapsingHeader(
-                                        "Untranslated Request Command Buffer")) {
-                                    for (std::size_t i = 0;
-                                         i < record.untranslated_request_cmdbuf.size(); ++i) {
-                                        std::string string = fmt::format(
-                                            "0x{:08X}", record.untranslated_request_cmdbuf[i]);
-                                        ImGui::InputText(
-                                            fmt::format("{}##Untranslated Request Command Buffer",
-                                                        i)
-                                                .c_str(),
-                                            &string, ImGuiInputTextFlags_ReadOnly);
-                                    }
+                            if (event.type == SDL_QUIT) {
+                                if (pfd::message("vvctre", "Would you like to exit now?",
+                                                 pfd::choice::yes_no, pfd::icon::question)
+                                        .result() == pfd::button::yes) {
+                                    vvctreShutdown(&plugin_manager);
+                                    std::exit(0);
                                 }
                             }
+                        }
 
-                            if (!record.translated_request_cmdbuf.empty()) {
-                                if (ImGui::CollapsingHeader("Translated Request Command Buffer")) {
-                                    for (std::size_t i = 0;
-                                         i < record.translated_request_cmdbuf.size(); ++i) {
-                                        std::string string = fmt::format(
-                                            "0x{:08X}", record.translated_request_cmdbuf[i]);
-                                        ImGui::InputText(
-                                            fmt::format("{}##Translated Request Command Buffer", i)
-                                                .c_str(),
-                                            &string, ImGuiInputTextFlags_ReadOnly);
-                                    }
-                                }
-                            }
+                        ImGui_ImplOpenGL3_NewFrame();
+                        ImGui_ImplSDL2_NewFrame(window);
+                        ImGui::NewFrame();
 
-                            if (!record.untranslated_reply_cmdbuf.empty()) {
-                                if (ImGui::CollapsingHeader("Untranslated Reply Command Buffer")) {
-                                    for (std::size_t i = 0;
-                                         i < record.untranslated_reply_cmdbuf.size(); ++i) {
-                                        std::string string = fmt::format(
-                                            "0x{:08X}", record.untranslated_reply_cmdbuf[i]);
-                                        ImGui::InputText(
-                                            fmt::format("{}##Untranslated Reply Command Buffer", i)
-                                                .c_str(),
-                                            &string, ImGuiInputTextFlags_ReadOnly);
-                                    }
-                                }
-                            }
+                        ImGui::OpenPopup("Add");
 
-                            if (!record.translated_reply_cmdbuf.empty()) {
-                                if (ImGui::CollapsingHeader("Translated Reply Command Buffer")) {
-                                    for (std::size_t i = 0;
-                                         i < record.translated_reply_cmdbuf.size(); ++i) {
-                                        std::string string = fmt::format(
-                                            "0x{:08X}", record.translated_reply_cmdbuf[i]);
-                                        ImGui::InputText(
-                                            fmt::format("{}##Translated Reply Command Buffer", i)
-                                                .c_str(),
-                                            &string, ImGuiInputTextFlags_ReadOnly);
-                                    }
-                                }
+                        ImGui::SetNextWindowPos(
+                            ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
+                            ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
+                        if (ImGui::BeginPopupModal("Add", &window_open,
+                                                   ImGuiWindowFlags_NoSavedSettings |
+                                                       ImGuiWindowFlags_NoMove |
+                                                       ImGuiWindowFlags_AlwaysAutoResize)) {
+                            ImGui::Checkbox("Enabled", &enabled);
+
+                            ImGui::TextUnformatted("Name:");
+                            ImGui::InputText("##Name", &name);
+
+                            ImGui::TextUnformatted("Code:");
+                            ImGui::InputTextMultiline("##Code", &code);
+
+                            ImGui::TextUnformatted("Comments:");
+                            ImGui::InputTextMultiline("##Comments", &comments);
+
+                            if (ImGui::Button("Add")) {
+                                engine.Add(
+                                    std::make_shared<Cheats::Cheat>(name, code, comments, enabled));
+
+                                return;
                             }
 
                             ImGui::EndPopup();
                         }
+
+                        if (!window_open) {
+                            return;
+                        }
+
+                        glClearColor(Settings::values.background_color_red,
+                                     Settings::values.background_color_green,
+                                     Settings::values.background_color_blue, 0.0f);
+
+                        glClear(GL_COLOR_BUFFER_BIT);
+
+                        ImGui::Render();
+                        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+                        SDL_GL_SwapWindow(window);
                     }
                 }
-            }
 
-            ImGui::EndChildFrame();
-        }
-
-        if (!show_ipc_recorder_window) {
-            IPC::Recorder& r = system.Kernel().GetIPCRecorder();
-
-            r.SetEnabled(false);
-            r.UnbindCallback(ipc_recorder_callback);
-
-            all_ipc_records.clear();
-            ipc_recorder_search_results.clear();
-            ipc_recorder_search_text.clear();
-            ipc_recorder_search_text_.clear();
-            ipc_recorder_callback = nullptr;
-        }
-
-        ImGui::End();
-    }
-
-    if (show_cheats_window) {
-        ImGui::SetNextWindowSize(ImVec2(480.0f, 640.0f), ImGuiCond_Appearing);
-
-        if (ImGui::Begin("Cheats", &show_cheats_window, ImGuiWindowFlags_NoSavedSettings)) {
-            if (ImGui::Button("Edit")) {
-                std::ostringstream oss;
-                system.CheatEngine().SaveCheatsToStream(oss);
-                cheats_text_editor_text = oss.str();
-                show_cheats_text_editor = true;
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Reload File")) {
-                system.CheatEngine().LoadCheatsFromFile();
-
-                if (show_cheats_text_editor) {
-                    std::ostringstream oss;
-                    system.CheatEngine().SaveCheatsToStream(oss);
-                    cheats_text_editor_text = oss.str();
+                if (ImGui::MenuItem("Reload")) {
+                    system.CheatEngine().Load();
                 }
-            }
 
-            ImGui::SameLine();
-
-            if (ImGui::Button("Save File")) {
-                system.CheatEngine().SaveCheatsToFile();
-
-                if (show_cheats_text_editor) {
-                    const std::string filepath = fmt::format(
-                        "{}{:016X}.txt", FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
-                        system.Kernel().GetCurrentProcess()->codeset->program_id);
-
-                    FileUtil::ReadFileToString(true, filepath, cheats_text_editor_text);
+                if (ImGui::MenuItem("Save")) {
+                    system.CheatEngine().Save();
                 }
+
+                ImGui::EndMenuBar();
             }
 
             if (ImGui::BeginChildFrame(ImGui::GetID("Cheats"), ImVec2(-1.0f, -1.0f),
                                        ImGuiWindowFlags_HorizontalScrollbar)) {
-                const std::vector<std::shared_ptr<Cheats::CheatBase>>& cheats =
-                    system.CheatEngine().GetCheats();
+                const std::vector<std::shared_ptr<Cheats::Cheat>> cheats = engine.GetCheats();
 
                 ImGuiListClipper clipper;
                 clipper.Begin(cheats.size());
 
                 while (clipper.Step()) {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                        const std::shared_ptr<Cheats::CheatBase>& cheat = cheats[i];
+                        const std::shared_ptr<Cheats::Cheat>& cheat = cheats[i];
                         bool enabled = cheat->IsEnabled();
 
-                        if (ImGui::Checkbox(cheat->GetName().c_str(), &enabled)) {
+                        if (ImGui::Checkbox(fmt::format("{}##{}", cheat->GetName(), i).c_str(),
+                                            &enabled)) {
                             cheat->SetEnabled(enabled);
+                        }
 
-                            if (show_cheats_text_editor) {
-                                std::ostringstream oss;
-                                system.CheatEngine().SaveCheatsToStream(oss);
-                                cheats_text_editor_text = oss.str();
+                        if (ImGui::IsItemHovered()) {
+                            const std::string comments = cheat->GetComments();
+
+                            if (!comments.empty()) {
+                                ImGui::BeginTooltip();
+                                ImGui::PushTextWrapPos(io.DisplaySize.x * 0.5f);
+                                ImGui::TextUnformatted(comments.c_str());
+                                ImGui::PopTextWrapPos();
+                                ImGui::EndTooltip();
                             }
+                        }
+
+                        const auto Edit = [&] {
+                            SDL_Event event;
+                            std::string name = cheat->GetName();
+                            std::string code = cheat->GetCode();
+                            std::string comments = cheat->GetComments();
+                            bool window_open = true;
+
+                            while (is_open) {
+                                while (SDL_PollEvent(&event)) {
+                                    ImGui_ImplSDL2_ProcessEvent(&event);
+
+                                    if (event.type == SDL_QUIT) {
+                                        if (pfd::message("vvctre", "Would you like to exit now?",
+                                                         pfd::choice::yes_no, pfd::icon::question)
+                                                .result() == pfd::button::yes) {
+                                            vvctreShutdown(&plugin_manager);
+                                            std::exit(0);
+                                        }
+                                    }
+                                }
+
+                                ImGui_ImplOpenGL3_NewFrame();
+                                ImGui_ImplSDL2_NewFrame(window);
+                                ImGui::NewFrame();
+
+                                ImGui::OpenPopup("Edit");
+
+                                ImGui::SetNextWindowPos(
+                                    ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f),
+                                    ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
+                                if (ImGui::BeginPopupModal("Edit", &window_open,
+                                                           ImGuiWindowFlags_NoSavedSettings |
+                                                               ImGuiWindowFlags_NoMove |
+                                                               ImGuiWindowFlags_AlwaysAutoResize)) {
+                                    ImGui::Checkbox("Enabled", &enabled);
+
+                                    ImGui::TextUnformatted("Name:");
+                                    ImGui::InputText("##Name", &name);
+
+                                    ImGui::TextUnformatted("Code:");
+                                    ImGui::InputTextMultiline("##Code", &code);
+
+                                    ImGui::TextUnformatted("Comments:");
+                                    ImGui::InputTextMultiline("##Comments", &comments);
+
+                                    if (ImGui::Button("Edit")) {
+                                        engine.Update(i, std::make_shared<Cheats::Cheat>(
+                                                             name, code, comments, enabled));
+
+                                        return;
+                                    }
+
+                                    ImGui::EndPopup();
+                                }
+
+                                if (!window_open) {
+                                    return;
+                                }
+
+                                glClearColor(Settings::values.background_color_red,
+                                             Settings::values.background_color_green,
+                                             Settings::values.background_color_blue, 0.0f);
+
+                                glClear(GL_COLOR_BUFFER_BIT);
+
+                                ImGui::Render();
+                                ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+                                SDL_GL_SwapWindow(window);
+                            }
+                        };
+
+                        if (ImGui::BeginPopupContextItem(fmt::format("Cheat {}", i).c_str(),
+                                                         ImGuiMouseButton_Right)) {
+                            if (ImGui::MenuItem("Edit")) {
+                                Edit();
+                            }
+
+                            if (ImGui::MenuItem("Remove")) {
+                                system.CheatEngine().Remove(i);
+                                return;
+                            }
+
+                            ImGui::EndPopup();
+                        }
+
+                        ImGui::SameLine();
+
+                        if (ImGui::SmallButton(fmt::format("Edit##{}", i).c_str())) {
+                            Edit();
+                        }
+
+                        ImGui::SameLine();
+
+                        if (ImGui::SmallButton(fmt::format("Remove##{}", i).c_str())) {
+                            system.CheatEngine().Remove(i);
+                            return;
                         }
                     }
                 }
@@ -4488,43 +4330,7 @@ void EmuWindow_SDL2::SwapBuffers() {
             ImGui::EndChildFrame();
         }
 
-        if (!show_cheats_window) {
-            show_cheats_text_editor = false;
-            cheats_text_editor_text.clear();
-        }
-
         ImGui::End();
-
-        if (show_cheats_text_editor) {
-            ImGui::SetNextWindowSize(ImVec2(640.0f, 480.0f), ImGuiCond_Appearing);
-
-            if (ImGui::Begin("Cheats Text Editor", &show_cheats_text_editor,
-                             ImGuiWindowFlags_NoSavedSettings)) {
-                if (ImGui::Button("Save")) {
-                    const std::string filepath = fmt::format(
-                        "{}{:016X}.txt", FileUtil::GetUserPath(FileUtil::UserPath::CheatsDir),
-                        system.Kernel().GetCurrentProcess()->codeset->program_id);
-
-                    FileUtil::WriteStringToFile(true, filepath, cheats_text_editor_text);
-
-                    system.CheatEngine().LoadCheatsFromFile();
-                }
-
-                ImGui::SameLine();
-
-                if (ImGui::Button("Load Cheats From Text")) {
-                    std::istringstream iss(cheats_text_editor_text);
-                    system.CheatEngine().LoadCheatsFromStream(iss);
-                }
-
-                ImGui::InputTextMultiline("##cheats_text_editor_text", &cheats_text_editor_text,
-                                          ImVec2(-1.0f, -1.0f));
-            }
-
-            if (!show_cheats_text_editor) {
-                cheats_text_editor_text.clear();
-            }
-        }
     }
 
     Network::RoomMember& room_member = system.RoomMember();

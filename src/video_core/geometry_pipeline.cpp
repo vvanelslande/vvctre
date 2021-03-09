@@ -5,7 +5,7 @@
 #include "video_core/geometry_pipeline.h"
 #include "video_core/pica_state.h"
 #include "video_core/regs.h"
-#include "video_core/renderer_base.h"
+#include "video_core/shader/engine.h"
 #include "video_core/video_core.h"
 
 namespace Pica {
@@ -200,7 +200,7 @@ void GeometryPipeline::SetVertexHandler(Shader::VertexHandler vertex_handler) {
     this->vertex_handler = std::move(vertex_handler);
 }
 
-void GeometryPipeline::Setup(Shader::ShaderEngine* shader_engine) {
+void GeometryPipeline::Setup(Shader::Engine* shader_engine) {
     if (backend == nullptr) {
         return;
     }

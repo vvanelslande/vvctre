@@ -367,11 +367,6 @@ ArchiveFactory_SDMC::ArchiveFactory_SDMC(const std::string& sdmc_directory)
 }
 
 bool ArchiveFactory_SDMC::Initialize() {
-    if (!Settings::values.use_virtual_sd) {
-        LOG_WARNING(Service_FS, "SDMC disabled.");
-        return false;
-    }
-
     if (!FileUtil::CreateFullPath(sdmc_directory)) {
         LOG_ERROR(Service_FS, "Unable to create SDMC path.");
         return false;

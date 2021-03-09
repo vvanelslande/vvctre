@@ -11,6 +11,7 @@
 #include <sstream>
 #include <thread>
 #include "enet/enet.h"
+#include "network/common.h"
 #include "network/packet.h"
 #include "network/room.h"
 
@@ -433,7 +434,7 @@ Room::~Room() {
     room_impl->run = false;
     room_impl->room_thread->join();
 
-    if (room_impl->server) {
+    if (room_impl->server != nullptr) {
         enet_host_destroy(room_impl->server);
     }
 }

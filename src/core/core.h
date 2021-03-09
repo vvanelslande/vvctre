@@ -9,14 +9,13 @@
 #include <optional>
 #include <string>
 #include "common/common_types.h"
+#include "core/arm/arm_dynarmic.h"
 #include "core/custom_tex_cache.h"
 #include "core/frontend/applets/mii_selector.h"
 #include "core/frontend/applets/swkbd.h"
 #include "core/loader/loader.h"
 #include "core/memory.h"
 #include "core/perf_stats.h"
-
-class ARM_Interface;
 
 namespace Frontend {
 class EmuWindow;
@@ -47,18 +46,17 @@ class KernelSystem;
 } // namespace Kernel
 
 namespace Cheats {
-class CheatEngine;
+class Engine;
 } // namespace Cheats
 
 namespace Network {
+class Room;
 class RoomMember;
 } // namespace Network
 
 namespace Dynarmic {
 class ExclusiveMonitor;
 } // namespace Dynarmic
-
-class RendererBase;
 
 namespace Core {
 
@@ -124,11 +122,11 @@ public:
     bool IsInitialized() const;
     void PrepareReschedule();
 
-    ARM_Interface& GetRunningCore() {
+    ARM_Dynarmic& GetRunningCore() {
         return *running_core;
     }
 
-    ARM_Interface& GetCore(u32 core_id) {
+    ARM_Dynarmic& GetCore(u32 core_id) {
         return *cpu_cores[core_id];
     }
 
@@ -149,8 +147,6 @@ public:
     AudioCore::DspInterface& DSP() {
         return *dsp_core;
     }
-
-    RendererBase& Renderer();
 
     /**
      * Gets a reference to the service manager.
@@ -189,10 +185,10 @@ public:
     const Memory::MemorySystem& Memory() const;
 
     /// Gets a reference to the cheat engine
-    Cheats::CheatEngine& CheatEngine();
+    Cheats::Engine& CheatEngine();
 
     /// Gets a const reference to the cheat engine
-    const Cheats::CheatEngine& CheatEngine() const;
+    const Cheats::Engine& CheatEngine() const;
 
     /// Gets a reference to the custom texture cache system
     Core::CustomTexCache& CustomTexCache();
@@ -233,6 +229,8 @@ public:
 
     const std::string& GetFilePath() const;
 
+    void CreateRoom(const std::string& ip, const u16 port, const u32 member_slots);
+
 private:
     /**
      * Initialize the emulated system.
@@ -250,8 +248,8 @@ private:
     std::unique_ptr<Loader::AppLoader> app_loader;
 
     /// ARM11 CPU cores
-    std::vector<std::shared_ptr<ARM_Interface>> cpu_cores;
-    ARM_Interface* running_core = nullptr;
+    std::vector<std::shared_ptr<ARM_Dynarmic>> cpu_cores;
+    ARM_Dynarmic* running_core = nullptr;
     std::shared_ptr<Dynarmic::ExclusiveMonitor> exclusive_monitor;
 
     /// DSP core
@@ -268,7 +266,7 @@ private:
     std::shared_ptr<Frontend::SoftwareKeyboard> registered_swkbd;
 
     /// Cheats manager
-    std::shared_ptr<Cheats::CheatEngine> cheat_engine;
+    std::shared_ptr<Cheats::Engine> cheat_engine;
 
     /// Custom texture cache system
     std::unique_ptr<Core::CustomTexCache> custom_tex_cache;
@@ -278,6 +276,9 @@ private:
     std::unique_ptr<Memory::MemorySystem> memory;
     std::unique_ptr<Kernel::KernelSystem> kernel;
     std::unique_ptr<Timing> timing;
+
+    // Rooms
+    std::vector<std::unique_ptr<Network::Room>> rooms;
 
     // Room member
     std::shared_ptr<Network::RoomMember> room_member;

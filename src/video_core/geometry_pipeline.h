@@ -26,7 +26,7 @@ public:
      * Setup the geometry shader unit if it is in use
      * @param shader_engine the shader engine for the geometry shader to run
      */
-    void Setup(Shader::ShaderEngine* shader_engine);
+    void Setup(Shader::Engine* shader_engine);
 
     /// Reconfigures the pipeline according to current register settings
     void Reconfigure();
@@ -42,7 +42,7 @@ public:
 
 private:
     Shader::VertexHandler vertex_handler;
-    Shader::ShaderEngine* shader_engine;
+    Shader::Engine* shader_engine;
     std::unique_ptr<GeometryPipelineBackend> backend;
     State& state;
 };

@@ -10,7 +10,7 @@
 #include "common/common_types.h"
 #include "common/logging/log.h"
 #include "common/math_util.h"
-#include "core/arm/arm_interface.h"
+#include "core/arm/arm_dynarmic.h"
 #include "core/core.h"
 #include "core/hle/kernel/errors.h"
 #include "core/hle/kernel/handle_table.h"
@@ -38,10 +38,6 @@ Thread::Thread(KernelSystem& kernel, u32 core_id)
       thread_manager(kernel.GetThreadManager(core_id)) {}
 
 Thread::~Thread() {}
-
-Thread* ThreadManager::GetCurrentThread() const {
-    return current_thread.get();
-}
 
 void Thread::Stop() {
     // Cancel any outstanding wakeup events for this thread
@@ -74,13 +70,25 @@ void Thread::Stop() {
     owner_process->tls_slots[tls_page].reset(tls_slot);
 }
 
+void ThreadManager::SetCPU(ARM_Dynarmic& cpu) {
+    this->cpu = &cpu;
+}
+
+std::unique_ptr<ThreadContext> ThreadManager::NewContext() {
+    return cpu->NewContext();
+}
+
+Thread* ThreadManager::GetCurrentThread() const {
+    return current_thread.get();
+}
+
 void ThreadManager::SwitchContext(Thread* new_thread) {
     Thread* previous_thread = GetCurrentThread();
 
     Core::Timing& timing = kernel.timing;
 
     // Save context for previous thread
-    if (previous_thread) {
+    if (previous_thread != nullptr) {
         previous_thread->last_running_ticks = cpu->GetTimer().GetTicks();
         cpu->SaveContext(previous_thread->context);
 
@@ -93,7 +101,7 @@ void ThreadManager::SwitchContext(Thread* new_thread) {
     }
 
     // Load context of new thread
-    if (new_thread) {
+    if (new_thread != nullptr) {
         ASSERT_MSG(new_thread->status == ThreadStatus::Ready,
                    "Thread must be ready to become running.");
 
@@ -273,12 +281,12 @@ static std::tuple<std::size_t, std::size_t, bool> GetFreeThreadLocalSlot(
  * @param entry_point Address of entry point for execution
  * @param arg User argument for thread
  */
-static void ResetThreadContext(const std::unique_ptr<ARM_Interface::ThreadContext>& context,
-                               u32 stack_top, u32 entry_point, u32 arg) {
+static void ResetThreadContext(const std::unique_ptr<ThreadContext>& context, u32 stack_top,
+                               u32 entry_point, u32 arg) {
     context->Reset();
     context->SetCpuRegister(0, arg);
-    context->SetProgramCounter(entry_point);
-    context->SetStackPointer(stack_top);
+    context->SetCpuRegister(13, stack_top);
+    context->SetCpuRegister(15, entry_point);
     context->SetCpsr(16 | ((entry_point & 1) << 5)); // Usermode and THUMB mode
 }
 
@@ -370,8 +378,6 @@ ResultVal<std::shared_ptr<Thread>> KernelSystem::CreateThread(std::string name, 
 
     memory.ZeroBlock(owner_process, thread->tls_address, Memory::TLS_ENTRY_SIZE);
 
-    // TODO(peachum): move to ScheduleThread() when scheduler is added so selected core is used
-    // to initialize the context
     ResetThreadContext(thread->context, stack_top, entry_point, arg);
 
     thread_managers[processor_id]->ready_queue.push_back(thread->current_priority, thread.get());

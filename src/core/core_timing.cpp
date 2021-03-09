@@ -165,7 +165,8 @@ s64 Timing::Timer::GetMaxSliceLength() const {
         ASSERT(next_event->time - executed_ticks > 0);
         return next_event->time - executed_ticks;
     }
-    return Settings::values.return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength;
+    return Settings::values
+        .return_this_if_the_event_queue_is_empty_in_core_timing_timer_getmaxslicelength;
 }
 
 void Timing::Timer::Advance() {

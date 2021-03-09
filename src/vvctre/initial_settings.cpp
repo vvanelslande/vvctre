@@ -34,8 +34,7 @@
 #include "core/movie.h"
 #include "core/settings.h"
 #include "input_common/main.h"
-#include "network/room.h"
-#include "video_core/renderer_opengl/texture_filters/texture_filterer.h"
+#include "video_core/renderer/texture_filters/texture_filterer.h"
 #include "vvctre/common.h"
 #include "vvctre/initial_settings.h"
 #include "vvctre/plugins.h"
@@ -67,10 +66,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
     std::vector<std::tuple<std::string, std::string>> installed_search_results;
     std::string installed_search_text;
     std::string installed_search_text_;
-    std::string host_multiplayer_room_ip = "0.0.0.0";
-    u16 host_multiplayer_room_port = Network::DEFAULT_PORT;
-    u32 host_multiplayer_room_member_slots = Network::DEFAULT_MEMBER_SLOTS;
-    bool host_multiplayer_room_room_created = false;
 
     while (is_open) {
         while (SDL_PollEvent(&event)) {
@@ -391,16 +386,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     if (Settings::values.initial_clock == Settings::InitialClock::UnixTimestamp) {
                         ImGui::InputScalar("Unix Timestamp", ImGuiDataType_U64,
                                            &Settings::values.unix_timestamp);
-                    }
-
-                    ImGui::Checkbox("Use Virtual SD Card", &Settings::values.use_virtual_sd);
-
-                    ImGui::Checkbox("Record Frame Times", &Settings::values.record_frame_times);
-
-                    ImGui::Checkbox("Enable GDB Stub", &Settings::values.use_gdbstub);
-                    if (Settings::values.use_gdbstub) {
-                        ImGui::InputScalar("GDB Stub Port", ImGuiDataType_U16,
-                                           &Settings::values.gdbstub_port);
                     }
 
                     ImGui::EndTabItem();
@@ -2356,8 +2341,10 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                     if (ImGui::BeginPopupContextItem("Console ID",
                                                      ImGuiPopupFlags_MouseButtonRight)) {
                         std::string console_id = fmt::format("0x{:016X}", cfg.GetConsoleUniqueId());
+
                         ImGui::InputText("##Console ID", &console_id[0], 18,
                                          ImGuiInputTextFlags_ReadOnly);
+
                         ImGui::EndPopup();
                     }
 
@@ -2381,84 +2368,49 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                 }
 
                 if (ImGui::BeginTabItem("Graphics")) {
-                    ImGui::Checkbox("Use Hardware Renderer",
-                                    &Settings::values.use_hardware_renderer);
+                    ImGui::Checkbox("Use Hardware Shader", &Settings::values.use_hardware_shader);
 
-                    if (Settings::values.use_hardware_renderer) {
+                    if (Settings::values.use_hardware_shader) {
                         ImGui::Indent();
 
-                        ImGui::Checkbox("Use Hardware Shader",
-                                        &Settings::values.use_hardware_shader);
+                        ImGui::Checkbox("Accurate Multiplication",
+                                        &Settings::values.hardware_shader_accurate_multiplication);
 
-                        if (Settings::values.use_hardware_shader) {
-                            ImGui::Indent();
+                        ImGui::Checkbox("Enable Disk Shader Cache",
+                                        &Settings::values.enable_disk_shader_cache);
 
-                            ImGui::Checkbox(
-                                "Accurate Multiplication",
-                                &Settings::values.hardware_shader_accurate_multiplication);
+                        ImGui::Unindent();
+                    }
 
-                            ImGui::Checkbox("Enable Disk Shader Cache",
-                                            &Settings::values.enable_disk_shader_cache);
+                    ImGui::Checkbox("Sharper Distant Objects",
+                                    &Settings::values.sharper_distant_objects);
 
-                            ImGui::Unindent();
-                        }
+                    ImGui::Checkbox("Use Custom Textures", &Settings::values.use_custom_textures);
 
-                        ImGui::Checkbox("Sharper Distant Objects",
-                                        &Settings::values.sharper_distant_objects);
+                    ImGui::Checkbox("Preload Custom Textures",
+                                    &Settings::values.preload_custom_textures);
 
-                        ImGui::Checkbox("Use Custom Textures",
-                                        &Settings::values.use_custom_textures);
+                    if (Settings::values.preload_custom_textures) {
+                        ImGui::Indent();
 
-                        ImGui::Checkbox("Preload Custom Textures",
-                                        &Settings::values.preload_custom_textures);
-
-                        if (Settings::values.preload_custom_textures) {
-                            ImGui::Indent();
-
-                            if (ImGui::BeginCombo(
-                                    "Folder", Settings::values.preload_custom_textures_folder ==
+                        if (ImGui::BeginCombo("Folder",
+                                              Settings::values.preload_custom_textures_folder ==
                                                       Settings::PreloadCustomTexturesFolder::Load
                                                   ? "load"
                                                   : "preload")) {
-                                if (ImGui::Selectable(
-                                        "load", Settings::values.preload_custom_textures_folder ==
-                                                    Settings::PreloadCustomTexturesFolder::Load)) {
-                                    Settings::values.preload_custom_textures_folder =
-                                        Settings::PreloadCustomTexturesFolder::Load;
-                                }
-
-                                if (ImGui::Selectable(
-                                        "preload",
-                                        Settings::values.preload_custom_textures_folder ==
-                                            Settings::PreloadCustomTexturesFolder::Preload)) {
-                                    Settings::values.preload_custom_textures_folder =
-                                        Settings::PreloadCustomTexturesFolder::Preload;
-                                }
-
-                                ImGui::EndCombo();
+                            if (ImGui::Selectable(
+                                    "load", Settings::values.preload_custom_textures_folder ==
+                                                Settings::PreloadCustomTexturesFolder::Load)) {
+                                Settings::values.preload_custom_textures_folder =
+                                    Settings::PreloadCustomTexturesFolder::Load;
                             }
 
-                            ImGui::Unindent();
-                        }
-
-                        ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
-
-                        const u16 min = 0;
-                        const u16 max = 10;
-                        ImGui::SliderScalar(
-                            "Resolution", ImGuiDataType_U16, &Settings::values.resolution, &min,
-                            &max, Settings::values.resolution == 0 ? "Window Size" : "%d");
-
-                        if (ImGui::BeginCombo("Texture Filter",
-                                              Settings::values.texture_filter.c_str())) {
-                            const std::vector<std::string_view>& filters =
-                                OpenGL::TextureFilterer::GetFilterNames();
-
-                            for (const std::string_view& filter : filters) {
-                                if (ImGui::Selectable(std::string(filter).c_str(),
-                                                      Settings::values.texture_filter == filter)) {
-                                    Settings::values.texture_filter = filter;
-                                }
+                            if (ImGui::Selectable(
+                                    "preload",
+                                    Settings::values.preload_custom_textures_folder ==
+                                        Settings::PreloadCustomTexturesFolder::Preload)) {
+                                Settings::values.preload_custom_textures_folder =
+                                    Settings::PreloadCustomTexturesFolder::Preload;
                             }
 
                             ImGui::EndCombo();
@@ -2467,7 +2419,29 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         ImGui::Unindent();
                     }
 
-                    ImGui::Checkbox("Use Shader JIT", &Settings::values.use_shader_jit);
+                    ImGui::Checkbox("Dump Textures", &Settings::values.dump_textures);
+
+                    const u16 min = 0;
+                    const u16 max = 10;
+                    ImGui::SliderScalar("Resolution", ImGuiDataType_U16,
+                                        &Settings::values.resolution, &min, &max,
+                                        Settings::values.resolution == 0 ? "Window Size" : "%d");
+
+                    if (ImGui::BeginCombo("Texture Filter",
+                                          Settings::values.texture_filter.c_str())) {
+                        const std::vector<std::string_view>& filters =
+                            OpenGL::TextureFilterer::GetFilterNames();
+
+                        for (const std::string_view& filter : filters) {
+                            if (ImGui::Selectable(std::string(filter).c_str(),
+                                                  Settings::values.texture_filter == filter)) {
+                                Settings::values.texture_filter = filter;
+                            }
+                        }
+
+                        ImGui::EndCombo();
+                    }
+
                     ImGui::Checkbox("Enable VSync", &Settings::values.enable_vsync);
 
                     ImGui::Checkbox("Enable Linear Filtering",
@@ -2828,42 +2802,6 @@ InitialSettings::InitialSettings(PluginManager& plugin_manager, SDL_Window* wind
                         }
                     }
                     ImGui::EndChildFrame();
-
-                    ImGui::EndTabItem();
-                }
-
-                if (ImGui::BeginTabItem("LLE Modules")) {
-                    for (auto& module : Settings::values.lle_modules) {
-                        ImGui::Checkbox(module.first.c_str(), &module.second);
-                    }
-
-                    ImGui::EndTabItem();
-                }
-
-                if (!host_multiplayer_room_room_created &&
-                    ImGui::BeginTabItem("Host Multiplayer Room")) {
-                    ImGui::InputText("IP", &host_multiplayer_room_ip);
-
-                    ImGui::InputScalar("Port", ImGuiDataType_U16, &host_multiplayer_room_port);
-
-                    ImGui::InputScalar("Member Slots", ImGuiDataType_U32,
-                                       &host_multiplayer_room_member_slots);
-
-                    ImGui::NewLine();
-
-                    ImGui::PushTextWrapPos(io.DisplaySize.x);
-                    ImGui::TextUnformatted("No more settings will be added here, this doesn't "
-                                           "have message length limit, and there's no "
-                                           "nickname/console ID/MAC address checks.");
-                    ImGui::PopTextWrapPos();
-
-                    ImGui::NewLine();
-
-                    if (ImGui::Button("Create Room & Close This Tab")) {
-                        new Network::Room(host_multiplayer_room_ip, host_multiplayer_room_port,
-                                          host_multiplayer_room_member_slots);
-                        host_multiplayer_room_room_created = true;
-                    }
 
                     ImGui::EndTabItem();
                 }

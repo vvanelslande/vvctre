@@ -128,10 +128,6 @@ struct Values {
     std::string log_filter = "*:Info";
     InitialClock initial_clock = InitialClock::System;
     u64 unix_timestamp = 0;
-    bool use_virtual_sd = true;
-    bool record_frame_times = false;
-    bool use_gdbstub = false;
-    u16 gdbstub_port = 24689;
 
     // General
     bool enable_core_2 = false;
@@ -167,11 +163,9 @@ struct Values {
     std::array<Service::CAM::Flip, Service::CAM::NumCameras> camera_flip{};
 
     // Graphics
-    bool use_hardware_renderer = true;
     bool use_hardware_shader = true;
     bool hardware_shader_accurate_multiplication = false;
     bool enable_disk_shader_cache = false;
-    bool use_shader_jit = true;
     bool enable_vsync = false;
     bool dump_textures = false;
     bool use_custom_textures = false;

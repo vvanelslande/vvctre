@@ -12,20 +12,19 @@
 #include "common/common_types.h"
 #include "common/fastmem_mapper.h"
 
-class ARM_Interface;
 class ARM_Dynarmic;
 
 namespace AudioCore {
 class DspInterface;
-} // namespace AudioCore
+}
 
 namespace Common {
 class FastmemMapper;
-} // namespace Common
+}
 
 namespace Kernel {
 class Process;
-} // namespace Kernel
+}
 
 namespace Memory {
 

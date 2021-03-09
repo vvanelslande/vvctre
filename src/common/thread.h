@@ -16,48 +16,57 @@ namespace Common {
 class Event {
 public:
     void Set() {
-        std::lock_guard lk{mutex};
+        std::unique_lock<std::mutex> lock(mutex);
+
         if (!is_set) {
             is_set = true;
-            condvar.notify_one();
+            cv.notify_one();
         }
     }
 
     void Wait() {
-        std::unique_lock lk{mutex};
-        condvar.wait(lk, [&] { return is_set.load(); });
+        std::unique_lock<std::mutex> lock(mutex);
+        cv.wait(lock, [&] { return is_set.load(); });
         is_set = false;
     }
 
     template <class Duration>
     bool WaitFor(const std::chrono::duration<Duration>& time) {
-        std::unique_lock lk{mutex};
-        if (!condvar.wait_for(lk, time, [this] { return is_set.load(); }))
+        std::unique_lock<std::mutex> lock(mutex);
+
+        if (!cv.wait_for(lock, time, [this] { return is_set.load(); })) {
             return false;
+        }
+
         is_set = false;
+
         return true;
     }
 
     template <class Clock, class Duration>
     bool WaitUntil(const std::chrono::time_point<Clock, Duration>& time) {
-        std::unique_lock lk{mutex};
-        if (!condvar.wait_until(lk, time, [this] { return is_set.load(); }))
+        std::unique_lock<std::mutex> lock(mutex);
+
+        if (!cv.wait_until(lock, time, [this] { return is_set.load(); })) {
             return false;
+        }
+
         is_set = false;
+
         return true;
     }
 
     void Reset() {
-        std::unique_lock lk{mutex};
-        // no other action required, since wait loops on the predicate and any lingering signal will
+        std::unique_lock<std::mutex> lock(mutex);
+        // No other action required, since wait loops on the predicate and any lingering signal will
         // get cleared on the first iteration
         is_set = false;
     }
 
 private:
-    std::condition_variable condvar;
+    std::condition_variable cv;
     std::mutex mutex;
-    std::atomic_bool is_set{false};
+    std::atomic<bool> is_set{false};
 };
 
 class Barrier {
@@ -72,20 +81,19 @@ public:
         if (++waiting == count) {
             generation++;
             waiting = 0;
-            condvar.notify_all();
+            cv.notify_all();
         } else {
-            condvar.wait(lk,
-                         [this, current_generation] { return current_generation != generation; });
+            cv.wait(lk, [this, current_generation] { return current_generation != generation; });
         }
     }
 
     std::size_t Generation() const {
-        std::unique_lock lk(mutex);
+        std::unique_lock<std::mutex> lock(mutex);
         return generation;
     }
 
 private:
-    std::condition_variable condvar;
+    std::condition_variable cv;
     mutable std::mutex mutex;
     std::size_t count;
     std::size_t waiting = 0;

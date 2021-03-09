@@ -488,8 +488,8 @@ std::shared_ptr<Module> GetModule(Core::System& system) {
 }
 
 void InstallInterfaces(Core::System& system) {
-    auto& service_manager = system.ServiceManager();
-    auto hid = std::make_shared<Module>(system);
+    SM::ServiceManager& service_manager = system.ServiceManager();
+    std::shared_ptr<Module> hid = std::make_shared<Module>(system);
     std::make_shared<User>(hid)->InstallAsService(service_manager);
     std::make_shared<Spvr>(hid)->InstallAsService(service_manager);
 }

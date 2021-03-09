@@ -40,7 +40,7 @@ enum class DecoderSampleRate : u32 {
 
 struct BinaryRequest {
     enum_le<DecoderCodec> codec =
-        DecoderCodec::None; // this is a guess. until now only 0x1 was observed here
+        DecoderCodec::None; // This is a guess. until now only 0x1 was observed here
     enum_le<DecoderCommand> cmd = DecoderCommand::Init;
     u32_le fixed = 0;
     u32_le src_addr = 0;
@@ -54,15 +54,15 @@ static_assert(sizeof(BinaryRequest) == 32, "Unexpected struct size for BinaryReq
 
 struct BinaryResponse {
     enum_le<DecoderCodec> codec =
-        DecoderCodec::None; // this could be something else. until now only 0x1 was observed here
+        DecoderCodec::None; // This could be something else. until now only 0x1 was observed here
     enum_le<DecoderCommand> cmd = DecoderCommand::Init;
     u32_le unknown1 = 0;
     enum_le<DecoderSampleRate> sample_rate;
-    u32_le num_channels = 0; // this is a guess, so far I only observed 2 here
+    u32_le num_channels = 0; // This is a guess, so far I only observed 2 here
     u32_le size = 0;
     u32_le unknown3 = 0;
     u32_le unknown4 = 0;
-    u32_le num_samples = 0; // this is a guess, so far I only observed 1024 here
+    u32_le num_samples = 0; // This is a guess, so far I only observed 1024 here
 };
 static_assert(sizeof(BinaryResponse) == 32, "Unexpected struct size for BinaryResponse");
 
@@ -72,8 +72,10 @@ class DecoderBase {
 public:
     virtual ~DecoderBase();
     virtual std::optional<BinaryResponse> ProcessRequest(const BinaryRequest& request) = 0;
+
     /// Return true if this Decoder can be loaded. Return false if the system cannot create the
     /// decoder
+
     virtual bool IsValid() const = 0;
 };
 
@@ -81,7 +83,9 @@ class NullDecoder final : public DecoderBase {
 public:
     NullDecoder();
     ~NullDecoder() override;
+
     std::optional<BinaryResponse> ProcessRequest(const BinaryRequest& request) override;
+
     bool IsValid() const override {
         return true;
     }

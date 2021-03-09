@@ -5,7 +5,8 @@
 #include <SDL.h>
 #include <portable-file-dialogs.h>
 #include "core/settings.h"
-#include "video_core/renderer_opengl/renderer_opengl.h"
+#include "video_core/renderer/renderer.h"
+#include "video_core/video_core.h"
 #include "vvctre/applets/swkbd.h"
 #include "vvctre/emu_window/emu_window_sdl2.h"
 

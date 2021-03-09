@@ -9,9 +9,8 @@
 #include "video_core/pica_state.h"
 #include "video_core/regs_rasterizer.h"
 #include "video_core/regs_shader.h"
+#include "video_core/shader/engine.h"
 #include "video_core/shader/shader.h"
-#include "video_core/shader/shader_interpreter.h"
-#include "video_core/shader/shader_jit_x64.h"
 #include "video_core/video_core.h"
 
 namespace Pica::Shader {
@@ -129,23 +128,17 @@ void GSUnitState::ConfigOutput(const ShaderRegs& config) {
     emitter.output_mask = config.output_mask;
 }
 
-static std::unique_ptr<JitX64Engine> jit_engine;
-static InterpreterEngine interpreter_engine;
+static std::unique_ptr<Engine> engine;
 
-ShaderEngine* GetEngine() {
-    // TODO(yuriks): Re-initialize on each change rather than being persistent
-    if (VideoCore::g_shader_jit_enabled) {
-        if (jit_engine == nullptr) {
-            jit_engine = std::make_unique<JitX64Engine>();
-        }
-        return jit_engine.get();
+Engine* GetEngine() {
+    if (engine == nullptr) {
+        engine = std::make_unique<Engine>();
     }
-
-    return &interpreter_engine;
+    return engine.get();
 }
 
 void Shutdown() {
-    jit_engine = nullptr;
+    engine = nullptr;
 }
 
 } // namespace Pica::Shader

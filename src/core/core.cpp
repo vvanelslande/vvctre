@@ -10,13 +10,11 @@
 #include "audio_core/lle/lle.h"
 #include "common/logging/log.h"
 #include "common/texture.h"
-#include "core/arm/arm_interface.h"
-#include "core/arm/dynarmic/arm_dynarmic.h"
-#include "core/cheats/cheats.h"
+#include "core/arm/arm_dynarmic.h"
+#include "core/cheats/engine.h"
 #include "core/core.h"
 #include "core/core_timing.h"
 #include "core/custom_tex_cache.h"
-#include "core/gdbstub/gdbstub.h"
 #include "core/hle/kernel/client_port.h"
 #include "core/hle/kernel/kernel.h"
 #include "core/hle/kernel/process.h"
@@ -31,8 +29,10 @@
 #include "core/movie.h"
 #include "core/settings.h"
 #include "enet/enet.h"
+#include "network/room.h"
 #include "network/room_member.h"
-#include "video_core/renderer_base.h"
+#include "video_core/renderer/rasterizer.h"
+#include "video_core/renderer/renderer.h"
 #include "video_core/video_core.h"
 
 namespace Core {
@@ -52,40 +52,21 @@ System::~System() {
         room_member->Leave();
     }
 
+    rooms.clear();
+
     enet_deinitialize();
 }
 
 System::ResultStatus System::Run() {
-    bool step = false;
-
     status = ResultStatus::Success;
 
     if (!IsInitialized()) {
         return ResultStatus::ErrorNotInitialized;
     }
 
-    if (GDBStub::IsServerEnabled()) {
-        if (running_core != nullptr) {
-            if (Kernel::Thread* current_thread =
-                    kernel->GetCurrentThreadManager().GetCurrentThread()) {
-                running_core->SaveContext(current_thread->context);
-            }
-        }
-
-        GDBStub::HandlePacket();
-
-        if (GDBStub::GetCpuHaltFlag()) {
-            if (GDBStub::GetCpuStepFlag()) {
-                step = true;
-            } else {
-                return ResultStatus::Success;
-            }
-        }
-    }
-
     u64 global_ticks = timing->GetGlobalTicks();
     s64 max_delay = 0;
-    ARM_Interface* current_core_to_execute = nullptr;
+    ARM_Dynarmic* current_core_to_execute = nullptr;
 
     for (auto& cpu_core : cpu_cores) {
         if (cpu_core->GetTimer().GetTicks() < global_ticks) {
@@ -122,11 +103,7 @@ System::ResultStatus System::Run() {
             current_core_to_execute->GetTimer().Idle();
             PrepareReschedule();
         } else {
-            if (step) {
-                current_core_to_execute->Step();
-            } else {
-                current_core_to_execute->Run();
-            }
+            current_core_to_execute->Run();
         }
     } else {
         s64 max_slice = Settings::values.core_system_run_default_max_slice_value;
@@ -139,7 +116,7 @@ System::ResultStatus System::Run() {
             max_slice = std::min(max_slice, cpu_core->GetTimer().GetMaxSliceLength());
         }
 
-        for (std::shared_ptr<ARM_Interface>& cpu_core : cpu_cores) {
+        for (std::shared_ptr<ARM_Dynarmic>& cpu_core : cpu_cores) {
             cpu_core->GetTimer().SetNextSlice(max_slice);
             const u64 start_ticks = cpu_core->GetTimer().GetTicks();
 
@@ -154,19 +131,11 @@ System::ResultStatus System::Run() {
                 cpu_core->GetTimer().Idle();
                 PrepareReschedule();
             } else {
-                if (step) {
-                    cpu_core->Step();
-                } else {
-                    cpu_core->Run();
-                }
+                cpu_core->Run();
             }
 
             max_slice = cpu_core->GetTimer().GetTicks() - start_ticks;
         }
-    }
-
-    if (GDBStub::IsServerEnabled()) {
-        GDBStub::SetCpuStepFlag(false);
     }
 
     Reschedule();
@@ -278,7 +247,7 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
         }
     }
 
-    cheat_engine = std::make_shared<Cheats::CheatEngine>(*this);
+    cheat_engine = std::make_shared<Cheats::Engine>(*this);
     perf_stats = std::make_unique<PerfStats>();
     custom_tex_cache = std::make_unique<Core::CustomTexCache>();
 
@@ -294,18 +263,15 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
         custom_tex_cache->FindCustomTextures();
     }
 
-    if (Settings::values.use_hardware_renderer && Settings::values.preload_custom_textures) {
+    if (Settings::values.preload_custom_textures) {
         preload_custom_textures_function();
     }
 
-    if (Settings::values.use_hardware_renderer && Settings::values.use_hardware_shader &&
-        Settings::values.enable_disk_shader_cache) {
+    if (Settings::values.use_hardware_shader && Settings::values.enable_disk_shader_cache) {
         VideoCore::g_renderer->Rasterizer()->LoadDiskShaderCache();
     }
 
     status = ResultStatus::Success;
-
-    perf_stats->BeginSystemFrame();
 
     return status;
 }
@@ -313,7 +279,7 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
 bool System::IsInitialized() const {
     return cpu_cores.size() > 0 &&
            !std::any_of(cpu_cores.begin(), cpu_cores.end(),
-                        [](std::shared_ptr<ARM_Interface> ptr) { return ptr == nullptr; });
+                        [](std::shared_ptr<ARM_Dynarmic> ptr) { return ptr == nullptr; });
 }
 
 void System::PrepareReschedule() {
@@ -373,15 +339,10 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window, u32 system_mo
 
     HW::Init(*memory);
     Service::Init(*this);
-    GDBStub::DeferStart();
 
     VideoCore::Init(emu_window, *memory);
 
     return ResultStatus::Success;
-}
-
-RendererBase& System::Renderer() {
-    return *VideoCore::g_renderer;
 }
 
 Service::SM::ServiceManager& System::ServiceManager() {
@@ -424,11 +385,11 @@ const Memory::MemorySystem& System::Memory() const {
     return *memory;
 }
 
-Cheats::CheatEngine& System::CheatEngine() {
+Cheats::Engine& System::CheatEngine() {
     return *cheat_engine;
 }
 
-const Cheats::CheatEngine& System::CheatEngine() const {
+const Cheats::Engine& System::CheatEngine() const {
     return *cheat_engine;
 }
 
@@ -457,7 +418,6 @@ void System::RegisterSoftwareKeyboard(std::shared_ptr<Frontend::SoftwareKeyboard
 }
 
 void System::Shutdown() {
-    GDBStub::Shutdown();
     VideoCore::Shutdown();
     perf_stats.reset();
     cheat_engine.reset();
@@ -562,6 +522,11 @@ const bool System::IsOnLoadFailedSet() const {
 
 const std::string& System::GetFilePath() const {
     return m_filepath;
+}
+
+void System::CreateRoom(const std::string& ip, const u16 port, const u32 member_slots) {
+    std::unique_ptr<Network::Room> room = std::make_unique<Network::Room>(ip, port, member_slots);
+    rooms.push_back(std::move(room));
 }
 
 } // namespace Core

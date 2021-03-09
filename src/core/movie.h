@@ -129,4 +129,5 @@ private:
     std::function<void()> playback_completion_callback;
     std::size_t current_byte = 0;
 };
+
 } // namespace Core

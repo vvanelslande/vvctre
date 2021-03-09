@@ -12,7 +12,9 @@ namespace Frontend {
 class EmuWindow;
 } // namespace Frontend
 
-class RendererBase;
+namespace OpenGL {
+class Renderer;
+}
 
 namespace Memory {
 class MemorySystem;
@@ -20,9 +22,7 @@ class MemorySystem;
 
 namespace VideoCore {
 
-extern std::unique_ptr<RendererBase> g_renderer;
-extern std::atomic<bool> g_hardware_renderer_enabled;
-extern std::atomic<bool> g_shader_jit_enabled;
+extern std::unique_ptr<OpenGL::Renderer> g_renderer;
 extern std::atomic<bool> g_hardware_shader_enabled;
 extern std::atomic<bool> g_hardware_shader_accurate_multiplication;
 extern std::atomic<bool> g_renderer_background_color_update_requested;

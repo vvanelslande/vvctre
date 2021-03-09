@@ -1,16 +1,13 @@
 add_library(core STATIC
     3ds.h
-    arm/arm_interface.h
-    arm/dynarmic/arm_dynarmic.cpp
-    arm/dynarmic/arm_dynarmic.h
-    arm/dynarmic/arm_dynarmic_cp15.cpp
-    arm/dynarmic/arm_dynarmic_cp15.h
-    cheats/cheat_base.cpp
-    cheats/cheat_base.h
-    cheats/cheats.cpp
-    cheats/cheats.h
-    cheats/gateway_cheat.cpp
-    cheats/gateway_cheat.h
+    arm/arm_dynarmic.cpp
+    arm/arm_dynarmic.h
+    arm/arm_dynarmic_cp15.cpp
+    arm/arm_dynarmic_cp15.h
+    cheats/engine.cpp
+    cheats/engine.h
+    cheats/cheat.cpp
+    cheats/cheat.h
     core.cpp
     core.h
     core_timing.cpp
@@ -86,8 +83,6 @@ add_library(core STATIC
     frontend/input.h
     frontend/mic.h
     frontend/mic.cpp
-    gdbstub/gdbstub.cpp
-    gdbstub/gdbstub.h
     hle/applets/applet.cpp
     hle/applets/applet.h
     hle/applets/erreula.cpp
@@ -117,8 +112,6 @@ add_library(core STATIC
     hle/kernel/hle_ipc.h
     hle/kernel/ipc.cpp
     hle/kernel/ipc.h
-    hle/kernel/ipc_recorder.cpp
-    hle/kernel/ipc_recorder.h
     hle/kernel/kernel.cpp
     hle/kernel/kernel.h
     hle/kernel/memory.cpp
@@ -410,5 +403,5 @@ add_library(core STATIC
 create_target_directory_groups(core)
 
 target_link_libraries(core PUBLIC common PRIVATE stb audio_core network video_core)
-target_link_libraries(core PUBLIC Boost::boost libcurl SDL2 PRIVATE dynarmic cryptopp enet fmt system-archives mbedtls llhttp)
+target_link_libraries(core PUBLIC Boost::boost dynarmic libcurl SDL2 PRIVATE cryptopp enet fmt system-archives mbedtls llhttp glad nihstro-headers)
 target_include_directories(core PRIVATE ${PROJECT_SOURCE_DIR}/externals/mbedtls/include)

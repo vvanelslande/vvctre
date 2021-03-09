@@ -29,7 +29,7 @@
 #include "vvctre/emu_window/emu_window_sdl2.h"
 #include "vvctre/plugins.h"
 
-const u8 vvctre_version_major = 48;
+const u8 vvctre_version_major = 49;
 const u8 vvctre_version_minor = 0;
 const u8 vvctre_version_patch = 0;
 
@@ -482,15 +482,13 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.cemuhookudp_pad_index = json["cemuhookudp_pad_index"].get<u8>();
 
                 if (system != nullptr) {
-                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                    if (hid != nullptr) {
+                    if (std::shared_ptr<Service::HID::Module> hid =
+                            Service::HID::GetModule(*system)) {
                         hid->ReloadInputDevices();
                     }
 
-                    Service::SM::ServiceManager& sm = system->ServiceManager();
-                    std::shared_ptr<Service::IR::IR_USER> ir_user =
-                        sm.GetService<Service::IR::IR_USER>("ir:USER");
-                    if (ir_user != nullptr) {
+                    if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                            system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                         ir_user->ReloadInputDevices();
                     }
                 }
@@ -716,8 +714,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Analog);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -737,10 +734,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Analog);
 
         if (system != nullptr) {
-            Service::SM::ServiceManager& sm = system->ServiceManager();
-            std::shared_ptr<Service::IR::IR_USER> ir_user =
-                sm.GetService<Service::IR::IR_USER>("ir:USER");
-            if (ir_user != nullptr) {
+            if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                    system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                 ir_user->ReloadInputDevices();
             }
         }
@@ -767,8 +762,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -783,8 +777,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -799,8 +792,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -815,8 +807,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -831,8 +822,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -847,8 +837,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -864,10 +853,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            Service::SM::ServiceManager& sm = system->ServiceManager();
-            std::shared_ptr<Service::IR::IR_USER> ir_user =
-                sm.GetService<Service::IR::IR_USER>("ir:USER");
-            if (ir_user != nullptr) {
+            if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                    system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                 ir_user->ReloadInputDevices();
             }
         }
@@ -883,10 +870,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            Service::SM::ServiceManager& sm = system->ServiceManager();
-            std::shared_ptr<Service::IR::IR_USER> ir_user =
-                sm.GetService<Service::IR::IR_USER>("ir:USER");
-            if (ir_user != nullptr) {
+            if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                    system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                 ir_user->ReloadInputDevices();
             }
         }
@@ -902,8 +887,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -919,8 +903,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -936,8 +919,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -953,8 +935,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -970,8 +951,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -1002,8 +982,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Settings::values.analogs[Settings::NativeAnalog::CirclePad] = params.Serialize();
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -1029,8 +1008,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Settings::values.analogs[Settings::NativeAnalog::CirclePad] = params.Serialize();
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -1056,8 +1034,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Settings::values.analogs[Settings::NativeAnalog::CirclePad] = params.Serialize();
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -1083,8 +1060,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Settings::values.analogs[Settings::NativeAnalog::CirclePad] = params.Serialize();
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -1111,8 +1087,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Settings::values.analogs[Settings::NativeAnalog::CirclePad] = params.Serialize();
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -1129,8 +1104,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.analogs[Settings::NativeAnalog::CirclePad] = params.Serialize();
 
                 if (system != nullptr) {
-                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                    if (hid != nullptr) {
+                    if (std::shared_ptr<Service::HID::Module> hid =
+                            Service::HID::GetModule(*system)) {
                         hid->ReloadInputDevices();
                     }
                 }
@@ -1144,8 +1119,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.analogs[Settings::NativeAnalog::CirclePad] = params.Serialize();
 
                 if (system != nullptr) {
-                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                    if (hid != nullptr) {
+                    if (std::shared_ptr<Service::HID::Module> hid =
+                            Service::HID::GetModule(*system)) {
                         hid->ReloadInputDevices();
                     }
                 }
@@ -1159,8 +1134,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.analogs[Settings::NativeAnalog::CirclePad] = params.Serialize();
 
                 if (system != nullptr) {
-                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                    if (hid != nullptr) {
+                    if (std::shared_ptr<Service::HID::Module> hid =
+                            Service::HID::GetModule(*system)) {
                         hid->ReloadInputDevices();
                     }
                 }
@@ -1191,10 +1166,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
 
         if (system != nullptr) {
-            Service::SM::ServiceManager& sm = system->ServiceManager();
-            std::shared_ptr<Service::IR::IR_USER> ir_user =
-                sm.GetService<Service::IR::IR_USER>("ir:USER");
-            if (ir_user != nullptr) {
+            if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                    system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                 ir_user->ReloadInputDevices();
             }
         }
@@ -1220,10 +1193,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
 
         if (system != nullptr) {
-            Service::SM::ServiceManager& sm = system->ServiceManager();
-            std::shared_ptr<Service::IR::IR_USER> ir_user =
-                sm.GetService<Service::IR::IR_USER>("ir:USER");
-            if (ir_user != nullptr) {
+            if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                    system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                 ir_user->ReloadInputDevices();
             }
         }
@@ -1249,10 +1220,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
 
         if (system != nullptr) {
-            Service::SM::ServiceManager& sm = system->ServiceManager();
-            std::shared_ptr<Service::IR::IR_USER> ir_user =
-                sm.GetService<Service::IR::IR_USER>("ir:USER");
-            if (ir_user != nullptr) {
+            if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                    system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                 ir_user->ReloadInputDevices();
             }
         }
@@ -1279,10 +1248,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
 
         if (system != nullptr) {
-            Service::SM::ServiceManager& sm = system->ServiceManager();
-            std::shared_ptr<Service::IR::IR_USER> ir_user =
-                sm.GetService<Service::IR::IR_USER>("ir:USER");
-            if (ir_user != nullptr) {
+            if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                    system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                 ir_user->ReloadInputDevices();
             }
         }
@@ -1309,10 +1276,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
         Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
 
         if (system != nullptr) {
-            Service::SM::ServiceManager& sm = system->ServiceManager();
-            std::shared_ptr<Service::IR::IR_USER> ir_user =
-                sm.GetService<Service::IR::IR_USER>("ir:USER");
-            if (ir_user != nullptr) {
+            if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                    system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                 ir_user->ReloadInputDevices();
             }
         }
@@ -1329,10 +1294,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
 
                 if (system != nullptr) {
-                    Service::SM::ServiceManager& sm = system->ServiceManager();
-                    std::shared_ptr<Service::IR::IR_USER> ir_user =
-                        sm.GetService<Service::IR::IR_USER>("ir:USER");
-                    if (ir_user != nullptr) {
+                    if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                            system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                         ir_user->ReloadInputDevices();
                     }
                 }
@@ -1346,10 +1309,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
 
                 if (system != nullptr) {
-                    Service::SM::ServiceManager& sm = system->ServiceManager();
-                    std::shared_ptr<Service::IR::IR_USER> ir_user =
-                        sm.GetService<Service::IR::IR_USER>("ir:USER");
-                    if (ir_user != nullptr) {
+                    if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                            system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                         ir_user->ReloadInputDevices();
                     }
                 }
@@ -1363,10 +1324,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.analogs[Settings::NativeAnalog::CirclePadPro] = params.Serialize();
 
                 if (system != nullptr) {
-                    Service::SM::ServiceManager& sm = system->ServiceManager();
-                    std::shared_ptr<Service::IR::IR_USER> ir_user =
-                        sm.GetService<Service::IR::IR_USER>("ir:USER");
-                    if (ir_user != nullptr) {
+                    if (std::shared_ptr<Service::IR::IR_USER> ir_user =
+                            system->ServiceManager().GetService<Service::IR::IR_USER>("ir:USER")) {
                         ir_user->ReloadInputDevices();
                     }
                 }
@@ -1387,8 +1346,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -1404,8 +1362,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -1421,8 +1378,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -1438,8 +1394,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             GetInput(InputCommon::Polling::DeviceType::Button);
 
         if (system != nullptr) {
-            std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-            if (hid != nullptr) {
+            if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                 hid->ReloadInputDevices();
             }
         }
@@ -1469,8 +1424,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.motion_device = "engine:motion_emu";
 
                 if (system != nullptr) {
-                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                    if (hid != nullptr) {
+                    if (std::shared_ptr<Service::HID::Module> hid =
+                            Service::HID::GetModule(*system)) {
                         hid->ReloadInputDevices();
                     }
                 }
@@ -1480,8 +1435,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.motion_device = "engine:cemuhookudp";
 
                 if (system != nullptr) {
-                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                    if (hid != nullptr) {
+                    if (std::shared_ptr<Service::HID::Module> hid =
+                            Service::HID::GetModule(*system)) {
                         hid->ReloadInputDevices();
                     }
                 }
@@ -1504,8 +1459,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             Settings::values.motion_device = motion_device.Serialize();
 
             if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
+                if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                     hid->ReloadInputDevices();
                 }
             }
@@ -1517,8 +1471,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             Settings::values.motion_device = motion_device.Serialize();
 
             if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
+                if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                     hid->ReloadInputDevices();
                 }
             }
@@ -1530,8 +1483,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             Settings::values.motion_device = motion_device.Serialize();
 
             if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
+                if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                     hid->ReloadInputDevices();
                 }
             }
@@ -1560,8 +1512,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.touch_device = "engine:emu_window";
 
                 if (system != nullptr) {
-                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                    if (hid != nullptr) {
+                    if (std::shared_ptr<Service::HID::Module> hid =
+                            Service::HID::GetModule(*system)) {
                         hid->ReloadInputDevices();
                     }
                 }
@@ -1571,8 +1523,8 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
                 Settings::values.touch_device = "engine:cemuhookudp";
 
                 if (system != nullptr) {
-                    std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                    if (hid != nullptr) {
+                    if (std::shared_ptr<Service::HID::Module> hid =
+                            Service::HID::GetModule(*system)) {
                         hid->ReloadInputDevices();
                     }
                 }
@@ -1596,8 +1548,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             Settings::values.touch_device = touch_device.Serialize();
 
             if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
+                if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                     hid->ReloadInputDevices();
                 }
             }
@@ -1609,8 +1560,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             Settings::values.touch_device = touch_device.Serialize();
 
             if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
+                if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                     hid->ReloadInputDevices();
                 }
             }
@@ -1622,8 +1572,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             Settings::values.touch_device = touch_device.Serialize();
 
             if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
+                if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                     hid->ReloadInputDevices();
                 }
             }
@@ -1635,8 +1584,7 @@ void GUI_AddControlsSettings(bool& is_open, Core::System* system, PluginManager&
             Settings::values.touch_device = touch_device.Serialize();
 
             if (system != nullptr) {
-                std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system);
-                if (hid != nullptr) {
+                if (std::shared_ptr<Service::HID::Module> hid = Service::HID::GetModule(*system)) {
                     hid->ReloadInputDevices();
                 }
             }

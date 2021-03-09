@@ -53,7 +53,6 @@ enum class Class : ClassType {
     Settings,          ///< Settings
     Debug,             ///< Debugging tools
     Debug_Emulated,    ///< Debug messages from the emulated programs
-    Debug_GDBStub,     ///< GDB Stub
     Kernel,            ///< The HLE implementation of the CTR kernel
     Kernel_SVC,        ///< Kernel system calls
     Applet,            ///< HLE implementation of system applets. Each applet

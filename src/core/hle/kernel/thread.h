@@ -11,11 +11,13 @@
 #include <vector>
 #include "common/common_types.h"
 #include "common/thread_queue_list.h"
-#include "core/arm/arm_interface.h"
 #include "core/core_timing.h"
 #include "core/hle/kernel/object.h"
 #include "core/hle/kernel/wait_object.h"
 #include "core/hle/result.h"
+
+class ARM_Dynarmic;
+class ThreadContext;
 
 namespace Kernel {
 
@@ -80,13 +82,8 @@ public:
     // Get a const reference to the thread list for debug use
     const std::vector<std::shared_ptr<Thread>>& GetThreadList();
 
-    void SetCPU(ARM_Interface& cpu) {
-        this->cpu = &cpu;
-    }
-
-    std::unique_ptr<ARM_Interface::ThreadContext> NewContext() {
-        return cpu->NewContext();
-    }
+    void SetCPU(ARM_Dynarmic& cpu);
+    std::unique_ptr<ThreadContext> NewContext();
 
 private:
     /**
@@ -109,7 +106,7 @@ private:
     void ThreadWakeupCallback(u64 thread_id, s64 cycles_late);
 
     KernelSystem& kernel;
-    ARM_Interface* cpu;
+    ARM_Dynarmic* cpu;
 
     std::shared_ptr<Thread> current_thread;
     Common::ThreadQueueList<Thread*, ThreadPrioLowest + 1> ready_queue;
@@ -133,6 +130,7 @@ public:
     std::string GetName() const override {
         return name;
     }
+
     std::string GetTypeName() const override {
         return "Thread";
     }
@@ -241,7 +239,7 @@ public:
         return status == ThreadStatus::WaitSynchAll;
     }
 
-    std::unique_ptr<ARM_Interface::ThreadContext> context;
+    std::unique_ptr<ThreadContext> context;
 
     u32 thread_id;
 
